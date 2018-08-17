@@ -1,8 +1,8 @@
 <template>
   <div class="menu-group-root">
     <WorkLogo :sysName="sysName" class="work-menu-logo"></WorkLogo>
-    <div class="menu-group-context">
-      <WorkTopMenu :menu="menuObj" v-for="menuObj in menuList"></WorkTopMenu>
+    <div v-if="menuList != null" class="menu-group-context">
+      <WorkTopMenu :menu="menuObj" v-for="menuObj in menuList" :key="menuObj"></WorkTopMenu>
     </div>
     <!--<slot></slot>-->
   </div>
