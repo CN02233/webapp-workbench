@@ -1,12 +1,16 @@
 package com.webapp.support.httpClient;
 
+import com.webapp.support.json.JsonSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,7 +22,15 @@ public class HttpSendMessage {
     private static Logger logger = LoggerFactory.getLogger(HttpSendMessage.class);
 
     public static String postHttpRequest4Str(String url,Map<String,Object> paramMap){
-        try (InputStream inputStream = postHttpRequest(url,paramMap) ){
+        return sendHttpRequest4Str(url,paramMap,RequestMethod.POST);
+    }
+
+    public static String getHttpRequest4Str(String url,Map<String,Object> paramMap){
+        return sendHttpRequest4Str(url,paramMap,RequestMethod.GET);
+    }
+
+    private static String sendHttpRequest4Str(String url,Map<String,Object> paramMap,RequestMethod sendType){
+        try (InputStream inputStream = sendHttpRequest(url,paramMap,sendType) ){
             if(inputStream==null)
                 return null;
             String line = null;
@@ -39,38 +51,58 @@ public class HttpSendMessage {
         return null;
     }
 
-    public static InputStream postHttpRequest(String url,Map<String,Object> paramMap){
+    public static InputStream sendHttpRequest(String url, Map<String,Object> paramMap, RequestMethod sendType){
         try {
             URLConnection conn = makeConnection(url);
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
+            StringBuilder builder = null;
 
-            StringBuilder builder = new StringBuilder();
-            if(paramMap!=null){
-                for(String paramKey : paramMap.keySet()){
-                    Object paramVal = paramMap.get(paramKey);
-                    if(builder.length()>0){
-                        builder.append("&");
+            if(sendType==RequestMethod.POST){
+                conn.setDoOutput(true);
+                conn.setDoInput(true);
+                builder = new StringBuilder();
+
+                builder.append(JsonSupport.objectToJson(paramMap) );
+            }else{
+                if(paramMap!=null){
+                    builder = new StringBuilder();
+                    for(String paramKey : paramMap.keySet()){
+                        Object paramVal = paramMap.get(paramKey);
+                        if(builder.length()>0){
+                            builder.append("&");
+                        }
+                        builder.append(paramKey);
+                        builder.append("=");
+                        if(paramVal instanceof String){
+                            builder.append(URLEncoder.encode((String) paramVal, "UTF-8") );
+                        }else{
+                            builder.append(paramVal );
+                        }
                     }
-                    builder.append(paramKey);
-                    builder.append("=");
-                    if(paramVal instanceof String){
-                        builder.append(URLEncoder.encode((String) paramVal, "UTF-8") );
-                    }else{
-                        builder.append(paramVal );
-                    }
-                }
 
-                logger.info("\n request http msg to -->{}<--,\n params:-->{}<--, \n finally send to server param string is -->{}<--",url,paramMap,builder.toString());
+                    logger.info("\n request http msg to -->{}<--,\n params:-->{}<--, \n finally send to server param string is -->{}<--",url,paramMap,builder.toString());
 
-                try(PrintWriter out = new PrintWriter(conn.getOutputStream())){
-                    out.print(builder.toString());
-                    out.flush();
-                }catch (IOException e) {
-                    e.printStackTrace();
-                    throw e;
                 }
             }
+
+
+            if(builder!=null){
+
+                BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), "UTF-8"));
+                bw.write(builder.toString());
+                bw.flush();
+                bw.close();
+
+//                try(PrintWriter out = new PrintWriter(new OutputStreamWriter(
+//                        conn.getOutputStream(), StandardCharsets.UTF_8), true)){
+//                    out.print(builder.toString());
+//                    out.flush();
+//                }catch (IOException e) {
+//                    e.printStackTrace();
+//                    throw e;
+//                }
+            }
+
+
 
             return conn.getInputStream();
 
@@ -79,6 +111,14 @@ public class HttpSendMessage {
         }
 
         return null;
+    }
+
+    public static InputStream postHttpRequest(String url,Map<String,Object> paramMap){
+        return HttpSendMessage.sendHttpRequest(url,paramMap, RequestMethod.POST);
+    }
+
+    public static InputStream getHttpRequest(String url,Map<String,Object> paramMap){
+        return HttpSendMessage.sendHttpRequest(url,paramMap, RequestMethod.GET);
     }
 
     public static URLConnection makeConnection(String url) throws IOException {

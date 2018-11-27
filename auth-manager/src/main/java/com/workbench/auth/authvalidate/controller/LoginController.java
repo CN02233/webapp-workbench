@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("sys/login")
-public class LoginController {
+public class LoginController extends AbstractLoginController{
 
     private Logger logger = LoggerFactory.getLogger(LoginController.class);
 
@@ -33,7 +33,7 @@ public class LoginController {
 
     @RequestMapping(value="doLogin",method = {RequestMethod.GET,RequestMethod.POST})
     @ResponseBody
-    @CrossOrigin
+    @CrossOrigin(allowCredentials="true")
     @JsonpCallback
     public String doLogin( String user_name, String user_pwd){
         boolean checkResult = Strings.isNullOrEmpty(user_name);
@@ -53,7 +53,7 @@ public class LoginController {
             }else
                 SessionSupport.addUserToSession(userService.getUserByUserNm(user_name));
         }
-        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登录成功",null, null);
+        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登录成功",null, "LOGIN_SUCCESS");
     }
 
     @RequestMapping(value="loginRest",method = {RequestMethod.GET,RequestMethod.POST})
@@ -78,6 +78,23 @@ public class LoginController {
                 SessionSupport.addUserToSession(userService.getUserByUserNm(user_name));
         }
         return JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "登录成功",null, null);
+    }
+
+    @RequestMapping("checkLoginUser")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String checkLoginUser(){
+        String responseJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, this.getLoginUserInfo());
+        return responseJson;
+    }
+
+    @RequestMapping("logout")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String logout(){
+        SessionSupport.logoutUser();
+        String responseJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登出成功", null, null);
+        return responseJson;
     }
 
 }

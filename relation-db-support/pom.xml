@@ -6,7 +6,7 @@
 
     <groupId>webapp-workbench</groupId>
     <artifactId>relation-db-support</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>webapp-workbench</groupId>
             <artifactId>app-web-support</artifactId>
-            <version>1.1</version>
+            <version>1.2</version>
             <scope>compile</scope>
         </dependency>
 

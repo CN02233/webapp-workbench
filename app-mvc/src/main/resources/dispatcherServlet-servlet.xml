@@ -29,7 +29,7 @@
 		</mvc:message-converters>
 	</mvc:annotation-driven>
 	<!-- 自动加载Controller层 -->
-	<context:component-scan base-package="com.crawler.webapp.**">
+	<context:component-scan base-package="com.seaboxdata.**">
 		<!-- avoid job beans been created twice -->
 		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service" />
 	</context:component-scan>
