@@ -98,8 +98,8 @@
         </init-param>
         <init-param>
             <param-name>service</param-name>
-            <param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9081/nlp</param-value>
-            <!--<param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9080/nlp</param-value>-->
+            <!--<param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9081/nlp</param-value>-->
+            <param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9080/nlp</param-value>
             <!--<param-value>http://10.10.10.41:9080/service/sys/casLogin/doLogin.do?redirect=http://10.10.10.41:9080/nlp</param-value>-->
             <!--<param-value>http://localhost:9080/home</param-value>-->
         </init-param>
