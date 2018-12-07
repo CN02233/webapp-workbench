@@ -24,7 +24,7 @@ import java.nio.charset.Charset;
  */
 
 @Controller
-@RequestMapping("/jiebaset")
+@RequestMapping({"/jiebaset","/secadd"})
 public class SenstiveClientController extends AbstractClientController{
 
     Logger logger = LoggerFactory.getLogger(SemanticAnalysisClientController.class);

@@ -33,8 +33,8 @@ public class SemanticAnalysisClientController extends AbstractClientController{
 
     Logger logger = LoggerFactory.getLogger(SemanticAnalysisClientController.class);
 
-    private final static String pythonHost = "http://10.10.10.41:8888";
-//    private final static String pythonHost = "http://192.168.1.184:8888";
+//    private final static String pythonHost = "http://10.10.10.41:8888";
+    private final static String pythonHost = "http://192.168.1.184:8888";
 
     private HttpClientSupport httpClientSupport = HttpClientSupport.getInstance(pythonHost);
 
@@ -50,10 +50,9 @@ public class SemanticAnalysisClientController extends AbstractClientController{
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String nlpRequest(HttpServletRequest request) throws IOException, URISyntaxException, ServletException {
-
         String response = clientRequest(request,true);
-
-        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"YYY",null,JsonSupport.jsonToMap(response));
+        JsonResult jsonpResult   = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "YYY", null, JsonSupport.jsonToMap(response));
+        return JsonSupport.objectToJsonWithoutFormatter(jsonpResult);
     }
 
     @RequestMapping("/nlpdownload/**")

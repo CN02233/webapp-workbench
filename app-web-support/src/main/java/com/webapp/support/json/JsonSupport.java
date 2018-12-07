@@ -27,7 +27,18 @@ public class JsonSupport {
         try {
             jsonValue = mapper.writeValueAsString(object);
             jsonValue = formatString(jsonValue);
-//            jsonValue = jsonValue.replace("\\","");
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return jsonValue;
+    }
+
+    public static <T> String objectToJsonWithoutFormatter(T object)
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonValue = null;
+        try {
+            jsonValue = mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

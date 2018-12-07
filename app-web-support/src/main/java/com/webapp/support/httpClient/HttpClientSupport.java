@@ -107,7 +107,7 @@ public class HttpClientSupport {
 
     private CloseableHttpResponse sendPutOrPostByJson(HttpEntityEnclosingRequestBase putOrPost,Map<String,Object> params) throws IOException {
 
-        String sendJson = JsonSupport.objectToJson(params);
+        String sendJson = JsonSupport.objectToJsonWithoutFormatter(params);
 //        String sendJson = params.toString();
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(sendJson.getBytes("UTF-8"));
