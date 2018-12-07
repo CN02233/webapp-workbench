@@ -4,6 +4,7 @@ import com.workbench.exception.runtime.NotLoginException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -41,9 +42,15 @@ public class SessionSupport {
     }
 
 
-    public static void logoutUser(){
+    public static void logoutUser()  {
         HttpServletRequest request =
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        request.getSession().removeAttribute("user");
         request.getSession().invalidate();
+        try {//working in servlet 3.0
+            request.logout();
+        } catch (ServletException e) {
+            e.printStackTrace();
+        }
     }
 }

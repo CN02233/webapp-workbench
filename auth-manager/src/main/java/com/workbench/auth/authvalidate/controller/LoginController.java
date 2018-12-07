@@ -14,6 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.support.RequestContext;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by pc on 2017/6/30.
@@ -91,9 +98,22 @@ public class LoginController extends AbstractLoginController{
     @RequestMapping("logout")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String logout(){
+    public String logout() {
         SessionSupport.logoutUser();
-        String responseJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登出成功", null, null);
+
+        HttpServletRequest request =
+                ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+
+        ServletContext requestContext = request.getServletContext();
+
+        Boolean casSwitch = new Boolean(requestContext.getInitParameter("casSwitch"));
+        logger.warn("cas swtich :{}",casSwitch);
+        String responseJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"登出成功","SUCCESS",null);
+        if(casSwitch){
+            String potentialRedirectUrl = requestContext.getInitParameter("casLogoutRedirect");
+            logger.warn("potentialRedirectUrl :{}",potentialRedirectUrl);
+            responseJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"登出成功","FORWARD_CAS",potentialRedirectUrl);
+        }
         return responseJson;
     }
 

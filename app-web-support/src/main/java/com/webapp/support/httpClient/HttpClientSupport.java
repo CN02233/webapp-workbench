@@ -6,6 +6,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -108,9 +110,10 @@ public class HttpClientSupport {
         String sendJson = JsonSupport.objectToJson(params);
 //        String sendJson = params.toString();
 
-        StringEntity stringEntity = new StringEntity(sendJson, "UTF-8");
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(sendJson.getBytes("UTF-8"));
+        InputStreamEntity entity = new InputStreamEntity(inputStream , -1);
 
-        putOrPost.setEntity(stringEntity);
+        putOrPost.setEntity(entity);
 
         CloseableHttpResponse response = httpClient.execute(putOrPost);
 

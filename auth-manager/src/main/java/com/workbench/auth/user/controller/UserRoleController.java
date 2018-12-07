@@ -65,8 +65,13 @@ public class UserRoleController {
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String updateUserRole(UserRole userRole,int old_user_role_id){
-        userRoleService.updateUserRole(userRole,old_user_role_id);
+    public String updateUserRole(UserRole userRole,Integer old_user_role_id){
+        if(old_user_role_id!=null){
+            userRoleService.updateUserRole(userRole,old_user_role_id);
+        }else{
+            userRoleService.saveUserRole(userRole);
+        }
+
         String resultJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
 
         logger.debug("jsonResult information after delete :{}",resultJson);
