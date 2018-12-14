@@ -30,8 +30,8 @@
     </context-param>
     <context-param><!--CAS退出地址-->
         <param-name>casLogoutRedirect</param-name>
-        <!--<param-value>http://192.168.1.179:8899/cas/logout?service=http://192.168.1.179:9080/nlp</param-value>-->
-        <param-value>http://10.10.10.41:17001/cas/logout?service=http://10.10.10.41:9080/nlp</param-value>
+        <param-value>http://192.168.1.113:8899/cas/logout?service=http://192.168.1.113:9080/nlp</param-value>
+        <!--<param-value>http://10.10.10.41:17001/cas/logout?service=http://10.10.10.41:9080/nlp</param-value>-->
     </context-param>
 
     <filter>
@@ -58,7 +58,7 @@
         <init-param>
             <param-name>casServerUrlPrefix</param-name>
             <!--<param-value>http://10.10.10.41:17001/cas</param-value>-->
-            <param-value>http://192.168.1.179:8899/cas</param-value>
+            <param-value>http://192.168.1.113:8899/cas</param-value>
         </init-param>
     </filter>
 
@@ -76,14 +76,14 @@
         <init-param>
             <param-name>casServerLoginUrl</param-name>
             <!--<param-value>http://10.10.10.41:17001/cas/login?locale=zh_CN</param-value>-->
-            <param-value>http://192.168.1.179:8899/cas/login?locale=zh_CN</param-value>
+            <param-value>http://192.168.1.113:8899/cas/login?locale=zh_CN</param-value>
         </init-param>
         <init-param>
             <param-name>service</param-name>
             <!--<param-value>http://10.10.10.41:9080/service/sys/casLogin/doLogin.do?redirect=http://10.10.10.41:9080/nlp</param-value>-->
-            <param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9080/nlp</param-value>
-            <!--<param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9081/nlp</param-value>-->
-            <!--<param-value>http://192.168.1.179:9080/service/sys/casLogin/doLogin.do</param-value>-->
+            <param-value>http://192.168.1.113:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.113:9080/nlp</param-value>
+            <!--<param-value>http://192.168.1.113:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.113:9081/nlp</param-value>-->
+            <!--<param-value>http://192.168.1.113:9080/service/sys/casLogin/doLogin.do</param-value>-->
             <!--<param-value>http://localhost:8080/service/sys/login/casLogin</param-value>-->
         </init-param>
     </filter>
@@ -94,12 +94,12 @@
         <init-param>
             <param-name>casServerUrlPrefix</param-name>
             <!--<param-value>http://10.10.10.41:17001/cas</param-value>-->
-            <param-value>http://192.168.1.179:8899/cas</param-value>
+            <param-value>http://192.168.1.113:8899/cas</param-value>
         </init-param>
         <init-param>
             <param-name>service</param-name>
-            <!--<param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9081/nlp</param-value>-->
-            <param-value>http://192.168.1.179:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.179:9080/nlp</param-value>
+            <!--<param-value>http://192.168.1.113:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.113:9081/nlp</param-value>-->
+            <param-value>http://192.168.1.113:8080/service/sys/casLogin/doLogin.do?redirect=http://192.168.1.113:9080/nlp</param-value>
             <!--<param-value>http://10.10.10.41:9080/service/sys/casLogin/doLogin.do?redirect=http://10.10.10.41:9080/nlp</param-value>-->
             <!--<param-value>http://localhost:9080/home</param-value>-->
         </init-param>
