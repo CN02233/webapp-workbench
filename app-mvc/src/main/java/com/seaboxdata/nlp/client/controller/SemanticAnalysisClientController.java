@@ -33,8 +33,8 @@ public class SemanticAnalysisClientController extends AbstractClientController{
 
     Logger logger = LoggerFactory.getLogger(SemanticAnalysisClientController.class);
 
-//    private final static String pythonHost = "http://10.10.10.41:8888";
-    private final static String pythonHost = "http://192.168.1.168:8888";
+    private final static String pythonHost = "http://10.10.10.41:8888";
+//    private final static String pythonHost = "http://192.168.1.168:8888";
 
     private HttpClientSupport httpClientSupport = HttpClientSupport.getInstance(pythonHost);
 
