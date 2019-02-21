@@ -22,4 +22,6 @@ public interface RoleMenuManageService {
     void delMenuByRoleId(int role_id);
 
     List<Menu> getMenuOutRole(int user_role_id);
+
+    void saveMenusForRole(Integer user_role_id,List<Integer> menus);
 }

@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -29,6 +30,7 @@ public class RoleManageController {
     @RequestMapping("rolePageData")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String rolePageData(int currPage, int pageSize){
         Page<Role> pageList = roleManageService.rolePageData(currPage, pageSize);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pageList);
@@ -42,6 +44,7 @@ public class RoleManageController {
 
     @RequestMapping("getRoleById")
     @ResponseBody
+    @CrossOrigin(allowCredentials="true")
     public String getRoleById(int user_role_id){
         Role roleData = roleManageService.getRoleById(user_role_id);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, roleData);
@@ -53,6 +56,7 @@ public class RoleManageController {
 
     @RequestMapping("saveNewRole")
     @ResponseBody
+    @CrossOrigin(allowCredentials="true")
     public String saveNewRole(Role role){
         roleManageService.saveNewRole(role);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
@@ -64,6 +68,7 @@ public class RoleManageController {
 
     @RequestMapping("updateSaveRole")
     @ResponseBody
+    @CrossOrigin(allowCredentials="true")
     public String updateSaveRole(Role role){
         roleManageService.updateSaveRole(role);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
@@ -75,6 +80,7 @@ public class RoleManageController {
 
     @RequestMapping("deleteRole")
     @ResponseBody
+    @CrossOrigin(allowCredentials="true")
     public String deleteRole(int user_role_id){
         roleManageService.deleteRole(user_role_id);
 

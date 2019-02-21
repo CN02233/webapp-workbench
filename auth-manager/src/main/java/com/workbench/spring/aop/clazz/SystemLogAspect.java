@@ -6,6 +6,8 @@ import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.jsonp.JsonpConfig;
 import com.webapp.support.jsonp.JsonpSupport;
 import com.webapp.support.session.SessionSupport;
+import com.workbench.auth.authvalidate.controller.AbstractLoginController;
+import com.workbench.auth.authvalidate.controller.CasLoginController;
 import com.workbench.auth.authvalidate.controller.LoginController;
 import com.workbench.auth.user.entity.User;
 import com.workbench.exception.runtime.NotLoginException;
@@ -50,8 +52,8 @@ public class SystemLogAspect {
             if(loginFilterLevel.getLevel()==0){//不过滤是否登录(Portal登陆的时候不走LOGINCTROLLER 需要特殊化处理)
             }else{
                 Object targer = joinPoint.getTarget();
-                if(!(targer instanceof LoginController)){
-                    User user = SessionSupport.checkoutUserFromSession();
+                if(!(targer instanceof AbstractLoginController)){
+                    Object user = SessionSupport.checkoutUserFromSession();
                     Object[] allArgs = joinPoint.getArgs();
                     logger.info("User:-->{}<-- called method:-->{}<--,the param values-->{}<--",user,joinPoint.toString(),allArgs);
                 }

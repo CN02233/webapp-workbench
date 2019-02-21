@@ -12,9 +12,9 @@ import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -32,6 +32,7 @@ public class UserController {
     @RequestMapping("listUserPage")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String getUserByPage(int currPage, int pageSize,User user){
         Page<User> userPageList = userService.listUsersForPage(currPage, pageSize,user);
         PageResult pageResult = PageResult.pageHelperList2PageResult(userPageList);
@@ -42,6 +43,7 @@ public class UserController {
     @RequestMapping("listAllUser")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String listAllUser(){
         List<User> userList = userService.listAllUser();
         String jsonResult = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, userList);
@@ -51,6 +53,7 @@ public class UserController {
     @RequestMapping("userMenuList")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String getMenuList4User(){
         User user = SessionSupport.checkoutUserFromSession();
         JsonResult jsonResult = JsonResult.getInstance();
@@ -76,6 +79,7 @@ public class UserController {
     @RequestMapping("saveNewUser")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String saveNewUser(User user){
         userService.createUser(user);
         JsonResult jsonResult = new JsonResult();
@@ -89,6 +93,7 @@ public class UserController {
     @RequestMapping("delUserByUserId")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String delUserByUserId(Integer user_id){
         userService.delUserById(user_id);
         JsonResult jsonResult = new JsonResult();
@@ -102,6 +107,7 @@ public class UserController {
     @RequestMapping("getUserByUserId")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String getUserByUserId(Integer user_id){
         User user = userService.getUserByUserId(user_id);
         JsonResult jsonResult = new JsonResult();
@@ -113,9 +119,10 @@ public class UserController {
         return jsonResult.toString();
     }
 
-    @RequestMapping("updateSaveUser")
+    @RequestMapping(value = "updateSaveUser")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String updateSaveUser(User user){
         userService.updateUser(user);
 

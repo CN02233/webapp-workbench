@@ -9,6 +9,7 @@ import com.workbench.auth.menu.service.MenuService;
 import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -27,6 +28,7 @@ public class MenuController {
     @RequestMapping("listMenuByPage")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String listMenuByPage(int currPage, int pageSize){
         PageResult menuList = menuService.listMenuByPage(currPage, pageSize);
 

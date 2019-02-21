@@ -26,6 +26,19 @@ public class JsonSupport {
         String jsonValue = null;
         try {
             jsonValue = mapper.writeValueAsString(object);
+            jsonValue = formatString(jsonValue);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return jsonValue;
+    }
+
+    public static <T> String objectToJsonWithoutFormatter(T object)
+    {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonValue = null;
+        try {
+            jsonValue = mapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -98,6 +111,15 @@ public class JsonSupport {
     public static String makeJsonResultStr(JsonResult.RESULT result, String resultMsg, String failReason, Object resultData){
         JsonResult jsonResult = makeJsonpResult(result, resultMsg, failReason, resultData);
         return jsonResult.toString();
+    }
+
+    private static String formatString(String jsonStr){
+        jsonStr = jsonStr.replace("\\\"","\"");
+        jsonStr = jsonStr.replace("\"[","[");
+        jsonStr = jsonStr.replace("]\"","]");
+        jsonStr = jsonStr.replace("\"{","{");
+        jsonStr = jsonStr.replace("}\"","}");
+        return jsonStr;
     }
 
 //    public static Object jsonToObect(String jsonVal, Type type){
