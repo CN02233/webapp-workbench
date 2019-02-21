@@ -1,8 +1,14 @@
 <template>
   <div class="menu-group-root">
-    <WorkLogo :sysName="sysName" class="work-menu-logo"></WorkLogo>
-    <div v-if="menuList != null" class="menu-group-context">
-      <WorkTopMenu :menu="menuObj" v-for="menuObj in menuList" :key="menuObj"></WorkTopMenu>
+    <WorkLogo :sysName="sysName"  class="work-menu-logo" :class="{'work-menu-logo-full' : menuList==null}"></WorkLogo>
+    <div class="menu-group-context">
+      <el-menu mode="horizontal" class="rootElMenu"
+               menu-trigger="hover"
+               background-color="rgba(255,255,255,0)"
+               text-color="#fff"
+               active-text-color="#ffd04b">
+        <WorkTopMenu v-for="menuObj in menuList" :key="menuObj.id" :menuData="menuObj"></WorkTopMenu>
+      </el-menu>
     </div>
     <!--<slot></slot>-->
   </div>
@@ -28,26 +34,38 @@
     data() {
         return {}
     },
-    methods: {}
+    methods: {},
+    mounted:function(){
+
+    }
   }
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
+  $full:100%;
+  $full-height:100%;
+
   .menu-group-root{
-    width:100%;
-    height:100%;
+    width:$full;
+    height:$full;
   }
 
   .work-menu-logo{
-    width:170px;
-    height:100%;
+    width:210px;
+    height:$full;
     float:left;
-    margin:0 0 0 30px;
+    margin:0 0 0 0;
+    font-size:20px;
+    color:#ffffff;
+  }
+
+  .work-menu-logo-full{
+    width:$full;
   }
 
   .menu-group-context{
-    width:calc(100% - 200px);
-    height: 100%;
+    width:calc($full - 200px);
+    height: $full;
     float:left;
   }
 </style>
