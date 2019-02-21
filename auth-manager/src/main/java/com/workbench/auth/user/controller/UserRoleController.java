@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -37,6 +38,7 @@ public class UserRoleController {
     @RequestMapping("getRoleByUserId")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String getRoleByUserId(int user_id){
         List<Role> role = userRoleService.getRoleByUserId(user_id);
         String resultJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, role);
@@ -47,6 +49,7 @@ public class UserRoleController {
     @RequestMapping("saveUserRole")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String saveUserRole(UserRole userRole){
         userRoleService.saveUserRole(userRole);
 
@@ -61,8 +64,14 @@ public class UserRoleController {
     @RequestMapping("updateUserRole")
     @ResponseBody
     @JsonpCallback
-    public String updateUserRole(UserRole userRole,int old_user_role_id){
-        userRoleService.updateUserRole(userRole,old_user_role_id);
+    @CrossOrigin(allowCredentials="true")
+    public String updateUserRole(UserRole userRole,Integer old_user_role_id){
+        if(old_user_role_id!=null){
+            userRoleService.updateUserRole(userRole,old_user_role_id);
+        }else{
+            userRoleService.saveUserRole(userRole);
+        }
+
         String resultJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
 
         logger.debug("jsonResult information after delete :{}",resultJson);
@@ -74,6 +83,7 @@ public class UserRoleController {
     @RequestMapping("delUserRole")
     @ResponseBody
     @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
     public String delUserRole(UserRole userRole){
         userRoleService.delUserRole(userRole);
         String resultJson = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "删除成功", null, null);

@@ -7,6 +7,7 @@ import com.workbench.auth.role.entity.RoleMenu;
 import com.workbench.auth.role.service.RoleMenuManageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -49,5 +50,17 @@ public class RoleMenuManageServiceImp implements RoleMenuManageService{
     @Override
     public List<Menu> getMenuOutRole(int user_role_id) {
         return roleMenuDao.getMenuOutRole(user_role_id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveMenusForRole(Integer user_role_id, List<Integer> menus) {
+        roleMenuDao.delMenuByRoleId(user_role_id);
+        for(Integer menu : menus){
+            RoleMenu roleMenu = new RoleMenu();
+            roleMenu.setUser_role_id(user_role_id);
+            roleMenu.setModule_id(menu);
+            roleMenuDao.saveMenuForRole(roleMenu);
+        }
     }
 }
