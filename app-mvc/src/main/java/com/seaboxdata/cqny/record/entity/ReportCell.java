@@ -7,8 +7,10 @@ public class ReportCell {
     private int row ;
     private int column;
     private String val;
-    private boolean merged = false;
+//    private boolean merged = false;
     private boolean input = false;
+    private int colspan = 1;
+    private int rowspan = 1;
 
     public int getRow() {
         return row;
@@ -34,13 +36,13 @@ public class ReportCell {
         this.val = val;
     }
 
-    public boolean isMerged() {
-        return merged;
-    }
-
-    public void setMerged(boolean merged) {
-        this.merged = merged;
-    }
+//    public boolean isMerged() {
+//        return merged;
+//    }
+//
+//    public void setMerged(boolean merged) {
+//        this.merged = merged;
+//    }
 
     public boolean isInput() {
         return input;
@@ -52,5 +54,21 @@ public class ReportCell {
 
     public String toString(){
         return JsonSupport.objectToJson(this);
+    }
+
+    public int getColspan() {
+        return colspan;
+    }
+
+    public void setColspan(int colspan) {
+        this.colspan = colspan;
+    }
+
+    public int getRowspan() {
+        return rowspan;
+    }
+
+    public void setRowspan(int rowspan) {
+        this.rowspan = rowspan;
     }
 }

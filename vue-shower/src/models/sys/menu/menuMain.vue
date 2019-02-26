@@ -47,8 +47,8 @@
 </template>
 
 <script>
-  import WorkTablePager from "@/models/SemanticAnalysis/public/WorkTablePager"
-  import WorkMain from "@/models/SemanticAnalysis/public/WorkMain"
+  import WorkTablePager from "@/models/public/WorkTablePager"
+  import WorkMain from "@/models/public/WorkMain"
   import { required } from 'vuelidate/lib/validators'
   export default {
     name: 'MenuMain',

@@ -4,7 +4,7 @@
 
 <script>
     export default {
-        name: 'templateName',
+        name: 'record-main',
         data() {
             return {}
         },
@@ -13,5 +13,4 @@
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-
 </style>

@@ -1,12 +1,12 @@
 <template>
   <TopMenuHome v-if="menuAlign==='top'" :sysName="sysNameStr" :menuList="menuList" :loginUserInfo="loginUserInfo"></TopMenuHome>
-  <LeftMenuHome v-else :sysName="sysNameStr" :menuList="menuList"></LeftMenuHome>
+  <LeftMenuHome v-else :sysName="sysNameStr" :menuList="menuList" :loginUserInfo="loginUserInfo"></LeftMenuHome>
 </template>
 
 <script>
   import TopMenuHome from '@/models/home/menuTopHome'
   import LeftMenuHome from '@/models/home/menuLeftHome'
-  import MenuTurnner from '@/models/SemanticAnalysis/public/utils/menuTurner'
+  import MenuTurnner from '@/models/public/utils/menuTurner'
 
   export default {
     name: 'HomeBridging',
@@ -14,7 +14,7 @@
     components:{TopMenuHome,LeftMenuHome},
     data() {
       let menuList = [];
-      const sysNameStr = "语义分析系统";
+      const sysNameStr = "XXXX系统";
       return {
         sysNameStr: sysNameStr,
         menuList : menuList,

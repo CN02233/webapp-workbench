@@ -33,30 +33,66 @@
 </template>
 
 <script>
-  import WorkTopMenuGroup from "@/models/menu/top-menu-group"
   import WorkLeftMenuGroup from "@/models/menu/left-menu-group"
   import WorkLeftMenu from "@/models/menu/left-menu"
+  import { MessageBox } from 'element-ui'
+
   export default {
-    data() {
-      return {
-      }
-    },
+    name:"MenuLeftHome",
     props:{
       menuList:{
         type:Array
       },
       sysName:{
         type:String
+      },
+      loginUserInfo:{
+        type:Object
       }
+    },
+    data() {
+      return {}
     },
     components: {
       WorkLeftMenuGroup,
-      WorkTopMenuGroup,
       WorkLeftMenu
     },
     methods:{
       mainPageChange:function(pageName){
-          console.log(pageName);
+        console.log(pageName);
+      },
+      logout:function(commound){
+        MessageBox.confirm('退出系统将丢失当前未保存的相关操作，确定退出？', '提示', {
+          confirmButtonText: '退出',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          const $this = this
+
+          this.$http.post(process.env.BASE_API+"/sys/login/logout.do",{},{withCredentials: true}).then(res => {
+            let responseData = res.data ;
+            try{
+              responseData = JSON.parse(responseData)
+            }catch(e){}
+            if (responseData.result == 'SUCCESS') {
+              if(responseData.faild_reason === 'FORWARD_CAS'){
+                let forwardUrl = responseData.resultData
+                window.location = forwardUrl
+
+              }
+            }else{
+              $this.Message.success("登出成功")
+              $this.$router.push({'path':'/'})
+            }
+          })
+        })
+
+
+      }
+    },
+    mounted:function(){
+      if(this.$route.fullPath=='/home'){
+        this.$router.push({"path":"welcome"})
       }
     }
   };

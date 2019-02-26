@@ -8,8 +8,8 @@
 </template>
 
 <script>
-  import WorkMainHeader from "@/models/SemanticAnalysis/public/WorkMainHeader"
-  import WorkMainContext from "@/models/SemanticAnalysis/public/WorkMainContext"
+  import WorkMainHeader from "@/models/public/WorkMainHeader"
+  import WorkMainContext from "@/models/public/WorkMainContext"
   export default {
     name: 'WorkMain',
     components: {

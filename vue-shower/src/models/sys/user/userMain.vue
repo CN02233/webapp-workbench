@@ -77,7 +77,7 @@
 </template>
 
 <script>
-  import WorkTablePager from "@/models/SemanticAnalysis/public/WorkTablePager"
+  import WorkTablePager from "@/models/public/WorkTablePager"
   import { required } from 'vuelidate/lib/validators'
 
   export default {

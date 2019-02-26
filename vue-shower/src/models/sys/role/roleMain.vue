@@ -68,9 +68,9 @@
 </template>
 
 <script>
-  import WorkTablePager from "@/models/SemanticAnalysis/public/WorkTablePager"
+  import WorkTablePager from "@/models/public/WorkTablePager"
   import { required } from 'vuelidate/lib/validators'
-  import MenuTurnner from '@/models/SemanticAnalysis/public/utils/menuTurner'
+  import MenuTurnner from '@/models/public/utils/menuTurner'
 
   export default {
     name: 'RoleMain',

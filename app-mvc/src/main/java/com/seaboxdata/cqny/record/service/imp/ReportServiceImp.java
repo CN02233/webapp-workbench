@@ -1,9 +1,13 @@
 package com.seaboxdata.cqny.record.service.imp;
 
+import com.github.pagehelper.Page;
 import com.google.common.io.Files;
 import com.seaboxdata.cqny.record.config.RecordConfig;
+import com.seaboxdata.cqny.record.dao.IReportDao;
 import com.seaboxdata.cqny.record.entity.ReportCell;
+import com.seaboxdata.cqny.record.entity.ReportInfo;
 import com.seaboxdata.cqny.record.service.ReportService;
+import com.webapp.support.page.PageResult;
 import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -28,12 +32,18 @@ public class ReportServiceImp implements ReportService {
     @Autowired
     private RecordConfig recordConfig;
 
+    @Autowired
+    private IReportDao iReportDao;
+
     @Override
-    public String createReport(String templateIdOrName){
+    public String createReport(String templateIdOrName,String reportName) throws IOException {
         String userId = isMock?"testUser":
                 String.valueOf(((User) SessionSupport.checkoutUserFromSession()).getUser_id());
         File template = loadTemplateFileFromDisk(templateIdOrName);
         try {
+            if(!template.exists()){
+                new FileNotFoundException("模板未找到");
+            }
             String templateFileName = template.getName();
             logger.debug("file name is {}",templateFileName);
             String[] templateFileNameSplit = templateFileName.split("\\.");
@@ -48,20 +58,43 @@ public class ReportServiceImp implements ReportService {
             }
             Files.copy(template,reportFile);
 
-            return fileName;
+            ReportInfo reportInfo = new ReportInfo();
+            reportInfo.setReportName(reportName);
+            reportInfo.setReportPath(reportFile.getPath());
+            reportInfo.setReportCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+            reportInfo.setReportCreate(userId);
+            reportInfo.setReportTemplateName(template.getName());
+
+            int reportId = iReportDao.createReport(reportInfo);
+
+            return reportInfo.getReportId().toString();
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            throw e;
         }
     }
 
 
     @Override
-    public List<List<ReportCell>> loadReport(String reportIdOrName) {
+    public List<List<List<ReportCell>>> loadReport(String reportIdOrName) {
 
-        List<List<ReportCell>> templateContent = this.readFile(loadTemplateFileFromDisk(reportIdOrName));
+        ReportInfo reportInfo = iReportDao.getReportInfoById(reportIdOrName);
+
+        File reportFile = new File(reportInfo.getReportPath());
+
+        List<List<List<ReportCell>>> templateContent = this.readFile(reportFile);
 
         return templateContent;
+    }
+
+    @Override
+    public PageResult reportList(int userId, int currPage, int pageSize) {
+
+        Page<ReportInfo> reportList = iReportDao.reportList(currPage, pageSize,userId);
+
+        PageResult pageResult = PageResult.pageHelperList2PageResult(reportList);
+
+        return pageResult;
     }
 
     /**
@@ -76,51 +109,60 @@ public class ReportServiceImp implements ReportService {
      * @param templateFile
      * @return
      */
-    private List<List<ReportCell>> readFile(File templateFile){
+    private List<List<List<ReportCell>>> readFile(File templateFile){
         try (InputStream inp = new FileInputStream(templateFile)) {
-            List<List<ReportCell>> reportSheets = new ArrayList();
+            List<List<List<ReportCell>>> reportSheets = new ArrayList();
 
             Workbook wb = WorkbookFactory.create(inp);
-            Sheet sheet = wb.getSheetAt(0);
-            Set allMergedCell = checkAllMergedCell(sheet);
-            for (Row row : sheet) {
-                List<ReportCell> reportCells = new ArrayList<>();
-                for (Cell cell : row) {
-                    ReportCell reportCell = new ReportCell();
-                    reportCell.setRow(cell.getRowIndex());
-                    reportCell.setColumn(cell.getColumnIndex());
-                    StringBuilder cellStrVal = new StringBuilder();
-                    switch (cell.getCellTypeEnum()){
-                        case STRING:
-                            cellStrVal.append(cell.getStringCellValue());
-                            break;
-                        case NUMERIC:
-                            cellStrVal.append(cell.getNumericCellValue());
-                            break;
-                        case BLANK:
-                            StringBuilder sb = new StringBuilder();
-                            sb.append(cell.getRowIndex());
-                            sb.append("-");
-                            sb.append(cell.getColumnIndex());
-                            if(allMergedCell.contains(sb.toString())){
-                                reportCell.setMerged(true);
-                            }else
-                                reportCell.setInput(true);
-                            break;
-                        case FORMULA:
-                            try{
-                                cellStrVal.append(cell.getNumericCellValue());
-                            }catch (IllegalStateException e){
+            Iterator<Sheet> sheetIterator = wb.sheetIterator();
+            while(sheetIterator.hasNext()){
+                Sheet sheet = sheetIterator.next();
+                List<List<ReportCell>> reportRows = new ArrayList();
+                for (Row row : sheet) {
+                    List<ReportCell> reportCells = new ArrayList<>();
+                    for (Cell cell : row) {
+                        ReportCell reportCell = new ReportCell();
+                        reportCell.setRow(cell.getRowIndex());
+                        reportCell.setColumn(cell.getColumnIndex());
+                        StringBuilder cellStrVal = new StringBuilder();
+                        switch (cell.getCellTypeEnum()){
+                            case STRING:
                                 cellStrVal.append(cell.getStringCellValue());
-                            }
-                            break;
+                                break;
+                            case NUMERIC:
+                                cellStrVal.append(cell.getNumericCellValue());
+                                break;
+                            case BLANK:
+//                                StringBuilder sb = new StringBuilder();
+//                                sb.append(cell.getRowIndex());
+//                                sb.append("-");
+//                                sb.append(cell.getColumnIndex());
+//                                if(allMergedCell.contains(sb.toString())){
+//                                    reportCell.setMerged(true);
+//                                }else
+//                                    reportCell.setInput(true);
+                                break;
+                            case FORMULA:
+                                try{
+                                    cellStrVal.append(cell.getNumericCellValue());
+                                }catch (IllegalStateException e){
+                                    cellStrVal.append(cell.getStringCellValue());
+                                }
+                                break;
+                        }
+                        logger.debug("当前cell信息为==>类型:{},数值:{}",cell.getCellTypeEnum(),cellStrVal.toString());
+                        reportCell.setVal(cellStrVal.toString());
+                        reportCells.add(reportCell);
                     }
-                    logger.debug("当前cell信息为==>类型:{},数值:{}",cell.getCellTypeEnum(),cellStrVal.toString());
-                    reportCell.setVal(cellStrVal.toString());
-                    reportCells.add(reportCell);
+                    reportRows.add(reportCells);
                 }
-                reportSheets.add(reportCells);
+
+                mergeCell(reportRows,sheet.getMergedRegions());
+
+                reportSheets.add(reportRows);
             }
+            Sheet sheet = wb.getSheetAt(0);
+
 
 
             logger.debug("当前报表{},数据为：{}",templateFile.getName(),reportSheets);
@@ -195,6 +237,45 @@ public class ReportServiceImp implements ReportService {
         logger.debug("{}",mergedSets);
 
         return mergedSets;
+    }
+
+    private void mergeCell(List<List<ReportCell>> reportRows,List<CellRangeAddress> allMergeRegions){
+        allMergeRegions.forEach(mergeRegion->{
+            logger.debug("合并单元格信息:起始行号{}截止行号{},起始列号{}截止列号{}",
+                    mergeRegion.getFirstRow(),mergeRegion.getLastRow(),mergeRegion.getFirstColumn(),mergeRegion.getLastColumn());
+            int mergedStartRow = mergeRegion.getFirstRow();
+            int mergedEndRow = mergeRegion.getLastRow();
+            int mergedStartColumn = mergeRegion.getFirstColumn();
+            int mergedEndColumn = mergeRegion.getLastColumn();
+            int mergedRowsOffset = mergedEndRow-mergedStartRow;
+            int mergedColumnOffset = mergedEndColumn-mergedStartColumn;
+            if(mergedRowsOffset>0){//合并行
+                List<ReportCell> startRow = reportRows.get(mergedStartRow);//获取合并的起始行
+                ReportCell reportStartCell = startRow.get(mergedStartColumn);//定位到需要合并的起始列
+                reportStartCell.setRowspan(mergedRowsOffset+1);
+                for(int i=1;i<(mergedRowsOffset+1);i++){//删除已经合并的单元格
+                    List<ReportCell> reportRow = reportRows.get(mergedStartRow + i);//获取到行
+                    if(mergedColumnOffset>0){//合并列
+                        reportStartCell.setColspan(mergedColumnOffset+1);
+                        for(int column=0;column<(mergedColumnOffset-1);column++){
+                            reportRow.remove(mergedStartColumn+1);
+                        }
+                    }else
+                        reportRow.remove(mergedStartColumn);
+                }
+            }
+            else if(mergedColumnOffset>0){//合并列
+                List<ReportCell> reportRow = reportRows.get(mergedStartRow);
+                ReportCell reportCell = reportRow.get(mergedStartColumn);
+                reportCell.setColspan(mergedColumnOffset+1);
+                for(int i=1;i<(mergedColumnOffset+1);i++){
+                    reportRow.remove(mergedStartColumn+1);
+                }
+
+            }
+        });
+
+        logger.debug("合并后excel格式为:{}",reportRows);
     }
 
 }
