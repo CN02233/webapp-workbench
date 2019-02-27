@@ -2,7 +2,6 @@ package com.seaboxdata.cqny.record.controller;
 
 
 import com.seaboxdata.cqny.record.entity.ReportCell;
-import com.seaboxdata.cqny.record.entity.ReportInfo;
 import com.seaboxdata.cqny.record.service.ReportService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
@@ -11,12 +10,15 @@ import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -68,6 +70,16 @@ public class ReportController {
         JsonResult response = JsonSupport.makeJsonpResult(
                 JsonResult.RESULT.SUCCESS, "获取成功", null, reportInfo);
         return response;
+    }
+
+
+    @RequestMapping("editSave")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public List<List<List<ReportCell>>> editSave(String reportCellsJson, String reportId){
+        ArrayList<ArrayList<ReportCell>> reportCells = (ArrayList<ArrayList<ReportCell>>) JsonSupport.jsonToObect(reportCellsJson, ArrayList.class);
+        List<List<List<ReportCell>>> reloadFileContext = reportService.editSave(reportCells, reportId);
+        return reloadFileContext;
     }
 
 }

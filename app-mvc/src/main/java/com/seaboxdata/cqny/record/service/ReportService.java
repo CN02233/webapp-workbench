@@ -4,6 +4,7 @@ import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.webapp.support.page.PageResult;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public interface ReportService {
@@ -23,4 +24,6 @@ public interface ReportService {
     List<List<List<ReportCell>>> loadReport(String reportId);
 
     PageResult reportList(int userId, int currPage, int pageSize);
+
+    List<List<List<ReportCell>>> editSave(ArrayList<ArrayList<ReportCell>> reportCells, String reportId);
 }

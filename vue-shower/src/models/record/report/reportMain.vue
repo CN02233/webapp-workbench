@@ -91,6 +91,7 @@
         newReportName:'',
         templateList:[
           {id:'test.xlsx',name:'测试模板'},
+          {id:'realtest.xlsx',name:'真实模板'},
           {id:'test1.xlsx',name:'测试模板1'},
           {id:'test2.xlsx',name:'测试模板2'}
         ]

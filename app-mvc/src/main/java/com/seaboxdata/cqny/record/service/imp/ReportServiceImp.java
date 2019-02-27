@@ -97,6 +97,19 @@ public class ReportServiceImp implements ReportService {
         return pageResult;
     }
 
+    @Override
+    public List<List<List<ReportCell>>> editSave(ArrayList<ArrayList<ReportCell>> reportCells, String reportId) {
+        ReportInfo reportInfo = iReportDao.getReportInfoById(reportId);
+
+        File reportFile = new File(reportInfo.getReportPath());
+
+        this.writeFile(reportCells,reportFile);
+
+        List<List<List<ReportCell>>> templateContent = this.readFile(reportFile);
+
+        return templateContent;
+    }
+
     /**
      * 读取excel文件内容
      * {
@@ -118,12 +131,22 @@ public class ReportServiceImp implements ReportService {
             while(sheetIterator.hasNext()){
                 Sheet sheet = sheetIterator.next();
                 List<List<ReportCell>> reportRows = new ArrayList();
-                for (Row row : sheet) {
+                for (int currRowNum = 0; currRowNum<sheet.getLastRowNum(); currRowNum++) {
+                    Row row = sheet.getRow(currRowNum);
                     List<ReportCell> reportCells = new ArrayList<>();
-                    for (Cell cell : row) {
+//                    logger.debug("当前行号:{}，起始列{}，结束列{}",row.getRowNum(),row.getFirstCellNum(),row.getLastCellNum());
+                    for (int columnNum = 0;columnNum<row.getLastCellNum();columnNum++) {
+                        Cell cell = row.getCell(columnNum);
                         ReportCell reportCell = new ReportCell();
-                        reportCell.setRow(cell.getRowIndex());
-                        reportCell.setColumn(cell.getColumnIndex());
+                        reportCells.add(reportCell);
+
+                        reportCell.setRow(currRowNum);
+                        reportCell.setColumn(columnNum);
+
+                        if(cell==null){
+                            reportCell.setVal("");
+                            continue;
+                        }
                         StringBuilder cellStrVal = new StringBuilder();
                         switch (cell.getCellTypeEnum()){
                             case STRING:
@@ -133,26 +156,23 @@ public class ReportServiceImp implements ReportService {
                                 cellStrVal.append(cell.getNumericCellValue());
                                 break;
                             case BLANK:
-//                                StringBuilder sb = new StringBuilder();
-//                                sb.append(cell.getRowIndex());
-//                                sb.append("-");
-//                                sb.append(cell.getColumnIndex());
-//                                if(allMergedCell.contains(sb.toString())){
-//                                    reportCell.setMerged(true);
-//                                }else
-//                                    reportCell.setInput(true);
+                                cellStrVal.append("");
+                                reportCell.setInput(true);
                                 break;
                             case FORMULA:
                                 try{
                                     cellStrVal.append(cell.getNumericCellValue());
                                 }catch (IllegalStateException e){
-                                    cellStrVal.append(cell.getStringCellValue());
+                                    try{
+                                        cellStrVal.append(cell.getStringCellValue());
+                                    }catch (IllegalStateException e1){
+                                        cellStrVal.append("公式计算失败,公式:"+cell.getCellFormula());
+//                                        throw e1;
+                                    }
                                 }
                                 break;
                         }
-                        logger.debug("当前cell信息为==>类型:{},数值:{}",cell.getCellTypeEnum(),cellStrVal.toString());
                         reportCell.setVal(cellStrVal.toString());
-                        reportCells.add(reportCell);
                     }
                     reportRows.add(reportCells);
                 }
@@ -176,6 +196,57 @@ public class ReportServiceImp implements ReportService {
         }
 
         return null;
+    }
+
+
+    public void writeFile(ArrayList<ArrayList<ReportCell>> dataList , File reportFile){
+        try (InputStream inp = new FileInputStream(reportFile)) {
+            logger.debug("开始写入报表:{}",reportFile.getPath());
+
+            Workbook wb = WorkbookFactory.create(inp);
+            Iterator<Sheet> sheetIterator = wb.sheetIterator();
+            while (sheetIterator.hasNext()) {
+                Sheet sheet = sheetIterator.next();
+
+                dataList.forEach(dataRow->{
+                    dataRow.forEach(
+                            reportCell -> {
+                                int rowNum = reportCell.getRow();
+                                int columnNum = reportCell.getColumn();
+                                String cellVal = reportCell.getVal();
+                                Cell cell = sheet.getRow(rowNum).getCell(columnNum);
+                                if(cell==null){
+                                    cell = sheet.getRow(rowNum).createCell(columnNum);
+                                }
+                                logger.debug("写入报表第{}行,第{}列,数据内容:{},表格原值：{}",rowNum,columnNum,cellVal,cell.toString());
+                                switch (cell.getCellTypeEnum()){
+                                    case STRING:
+                                        cell.setCellValue(cellVal);
+                                    case NUMERIC:
+                                        cell.setCellValue(new Integer(cellVal));
+                                        break;
+                                    case BLANK:
+                                        cell.setCellValue(cellVal);
+                                        break;
+                                }
+                            }
+                    );
+                });
+            }
+            inp.close();
+            try (FileOutputStream fileOut = new FileOutputStream(reportFile)){
+                wb.write(fileOut);
+            }
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     /**
@@ -240,9 +311,11 @@ public class ReportServiceImp implements ReportService {
     }
 
     private void mergeCell(List<List<ReportCell>> reportRows,List<CellRangeAddress> allMergeRegions){
+        Map<Integer,Integer> hasRemoveOffsetMap = new HashMap<>();
+
         allMergeRegions.forEach(mergeRegion->{
-            logger.debug("合并单元格信息:起始行号{}截止行号{},起始列号{}截止列号{}",
-                    mergeRegion.getFirstRow(),mergeRegion.getLastRow(),mergeRegion.getFirstColumn(),mergeRegion.getLastColumn());
+//            logger.debug("合并单元格信息:起始行号{}截止行号{},起始列号{}截止列号{}",
+//                    mergeRegion.getFirstRow(),mergeRegion.getLastRow(),mergeRegion.getFirstColumn(),mergeRegion.getLastColumn());
             int mergedStartRow = mergeRegion.getFirstRow();
             int mergedEndRow = mergeRegion.getLastRow();
             int mergedStartColumn = mergeRegion.getFirstColumn();
@@ -264,12 +337,20 @@ public class ReportServiceImp implements ReportService {
                         reportRow.remove(mergedStartColumn);
                 }
             }
-            else if(mergedColumnOffset>0){//合并列
+            else if(mergedColumnOffset>0){//合并列 合并3~5（2~4） mergedColumnOffset：2 mergedStartColumn：2
+                int mergeColumnNum = mergedStartColumn;
+                if(hasRemoveOffsetMap.containsKey(mergedStartRow)){
+                    mergeColumnNum = mergedStartColumn-hasRemoveOffsetMap.get(mergedStartRow);
+                    hasRemoveOffsetMap.put(mergedStartRow,hasRemoveOffsetMap.get(mergedStartRow)+mergedColumnOffset);
+                }else{
+                    hasRemoveOffsetMap.put(mergedStartRow,mergedColumnOffset);
+                }
                 List<ReportCell> reportRow = reportRows.get(mergedStartRow);
-                ReportCell reportCell = reportRow.get(mergedStartColumn);
+                ReportCell reportCell = reportRow.get(mergeColumnNum);
                 reportCell.setColspan(mergedColumnOffset+1);
+//                logger.debug("reportRow value :{}",reportRow);
                 for(int i=1;i<(mergedColumnOffset+1);i++){
-                    reportRow.remove(mergedStartColumn+1);
+                    reportRow.remove(mergeColumnNum+1);//移除两次 第四个元素 3
                 }
 
             }
