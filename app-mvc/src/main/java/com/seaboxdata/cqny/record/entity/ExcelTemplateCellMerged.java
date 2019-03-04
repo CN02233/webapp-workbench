@@ -1,28 +1,20 @@
 package com.seaboxdata.cqny.record.entity;
 
-public class ExcelTemplateCellMerged {
+import com.webapp.support.json.JsonSupport;
 
+public class ExcelTemplateCellMerged {
     private Integer id;
-    private Integer template_id;
+    private Integer sheet_id;
     private Integer row;
     private Integer col;
     private Integer rowspan;
     private Integer colspan;
-
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Integer getTemplate_id() {
-        return template_id;
-    }
-
-    public void setTemplate_id(Integer template_id) {
-        this.template_id = template_id;
     }
 
     public Integer getRow() {
@@ -55,5 +47,17 @@ public class ExcelTemplateCellMerged {
 
     public void setColspan(Integer colspan) {
         this.colspan = colspan;
+    }
+
+    public Integer getSheet_id() {
+        return sheet_id;
+    }
+
+    public void setSheet_id(Integer sheet_id) {
+        this.sheet_id = sheet_id;
+    }
+
+    public String toString(){
+        return JsonSupport.objectToJson(this);
     }
 }

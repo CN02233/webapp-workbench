@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.controller;
 
 
+import com.seaboxdata.cqny.record.entity.ExcelContext;
 import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.seaboxdata.cqny.record.service.ReportService;
 import com.webapp.support.json.JsonSupport;
@@ -76,7 +77,7 @@ public class ReportController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult loadReportData(String reportIdOrName){
-        List<Map<String, Object>> reportInfo = reportService.loadReportData(reportIdOrName);
+        List<ExcelContext> reportInfo = reportService.loadReportData(reportIdOrName);
         JsonResult response = JsonSupport.makeJsonpResult(
                 JsonResult.RESULT.SUCCESS, "获取成功", null, reportInfo);
         return response;

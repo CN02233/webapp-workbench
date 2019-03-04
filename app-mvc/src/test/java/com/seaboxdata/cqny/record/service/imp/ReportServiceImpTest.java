@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.AbstractTestService;
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.entity.ExcelContext;
 import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.seaboxdata.cqny.record.entity.ReportInfo;
 import com.seaboxdata.cqny.record.service.ReportService;
@@ -52,7 +53,7 @@ public class ReportServiceImpTest extends AbstractTestService {
 
     @Test
     public void testLoadReportData() {
-        List<Map<String, Object>> result = reportService.loadReportData("9");
+        List<ExcelContext> result = reportService.loadReportData("9");
         System.out.println(result);
     }
 }

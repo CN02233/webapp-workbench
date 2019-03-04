@@ -1,12 +1,12 @@
 package com.seaboxdata.cqny.record.service;
 
+import com.seaboxdata.cqny.record.entity.ExcelContext;
 import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.webapp.support.page.PageResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public interface ReportService {
 
@@ -24,7 +24,7 @@ public interface ReportService {
      */
     List<List<List<ReportCell>>> loadReport(String reportId);
 
-    List<Map<String, Object>> loadReportData(String reportID);
+    List<ExcelContext> loadReportData(String reportID);
 
     PageResult reportList(int userId, int currPage, int pageSize);
 

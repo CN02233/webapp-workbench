@@ -1,28 +1,26 @@
 package com.seaboxdata.cqny.record.entity;
 
+import com.webapp.support.json.JsonSupport;
+
+import java.util.List;
+
 public class ExcelTemplateCell {
 
-    private Integer template_id;
-    private String template_name;
+    private Integer id;
+    private Integer sheet_id;
     private Integer template_row;
     private Integer template_col;
     private String template_context;
     private String template_col_styles;
 
-    public Integer getTemplate_id() {
-        return template_id;
+    private List<ExcelTemplateCellMerged> excelTemplateCellMerged;
+
+    public Integer getSheet_id() {
+        return sheet_id;
     }
 
-    public void setTemplate_id(Integer template_id) {
-        this.template_id = template_id;
-    }
-
-    public String getTemplate_name() {
-        return template_name;
-    }
-
-    public void setTemplate_name(String template_name) {
-        this.template_name = template_name;
+    public void setSheet_id(Integer sheet_id) {
+        this.sheet_id = sheet_id;
     }
 
     public Integer getTemplate_row() {
@@ -55,5 +53,26 @@ public class ExcelTemplateCell {
 
     public void setTemplate_col_styles(String template_col_styles) {
         this.template_col_styles = template_col_styles;
+    }
+
+
+    public List<ExcelTemplateCellMerged> getExcelTemplateCellMerged() {
+        return excelTemplateCellMerged;
+    }
+
+    public void setExcelTemplateCellMerged(List<ExcelTemplateCellMerged> excelTemplateCellMerged) {
+        this.excelTemplateCellMerged = excelTemplateCellMerged;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String toString(){
+        return JsonSupport.objectToJson(this);
     }
 }

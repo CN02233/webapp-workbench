@@ -12,26 +12,37 @@
           :data="recordDataList"
           style="width: 100%">
           <el-table-column
-            prop="module_id"
+            prop="template_id"
+            align="left"
+            label="模板编号">
+          </el-table-column>
+          <el-table-column
+            prop="template_name"
             align="left"
             label="模板名称">
           </el-table-column>
           <el-table-column
-            prop="module_name"
+            prop="source_file_name"
             align="left"
-            label="上传时间">
+            label="模板文件名称">
           </el-table-column>
           <el-table-column
-            prop="super_module_name"
+            prop="import_user"
             align="left"
-            label="创建人"
-            :formatter="formatterSuperName"
-          >
+            label="创建人">
+          </el-table-column>
+          <el-table-column
+            prop="import_date"
+            align="left"
+            label="创建时间">
           </el-table-column>
           <el-table-column
             prop="module_url"
             align="left"
             label="操作">
+            <template slot-scope="scope">
+              <el-button type="text" @click="openEditModal(scope.row)" size="small">编辑</el-button>
+            </template>
           </el-table-column>
 
         </el-table>
@@ -44,46 +55,20 @@
     </WorkTablePager>
 
     <!-- 新增、编辑 弹窗-->
-    <el-dialog :title="modalPageTitle" :visible.sync="showModalPage" >
-      <el-row>
-        <el-col :span="15">
-          <el-input :disabled="true" placeholder="请输入文件路径" v-model="uploadFilePath" class="input-with-select" ></el-input>
-        </el-col>
-        <el-col :span="5">
-          <el-upload
-          :show-file-list="false"
-          :auto-upload = 'false'
-          :on-change="fileChange"
-          ref="uploadFile">
-            <el-button type="primary">
-              <span v-if="uploadFilePath.length>0">重新选取文件</span>
-              <span v-else>选取文件</span>
-            </el-button>
-          </el-upload>
-        </el-col>
-      </el-row>
-      <!--<el-row>-->
-        <!--<el-col :span="5" style="text-align: right">-->
-          <!--<el-upload-->
-            <!--:show-file-list="false"-->
-            <!--:auto-upload = 'false'-->
-            <!--:on-change="fileChange"-->
-            <!--ref="uploadFile">-->
-            <!--<el-button slot="trigger" size="small" type="primary">-->
-              <!--<span v-if="uploadFilePath.length>0">重新选取文件</span>-->
-              <!--<span v-else>选取文件</span>-->
-            <!--</el-button>-->
-          <!--</el-upload>-->
-        <!--</el-col>-->
-        <!--<el-col>-->
-          <!--<el-col :span="10">-->
-          <!--</el-col>-->
-
-        <!--</el-col>-->
-      <!--</el-row>-->
+    <el-dialog title="新增" :visible.sync="showModalPage" >
+      <el-form class="modal-form" :label-position="left" label-width="20%" :model="formData">
+        <el-form-item :size="small" label="报表名称" >
+          <el-input :disabled="false"  v-model="newReportName" auto-complete="off" ></el-input>
+        </el-form-item>
+        <el-form-item :size="small" label="报表模板" >
+          <el-select v-model="template" style="width:100%;" placeholder="请选择报表模板">
+            <el-option :key="item.id" v-for="item in templateList" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
-        <el-button type="primary" @click="subWordForm()">确 定</el-button>
+        <el-button type="primary" @click="goToEditPage()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -95,18 +80,26 @@
   import WorkMain from "@/models/public/WorkMain"
   import { required } from 'vuelidate/lib/validators'
   export default {
-    name: 'template-main',
+    name: 'ReportTemplateMain',
     data() {
       return {
         recordDataList:[],
-        tableDataUrl:'report/reportList',
+        tableDataUrl:'template/listTemplates',
         currPageNum:1,
         eachPageNum:10,
         totalPage:1,
         showModalPage:false,
         uploadFilePath:'',
         filePath:'',
-        isEditModal:false
+        isEditModal:false,
+        template:'',
+        newReportName:'',
+        templateList:[
+          {id:'test.xlsx',name:'测试模板'},
+          {id:'realtest.xlsx',name:'真实模板'},
+          {id:'test1.xlsx',name:'测试模板1'},
+          {id:'test2.xlsx',name:'测试模板2'}
+        ]
       }
     },
     validations:{
@@ -146,11 +139,6 @@
           method:"get",
           params:{currPage:pageNum,pageSize:this.eachPageNum}
         }).then(response=>{
-          if(response.dataList!=null){
-            response.dataList.forEach(menuObj =>{
-              $this.menuDataObjs[menuObj.module_id] = menuObj
-            })
-          }
           $this.recordDataList = response.dataList
           $this.totalPage = response.totalPage
         })
@@ -164,6 +152,11 @@
       openAddModal:function(){
         this.showModalPage = true
         this.isEditModal = false
+      },
+      openEditModal(editRow){
+        this.reportId = editRow.reportId
+        this.isEditModal = true
+        this.goToEditPage()
       },
       fileChange:function(file, fileList){
         this.uploadFilePath = file.name
@@ -181,6 +174,24 @@
         this.uploadFilePath = ""
         this.uploadFile = null
       },
+      closeModal:function(){
+        this.showModalPage=false
+        this.isEditModal=false
+        Object.keys(this.formData).forEach(objKey=>{
+          this.formData[objKey] = ""
+        })
+      },
+      goToEditPage(){
+        this.$router.push({
+          path: "/record/report/edit",
+          query:{
+            'template':this.template,
+            'reportId':this.reportId,
+            'reportName':this.newReportName,
+            'isCreate':!this.isEditModal
+          }
+        });
+      }
     },
     mounted:function(){
       this.menuDataList = []

@@ -1,9 +1,11 @@
 package com.seaboxdata.cqny.record.service;
 
-import com.webapp.support.jsonp.JsonResult;
+import com.seaboxdata.cqny.record.entity.ExcelTemplate;
+import com.webapp.support.page.PageResult;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 public interface TemplateService {
 
@@ -12,6 +14,11 @@ public interface TemplateService {
      * @param templateId 模板ID
      * @return
      */
-    List<Map<String,String>> loadTemplate(String templateId);
+    List<ExcelTemplate> loadTemplate(String templateId);
 
+    List<ExcelTemplate> loadTemplateBasicInfo(String templateId);
+
+    String uploadTemplate(String tempalteName, File uploadFile) throws IOException;
+
+    PageResult pageTempaltes(int currPage, int pageSize);
 }
