@@ -13,6 +13,7 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ReportServiceImpTest extends AbstractTestService {
 
@@ -47,5 +48,11 @@ public class ReportServiceImpTest extends AbstractTestService {
 //            reportCells.add(reportCell);
 //        }
 //        reportService.editSave(reportCells,"9");
+    }
+
+    @Test
+    public void testLoadReportData() {
+        List<Map<String, Object>> result = reportService.loadReportData("9");
+        System.out.println(result);
     }
 }

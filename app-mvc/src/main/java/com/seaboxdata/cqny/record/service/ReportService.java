@@ -6,6 +6,7 @@ import com.webapp.support.page.PageResult;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface ReportService {
 
@@ -23,7 +24,9 @@ public interface ReportService {
      */
     List<List<List<ReportCell>>> loadReport(String reportId);
 
+    List<Map<String, Object>> loadReportData(String reportID);
+
     PageResult reportList(int userId, int currPage, int pageSize);
 
-    List<List<List<ReportCell>>> editSave(ArrayList<ArrayList<ReportCell>> reportCells, String reportId);
+    List<List<List<ReportCell>>> editSave(ArrayList<ReportCell> reportCells, String reportId);
 }

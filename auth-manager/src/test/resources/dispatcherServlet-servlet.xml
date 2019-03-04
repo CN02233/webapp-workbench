@@ -16,6 +16,7 @@
 	<aop:aspectj-autoproxy proxy-target-class="true" />
 	<!-- 使用responseBody注解时,会将返回字符串写到responsebody中,注解的默认编码是ISO(spring mvc使用的默认处理字符串编码为ISO-8859-1),
 	JSON报文没有问题,JS解析时会根据页面编码将其转换,但是如果单纯返回字符串,不是JSON的就会造成乱码.加上这段可以解决乱码问题 -->
+	
 	<mvc:annotation-driven>
 		<mvc:message-converters register-defaults="true">
 			<bean class="org.springframework.http.converter.StringHttpMessageConverter">

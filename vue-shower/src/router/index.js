@@ -68,21 +68,21 @@ const routes = [
         name: 'record',
         path: '/record',
         component: () => import('@/models/record/main'),
-        children:[
+        children: [
           {
             name: 'report',
             path: '/record/report',
             component: () => import('@/models/record/report/reportMain'),
-            children:[]
+            children: []
           },
           {
             name: 'template',
             path: '/record/template',
             component: () => import('@/models/record/template/templateMain'),
-            children:[]
+            children: []
           },
           {
-            name:'reportCreate',
+            name: 'reportCreate',
             path: '/record/report/edit',
             component: () => import('@/models/record/report/reportEdit')
           }

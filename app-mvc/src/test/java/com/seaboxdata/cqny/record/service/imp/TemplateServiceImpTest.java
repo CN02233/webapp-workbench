@@ -15,6 +15,7 @@ public class TemplateServiceImpTest extends AbstractTestService {
 
     @Test
     public void testLoadTemplate() {
-        templateServcice.loadTemplate("test.xlsx");
+        templateServcice.loadTemplate("1");
     }
+
 }

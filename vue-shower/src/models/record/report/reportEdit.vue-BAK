@@ -1,5 +1,4 @@
 <template>
-
   <WorkMain :headerItems="['报送管理','报表管理',title]">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
@@ -10,29 +9,75 @@
       </el-col>
     </el-row>
 
-    <el-row>
-      <hot-table :root="root" ref="reportEditRef"  :settings="handsontableSetting" ></hot-table>
+    <el-row class="table-row">
+      <table  class="report-table">
+        <tr class="row-num-td">
+          <td></td>
+          <td v-for="n in columNum">{{n}}</td>
+        </tr>
+        <tr v-for="(reportRow,reportRowIndex) in reportRows">
+          <td width="20px" class="row-num-td">{{reportRowIndex}}</td>
+          <td style="text-align: center"
+              border="1" v-bind:rowspan="reportColum.rowspan" v-bind:colspan="reportColum.colspan" v-for="(reportColum,reportColumIndex) in reportRow">
+            <!--<div  v-if="reportColum.input">-->
+              <input v-if="reportColum.input"
+                     class="excel-colum "
+                     v-bind:class="{'excel-colum-center':reportColum.aligin=='CENTER','excel-colum-left':reportColum.aligin=='GENERAL'}"
+                     v-model="reportRows[reportRowIndex][reportColumIndex].val" style="width:100%;border:0"/>
+              <span v-else>{{reportRows[reportRowIndex][reportColumIndex].val}}</span>
+          </td>
+        </tr>
+      </table>
     </el-row>
+
+    <el-dialog title="基础数据选择" :visible.sync="showModalPage" >
+
+      <el-row>
+        <el-col :span="10">
+          <el-tree :data="baseDataList" @node-click="confirmSelected" ></el-tree>
+        </el-col>
+        <el-col :span="10">
+          <el-row>
+            <el-col :span="10">数据名称</el-col>
+            <el-col :span="10">{{baseDataSelected.dataName}}</el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="10">数据类型</el-col>
+            <el-col :span="10">{{baseDataSelected.dataType}}</el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="10">数据值</el-col>
+            <el-col :span="10">{{baseDataSelected.dataVal}}</el-col>
+          </el-row>
+        </el-col>
+      </el-row>
+
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeModal">完 成</el-button>
+        <!--<el-button type="primary" @click="confirmSelected()">确 定</el-button>-->
+      </div>
+    </el-dialog>
+
   </WorkMain>
+
+
+
 </template>
 
 <script>
   import WorkTablePager from "@/models/public/WorkTablePager"
   import WorkMain from "@/models/public/WorkMain"
-  import { HotTable } from '@handsontable/vue';
-  import 'handsontable/dist/handsontable.full.min.css'
-  import 'handsontable/languages/zh-CN'
+  import { required } from 'vuelidate/lib/validators'
 
   export default {
     name: "report-create.vue",
     components: {
       WorkTablePager,
-      WorkMain,
-      HotTable
+      WorkMain
     },
     data() {
       return {
-        root: 'report-edit',
         title:'创建报表',
         isCreate:true,
         templateId:'',
@@ -47,26 +92,7 @@
           dataVal:'',
           dataType:''
         },
-        columNum :0,
-        handsontableSetting: {//handsontable设置
-          data: [],
-          mergeCells:[],
-          colHeaders: true,
-          // colHeaders: ['日期', '地点', '商品', '单价', '销量'],
-          rowHeaders: true,
-          contextMenu:true,//开启右键菜单
-          language: 'zh-CN',
-          stretchH: 'all',
-          width: '100%',
-          autoWrapRow: true,
-          height: 487,
-          maxRows: 1000,
-          manualRowResize: true,
-          manualColumnResize: true,
-          rowHeaders: true,
-          afterMergeCells:this.mergeCells
-        },
-        hotTable:{}
+        columNum :0
       }
     },
     methods: {
@@ -104,7 +130,7 @@
             background: 'rgba(0, 0, 0, 0.7)'
           });
           $this.BaseRequest({
-            url:"/report/loadReportData",
+            url:"/report/loadReport",
             params:{
               reportIdOrName:$this.reportId
             }
@@ -118,15 +144,17 @@
         }
 
       },
-      showReportContext(reportSheets){
+      showReportContext(reportContext){
         const $this = this
-        if(reportSheets!=null){
+        if(reportContext!=null){
 
-          reportSheets.forEach(reportSheet=>{
+          reportContext.forEach(reportSheet=>{
             if(reportSheet!=null){
-              console.log(JSON.stringify(reportSheet.sheetData))
-              $this.handsontableSetting.data = reportSheet.sheetData
-              $this.handsontableSetting.mergeCells = reportSheet.mergedList
+              $this.reportRows = reportSheet
+              $this.reportRows.forEach(reportRow=>{
+                if(this.columNum<reportRow.length)
+                  this.columNum = reportRow.length
+              })
             }
           })
         }
@@ -191,49 +219,35 @@
         });
       },
       editSave(){
-        // console.log(this.$refs.reportEditRef.hotInstance.getCellsMeta())
-        const mergedCells = this.hotTable.getPlugin('mergeCells').mergedCellsCollection.mergedCells;//获取合并单元格信息
-        console.log(mergedCells)
-        const cellDatas = this.hotTable.getData()//获取所有单元格数据
-        console.log(cellDatas)
+        const loading = this.$loading({
+          lock: true,
+          text: '报表信息保存中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
 
-      },
-      mergeCells(cellRange,mergeParent,auto){
-        console.log(this.hotTable.getSettings())
-        console.log(mergeParent)
-        console.log(auto)
+        const $this = this
+        const sendReportCells = []
+        this.reportRows.forEach(reportRow=>{
+          reportRow.forEach(reportCell=>{
+            sendReportCells.push(reportCell)
+          })
+        })
+        this.BaseRequest({
+          url:"/report/editSave",
+          method:'POST',
+          data:{
+              reportId:this.reportId,
+              reportCells:sendReportCells
+          }
+        }).then(response=>{
+          $this.showReportContext(response)
+          setTimeout(() => {
+            loading.close();
+          }, 1000);
 
+        });
       }
-      // editSave(){
-      //   const loading = this.$loading({
-      //     lock: true,
-      //     text: '报表信息保存中.......',
-      //     spinner: 'el-icon-loading',
-      //     background: 'rgba(0, 0, 0, 0.7)'
-      //   });
-      //
-      //   const $this = this
-      //   const sendReportCells = []
-      //   this.reportRows.forEach(reportRow=>{
-      //     reportRow.forEach(reportCell=>{
-      //       sendReportCells.push(reportCell)
-      //     })
-      //   })
-      //   this.BaseRequest({
-      //     url:"/report/editSave",
-      //     method:'POST',
-      //     data:{
-      //       reportId:this.reportId,
-      //       reportCells:sendReportCells
-      //     }
-      //   }).then(response=>{
-      //     $this.showReportContext(response)
-      //     setTimeout(() => {
-      //       loading.close();
-      //     }, 1000);
-      //
-      //   });
-      // }
     },
     mounted() {
       this.templateId = this.$route.query.template
@@ -244,12 +258,91 @@
         this.title = '修改报表'
       this.getReportContext()
       this.getBaseData()
-      this.hotTable =  this.$refs.reportEditRef.hotInstance;
-    }
 
+    }
   }
 </script>
 
+<style>
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
+  @import "@/styles/table-page.scss";
+
+  .el-row{
+    margin-top:20px;
+  }
+
+  $seachRowHeight : 50px;
+  $pagerRowHeight : 50px;
+  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
+  .search-row{
+    height:$seachRowHeight;
+  }
+
+  .table-row{
+    width:99%;
+    height:$tableRowHeight;
+    overflow: auto;
+  }
+
+  .row-num-td{
+    background: #8cc5ff;
+  }
+
+  .excel-colum{
+    width:100%;
+    height:100%;
+    border:0;
+  }
+
+  .excel-colum-left{
+    text-align: left;
+  }
+
+  .excel-colum-right{
+    text-align: right;
+  }
+
+  .excel-colum-center{
+    text-align: center;
+  }
+
+  .report-table{
+    border-collapse: collapse;
+    font-size:12px;
+  }
+
+  .report-table tr {
+    height:20px;
+  }
+  .report-table td, .report-table th {
+    border: 1px solid black;
+    min-width:100px;
+  }
+  .report-table tr:first-child th {
+    border-top: 0;
+  }
+  .report-table tr:last-child td {
+    border-bottom: 0;
+  }
+  .report-table tr td:first-child,
+  .report-table tr th:first-child {
+    border-left: 1;
+  }
+  .report-table tr td:last-child,
+  .report-table tr th:last-child {
+    border-right: 1;
+  }
+
+  .my-autocomplete{
+    padding:0 5px 0 5px;
+    height:10px !important;
+  }
+
+  .my-edit-icon{
+    cursor: pointer;
+  }
+
 
 </style>

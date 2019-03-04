@@ -13,8 +13,10 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "@handsontable/vue": "^3.1.0",
     "axios": "^0.18.0",
     "element-ui": "^2.4.5",
+    "handsontable": "^6.2.2",
     "js-cookie": "^2.2.0",
     "vue": "^2.5.16",
     "vue-awesome": "^3.1.0",

@@ -7,6 +7,7 @@ public class ReportCell {
     private int row ;
     private int column;
     private String val;
+    private String aligin;
 //    private boolean merged = false;
     private boolean input = false;
     private int colspan = 1;
@@ -70,5 +71,13 @@ public class ReportCell {
 
     public void setRowspan(int rowspan) {
         this.rowspan = rowspan;
+    }
+
+    public String getAligin() {
+        return aligin;
+    }
+
+    public void setAligin(String aligin) {
+        this.aligin = aligin;
     }
 }

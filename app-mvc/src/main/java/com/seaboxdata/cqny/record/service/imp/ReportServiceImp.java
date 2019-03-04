@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 import com.seaboxdata.cqny.record.config.RecordConfig;
 import com.seaboxdata.cqny.record.dao.IReportDao;
@@ -88,6 +89,17 @@ public class ReportServiceImp implements ReportService {
     }
 
     @Override
+    public List<Map<String, Object>> loadReportData(String reportID) {
+        ReportInfo reportInfo = iReportDao.getReportInfoById(reportID);
+
+        File reportFile = new File(reportInfo.getReportPath());
+
+        List<Map<String, Object>> loadResult = loadFile(reportFile);
+        
+        return loadResult;
+    }
+
+    @Override
     public PageResult reportList(int userId, int currPage, int pageSize) {
 
         Page<ReportInfo> reportList = iReportDao.reportList(currPage, pageSize,userId);
@@ -98,7 +110,7 @@ public class ReportServiceImp implements ReportService {
     }
 
     @Override
-    public List<List<List<ReportCell>>> editSave(ArrayList<ArrayList<ReportCell>> reportCells, String reportId) {
+    public List<List<List<ReportCell>>> editSave(ArrayList<ReportCell> reportCells, String reportId) {
         ReportInfo reportInfo = iReportDao.getReportInfoById(reportId);
 
         File reportFile = new File(reportInfo.getReportPath());
@@ -122,6 +134,80 @@ public class ReportServiceImp implements ReportService {
      * @param templateFile
      * @return
      */
+    private List<Map<String, Object>> loadFile(File templateFile){
+        try (InputStream inp = new FileInputStream(templateFile)) {
+
+            Workbook wb = WorkbookFactory.create(inp);
+            Iterator<Sheet> sheetIterator = wb.sheetIterator();
+            List<Map<String,Object>> sheets = new ArrayList<>();
+            while(sheetIterator.hasNext()){
+                Sheet sheet = sheetIterator.next();
+                List<List<String>> reportRows = new ArrayList();
+                Map<String,Object> sheetContext = new HashMap<>();
+                for (int currRowNum = 0; currRowNum<sheet.getLastRowNum(); currRowNum++) {
+                    Row row = sheet.getRow(currRowNum);
+                    List<String> reportCells = new ArrayList<>();
+//                    logger.debug("当前行号:{}，起始列{}，结束列{}",row.getRowNum(),row.getFirstCellNum(),row.getLastCellNum());
+                    for (int columnNum = 0;columnNum<row.getLastCellNum();columnNum++) {
+                        Cell cell = row.getCell(columnNum);
+
+                        if(cell==null){
+                            reportCells.add("");
+                            continue;
+                        }else{
+                            try{
+                                String cellVal = this.checkCellVal(cell);
+                                reportCells.add(cellVal);
+                            }catch (IllegalStateException e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    reportRows.add(reportCells);
+                }
+
+                sheetContext.put("sheetData",reportRows);
+
+//                {row: 1, col: 1, rowspan: 2, colspan: 2}
+                List<CellRangeAddress> allMergedRegisions = sheet.getMergedRegions();
+                List<Map<String,Integer>> mergedList = new ArrayList<>();
+                allMergedRegisions.forEach(mergeRegion-> {
+//              logger.debug("合并单元格信息:起始行号{}截止行号{},起始列号{}截止列号{}",
+//                    mergeRegion.getFirstRow(),mergeRegion.getLastRow(),mergeRegion.getFirstColumn(),mergeRegion.getLastColumn());
+                    int mergedStartRow = mergeRegion.getFirstRow();
+                    int mergedEndRow = mergeRegion.getLastRow();
+                    int mergedStartColumn = mergeRegion.getFirstColumn();
+                    int mergedEndColumn = mergeRegion.getLastColumn();
+                    int mergedRowsOffset = mergedEndRow-mergedStartRow;
+                    int mergedColumnOffset = mergedEndColumn-mergedStartColumn;
+                    Map<String,Integer> mergeMap = new HashMap<>();
+                    mergeMap.put("row",mergedStartRow);
+                    mergeMap.put("col",mergedStartColumn);
+                    mergeMap.put("rowspan",mergedRowsOffset>0?mergedColumnOffset:1);
+                    mergeMap.put("colspan",mergedColumnOffset>0?mergedColumnOffset:1);
+                    mergedList.add(mergeMap);
+                });
+
+                sheetContext.put("mergedList",mergedList);
+
+
+                sheets.add(sheetContext);
+            }
+
+
+            return sheets;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InvalidFormatException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
     private List<List<List<ReportCell>>> readFile(File templateFile){
         try (InputStream inp = new FileInputStream(templateFile)) {
             List<List<List<ReportCell>>> reportSheets = new ArrayList();
@@ -147,32 +233,20 @@ public class ReportServiceImp implements ReportService {
                             reportCell.setVal("");
                             continue;
                         }
-                        StringBuilder cellStrVal = new StringBuilder();
-                        switch (cell.getCellTypeEnum()){
-                            case STRING:
-                                cellStrVal.append(cell.getStringCellValue());
-                                break;
-                            case NUMERIC:
-                                cellStrVal.append(cell.getNumericCellValue());
-                                break;
-                            case BLANK:
-                                cellStrVal.append("");
+
+                        reportCell.setAligin(cell.getCellStyle().getAlignmentEnum().toString());
+
+                        try{
+                            String cellVal = this.checkCellVal(cell);
+                            if(Strings.isNullOrEmpty(cellVal))
                                 reportCell.setInput(true);
-                                break;
-                            case FORMULA:
-                                try{
-                                    cellStrVal.append(cell.getNumericCellValue());
-                                }catch (IllegalStateException e){
-                                    try{
-                                        cellStrVal.append(cell.getStringCellValue());
-                                    }catch (IllegalStateException e1){
-                                        cellStrVal.append("公式计算失败,公式:"+cell.getCellFormula());
-//                                        throw e1;
-                                    }
-                                }
-                                break;
+                            else
+                                reportCell.setInput(false);
+                            reportCell.setVal(cellVal);
+
+                        }catch (IllegalStateException e){
+                            e.printStackTrace();
                         }
-                        reportCell.setVal(cellStrVal.toString());
                     }
                     reportRows.add(reportCells);
                 }
@@ -199,7 +273,7 @@ public class ReportServiceImp implements ReportService {
     }
 
 
-    public void writeFile(ArrayList<ArrayList<ReportCell>> dataList , File reportFile){
+    public void writeFile(ArrayList<ReportCell> dataList , File reportFile){
         try (InputStream inp = new FileInputStream(reportFile)) {
             logger.debug("开始写入报表:{}",reportFile.getPath());
 
@@ -208,29 +282,39 @@ public class ReportServiceImp implements ReportService {
             while (sheetIterator.hasNext()) {
                 Sheet sheet = sheetIterator.next();
 
-                dataList.forEach(dataRow->{
-                    dataRow.forEach(
-                            reportCell -> {
-                                int rowNum = reportCell.getRow();
-                                int columnNum = reportCell.getColumn();
-                                String cellVal = reportCell.getVal();
-                                Cell cell = sheet.getRow(rowNum).getCell(columnNum);
-                                if(cell==null){
-                                    cell = sheet.getRow(rowNum).createCell(columnNum);
-                                }
-                                logger.debug("写入报表第{}行,第{}列,数据内容:{},表格原值：{}",rowNum,columnNum,cellVal,cell.toString());
-                                switch (cell.getCellTypeEnum()){
-                                    case STRING:
-                                        cell.setCellValue(cellVal);
-                                    case NUMERIC:
-                                        cell.setCellValue(new Integer(cellVal));
-                                        break;
-                                    case BLANK:
-                                        cell.setCellValue(cellVal);
-                                        break;
+                dataList.forEach(reportCell->{
+                    int rowNum = reportCell.getRow();
+                    int columnNum = reportCell.getColumn();
+                    String cellVal = reportCell.getVal();
+                    Cell cell = sheet.getRow(rowNum).getCell(columnNum);
+                    if(cell==null){
+                        cell = sheet.getRow(rowNum).createCell(columnNum);
+                    }
+                    logger.debug("写入报表第{}行,第{}列,数据内容:{},表格原值：{},表格类型:{}",rowNum,columnNum,cellVal,cell.toString(),cell.getCellTypeEnum());
+                    switch (cell.getCellTypeEnum()){
+                        case STRING:
+                            cell.setCellValue(cellVal);
+                            break;
+                        case NUMERIC:
+                            try{
+                                cell.setCellValue(new Integer(cellVal));
+                            }catch (NumberFormatException e ){
+                                try{
+                                    cell.setCellValue(new Double(cellVal));
+                                }catch (NumberFormatException e1){
+                                    try{
+                                        cell.setCellValue(new Long(cellVal));
+                                    }catch (NumberFormatException e2){
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
-                    );
+
+                            break;
+                        case BLANK:
+                            cell.setCellValue(cellVal);
+                            break;
+                    }
                 });
             }
             inp.close();
@@ -357,6 +441,35 @@ public class ReportServiceImp implements ReportService {
         });
 
         logger.debug("合并后excel格式为:{}",reportRows);
+    }
+
+    private String checkCellVal(Cell cell) throws IllegalStateException{
+        StringBuilder cellStrVal = new StringBuilder();
+        switch (cell.getCellTypeEnum()){
+            case STRING:
+                cellStrVal.append(cell.getStringCellValue());
+                break;
+            case NUMERIC:
+                cellStrVal.append(cell.getNumericCellValue());
+                break;
+            case BLANK:
+                cellStrVal.append("");
+                break;
+            case FORMULA:
+                try{
+                    cellStrVal.append(cell.getNumericCellValue());
+                }catch (IllegalStateException e){
+                    try{
+                        cellStrVal.append(cell.getStringCellValue());
+                    }catch (IllegalStateException e1){
+                        cellStrVal.append("公式计算失败,公式:"+cell.getCellFormula());
+                    }
+                }
+                break;
+        }
+
+
+        return cellStrVal.toString();
     }
 
 }

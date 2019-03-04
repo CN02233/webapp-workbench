@@ -8,26 +8,28 @@ import Qs from 'qs'
 const service = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
   timeout: 20000, // 请求超时时间 20秒,
+  // headers:{'Content-Type':'application/x-www-form-urlencoded'},
   withCredentials:true
 })
 
 
 service.defaults.headers = {
-  'Accept-Charset':'utf-8',
+  'Accept-Charset':'utf-8'
 };
 // request拦截器
 service.interceptors.request.use(config => {
   const requestData = config.data
 
-  if(config.data instanceof FormData){
-    console.log("this is form data")
-    //do nothing......
-  }else{
-    config.transformRequest = [function (requestData) {//不适用request body
-      requestData = Qs.stringify(requestData);
-      return requestData;
-    }]
-  }
+  // if(config.data instanceof FormData){
+  //   console.log("this is form data")
+  //   //do nothing......
+  // }else{
+  //   config.transformRequest = [function (requestData) {//不适用request body
+  //     debugger
+  //     requestData = Qs.stringify(requestData);
+  //     return requestData;
+  //   }]
+  // }
 
   return config
 })

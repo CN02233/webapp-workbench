@@ -11,15 +11,15 @@ import com.workbench.auth.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("report")
@@ -72,14 +72,46 @@ public class ReportController {
         return response;
     }
 
+    @RequestMapping("loadReportData")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult loadReportData(String reportIdOrName){
+        List<Map<String, Object>> reportInfo = reportService.loadReportData(reportIdOrName);
+        JsonResult response = JsonSupport.makeJsonpResult(
+                JsonResult.RESULT.SUCCESS, "获取成功", null, reportInfo);
+        return response;
+    }
+
 
     @RequestMapping("editSave")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public List<List<List<ReportCell>>> editSave(String reportCellsJson, String reportId){
-        ArrayList<ArrayList<ReportCell>> reportCells = (ArrayList<ArrayList<ReportCell>>) JsonSupport.jsonToObect(reportCellsJson, ArrayList.class);
-        List<List<List<ReportCell>>> reloadFileContext = reportService.editSave(reportCells, reportId);
+    public List<List<List<ReportCell>>> editSave(@RequestBody ReportCells reportCells){
+        List<List<List<ReportCell>>> reloadFileContext = reportService.editSave(reportCells.getReportCells(), reportCells.getReportId());
         return reloadFileContext;
+//        return null;
+    }
+
+    class ReportCells{
+        private ArrayList<ReportCell> reportCells = new ArrayList<>();
+
+        private String reportId;
+
+        public ArrayList getReportCells() {
+            return reportCells;
+        }
+
+        public void setReportCells(ArrayList reportCells) {
+            this.reportCells = reportCells;
+        }
+
+        public String getReportId() {
+            return reportId;
+        }
+
+        public void setReportId(String reportId) {
+            this.reportId = reportId;
+        }
     }
 
 }
