@@ -61,6 +61,7 @@
           autoWrapRow: true,
           height: 487,
           maxRows: 1000,
+          colWidths: 150,
           manualRowResize: true,
           manualColumnResize: true,
           rowHeaders: true,
