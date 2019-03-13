@@ -1,20 +1,32 @@
 
 <template>
     <el-container class="home" >
-        <el-header>
-          <div class="work-left-menu-header">
-            {{sysName}}
+
+      <el-header style="text-align: right; font-size: 12px">
+        <div class="work-menu-group">
+          <WorkLeftMenuGroup :sysName="sysName" ></WorkLeftMenuGroup>
+        </div>
+        <div class="personal-infos">
+          <div  @click="logout" class="logout-icon" >
+            <icon class="fa-icon" name="logout2"></icon>
+            <div class="logout-font">退出</div>
           </div>
-          <div class="personal-infos">
-            <div  @click="logout" class="logout-icon" >
-              <icon class="fa-icon" name="logout2"></icon>
-              <div class="logout-font">退出</div>
-            </div>
-            <div class="login-user">
-              当前登录用户：{{loginUserInfo.user_name}}
-            </div>
+          <div class="login-user">
+            <el-tooltip class="item" effect="dark"
+                        placement="bottom-start">
+              <div slot="content">{{loginUserInfo.user_name}}</div>
+              <el-row class="loginUserInfoRow">
+                <div class="login-user-infomation">
+                  当前登录用户：{{loginUserInfo.user_name}}
+                </div>
+              </el-row>
+            </el-tooltip>
           </div>
-        </el-header>
+
+        </div>
+
+      </el-header>
+
         <el-container>
             <el-aside width="225px" class="menu">
                 <el-menu
@@ -100,15 +112,6 @@
 
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-  .home{
-    width:100%;
-    height:100%;
-  }
-
-  .el-container{
-    height:100%;
-    width: 100%;
-  }
 
   .menu{
     background-color: #2e3d50;
@@ -116,31 +119,11 @@
   }
 
   .work-left-menu-header{
-    width:calc(100% - 200px);
+    width:calc(100% - 300px);
     height:100%;
     float: left;
     text-align: left;
     font-size:20px;
-  }
-
-  .personal-infos{
-    width:280px;
-    height:100%;
-    float:left;
-    color:white;
-    text-align: left;
-  }
-
-  .el-main{
-    width:calc(100% - 200px);
-    height:100%;
-  }
-
-  .el-header {
-    background-color: #2b5ca9;
-    color: #ffffff;
-    line-height: 60px;
-    padding:0 0 0 0;
   }
 
   .el-menu{
@@ -161,5 +144,88 @@
     width: 18px;
     height: 18px;
   }
+
+  .home{
+    width:100%;
+    height:100%;
+  }
+
+  .work-menu-group{
+    width:calc(100% - 300px);
+    height:100%;
+    float: left;
+  }
+
+  .personal-infos{
+    width:280px;
+    height:100%;
+    float:left;
+    color:white;
+    text-align: left;
+  }
+
+  .menu{
+    background-color: rgb(238, 241, 246);
+  }
+
+  .el-header {
+    /*background-color: #2b5ca9;*/
+    color: #333;
+    height:54px !important;
+    background-image: url("/static/image/header_backgroud.png");
+    /*background-image: url("/nlp/static/image/header_backgroud.png");*/
+  }
+
+  .el-aside {
+    color: #333;
+  }
+
+  .el-container{
+    background-color: #ffffff;
+  }
+
+  .fa-icon {
+    width:30px;
+    height:20px;
+    padding:18px 0 0 0;
+  }
+
+  .logout-font{
+    float: right;
+    font-size: 14px;
+    line-height: 54px;
+  }
+
+  .login-user{
+    float: right;
+    margin:0 44px 0 0;
+    width:178px;
+    height:54px;
+    line-height: 54px;
+    font-size: 14px;
+    color:#ffffff;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+
+  }
+
+  .login-user-infomation{
+    width:178px;
+    height:54px;
+    line-height: 54px;
+    font-size: 14px;
+    color:#ffffff;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+
+  .logout-icon{
+    float: right;
+    cursor: pointer;
+    width:58px;
+  }
+
+  .loginUserInfoRow{
+    margin:0 !important;
+  }
+
 
 </style>

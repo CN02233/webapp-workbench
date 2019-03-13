@@ -7,7 +7,7 @@ import Qs from 'qs'
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
-  timeout: 20000, // 请求超时时间 20秒,
+  timeout: 120000, // 请求超时时间 120秒,
   // headers:{'Content-Type':'application/x-www-form-urlencoded'},
   withCredentials:true
 })

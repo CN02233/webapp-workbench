@@ -132,12 +132,21 @@ public class ExcelFileOptionsServiceImp implements ExcelFileOptionsService {
             Iterator<Sheet> sheetIterator = wb.sheetIterator();
             List<ExcelContext> sheets = new ArrayList<>();
             while(sheetIterator.hasNext()){
+                int columRows = 0;
                 Sheet sheet = sheetIterator.next();
                 List<List<String>> reportRows = new ArrayList();
+                Map<String,String> formulaMap = new HashMap<>();
                 for (int currRowNum = 0; currRowNum<sheet.getLastRowNum(); currRowNum++) {
                     Row row = sheet.getRow(currRowNum);
                     List<String> reportCells = new ArrayList<>();
-//                    logger.debug("当前行号:{}，起始列{}，结束列{}",row.getRowNum(),row.getFirstCellNum(),row.getLastCellNum());
+                    if(row==null){
+                        logger.debug("当前行号：{},空.....",currRowNum);
+                        continue;
+                    }
+                    if(columRows<row.getLastCellNum())
+                        columRows = row.getLastCellNum()+1;
+
+                    logger.debug("当前行号:{}，起始列{}，结束列{}",row.getRowNum(),row.getFirstCellNum(),row.getLastCellNum());
                     for (int columnNum = 0;columnNum<row.getLastCellNum();columnNum++) {
                         Cell cell = row.getCell(columnNum);
 
@@ -145,6 +154,12 @@ public class ExcelFileOptionsServiceImp implements ExcelFileOptionsService {
                             reportCells.add("");
                             continue;
                         }else{
+                            if(cell.getCellComment()!=null)
+                                logger.debug("cell coment is not null : {}",cell.getCellComment().getString().toString());
+
+                            if(cell.getCellTypeEnum() == CellType.FORMULA){
+                                formulaMap.put(currRowNum+"-"+columnNum,cell.getCellFormula());
+                            }
                             try{
                                 String cellVal = this.checkCellVal(cell);
                                 reportCells.add(cellVal);
@@ -158,7 +173,10 @@ public class ExcelFileOptionsServiceImp implements ExcelFileOptionsService {
 
                 ExcelContext excelContext = new ExcelContext();
                 excelContext.setReportRows(reportRows);
-
+                excelContext.setSheetName(sheet.getSheetName());
+                excelContext.setSheetRows(sheet.getLastRowNum()+1);
+                excelContext.setSheetColums(columRows);
+                excelContext.setFormulas(formulaMap);
 //                {row: 1, col: 1, rowspan: 2, colspan: 2}
                 List<CellRangeAddress> allMergedRegisions = sheet.getMergedRegions();
                 List<ExcelTemplateCellMerged> mergedList = new ArrayList<>();
@@ -174,7 +192,7 @@ public class ExcelFileOptionsServiceImp implements ExcelFileOptionsService {
                     ExcelTemplateCellMerged excelTemplateCellMerged = new ExcelTemplateCellMerged();
                     excelTemplateCellMerged.setRow(mergedStartRow);
                     excelTemplateCellMerged.setCol(mergedStartColumn);
-                    excelTemplateCellMerged.setRowspan(mergedRowsOffset>0?mergedRowsOffset:1);
+                    excelTemplateCellMerged.setRowspan(mergedRowsOffset>0?(mergedRowsOffset+1):1);
                     excelTemplateCellMerged.setColspan(mergedColumnOffset>0?mergedColumnOffset:1);
                     mergedList.add(excelTemplateCellMerged);
                 });

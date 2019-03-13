@@ -1,12 +1,13 @@
 package com.seaboxdata.cqny.record.service;
 
-import com.seaboxdata.cqny.record.entity.ExcelContext;
 import com.seaboxdata.cqny.record.entity.ReportCell;
+import com.seaboxdata.cqny.record.entity.ReportInfo;
 import com.webapp.support.page.PageResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface ReportService {
 
@@ -22,11 +23,23 @@ public interface ReportService {
      * @param reportId
      * @return
      */
-    List<List<List<ReportCell>>> loadReport(String reportId);
+    ReportInfo loadReport(String reportId);
 
-    List<ExcelContext> loadReportData(String reportID);
+    ReportInfo loadReportData(String reportID);
 
     PageResult reportList(int userId, int currPage, int pageSize);
 
-    List<List<List<ReportCell>>> editSave(ArrayList<ReportCell> reportCells, String reportId);
+    void editSave(ArrayList<ArrayList<String>> reportCells, String reportId,String sheetId);
+
+    void lockReport(String reportId,Integer userId);
+
+    ReportInfo loadReportBasic(String reportId);
+
+    void submitReport(String reportId, int userId);
+
+    void reviewReport(String reportId, int userId);
+
+    void confirmReport(String reportId, int userId);
+
+    void fullEditSave(ArrayList<ArrayList<String>> reportCells, ArrayList<Map<String, String>> reportMerged, String reportId, String templateId,String sheetId);
 }

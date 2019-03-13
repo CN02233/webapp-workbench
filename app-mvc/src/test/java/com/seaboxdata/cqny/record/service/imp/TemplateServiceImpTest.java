@@ -19,7 +19,7 @@ public class TemplateServiceImpTest extends AbstractTestService {
 
     @Test
     public void testLoadTemplate() {
-        List<ExcelTemplate> result = templateServcice.loadTemplate("2");
+        ExcelTemplate result = templateServcice.loadTemplate("2");
         System.out.println(result.toString());
     }
 
@@ -30,7 +30,7 @@ public class TemplateServiceImpTest extends AbstractTestService {
     public void testUploadTemplate() throws IOException {
 //        String createResult = reportService.createReport("test.xlsx", "测试报表111");
         File file = new File("/home/song/myfiles/jobfiles/DFJX/codings/cqnytemplates/realtest.xlsx");
-        templateServcice.uploadTemplate("junit上传1",file);
+        templateServcice.uploadTemplate("junit上传1","48",file);
     }
 
     @Test

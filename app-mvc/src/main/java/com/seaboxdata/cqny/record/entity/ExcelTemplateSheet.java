@@ -14,10 +14,15 @@ public class ExcelTemplateSheet {
 
     private String sheet_name;
 
+    private Integer row_num;
+
+    private Integer colum_num;
 
     private List<ExcelTemplateCell> excelTemplateCells;
 
     private List<ExcelTemplateCellMerged> excelTemplateCellMergeds;
+
+    private List<ExcelCopyGroup> excelCopyGroup;
 
     public Integer getId() {
         return id;
@@ -69,5 +74,29 @@ public class ExcelTemplateSheet {
 
     public void setExcelTemplateCellMergeds(List<ExcelTemplateCellMerged> excelTemplateCellMergeds) {
         this.excelTemplateCellMergeds = excelTemplateCellMergeds;
+    }
+
+    public Integer getRow_num() {
+        return row_num;
+    }
+
+    public void setRow_num(Integer row_num) {
+        this.row_num = row_num;
+    }
+
+    public Integer getColum_num() {
+        return colum_num;
+    }
+
+    public void setColum_num(Integer colum_num) {
+        this.colum_num = colum_num;
+    }
+
+    public List<ExcelCopyGroup> getExcelCopyGroup() {
+        return excelCopyGroup;
+    }
+
+    public void setExcelCopyGroup(List<ExcelCopyGroup> excelCopyGroup) {
+        this.excelCopyGroup = excelCopyGroup;
     }
 }

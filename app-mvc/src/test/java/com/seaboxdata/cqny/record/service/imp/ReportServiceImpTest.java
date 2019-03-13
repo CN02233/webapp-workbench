@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.AbstractTestService;
 import com.github.pagehelper.Page;
+import com.googlecode.aviator.AviatorEvaluator;
 import com.seaboxdata.cqny.record.entity.ExcelContext;
 import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.seaboxdata.cqny.record.entity.ReportInfo;
@@ -23,12 +24,13 @@ public class ReportServiceImpTest extends AbstractTestService {
 
     @Test
     public void testLoadReport() {
-        reportService.loadReport("8");
+        ReportInfo reportInfo = reportService.loadReport("2");
+        System.out.println(reportInfo);
     }
 
     @Test
     public void testCreateReport() throws IOException {
-        String createResult = reportService.createReport("test.xlsx", "测试报表111");
+        String createResult = reportService.createReport("1", "测试报表111");
         System.out.println(createResult);
     }
 
@@ -53,7 +55,18 @@ public class ReportServiceImpTest extends AbstractTestService {
 
     @Test
     public void testLoadReportData() {
-        List<ExcelContext> result = reportService.loadReportData("9");
+        ReportInfo result = reportService.loadReportData("2");
+        System.out.println(result);
+    }
+
+    @Test
+    public void testLockReport() {
+        reportService.lockReport("9",1  );
+    }
+
+    @Test
+    public void main(){
+        Long result = (Long) AviatorEvaluator.execute("1+2+3");
         System.out.println(result);
     }
 }

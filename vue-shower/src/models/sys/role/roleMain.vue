@@ -1,5 +1,5 @@
 <template>
-  <div class="table-page-root">
+  <WorkMain :headerItems="['角色管理','角色列表']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
         <el-button @click="openAddModal" type="primary">新增</el-button>
@@ -64,11 +64,12 @@
       </div>
 
     </el-dialog>
-  </div>
+  </WorkMain>
 </template>
 
 <script>
   import WorkTablePager from "@/models/public/WorkTablePager"
+  import WorkMain from "@/models/public/WorkMain"
   import { required } from 'vuelidate/lib/validators'
   import MenuTurnner from '@/models/public/utils/menuTurner'
 
@@ -125,7 +126,8 @@
       }
     },
     components: {
-      WorkTablePager
+      WorkTablePager,
+      WorkMain
     },
     methods: {
       getTableData:function(pageNum){
@@ -256,8 +258,8 @@
       const $this = this
       this.BaseRequest({
         url:"sys/menu/listMenuByPage",
-        method:'POST',
-        data:{"currPage":"1","pageSize":'200'}
+        method:'GET',
+        params:{"currPage":"1","pageSize":'200'}
       }).then(response=>{
         response.dataList.forEach(menuData=>{
           $this.roleFunctionData.push({'key':menuData.module_id,'label':menuData.module_name})

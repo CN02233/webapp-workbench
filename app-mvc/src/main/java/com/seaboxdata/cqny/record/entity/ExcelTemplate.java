@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.entity;
 
 import com.webapp.support.json.JsonSupport;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -17,7 +18,11 @@ public class ExcelTemplate {
 
     private String import_user;
 
+    private String import_user_name;
+
     private Date import_date;
+
+    private String import_date_format;
 
     private List<ExcelTemplateSheet> excelTemplateSheets;
 
@@ -61,6 +66,8 @@ public class ExcelTemplate {
 
     public void setImport_date(Date import_date) {
         this.import_date = import_date;
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        this.import_date_format = format.format(import_date);
     }
 
     public String getSource_file_name() {
@@ -81,5 +88,21 @@ public class ExcelTemplate {
 
     public void setExcelTemplateSheets(List<ExcelTemplateSheet> excelTemplateSheets) {
         this.excelTemplateSheets = excelTemplateSheets;
+    }
+
+    public String getImport_date_format() {
+        return import_date_format;
+    }
+
+    public void setImport_date_format(String import_date_format) {
+        this.import_date_format = import_date_format;
+    }
+
+    public String getImport_user_name() {
+        return import_user_name;
+    }
+
+    public void setImport_user_name(String import_user_name) {
+        this.import_user_name = import_user_name;
     }
 }

@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.config.RecordConfig;
+import com.seaboxdata.cqny.record.dao.IOriginDao;
 import com.seaboxdata.cqny.record.dao.ITemplateDao;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.service.ExcelFileOptionsService;
@@ -19,8 +20,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service("template")
 public class TemplateServiceImp implements TemplateService {
@@ -34,12 +34,15 @@ public class TemplateServiceImp implements TemplateService {
     private ITemplateDao templateDao;
 
     @Autowired
+    private IOriginDao originDao;
+
+    @Autowired
     private ExcelFileOptionsService excelFileOptionsService;
 
     @Override
-    public List<ExcelTemplate> loadTemplate(String templateIdOrName) {
+    public ExcelTemplate loadTemplate(String templateIdOrName) {
 
-        List<ExcelTemplate> templateInfo = templateDao.getExcelTemplate(templateIdOrName);
+        ExcelTemplate templateInfo = templateDao.getExcelTemplate(templateIdOrName);
 
         return templateInfo;
     }
@@ -51,7 +54,7 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String uploadTemplate(String tempalteName, File uploadFile) throws IOException {
+    public String uploadTemplate(String tempalteName,String originId, File uploadFile) throws IOException {
         try {
             String userId = String.valueOf(((User) SessionSupport.checkoutUserFromSession()).getUser_id());
 //            String userId = "111111";
@@ -88,19 +91,23 @@ public class TemplateServiceImp implements TemplateService {
             List<ExcelContext> loadResult = excelFileOptionsService.loadFileByFilePath(uploadFile.getPath());
             if(loadResult!=null){
                for(int i=0;i<loadResult.size();i++){
+                   ExcelContext excelContext = loadResult.get(i);
+
                    ExcelTemplateSheet excelTemplateSheet = new ExcelTemplateSheet();
                    excelTemplateSheet.setSheet_num(i+1);
                    excelTemplateSheet.setTemplate_id(excelTemplate.getTemplate_id());
-
+                   excelTemplateSheet.setRow_num(excelContext.getSheetRows());
+                   excelTemplateSheet.setColum_num(excelContext.getSheetColums());
+                   excelTemplateSheet.setSheet_name(excelContext.getSheetName());
                    templateDao.saveTemplateSheet(excelTemplateSheet);
 
                    logger.debug("excelTemplateSheet ======> {}",excelTemplateSheet);
 
-                   ExcelContext excelContext = loadResult.get(i);
                    List<List<String>> reportRows = excelContext.getReportRows();
                    List<ExcelTemplateCellMerged> mergedList = excelContext.getMergedList();
 
                    int rowNum = 0;
+                   int maxColNum = 0;
                    while(reportRows.size()>0){
                        List<String> reportRow = reportRows.remove(0);
                        int columNum = 0;
@@ -111,24 +118,33 @@ public class TemplateServiceImp implements TemplateService {
                            excelTemplateCell.setTemplate_col(columNum);
                            excelTemplateCell.setTemplate_context(reportCell);
                            excelTemplateCell.setSheet_id(excelTemplateSheet.getId());
+                           if(excelContext.getFormulas().containsKey(rowNum+"-"+columNum)){
+                               excelTemplateCell.setContext_script(excelContext.getFormulas().get(rowNum+"-"+columNum));
+                           }
+                           excelTemplateCell.setContext_readonly("Y");
                            templateDao.saveTemplateCell(excelTemplateCell);
                            logger.debug("excelTemplateCell ======> {}",excelTemplateCell);
 
                            columNum++;
                        }
+                       if(maxColNum<columNum)
+                           maxColNum = columNum;
                        rowNum++;
                    }
+
 
                    while(mergedList.size()>0){
                        ExcelTemplateCellMerged mergedData = mergedList.remove(0);
                        mergedData.setSheet_id(excelTemplateSheet.getId());
                        templateDao.saveExcelTemplateCellMerged(mergedData);
                        logger.debug("mergedData ======> {}",mergedData);
-
                    }
                    
                }
             }
+
+            Map<String, Object> originData = originDao.getOriginById(new Integer(originId));
+            saveOriginTemplate(originData,excelTemplate.getTemplate_id());
 
             return excelTemplate.getTemplate_id().toString();
         } catch (IOException e) {
@@ -137,11 +153,55 @@ public class TemplateServiceImp implements TemplateService {
         }
     }
 
+    private void saveOriginTemplate(Map<String, Object> originData ,Integer templateId){
+        if(originData!=null){
+            Integer originIdTmp = (Integer) originData.get("origin_id");
+            originDao.saveOriginTemplate( originIdTmp, templateId);
+            List<Map<String,Object>> children = (List<Map<String, Object>>) originData.get("childrens");
+            if(children!=null&&children.size()>0){
+                children.forEach(child->{
+                    saveOriginTemplate(child,templateId);
+                });
+            }
+        }
+    }
+
     @Override
     public PageResult pageTempaltes(int currPage, int pageSize) {
         Page<ExcelTemplate> pageData = templateDao.pagerTemplates(currPage, pageSize);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pageData);
         return pageResult;
+    }
+
+    @Override
+    public List<ExcelTemplate> getTemplatesByUser(int user_id) {
+        List<ExcelTemplate> templates = templateDao.getTemplatesByUser(user_id);
+        return templates;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void editSaveTemplate(String templateId, String sheetId, ArrayList<ArrayList<String>> templateContext, ArrayList<HashMap<String,Object>> copyGroups) {
+//        templateDao.removeTemplateContext(templateId,sheetId);
+//        templateDao.removeTemplateMerged(templateId,sheetId);
+        templateDao.removeCopyGroups(templateId,sheetId);
+        if(copyGroups!=null&&copyGroups.size()>0){
+            copyGroups.forEach(copyGroup->{
+                String copyGroupName = (String) copyGroup.get("name");
+                List copyGroupRows = (List) copyGroup.get("rows");
+                templateDao.saveCopyGroups(templateId,sheetId,copyGroupName,copyGroupRows.toString());
+            });
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void templteDelete(String templateId) {
+        templateDao.removeTemlateMerged(templateId);
+        templateDao.removeTemplateContext(templateId);
+        templateDao.removeTemplateCopyGroup(templateId);
+        templateDao.removeTemplateSheet(templateId);
+        templateDao.removeTemplateInfo(templateId);
     }
 
     private String makeFileName(String userId,String templateFileType){

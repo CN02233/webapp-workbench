@@ -1,12 +1,13 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
-import com.google.common.io.Files;
+import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.RecordConfig;
 import com.seaboxdata.cqny.record.dao.IReportDao;
-import com.seaboxdata.cqny.record.entity.ExcelContext;
+import com.seaboxdata.cqny.record.entity.ExcelTemplateCell;
 import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.seaboxdata.cqny.record.entity.ReportInfo;
+import com.seaboxdata.cqny.record.entity.ReportStatus;
 import com.seaboxdata.cqny.record.service.ExcelFileOptionsService;
 import com.seaboxdata.cqny.record.service.ReportService;
 import com.webapp.support.page.PageResult;
@@ -19,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -29,7 +31,7 @@ public class ReportServiceImp implements ReportService {
 
     private Logger logger = LoggerFactory.getLogger(ReportServiceImp.class);
 
-    private boolean isMock = true;
+    private boolean isMock = false;
 
     @Autowired
     private RecordConfig recordConfig;
@@ -41,62 +43,42 @@ public class ReportServiceImp implements ReportService {
     private ExcelFileOptionsService excelFileOptionsService;
 
     @Override
-    public String createReport(String templateIdOrName,String reportName) throws IOException {
+    @Transactional(rollbackFor = Exception.class)
+    public String createReport(String templateId,String reportName) throws IOException {
         String userId = isMock?"testUser":
                 String.valueOf(((User) SessionSupport.checkoutUserFromSession()).getUser_id());
-        File template = excelFileOptionsService.loadTemplateFileFromDisk(templateIdOrName);
-        try {
-            if(!template.exists()){
-                new FileNotFoundException("模板未找到");
-            }
-            String templateFileName = template.getName();
-            logger.debug("file name is {}",templateFileName);
-            String[] templateFileNameSplit = templateFileName.split("\\.");
-            String fileType = templateFileNameSplit[templateFileNameSplit.length-1];
-            String fileName = makeFileName(userId,fileType);
-            File reportFile = findReportPath(fileName);
-            if(!reportFile.exists()){
-                if(!reportFile.getParentFile().exists()){
-                    reportFile.getParentFile().mkdirs();
-                }
-                reportFile.createNewFile();
-            }
-            Files.copy(template,reportFile);
+        ReportInfo reportInfo = new ReportInfo();
+        reportInfo.setReportName(reportName);
+        reportInfo.setReportCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        reportInfo.setReportCreate(userId);
+        reportInfo.setReportTemplateId(templateId);
 
-            ReportInfo reportInfo = new ReportInfo();
-            reportInfo.setReportName(reportName);
-            reportInfo.setReportPath(reportFile.getPath());
-            reportInfo.setReportCreateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-            reportInfo.setReportCreate(userId);
-            reportInfo.setReportTemplateName(template.getName());
 
-            int reportId = iReportDao.createReport(reportInfo);
+        iReportDao.createReport(reportInfo);
+        iReportDao.copyTemplateContext(reportInfo.getReportId(),new Integer(templateId));
+        iReportDao.copyTemplateMerged(new Integer(templateId));
 
-            return reportInfo.getReportId().toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
-        }
+        return reportInfo.getReportId().toString();
     }
 
 
     @Override
-    public List<List<List<ReportCell>>> loadReport(String reportIdOrName) {
+    public ReportInfo loadReport(String reportIdOrName) {
 
         ReportInfo reportInfo = iReportDao.getReportInfoById(reportIdOrName);
 
-        List<List<List<ReportCell>>> templateContent = excelFileOptionsService.loadReport(reportInfo.getReportPath());
+//        List<List<List<ReportCell>>> templateContent = excelFileOptionsService.loadReport(reportInfo.getReportPath());
 
-        return templateContent;
+        return reportInfo;
     }
 
     @Override
-    public List<ExcelContext> loadReportData(String reportID) {
+    public ReportInfo loadReportData(String reportID) {
         ReportInfo reportInfo = iReportDao.getReportInfoById(reportID);
 
-        List<ExcelContext> templateContent = excelFileOptionsService.loadFileByFilePath(reportInfo.getReportPath());
+//        List<ExcelContext> templateContent = excelFileOptionsService.loadFileByFilePath(reportInfo.getReportPath());
 
-        return templateContent;
+        return reportInfo;
     }
 
     @Override
@@ -110,16 +92,83 @@ public class ReportServiceImp implements ReportService {
     }
 
     @Override
-    public List<List<List<ReportCell>>> editSave(ArrayList<ReportCell> reportCells, String reportId) {
-        ReportInfo reportInfo = iReportDao.getReportInfoById(reportId);
+    @Transactional
+    public void editSave(ArrayList<ArrayList<String>> reportCells, String reportId,String sheetId) {
 
-        List<List<List<ReportCell>>> templateContent = excelFileOptionsService.loadReport(reportInfo.getReportPath());
+        if(reportCells!=null&&reportCells.size()>0){
+            for(int rowNum=0;rowNum<reportCells.size();rowNum++){
+                ArrayList<String> rowData = reportCells.get(rowNum);
+                if(rowData!=null&&reportCells.size()>0){
+                    for(int cellNum = 0;cellNum<rowData.size();cellNum++){
+                        String cellVal = rowData.get(cellNum);
+                        iReportDao.updateReport(reportId,sheetId,rowNum,cellNum, Strings.isNullOrEmpty(cellVal)?"":cellVal);
+                    }
+                }
+            }
+        }
 
-        return templateContent;
+        return ;
     }
 
 
+    public void lockReport(String reportId,Integer userId){
+        logger.debug("lock report :{},{}",reportId,ReportStatus.LOCK);
+        iReportDao.changeReportStatus(ReportStatus.LOCK.toString(),reportId,userId);
+    }
 
+    @Override
+    public ReportInfo loadReportBasic(String reportId) {
+        return iReportDao.getBasicReportInfo(reportId);
+    }
+
+    @Override
+    public void submitReport(String reportId, int userId) {
+        iReportDao.changeReportStatus(ReportStatus.SUBMIT.toString(),reportId,null);
+    }
+
+    @Override
+    public void reviewReport(String reportId, int userId) {
+        iReportDao.changeReportStatus(ReportStatus.REVIEW.toString(),reportId,null);
+    }
+
+    @Override
+    public void confirmReport(String reportId, int userId) {
+        iReportDao.changeReportStatus(ReportStatus.APPROVE.toString(),reportId,null);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void fullEditSave(ArrayList<ArrayList<String>> reportCells,
+                             ArrayList<Map<String, String>> reportMerged,
+                             String reportId,
+                             String templateId,
+                             String sheetId) {
+        iReportDao.removeReportContext(reportId,sheetId);
+        iReportDao.removeReportMerged(reportId,sheetId);
+        if(reportCells!=null){
+            for(int reportRow = 0;reportRow<reportCells.size();reportRow++){
+                if(reportCells.get(reportRow)!=null){
+                    for(int reportColum = 0;reportColum<reportCells.get(reportRow).size();reportColum++) {
+                        String context = reportCells.get(reportRow).get(reportColum);
+                        //(#{report_id},#{template_id},#{template_sheet_id},#{report_row},#{report_colum},#{report_context})
+                        Map<String,Object> paramMap = new HashMap<>();
+                        paramMap.put("report_id",reportId);
+                        paramMap.put("template_id",templateId);
+                        paramMap.put("template_sheet_id",sheetId);
+                        paramMap.put("report_row",reportRow);
+                        paramMap.put("report_colum",reportColum);
+                        paramMap.put("report_context",context);
+                        iReportDao.insertReportContext(paramMap);
+
+                    }
+                }
+            }
+            reportMerged.forEach(reportMergedCell->{
+                reportMergedCell.put("sheet_id",sheetId);
+                iReportDao.insertReportMerged(reportMergedCell);
+            });
+        }
+    }
 
 
     public void writeFile(ArrayList<ReportCell> dataList , File reportFile){

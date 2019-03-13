@@ -1,15 +1,6 @@
 <template>
   <div class="menu-group-root">
     <WorkLogo :sysName="sysName"  class="work-menu-logo" :class="{'work-menu-logo-full' : menuList==null}"></WorkLogo>
-    <div class="menu-group-context">
-      <el-menu mode="horizontal" class="rootElMenu"
-               menu-trigger="hover"
-               background-color="#2b5ca9"
-               text-color="#fff"
-               active-text-color="#ffd04b">
-        <WorkTopMenu v-for="menuObj in menuList" :key="menuObj.id" :menuData="menuObj"></WorkTopMenu>
-      </el-menu>
-    </div>
     <!--<slot></slot>-->
   </div>
 </template>

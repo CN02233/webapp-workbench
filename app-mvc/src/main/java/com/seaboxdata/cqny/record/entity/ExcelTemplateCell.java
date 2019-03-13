@@ -12,6 +12,8 @@ public class ExcelTemplateCell {
     private Integer template_col;
     private String template_context;
     private String template_col_styles;
+    private String context_script;
+    private String context_readonly;
 
     private List<ExcelTemplateCellMerged> excelTemplateCellMerged;
 
@@ -74,5 +76,21 @@ public class ExcelTemplateCell {
 
     public String toString(){
         return JsonSupport.objectToJson(this);
+    }
+
+    public String getContext_script() {
+        return context_script;
+    }
+
+    public void setContext_script(String context_script) {
+        this.context_script = context_script;
+    }
+
+    public String getContext_readonly() {
+        return context_readonly;
+    }
+
+    public void setContext_readonly(String context_readonly) {
+        this.context_readonly = context_readonly;
     }
 }

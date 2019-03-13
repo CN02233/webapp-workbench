@@ -212,7 +212,7 @@
 
         function doEdit(){
           $this.$router.push({
-            path: "/record/report/edit",
+            path: "/record/stepsEdit",
             query:{
               'template':$this.template,
               'reportId':$this.reportId,

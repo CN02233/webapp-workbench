@@ -84,6 +84,7 @@ public class UserController {
         userService.createUser(user);
         JsonResult jsonResult = new JsonResult();
         jsonResult.setResult(JsonResult.RESULT.SUCCESS);
+        jsonResult.setResultData(user);
         jsonResult.setResult_msg("保存成功");
         logger.debug("user bean information after create :{}, and json value is 【{}】",user.toString(),jsonResult.toString());
 
