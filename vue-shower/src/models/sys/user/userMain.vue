@@ -53,6 +53,9 @@
     <!-- 新增、编辑 弹窗-->
     <el-dialog :title="modalPageTitle" :visible.sync="showModalPage" >
       <el-form ref="editForm" class="modal-form" :label-position="left" label-width="20%" :model="formData">
+        <el-form-item :size="small" label="用户登陆名" >
+          <el-input   auto-complete="off" ></el-input>
+        </el-form-item>
         <el-form-item :size="small" label="用户名称" >
           <el-input v-model="formData.user_name" auto-complete="off" ></el-input>
         </el-form-item>
