@@ -29,12 +29,6 @@
             label="报表说明">
           </el-table-column>
           <el-table-column
-            prop="defined_type"
-            align="left"
-            :formatter="formatterDefinedType"
-            label="报表类型">
-          </el-table-column>
-          <el-table-column
             prop="create_date"
             align="center"
             width="200"
@@ -51,7 +45,7 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="definedUnit(scope.row.defined_id,scope.row.defined_type)" size="small">报送单元</el-button>
+              <el-button type="text" @click="definedUnit(scope.row.defined_id)" size="small">报送单元</el-button>
               <el-button type="text" @click="viewDefined()" size="small">查看</el-button>
               <el-button type="text" @click="editDefined()" size="small">编辑</el-button>
               <el-button type="text" @click="deleteDefined()" size="small">删除</el-button>
@@ -78,7 +72,7 @@
   import { required } from 'vuelidate/lib/validators'
   export default {
     name: "report-defined-main",
-    describe:"一维静态报表单元列表/入口",
+    describe:"已定义报表列表",
     components: {
       WorkTablePager,
       WorkMain
@@ -88,13 +82,7 @@
         reportDefinedList:[],
         currPageNum:1,
         eachPageNum:10,
-        totalPage:1,
-        reportDefinedType:{
-          '1':'一维静态',
-          '2':'一维动态',
-          '3':'多维静态',
-          '4':'多维树状'
-        }
+        totalPage:1
       }
     },
     methods: {
@@ -124,28 +112,13 @@
       deleteDefined(){
 
       },
-      definedUnit(definedId,defined_type){
-        let editUrl = ''
-        if(defined_type=='1'){
-          editUrl = '/record/reportDefined/oneDimensionsStatic/edit'
-        }else if(defined_type=='2'){
-
-        }else if(defined_type=='3'){
-
-        }else if(defined_type=='4'){
-
-        }else{
-          return
-        }
+      definedUnit(definedId){
         this.$router.push({
-          path: editUrl,
+          path: '/record/reportDefined/unitMain',
           query:{
             'definedId':definedId
           }
         });
-      },
-      formatterDefinedType(row){
-        return this.reportDefinedType[row['defined_type']]
       }
     },
     mounted:function(){

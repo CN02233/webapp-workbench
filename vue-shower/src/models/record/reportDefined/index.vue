@@ -5,7 +5,7 @@
 <script>
   export default {
     name: 'report-defined-main',
-    describe:"报表单元入口",
+    describe:"报表定义路由入口",
     data() {
       return {}
     },

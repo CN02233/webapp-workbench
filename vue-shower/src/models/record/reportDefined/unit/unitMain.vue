@@ -2,7 +2,7 @@
 
 
 <template>
-  <WorkMain :headerItems="['报送管理','报送设置','报送定义列表']">
+  <WorkMain :headerItems="['报送管理','报送设置','报送定义列表','']">
 
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
@@ -13,29 +13,29 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="reportDefinedList"
+          :data="unitList"
           style="width: 100%">
           <el-table-column
-            prop="defined_id"
+            prop="unit_id"
             align="center"
             width="100"
             label="编号">
           </el-table-column>
           <el-table-column
-            prop="defined_name"
+            prop="unit_name"
             align="center"
-            label="报表名称">
+            label="单元名称">
           </el-table-column>
           <el-table-column
-            prop="defined_describe"
+            prop="unit_describe"
             align="left"
-            label="报表说明">
+            label="单元说明">
           </el-table-column>
           <el-table-column
-            prop="defined_type"
+            prop="unit_type"
             align="left"
             :formatter="formatterDefinedType"
-            label="报表类型">
+            label="单元类型">
           </el-table-column>
           <el-table-column
             prop="create_date"
@@ -44,7 +44,7 @@
             label="创建时间">
           </el-table-column>
           <el-table-column
-            prop="创建人"
+            prop="create_user"
             align="center"
             width="200"
             label="创建时间">
@@ -54,7 +54,7 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <el-button type="text" @click="definedUnit(scope.row.defined_id,scope.row.defined_type)" size="small">报送单元</el-button>
+              <el-button type="text" @click="definedUnit(scope.row.unit_id,scope.row.unit_type)" size="small">报送项</el-button>
               <el-button type="text" @click="viewDefined()" size="small">查看</el-button>
               <el-button type="text" @click="editDefined()" size="small">编辑</el-button>
               <el-button type="text" @click="deleteDefined()" size="small">删除</el-button>
@@ -88,11 +88,12 @@
     },
     data() {
       return {
-        reportDefinedList:[],
+        unitList:[],
         currPageNum:1,
         eachPageNum:10,
         totalPage:1,
-        reportDefinedType:{
+        definedId:'',
+        reportDefinedUnitType:{
           '1':'一维静态',
           '2':'一维动态',
           '3':'多维静态',
@@ -110,11 +111,11 @@
         const $this = this
 
         this.BaseRequest({
-          url:'reportDefined/reportDefinedList',
+          url:'reportUnitDefined/reportUnitDefinedList',
           method:"get",
-          params:{currPage:pageNum,pageSize:this.eachPageNum}
+          params:{currPage:pageNum,pageSize:this.eachPageNum,reportDefinedId:this.definedId}
         }).then(response=>{
-          $this.reportDefinedList = response.dataList
+          $this.unitList = response.dataList
           $this.totalPage = response.totalPage
         })
       },
@@ -148,10 +149,11 @@
         });
       },
       formatterDefinedType(row){
-        return this.reportDefinedType[row['defined_type']]
+        return this.reportDefinedUnitType[row['unit_type']]
       }
     },
     mounted:function(){
+      this.definedId = this.$route.query.definedId
       this.getTableData(1)
     }
   }
