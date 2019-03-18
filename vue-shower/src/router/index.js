@@ -81,6 +81,26 @@ const routes = [
             children: []
           },
           {
+            name: 'reportDefined',
+            path: '/record/reportDefined',
+            component: () => import('@/models/record/reportDefined/reportDefinedMain'),
+            children: [
+
+              {
+                name: 'reportDefinedUnit',
+                path: '/record/reportDefined/unitMain',
+                component: () => import('@/models/record/reportDefined/unit/unitMain'),
+                children: []
+              },
+              {
+                name: 'oneDimensionsStaticEdit',
+                path: '/record/reportDefined/oneDimensionsStatic/edit',
+                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/edit'),
+                children: []
+              }
+            ]
+          },
+          {
             name: 'template',
             path: '/record/template',
             component: () => import('@/models/record/template/templateMain'),
