@@ -128,10 +128,10 @@
       deleteDefined(){
 
       },
-      definedUnit(definedId,defined_type){
+      definedUnit(unitId,defined_type){
         let editUrl = ''
         if(defined_type=='1'){
-          editUrl = '/record/reportDefined/oneDimensionsStatic/edit'
+          editUrl = '/record/reportDefined/oneDimensionsStatic'
         }else if(defined_type=='2'){
 
         }else if(defined_type=='3'){
@@ -144,7 +144,7 @@
         this.$router.push({
           path: editUrl,
           query:{
-            'definedId':definedId
+            'unitId':unitId
           }
         });
       },

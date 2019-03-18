@@ -98,6 +98,19 @@ const routes = [
                 children: []
               },
               {
+                name: 'oneDimensionsStatic',
+                path: '/record/reportDefined/oneDimensionsStatic',
+                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/main'),
+                children: []
+              }
+              ,
+              {
+                name: 'oneDimensionsStaticEdit',
+                path: '/record/reportDefined/oneDimensionsStatic/add',
+                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/add'),
+                children: []
+              },
+              {
                 name: 'oneDimensionsStaticEdit',
                 path: '/record/reportDefined/oneDimensionsStatic/edit',
                 component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/edit'),
