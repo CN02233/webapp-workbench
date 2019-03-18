@@ -83,9 +83,14 @@ const routes = [
           {
             name: 'reportDefined',
             path: '/record/reportDefined',
-            component: () => import('@/models/record/reportDefined/reportDefinedMain'),
+            component: () => import('@/models/record/reportDefined'),
             children: [
-
+              {
+                name: 'reportDefinedMain',
+                path: '/record/reportDefined/reportDefinedMain',
+                component: () => import('@/models/record/reportDefined/base/reportDefinedMain'),
+                children: []
+              },
               {
                 name: 'reportDefinedUnit',
                 path: '/record/reportDefined/unitMain',

@@ -2,10 +2,7 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送设置','报送单元','一维单元设置']">
 
-
   </WorkMain>
-
-
 </template>
 
 <script>
