@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.controller;
 
 import com.seaboxdata.cqny.record.entity.onedim.ColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("unitOneDimColum")
@@ -37,4 +40,21 @@ public class ReportDefinedUnitOneDimController {
         return jsonResult;
     }
 
+    @RequestMapping("getUnits")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getUnits(String originId){
+        List<UnitDefined> unitList = reportDefinedUnitOneDimService.getUnitsByOrigin(originId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,unitList);
+        return jsonResult;
+    }
+
+    @RequestMapping("getInputColumn")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getInputColumn(String unitId){
+        List<ColumDefined> colums = reportDefinedUnitOneDimService.getColumByUnit(unitId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,colums);
+        return jsonResult;
+    }
 }

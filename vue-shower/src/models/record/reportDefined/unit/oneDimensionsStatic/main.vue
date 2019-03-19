@@ -71,7 +71,15 @@
           <el-input v-model="addFormData.max_value" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="addFormData.colum_data_type=='0'" :size="small" label="公式" >
-          <el-input v-model="addFormData.colum_formula" auto-complete="off" ></el-input>
+          <el-input v-model="addFormData.colum_formula" :disabled="true" auto-complete="off" >
+            <el-tooltip slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
+              <el-button @click="openFormulaEditor()" icon="el-icon-edit"></el-button>
+            </el-tooltip>
+          </el-input>
+
+        </el-form-item>
+        <el-form-item v-if="addFormData.colum_data_type=='0'" :size="small" label="公式描述" >
+          <el-input v-model="addFormData.colum_formula_des" :disabled="true" auto-complete="off" ></el-input>
         </el-form-item>
 
         <!--<el-form-item :size="small" label="所属机构" >-->
@@ -90,6 +98,58 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
+
+      <el-form class="modal-form" :label-position="left" label-width="100px" >
+        <el-form-item label="选择输入项" >
+          <el-cascader
+            ref="unitSelectRef"
+            :options="otherUnits"
+            v-model="fomularColumnTmp"
+            :show-all-levels="false"
+            :change-on-select="false"
+            @active-item-change="handleItemChange"
+          ></el-cascader>
+          <el-button @click="formulaColumConfirm">确定输入项</el-button>
+        </el-form-item>
+        <el-form-item label="设置运算符" >
+          <el-button @click="formulaAdd('+')">+</el-button>
+          <el-button @click="formulaAdd('-')">-</el-button>
+          <!--<el-button @click="formulaAdd('%')">%</el-button>-->
+          <el-button @click="formulaAdd('*')">*</el-button>
+          <el-button @click="formulaAdd('/')">/</el-button>
+          <el-button @click="formulaAdd('(')">(</el-button>
+          <el-button @click="formulaAdd(')')">)</el-button>
+          <el-button @click="formulaBack"><-(回退)</el-button>
+        </el-form-item>
+      </el-form>
+      <el-row>
+        <el-col :span="12">
+          <el-input
+            type="textarea"
+            :rows="10"
+            :disabled="true"
+            placeholder="请输入内容"
+            v-model="formulaDescContextTmp">
+          </el-input>
+        </el-col>
+        <el-col :span="1">&nbsp;</el-col>
+        <el-col :span="11">
+          <el-row><el-col><el-input placeholder="请输入内容"></el-input></el-col></el-row>
+          <el-row><el-col><el-input placeholder="请输入内容"></el-input></el-col></el-row>
+          <el-row><el-col><el-input placeholder="请输入内容"></el-input></el-col></el-row>
+          <el-row><el-col><el-input placeholder="请输入内容"></el-input></el-col></el-row>
+          <el-row><el-col><el-input placeholder="请输入内容"></el-input></el-col></el-row>
+          <el-row><el-col><el-button>试算</el-button></el-col></el-row>
+
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-button>取消</el-button>
+        <el-button @click="fomularConfirm">确定</el-button>
+      </el-row>
+
+    </el-dialog>
 
   </WorkMain>
 </template>
@@ -125,12 +185,19 @@
         addFormData:{
           'colum_name':'',
           'colum_name_cn':'',
-          'colum_data_type':'1',
+          'colum_data_type':'0',
           'min_value':'',
           'max_value':'',
-          'colum_formula':'',
+          'colum_formula':[],
+          'colum_formula_des':[],
           'unit_id':''
-        }
+        },
+        isOpenFormulaEditor:false,
+        formulaDescContext:[],
+        formulaDescContextTmp:'',
+        formulaContext:[],
+        otherUnits:[],
+        fomularColumnTmp :''
       }
     },
     validations:{
@@ -232,12 +299,110 @@
           }
         }
         return checkResult
+      },
+      openFormulaEditor(){
+        this.isOpenFormulaEditor = true
+      },
+      handleItemChange(val) {
+        console.log('active item:', val);
+        // this.getReportColums(val)
+      },
+      getUnits(){
+        const $this = this
+        const loading = $this.$loading({
+          lock: true,
+          text: '获取中......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        $this.BaseRequest({
+          url:"/unitOneDimColum/getUnits",
+          method:'get',
+          params:{unitId:''}
+        }).then(response=>{
+          loading.close()
+          if(response){
+            this.otherUnits = []
+            response.forEach(unitData=>{
+              this.otherUnits.push({'label':unitData.unit_name,'value':unitData.unit_id,'children':[]})
+            })
+          }
+          // $this.otherUnits = response
+        }).catch(error=>{
+          loading.close()
+          $this.Message.success("获取其他报送单元失败:"+error)
+        });
+      },
+      getReportColums(unitId){
+        const loading = $this.$loading({
+          lock: true,
+          text: '获取中......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        $this.BaseRequest({
+          url:"/unitOneDimColum/getInputColumn",
+          method:'get',
+          params:{'unitId':unitId}
+        }).then(response=>{
+          loading.close()
+          $this.Message.success("保存成功")
+          $this.getTableData(1)
+          $this.addModelOpend = false
+        }).catch(error=>{
+          loading.close()
+          $this.Message.success("保存失败:"+error)
+        });
+      },
+      formulaColumClick(clickObj){
+        console.log(clickObj)
+
+      },
+      formulaColumConfirm(){
+        const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
+        console.log("columtClickId === >"+columtClickId)
+        this.otherUnits.forEach(unitData=>{
+          console.log(unitData)
+          if(unitData.value == columtClickId){
+            this.formulaDescContext.push(unitData.label)
+            this.formulaDescContextTmp+=unitData.label
+          }
+        })
+        let formularColumn = ""
+        this.fomularColumnTmp.forEach((fomularColumnData,i)=>{
+          if(i>0){
+            formularColumn+='.'
+          }
+          formularColumn+=fomularColumnData
+        })
+        this.formulaContext.push(formularColumn)
+      },
+      formulaAdd(addContext){
+        this.formulaDescContext.push(addContext)
+        this.formulaContext.push(addContext)
+        this.formulaDescContextTmp+=addContext
+      },
+      formulaBack(){
+        this.formulaContext.pop()
+        this.formulaDescContext.pop()
+        this.formulaDescContextTmp = ''
+        this.formulaDescContext.forEach(formulaDesc=>{
+          this.formulaDescContextTmp+=formulaDesc
+        })
+      },
+      fomularConfirm(){
+        this.addFormData.colum_formula = this.formulaContext
+        this.addFormData.colum_formula_des = this.formulaDescContext
+        this.formulaContext = []
+        this.formulaDescContext = []
+        this.isOpenFormulaEditor = false
       }
     },
     mounted:function(){
       this.unitId = this.$route.query.unitId
       this.addFormData.unit_id = this.$route.query.unitId
       this.getTableData(1)
+      this.getUnits()
     }
   }
 </script>
