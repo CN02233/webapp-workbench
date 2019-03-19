@@ -12,6 +12,7 @@ public class ColumDefined {
     private Integer min_value;
     private Integer max_value    ;
     private String colum_formula    ;
+    private String colum_formula_desc    ;
 
 
     public Integer getColum_id() {
@@ -92,5 +93,13 @@ public class ColumDefined {
 
     public void setColum_formula(String colum_formula) {
         this.colum_formula = colum_formula;
+    }
+
+    public String getColum_formula_desc() {
+        return colum_formula_desc;
+    }
+
+    public void setColum_formula_desc(String colum_formula_desc) {
+        this.colum_formula_desc = colum_formula_desc;
     }
 }
