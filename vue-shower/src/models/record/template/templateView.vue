@@ -3,7 +3,7 @@
   <WorkMain :headerItems="['报送管理','模板管理','模板查看']">
     <el-row>
       <el-tabs  type="border-card" v-model="showSeet" @tab-click="handleClick">
-        <el-tab-pane v-for="sheetObj in sheetList"  :label="sheetObj" :name="sheetObj">
+        <el-tab-pane :key="sheetObj" v-for="sheetObj in sheetList"  :label="sheetObj" :name="sheetObj">
         </el-tab-pane>
       </el-tabs>
     </el-row>

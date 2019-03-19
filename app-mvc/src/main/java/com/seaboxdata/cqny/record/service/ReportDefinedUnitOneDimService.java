@@ -17,4 +17,10 @@ public interface ReportDefinedUnitOneDimService {
     List<UnitDefined> getUnitsByOrigin(String originId);
 
     List<ColumDefined> getColumByUnit(String unitId);
+
+    void deleteOneDim(String columId);
+
+    ColumDefined getOnedimColumn(String columId);
+
+    void editSaveOnedim(ColumDefined columDefined);
 }

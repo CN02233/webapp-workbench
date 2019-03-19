@@ -14,7 +14,7 @@ const service = axios.create({
 
 
 service.defaults.headers = {
-  'Accept-Charset':'utf-8'
+  // 'Accept-Charset':'utf-8'
 };
 // request拦截器
 service.interceptors.request.use(config => {

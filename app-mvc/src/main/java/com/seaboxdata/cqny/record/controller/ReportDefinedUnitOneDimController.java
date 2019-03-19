@@ -40,6 +40,33 @@ public class ReportDefinedUnitOneDimController {
         return jsonResult;
     }
 
+    @RequestMapping("editSaveOnedim")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult editSaveOnedim(@RequestBody ColumDefined columDefined){
+        reportDefinedUnitOneDimService.editSaveOnedim(columDefined);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
+        return jsonResult;
+    }
+
+    @RequestMapping("getOnedimColumn")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getOnedimColumn(String columId){
+        ColumDefined columDefined = reportDefinedUnitOneDimService.getOnedimColumn(columId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,columDefined);
+        return jsonResult;
+    }
+
+    @RequestMapping("deleteOneDim")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult deleteOneDim( String columId){
+        reportDefinedUnitOneDimService.deleteOneDim(columId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+        return jsonResult;
+    }
+
     @RequestMapping("getUnits")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")

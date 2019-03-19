@@ -6,7 +6,7 @@
                 :index="'M'+menuData.id">
       <template style="margin-left:40px;margin-right:40px;" slot="title">
         <!--<i class="el-icon-menu"></i>-->
-        <icon name="record-checked"></icon>
+        <!--<icon name="record-checked"></icon>-->
         <span slot="title">{{menuData.name}}</span>
 
       </template>

@@ -3,7 +3,7 @@
   <WorkMain :headerItems="['报送管理','模板管理','模板编辑']">
     <el-row>
       <el-tabs  type="border-card" v-model="showSeet" @tab-click="handleClick">
-        <el-tab-pane v-for="sheetObj in sheetList"  :label="sheetObj" :name="sheetObj">
+        <el-tab-pane v-for="sheetObj in sheetList" :key="sheetObj" :label="sheetObj" :name="sheetObj">
           <div style="width: 100%;text-align: left;">
             <el-button @click="backList" size="mini" type="warning">返回上一级</el-button>
             <el-button @click="copyGroupEdit" size="mini" type="primary">设定可复制行组</el-button>

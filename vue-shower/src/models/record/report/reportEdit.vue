@@ -3,17 +3,17 @@
   <WorkMain class="WorkMain" :headerItems="['报送管理','报表管理',title]">
 
     <el-tabs  type="border-card" v-model="showSeet" @tab-click="handleClick">
-      <el-tab-pane v-for="sheetObj in sheetList"  :label="sheetObj" :name="sheetObj">
+      <el-tab-pane v-for="sheetObj in sheetList" :key="sheetObj" :label="sheetObj" :name="sheetObj">
         <div style="width: 100%;text-align: left;">
           <el-button @click="backList" size="mini" type="warning">返回上一级</el-button>
           <el-button @click="confirmSelected" size="mini" type="primary">下载模板文件</el-button>
           <el-button @click="editSave" size="mini" type="primary">保存</el-button>
           <el-button @click="submitReport" size="mini" type="primary">提交审批</el-button>
 
-          <el-button @click="cpGroup(allowCopyGroup.group_list)" size="mini" v-for="allowCopyGroup in allowCopys[showSeet]">
+          <el-button @click="cpGroup(allowCopyGroup.group_list)" size="mini" :key="allowCopyGroup.group_name" v-for="allowCopyGroup in allowCopys[showSeet]">
             新增{{allowCopyGroup.group_name}}
           </el-button>
-          <el-button @click="delGroup(allowCopyGroup.group_list)" size="mini" v-for="allowCopyGroup in allowCopys[showSeet]">
+          <el-button @click="delGroup(allowCopyGroup.group_list)" size="mini" :key="allowCopyGroup.group_name" v-for="allowCopyGroup in allowCopys[showSeet]">
             删除{{allowCopyGroup.group_name}}
           </el-button>
           <span style="font-size:12px;color:red;margin:0 0 0 30px;"> 提示：保存后自动刷新公式值</span>

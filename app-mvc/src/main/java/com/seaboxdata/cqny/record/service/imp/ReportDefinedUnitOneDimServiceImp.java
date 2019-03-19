@@ -40,4 +40,20 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
         List<ColumDefined> columList = reportDefinedUnitOneDimDao.getColumByUnit(unitId);
         return columList;
     }
+
+    @Override
+    public void deleteOneDim(String columId) {
+        reportDefinedUnitOneDimDao.deleteOneDim(columId);
+    }
+
+    @Override
+    public ColumDefined getOnedimColumn(String columId) {
+        ColumDefined columDefined = reportDefinedUnitOneDimDao.getOnedimColumn(columId);
+        return columDefined;
+    }
+
+    @Override
+    public void editSaveOnedim(ColumDefined columDefined) {
+        reportDefinedUnitOneDimDao.editSaveOnedim(columDefined);
+    }
 }

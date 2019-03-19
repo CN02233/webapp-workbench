@@ -29,7 +29,7 @@
         url:'/sys/login/checkLoginUser',
         method:"get"
       }).then(loginUserInfo=>{
-          console.log(JSON.stringify(loginUserInfo))
+          // console.log(JSON.stringify(loginUserInfo))
           if(loginUserInfo!=null){
             $this.loginUserInfo = loginUserInfo
           }

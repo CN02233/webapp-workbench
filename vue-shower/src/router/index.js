@@ -105,7 +105,7 @@ const routes = [
               }
               ,
               {
-                name: 'oneDimensionsStaticEdit',
+                name: 'oneDimensionsStaticAdd',
                 path: '/record/reportDefined/oneDimensionsStatic/add',
                 component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/add'),
                 children: []
