@@ -115,6 +115,24 @@ const routes = [
                 path: '/record/reportDefined/oneDimensionsStatic/edit',
                 component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/edit'),
                 children: []
+              },
+              {
+                name: 'oneDimensionsDynamic',
+                  path: '/record/reportDefined/oneDimensionsDynamic',
+                component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/main'),
+                children: []
+              },
+              {
+                name: 'oneDimensionsDynamicAdd',
+                  path: '/record/reportDefined/oneDimensionsDynamic/add',
+                component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/add'),
+                children: []
+              },
+              {
+                name: 'oneDimensionsDynamicEdit',
+                  path: '/record/reportDefined/oneDimensionsDynamic/edit',
+                component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/edit'),
+                children: []
               }
             ]
           },

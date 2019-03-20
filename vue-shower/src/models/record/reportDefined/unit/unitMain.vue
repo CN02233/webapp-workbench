@@ -133,7 +133,7 @@
         if(defined_type=='1'){
           editUrl = '/record/reportDefined/oneDimensionsStatic'
         }else if(defined_type=='2'){
-
+          editUrl = '/record/reportDefined/oneDimensionsDynamic'
         }else if(defined_type=='3'){
 
         }else if(defined_type=='4'){
