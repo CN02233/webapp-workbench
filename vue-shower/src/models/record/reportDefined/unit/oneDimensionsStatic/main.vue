@@ -490,7 +490,7 @@
                 if(columData.value == columtClickId) {
                   const finalContext = unitData.label+"."+columData.label
                   this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
-                  this.formulaContext.push({"context":unitData.value+"."+columData.value,"columKey":unitData.label+'.'+columData.columKey,"isSymbol":false})
+                  this.formulaContext.push({"context":unitData.value+"_"+columData.value,"columKey":unitData.label+'_'+columData.columKey,"isSymbol":false})
                   if(this.isEditModal){
                     this.editFormData.colum_formula_desc +=finalContext
                     this.editFormData.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
@@ -554,8 +554,15 @@
       },
       fomularOperation(){
         const $this = this
-        if(this.formularOprationColums){
-          Object.keys(formularOprationColums)
+        let fomular = ""
+        if(this.formulaContext){
+          this.formulaContext.forEach(formulaData=>{
+            if(formulaData.columKey){
+              fomular+=formulaData.columKey
+            }else{
+              fomular+=formulaData.context
+            }
+          })
         }
 
         const loading = $this.$loading({
@@ -566,24 +573,14 @@
         });
         $this.BaseRequest({
           url:"/reportDefined/formalOperation",
-          method:'get',
-          params:{'format':unitId}
+          method:'post',
+          data:{'fomular':fomular,'operaionValus':this.formularOprationColums}
         }).then(response=>{
           loading.close()
-          this.otherUnits.forEach((unitData,i)=>{
-            if(unitData.value == unitId){
-              const columArray = []
-              if(response){
-                response.forEach(responseData=>{
-                  const colum_id = responseData.colum_id
-                  const colum_name = responseData.colum_name_cn
-                  const colum_key = responseData.colum_name
-                  columArray.push({label:colum_name,value:colum_id,columKey:colum_key})
-                })
-                this.otherUnits[i].children = columArray
-              }
-            }
-          })
+          this.$message({
+            showClose: true,
+            message: '试算结果:'+response
+          });
         }).catch(error=>{
           loading.close()
           $this.Message.success("保存失败:"+error)
