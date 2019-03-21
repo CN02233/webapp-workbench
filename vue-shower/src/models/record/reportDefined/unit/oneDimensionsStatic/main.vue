@@ -125,7 +125,7 @@
         </el-form-item>
         <el-form-item label="公式试算" >
           <el-row :key="formulaColumnDesc.context" v-for="(formulaColumnDesc,i) in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
-            <el-col><el-input :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
+            <el-col><el-input v-model="formularOprationColums[formulaContext[i].columKey]" :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
             </el-col>
           </el-row>
 
@@ -134,7 +134,7 @@
       <el-row>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
-        <el-button>试算</el-button>
+        <el-button @click="fomularOperation">试算</el-button>
       </el-row>
 
     </el-dialog>
@@ -467,7 +467,8 @@
                 response.forEach(responseData=>{
                   const colum_id = responseData.colum_id
                   const colum_name = responseData.colum_name_cn
-                  columArray.push({label:colum_name,value:colum_id})
+                  const colum_key = responseData.colum_name
+                  columArray.push({label:colum_name,value:colum_id,columKey:colum_key})
                 })
                 this.otherUnits[i].children = columArray
               }
@@ -489,7 +490,7 @@
                 if(columData.value == columtClickId) {
                   const finalContext = unitData.label+"."+columData.label
                   this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
-                  this.formulaContext.push({"context":unitData.value+"."+columData.value,"isSymbol":false})
+                  this.formulaContext.push({"context":unitData.value+"."+columData.value,"columKey":unitData.label+'.'+columData.columKey,"isSymbol":false})
                   if(this.isEditModal){
                     this.editFormData.colum_formula_desc +=finalContext
                     this.editFormData.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
@@ -550,8 +551,43 @@
         // this.formulaDescContext = []
         this.isOpenFormulaEditor = false
 
+      },
+      fomularOperation(){
+        const $this = this
+        if(this.formularOprationColums){
+          Object.keys(formularOprationColums)
+        }
 
-
+        const loading = $this.$loading({
+          lock: true,
+          text: '计算中......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        $this.BaseRequest({
+          url:"/reportDefined/formalOperation",
+          method:'get',
+          params:{'format':unitId}
+        }).then(response=>{
+          loading.close()
+          this.otherUnits.forEach((unitData,i)=>{
+            if(unitData.value == unitId){
+              const columArray = []
+              if(response){
+                response.forEach(responseData=>{
+                  const colum_id = responseData.colum_id
+                  const colum_name = responseData.colum_name_cn
+                  const colum_key = responseData.colum_name
+                  columArray.push({label:colum_name,value:colum_id,columKey:colum_key})
+                })
+                this.otherUnits[i].children = columArray
+              }
+            }
+          })
+        }).catch(error=>{
+          loading.close()
+          $this.Message.success("保存失败:"+error)
+        });
       }
     },
     computed:{
