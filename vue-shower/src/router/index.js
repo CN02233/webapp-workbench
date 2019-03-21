@@ -176,6 +176,11 @@ const routes = [
             path: '/record/stepsEdit',
             component: () => import('@/models/record/report/stepsEdit'),
             children: []
+          },{
+            name: 'submitAUmanager',
+            path: '/record/submitAUmanager',
+            component: () => import('@/models/record/submitAuthority/submitAUmanager'),
+            children: []
           }
         ]
       }
