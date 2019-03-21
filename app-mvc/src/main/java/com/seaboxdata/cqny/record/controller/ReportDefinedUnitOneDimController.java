@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("unitOneDimColum")
@@ -82,6 +84,43 @@ public class ReportDefinedUnitOneDimController {
     public JsonResult getInputColumn(String unitId){
         List<ColumDefined> colums = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,colums);
+        return jsonResult;
+    }
+
+    @RequestMapping("getGroup")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getGroup(String unitId){
+        List<Map> groupList = reportDefinedUnitOneDimService.getGroupByUnit(unitId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,groupList);
+        return jsonResult;
+    }
+
+    @RequestMapping("pagerOnedimListDynamic")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult pagerOnedimListDynamic(Integer currPage,Integer pageSize, Integer unitId, String group_id){
+        PageResult definedpageLIst = reportDefinedUnitOneDimService.pagerOnedimListDynamic(currPage,pageSize, unitId, group_id);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,definedpageLIst);
+        return jsonResult;
+    }
+
+    @RequestMapping("editSaveOnedimDynamic")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult editSaveOnedimDynamic(@RequestBody Map<String,List<ColumDefined>> maps){
+
+        reportDefinedUnitOneDimService.editSaveOnedimBat(maps);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
+        return jsonResult;
+    }
+
+    @RequestMapping("deleteOneDimDynamic")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult deleteOneDimDynamic(Integer unitId, String group_id){
+        reportDefinedUnitOneDimService.deleteOneDimDynamic(unitId, group_id);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
 }

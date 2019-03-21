@@ -40,4 +40,14 @@ public interface IReportDefinedUnitOneDimDao {
             "colum_data_type=#{colum_data_type},min_value=#{min_value},max_value=#{max_value} ," +
             "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc} where colum_id=#{colum_id}")
     void editSaveOnedim(ColumDefined columDefined);
+
+    @Select("<script>select * from report_defined_unit_onedim where unit_id = #{unitId}"
+            +"<if test=\"group_id!='' and group_id!=null and group_id!='null'\"> and group_id = #{group_id}</if>"
+            +" order by group_id,colum_id</script>")
+    Page<Map<String, Object>> pagerOnedimListDynamic(@Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize, @Param("unitId") Integer unitId, @Param("group_id") String group_id);
+
+
+    @Select("select distinct group_id,group_name from report_defined_unit_onedim where unit_id = #{unitId}")
+    List<Map> getGroupByUnit(String unitId);
+
 }
