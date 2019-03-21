@@ -124,7 +124,7 @@
           </el-input>
         </el-form-item>
         <el-form-item label="公式试算" >
-          <el-row :key="formulaColumnDesc.context" v-for="formulaColumnDesc in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
+          <el-row :key="formulaColumnDesc.context" v-for="(formulaColumnDesc,i) in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
             <el-col><el-input :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
             </el-col>
           </el-row>
@@ -199,7 +199,8 @@
         formulaDescContextTmp:'',
         formulaContext:[],
         otherUnits:[],
-        fomularColumnTmp :''
+        fomularColumnTmp :'',
+        formularOprationColums:{}
       }
     },
     validations:{
@@ -548,6 +549,9 @@
         // this.formulaContext = []
         // this.formulaDescContext = []
         this.isOpenFormulaEditor = false
+
+
+
       }
     },
     computed:{
