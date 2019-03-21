@@ -1,5 +1,6 @@
 package com.workbench.auth.authvalidate.controller;
 
+import com.google.common.base.Strings;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.session.SessionSupport;
@@ -35,7 +36,12 @@ public class CasLoginController extends AbstractLoginController{
     @RequestMapping("doLogin")
     public void casLogin(HttpServletRequest request, HttpServletResponse response) throws IOException {
         AttributePrincipal principal = (AttributePrincipal)request.getUserPrincipal();
-        String loginUserName = principal.getName();
+        String loginUserName = (String) principal.getAttributes().get("user_real_name");
+        if(Strings.isNullOrEmpty(loginUserName)){
+            logger.info("user real name 字段值未找到，使用name值                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ");
+
+            loginUserName = principal.getName();
+        }
         Map<String, Object> allAttributes = principal.getAttributes();
         logger.info("CAS登录重定向请求已收到.参数内容为{},用户名为【{}】", allAttributes.toString(), loginUserName);
         User user = new User();
