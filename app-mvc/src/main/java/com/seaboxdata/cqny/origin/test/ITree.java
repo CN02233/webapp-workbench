@@ -12,7 +12,7 @@ public interface ITree<T> {
 	
      String getParentId();
     
-     void setChildList(List<T> childList);
+     void setChildren(List<T> childList);
     
-     List<T> getChildList();
+     List<T> getChildren();
 }

@@ -30,10 +30,10 @@ public class TreeUtil {
 			itemTree = entityList.get(i);
 			T data = treeMap.get(itemTree.getParentId());//在map集合中寻找父亲
 			if(data != null) {//判断父亲有没有
-				if(data.getChildList() == null) {
-					data.setChildList(new ArrayList<>());
+				if(data.getChildren() == null) {
+					data.setChildren(new ArrayList<>());
 				}
-				data.getChildList().add(itemTree);//把子节点 放到父节点childList当中
+				data.getChildren().add(itemTree);//把子节点 放到父节点childList当中
 				treeMap.put(itemTree.getParentId(), data);//把放好的数据放回map当中
 			}
 		}
