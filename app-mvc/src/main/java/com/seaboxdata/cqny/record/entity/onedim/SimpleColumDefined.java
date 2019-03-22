@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.entity.onedim;
 
-public class ColumDefined {
+
+public class SimpleColumDefined {
 
     private Integer colum_id;
     private String colum_name;

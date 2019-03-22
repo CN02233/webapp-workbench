@@ -1,6 +1,6 @@
 package com.seaboxdata.cqny.record.controller;
 
-import com.seaboxdata.cqny.record.entity.onedim.ColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.webapp.support.json.JsonSupport;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,8 +35,8 @@ public class ReportDefinedUnitOneDimController {
     @RequestMapping("addSaveOnedim")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult addSaveOnedim(@RequestBody ColumDefined columDefined){
-        reportDefinedUnitOneDimService.addSaveOnedim(columDefined);
+    public JsonResult addSaveOnedim(@RequestBody SimpleColumDefined simpleColumDefined){
+        reportDefinedUnitOneDimService.addSaveOnedim(simpleColumDefined);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
@@ -45,8 +44,8 @@ public class ReportDefinedUnitOneDimController {
     @RequestMapping("editSaveOnedim")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult editSaveOnedim(@RequestBody ColumDefined columDefined){
-        reportDefinedUnitOneDimService.editSaveOnedim(columDefined);
+    public JsonResult editSaveOnedim(@RequestBody SimpleColumDefined simpleColumDefined){
+        reportDefinedUnitOneDimService.editSaveOnedim(simpleColumDefined);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
@@ -55,8 +54,8 @@ public class ReportDefinedUnitOneDimController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getOnedimColumn(String columId){
-        ColumDefined columDefined = reportDefinedUnitOneDimService.getOnedimColumn(columId);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,columDefined);
+        SimpleColumDefined simpleColumDefined = reportDefinedUnitOneDimService.getOnedimColumn(columId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null, simpleColumDefined);
         return jsonResult;
     }
 
@@ -82,7 +81,7 @@ public class ReportDefinedUnitOneDimController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getInputColumn(String unitId){
-        List<ColumDefined> colums = reportDefinedUnitOneDimService.getColumByUnit(unitId);
+        List<SimpleColumDefined> colums = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,colums);
         return jsonResult;
     }
@@ -108,7 +107,7 @@ public class ReportDefinedUnitOneDimController {
     @RequestMapping("editSaveOnedimDynamic")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult editSaveOnedimDynamic(@RequestBody Map<String,List<ColumDefined>> maps){
+    public JsonResult editSaveOnedimDynamic(@RequestBody Map<String,List<SimpleColumDefined>> maps){
 
         reportDefinedUnitOneDimService.editSaveOnedimBat(maps);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
