@@ -13,7 +13,7 @@ public interface ISubmitauthorityDao {
 
     @Select("SELECT\n" +
             "\torigin_id id,\n" +
-            "\torigin_name name,\n" +
+            "\torigin_name label,\n" +
             "\tparent_origin_id parentId\n" +
             "\n" +
             "FROM\n" +

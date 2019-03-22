@@ -181,6 +181,11 @@ const routes = [
             path: '/record/submitAUmanager',
             component: () => import('@/models/record/submitAuthority/submitAUmanager'),
             children: []
+          },{
+            name: 'administrative',
+            path: '/record/administrative',
+            component: () => import('@/models/record/submitAuthority/administrative'),
+            children: []
           }
         ]
       }

@@ -12,9 +12,9 @@ public class EntityTree implements ITree<EntityTree> {
 	
 	private String parentId;
 	
-	private String name;
+	private String label;
 	
-	private List<EntityTree> childList;
+	private List<EntityTree> children;
 
 	@Override
 	public String getId() {
@@ -34,21 +34,21 @@ public class EntityTree implements ITree<EntityTree> {
 		this.parentId = parentId;
 	}
 
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	@Override
-	public List<EntityTree> getChildList() {
-		return childList;
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	@Override
-	public void setChildList(List<EntityTree> childList) {
-		this.childList = childList;
+	public List<EntityTree> getChildren() {
+		return children;
+	}
+
+	@Override
+	public void setChildren(List<EntityTree> childList) {
+		this.children = childList;
 	}
 }
