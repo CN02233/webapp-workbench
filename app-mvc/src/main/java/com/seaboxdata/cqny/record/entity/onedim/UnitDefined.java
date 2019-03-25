@@ -10,7 +10,8 @@ public class UnitDefined {
     private Integer unit_type;
     private Date create_date;
     private Integer create_user;
-    private List<ColumDefined> colums;
+    private List colums;
+
 
     public Integer getUnit_id() {
         return unit_id;
@@ -60,11 +61,12 @@ public class UnitDefined {
         this.create_user = create_user;
     }
 
-    public List<ColumDefined> getColums() {
+    public List getColums() {
         return colums;
     }
 
-    public void setColums(List<ColumDefined> colums) {
+    public void setColums(List colums) {
         this.colums = colums;
     }
+
 }

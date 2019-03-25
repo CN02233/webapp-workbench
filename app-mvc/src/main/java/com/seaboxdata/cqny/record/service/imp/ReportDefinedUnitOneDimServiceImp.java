@@ -2,14 +2,13 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
-import com.seaboxdata.cqny.record.entity.onedim.ColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,8 +26,8 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
         return pageResult;    }
 
     @Override
-    public void addSaveOnedim(ColumDefined columDefined) {
-        reportDefinedUnitOneDimDao.addSaveOnedim(columDefined);
+    public void addSaveOnedim(SimpleColumDefined simpleColumDefined) {
+        reportDefinedUnitOneDimDao.addSaveOnedim(simpleColumDefined);
     }
 
     @Override
@@ -38,8 +37,8 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
     }
 
     @Override
-    public List<ColumDefined> getColumByUnit(String unitId) {
-        List<ColumDefined> columList = reportDefinedUnitOneDimDao.getColumByUnit(unitId);
+    public List<SimpleColumDefined> getColumByUnit(String unitId) {
+        List<SimpleColumDefined> columList = reportDefinedUnitOneDimDao.getColumByUnit(unitId);
         return columList;
     }
 
@@ -49,14 +48,14 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
     }
 
     @Override
-    public ColumDefined getOnedimColumn(String columId) {
-        ColumDefined columDefined = reportDefinedUnitOneDimDao.getOnedimColumn(columId);
-        return columDefined;
+    public SimpleColumDefined getOnedimColumn(String columId) {
+        SimpleColumDefined simpleColumDefined = reportDefinedUnitOneDimDao.getOnedimColumn(columId);
+        return simpleColumDefined;
     }
 
     @Override
-    public void editSaveOnedim(ColumDefined columDefined) {
-        reportDefinedUnitOneDimDao.editSaveOnedim(columDefined);
+    public void editSaveOnedim(SimpleColumDefined simpleColumDefined) {
+        reportDefinedUnitOneDimDao.editSaveOnedim(simpleColumDefined);
     }
 
 
@@ -86,11 +85,11 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
      * @param maps
      */
     @Override
-    public void editSaveOnedimBat(Map<String, List<ColumDefined>> maps)
+    public void editSaveOnedimBat(Map<String, List<SimpleColumDefined>> maps)
     {
         if(maps.containsKey("add")){
             int group_id = getTimestamp();//有BUG，不支持多人同步
-            for(ColumDefined mod1 : maps.get("add")){
+            for(SimpleColumDefined mod1 : maps.get("add")){
                 Integer gid = mod1.getGroup_id();
                 if(gid == null)
                     mod1.setGroup_id(group_id);
@@ -98,12 +97,12 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
             }
         }
         if(maps.containsKey("edit")){
-            for(ColumDefined mod2 : maps.get("edit")){
+            for(SimpleColumDefined mod2 : maps.get("edit")){
                 reportDefinedUnitOneDimDao.editSaveOnedim(mod2);
             }
         }
         if(maps.containsKey("del")){
-            for(ColumDefined mod3 : maps.get("del")){
+            for(SimpleColumDefined mod3 : maps.get("del")){
                 String column_id = mod3.getColum_id().toString();
                 if(column_id != null && !"".equals(column_id))
                     reportDefinedUnitOneDimDao.deleteOneDim(column_id);
