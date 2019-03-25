@@ -186,6 +186,11 @@ const routes = [
             path: '/record/administrative',
             component: () => import('@/models/record/submitAuthority/administrative'),
             children: []
+          },{
+            name: 'reportUnit',
+            path: '/record/reportUnit',
+            component: () => import('@/models/record/submitAuthority/reportunit'),
+            children: []
           }
         ]
       }
