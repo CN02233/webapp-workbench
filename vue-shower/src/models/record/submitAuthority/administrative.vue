@@ -28,7 +28,7 @@
             label="创建时间">
           </el-table-column>
           <el-table-column
-            prop="create_user"
+            prop="user_name"
             align="left"
             label="创建人">
           </el-table-column>

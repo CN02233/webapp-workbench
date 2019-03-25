@@ -11,6 +11,16 @@ public class Administrative {
     private String create_time;
     private int create_user;
 
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
+    }
+
+    private String user_name;
+
     public Integer getOrigin_id() {
         return origin_id;
     }

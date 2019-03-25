@@ -46,9 +46,12 @@ public interface IAdministrativeDao {
             "\ta.origin_id,\n" +
             "\ta.create_time,\n" +
             "\ta.create_user,\n" +
-            "\tb.origin_name\n" +
+            "\tb.origin_name,\n" +
+            "\tc.user_name\n" +
             "FROM\n" +
-            "\torganizations a LEFT JOIN sys_origin b on a.origin_id=b.origin_id")
+            "\torganizations a\n" +
+            "LEFT JOIN sys_origin b ON a.origin_id = b.origin_id\n" +
+            "LEFT JOIN `user` c ON a.create_user=c.user_id")
     Page<Administrative> listAdministrative(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
 }
