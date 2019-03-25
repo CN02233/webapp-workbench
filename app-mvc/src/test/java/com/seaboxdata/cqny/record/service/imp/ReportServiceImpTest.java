@@ -3,6 +3,7 @@ package com.seaboxdata.cqny.record.service.imp;
 import com.AbstractTestService;
 import com.github.pagehelper.Page;
 import com.googlecode.aviator.AviatorEvaluator;
+import com.googlecode.aviator.Expression;
 import com.seaboxdata.cqny.record.entity.ExcelContext;
 import com.seaboxdata.cqny.record.entity.ReportCell;
 import com.seaboxdata.cqny.record.entity.ReportInfo;
@@ -14,6 +15,7 @@ import org.junit.Test;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +68,11 @@ public class ReportServiceImpTest extends AbstractTestService {
 
     @Test
     public void main(){
-        Long result = (Long) AviatorEvaluator.execute("1+2+3");
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("F114FL","1");
+        paramMap.put("FL222FL","2");
+        Expression exxxx = AviatorEvaluator.compile("F114FL+FL222FL");
+        Object result = exxxx.execute(paramMap);
         System.out.println(result);
     }
 }

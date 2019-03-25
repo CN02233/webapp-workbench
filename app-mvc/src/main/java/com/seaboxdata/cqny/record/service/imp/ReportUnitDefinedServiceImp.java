@@ -36,18 +36,18 @@ public class ReportUnitDefinedServiceImp implements ReportDefinedUnitService {
     @Override
     public List getDefinedColums(String unitId,String unitType){
         Integer unitTypeInt = new Integer(unitType);
+        List columsDatas = null;
         if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitTypeInt)){//一维静态
-            List<SimpleColumDefined> columsDatas = reportDefinedUnitOneDimService.getColumByUnit(unitId);
-            return columsDatas;
+            columsDatas = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
-
+            columsDatas = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
 
         }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
-
+            columsDatas = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         }else{
 
         }
-        return null;
+        return columsDatas;
     }
 }

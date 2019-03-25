@@ -5,7 +5,9 @@ import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public interface IReportCustomerDao {
@@ -20,4 +22,10 @@ public interface IReportCustomerDao {
 
     @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId}")
     List<ReportCustomerData> getColumDatas(@Param("reportId") String reportId, @Param("unitId") String unitId);
+
+    @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id}")
+    void updateUnitContext(ReportCustomerData columDatas);
+
+    @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId}")
+    ReportCustomerData getSimpleReportCustomerData(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("columId") String columId);
 }

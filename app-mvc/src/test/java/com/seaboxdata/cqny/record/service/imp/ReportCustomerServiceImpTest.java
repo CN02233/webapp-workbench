@@ -19,6 +19,6 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
 
     @Test
     public void testGetUnitContext() {
-        reportCustomerService.getUnitContext("1","1","1");
+        reportCustomerService.getUnitContext("1","1", "1");
     }
 }

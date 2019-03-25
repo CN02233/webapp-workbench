@@ -133,7 +133,14 @@ const routes = [
                   path: '/record/reportDefined/oneDimensionsDynamic/edit',
                 component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/edit'),
                 children: []
+              },
+              {
+                name: 'oneDimensionsStaticRecord',
+                  path: '/record/onedim/onedimRecord',
+                component: () => import('@/models//record/report/onedim/onedimRecord'),
+                children: []
               }
+
             ]
           },
           {
