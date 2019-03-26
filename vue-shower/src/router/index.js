@@ -198,6 +198,11 @@ const routes = [
             path: '/record/reportUnit',
             component: () => import('@/models/record/submitAuthority/reportunit'),
             children: []
+          },{
+            name: 'reportStatements',
+            path: '/record/reportStatements',
+            component: () => import('@/models/record/submitAuthority/reportstatements'),
+            children: []
           }
         ]
       }
