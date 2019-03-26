@@ -1,5 +1,5 @@
 <template>
-  <WorkMain :headerItems="['报送管理','报表管理','报表填写']">
+  <div>
     <el-form ref="form"  label-width="40%">
       <el-form-item  v-for="definedColum in definedColums" :label="definedColum.colum_name_cn">
         <el-input v-model="columDatas[definedColum.unit_id+'_'+definedColum.colum_id].report_data"
@@ -7,10 +7,10 @@
       </el-form-item>
     </el-form>
 
-    <el-button @click="saveUnitContext" type="info">保存</el-button>
-    <el-button type="primary">上一步</el-button>
-    <el-button type="success">下一步</el-button>
-  </WorkMain>
+    <el-button @click="saveUnitContext(false)" type="info">保存</el-button>
+    <!--<el-button type="primary">上一步</el-button>-->
+    <el-button v-if="lastStep=='true'" @click="nextStep" type="success">下一步</el-button>
+  </div>
 </template>
 
 <script>
@@ -27,6 +27,7 @@
         reportId:"",
         unitId:"",
         unitType:"",
+        lastStep:false,
         definedColums:[],
         columDatas:{}
       }
@@ -39,6 +40,11 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
+        console.log({
+          reportId:this.reportId,
+          unitId:this.unitId,
+          unitType:this.unitType
+        })
         this.BaseRequest({
           url:"/reportCust/getUnitContext",
           params:{
@@ -57,39 +63,115 @@
               })
             }
           }
-        });
+        }).catch(error=>{
+            this.Message.success(error)
+            loading.close()
+          }
+        );
       },
-      saveUnitContext(){
-        const loading = this.$loading({
+      saveUnitContext(needUpdateStep){
+        const $this = this
+
+        // validateSimpleUnitContext
+        const valloading = this.$loading({
           lock: true,
-          text: '保存报送信息中.......',
+          text: '数据校验中.......',
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
-        const $this = this
         this.BaseRequest({
-          url:"/reportCust/saveSimpleUnitContext",
+          url:"/reportCust/validateSimpleUnitContext",
           method:'post',
           data:{
             definedColums:this.definedColums,
             columDatas:Object.values(this.columDatas)
           }
         }).then(response=>{
-          loading.close();
-          $this.Message.success("保存成功")
-          $this.getUnitContext()
+          valloading.close();
+          let validateFailed = false
+          if(response!=null){
+            const validateFailedKeys = Object.keys(response)
+            let failtMes = ""
+            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
+              validateFailed = true
+              validateFailedKeys.forEach(validateFailedKey=>{
+                const failedReason = response[validateFailedKey]
+                failtMes+=(validateFailedKey+":"+failedReason+"<br><br>")
+              })
+
+              this.$notify({
+                dangerouslyUseHTMLString: true,
+                message: '<span style="font-size:15px;color:red;font-weight: bold">'+failtMes+'</span>'
+              })
+            }
+          }
+
+          if(!validateFailed){
+            const loading = this.$loading({
+              lock: true,
+              text: '保存报送信息中.......',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.7)'
+            });
+            this.BaseRequest({
+              url:"/reportCust/saveSimpleUnitContext",
+              method:'post',
+              data:{
+                definedColums:this.definedColums,
+                columDatas:Object.values(this.columDatas)
+              }
+            }).then(response=>{
+              loading.close();
+              $this.Message.success("保存成功")
+              if(needUpdateStep){
+                $this.updateStep()
+              }else{
+                $this.getUnitContext()
+              }
+            });
+          }
         });
+
+
+
+      },
+      updateStep(){
+        const loading = this.$loading({
+          lock: true,
+          text: '更新报送步骤.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        const $this = this
+        this.BaseRequest({
+          url:"/reportCust/updateStep",
+          method:'get',
+          params:{
+            reportId:this.reportId
+          }
+        }).then(response=>{
+          loading.close();
+          $this.Message.success("更新成功")
+
+          this.$emit("refreshReportFill")
+          // this.$router.push({
+          //   path: '/record/report/reportFill',
+          //   query:{
+          //     'reportId':this.reportId
+          //   }
+          // });
+        });
+      },
+      nextStep(){
+        this.saveUnitContext(true)
       }
     },
     mounted:function(){
       this.reportId = this.$route.query.reportId
       this.unitId = this.$route.query.unitId
       this.unitType = this.$route.query.unitType
-      if(true){
-        this.reportId = '1'
-        this.unitId = '1'
-        this.unitType = '1'
-      }
+      this.unitType = this.$route.query.unitType
+      this.lastStep = this.$route.query.lastStep
       this.getUnitContext()
     }
   }

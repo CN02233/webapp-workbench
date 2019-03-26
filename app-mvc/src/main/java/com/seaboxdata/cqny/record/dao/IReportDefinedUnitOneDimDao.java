@@ -23,7 +23,7 @@ public interface IReportDefinedUnitOneDimDao {
     @Options(useGeneratedKeys = true, keyProperty = "colum_id", keyColumn = "colum_id")
     void addSaveOnedim(SimpleColumDefined simpleColumDefined);
 
-    @Select("select * from report_defined_unit")
+    @Select("select * from report_unit_info")
     List<UnitDefined> getUnitByOrigin(String originId);
 
     @Select("select * from report_defined_unit_onedim where unit_id = #{unitId}")

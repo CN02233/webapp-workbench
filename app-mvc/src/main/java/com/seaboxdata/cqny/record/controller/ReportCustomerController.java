@@ -1,9 +1,11 @@
 package com.seaboxdata.cqny.record.controller;
 
+import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
+import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("reportCust")
@@ -55,11 +57,11 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult checkUnitStep(String reportId){
 
-        Object unitStepInfo = reportCustomerService.checkUnitStep(reportId);
+        ReportCustomer unitStepInfo = reportCustomerService.checkReportCustomer(reportId);
 
 
         JsonResult jsonResult = JsonSupport.makeJsonpResult(
-                JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+                JsonResult.RESULT.SUCCESS, "获取欧成功", null,unitStepInfo);
         return jsonResult;
     }
 
@@ -67,6 +69,26 @@ public class ReportCustomerController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getUnitContext(String reportId, String unitId, String unitType){
+        ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
+        Integer currOrder = 0;
+        Integer getUnitOrder = 0;
+        Integer activeUnitId = reportCustomer.getActive_unit();
+        for (UnitEntity unitEntity : reportCustomer.getUnitEntities()) {
+            if(unitEntity.getUnit_id().equals(activeUnitId)){
+                currOrder = unitEntity.getUnit_order();
+            }
+
+            if(unitEntity.getUnit_id().toString().equals(unitId)){
+                getUnitOrder = unitEntity.getUnit_order();
+            }
+
+
+        }
+        if(getUnitOrder>currOrder){
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "该步骤还未填写", null,null);
+            return jsonResult;
+
+        }
         ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,unitContext);
 
@@ -81,6 +103,30 @@ public class ReportCustomerController {
         reportCustomerService.updateSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+
+        return jsonResult;
+    }
+
+    @RequestMapping("validateSimpleUnitContext")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult validateSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
+
+        Map<String, String> validateResult = reportCustomerService.validateSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
+//        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "校验完成", null,validateResult);
+
+        return jsonResult;
+    }
+
+    @RequestMapping("updateStep")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult updateStep(String reportId){
+
+        reportCustomerService.updateStep(reportId);
+//        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
 
         return jsonResult;
     }

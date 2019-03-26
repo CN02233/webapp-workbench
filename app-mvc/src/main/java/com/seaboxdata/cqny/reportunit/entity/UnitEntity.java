@@ -17,6 +17,7 @@ public class UnitEntity {
     //add by SongChaoqun
     private Integer report_defined_id;//属于哪个报表定义
     private Integer unit_type;//报送类型：单元类型一维静态 一维动态 多维树状 多维静态 详见`UnitDefinedType
+    private Integer unit_order;//填报顺序
     private List colums;
 
 
@@ -106,5 +107,13 @@ public class UnitEntity {
 
     public void setColums(List colums) {
         this.colums = colums;
+    }
+
+    public Integer getUnit_order() {
+        return unit_order;
+    }
+
+    public void setUnit_order(Integer unit_order) {
+        this.unit_order = unit_order;
     }
 }

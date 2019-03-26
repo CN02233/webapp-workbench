@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
+import com.google.common.base.Strings;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
 import com.seaboxdata.cqny.record.config.ColumType;
@@ -10,7 +11,8 @@ import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
-import com.seaboxdata.cqny.record.service.ReportDefinedUnitService;
+import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
 import com.webapp.support.page.PageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     private IReportCustomerDao reportCustomerDao;
 
     @Autowired
-    private ReportDefinedUnitService reportDefinedUnitService;
+    private ReportUnitService reportDefinedUnitService;
 
 
     @Override
@@ -103,10 +105,118 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
-    public Object checkUnitStep(String reportId) {
+    public ReportCustomer checkReportCustomer(String reportId) {
         ReportCustomer reportCustomer = reportCustomerDao.checkReportCustomer(reportId);
+        return reportCustomer;
+    }
 
-        return null;
+    @Override
+    public Integer checkNextStepUnitId(String reportId) {
+        ReportCustomer reportCustomer = reportCustomerDao.checkReportCustomer(reportId);
+        Integer currUnitId = reportCustomer.getActive_unit();
+        Integer nexyCurrUnitId = null;
+        List<UnitEntity> allUnit = reportCustomer.getUnitEntities();
+        boolean nextCheckOut = false;
+        for (UnitEntity unitEntity : allUnit) {
+            Integer unitOrder = unitEntity.getUnit_order();
+             if(unitEntity.getUnit_id().equals(currUnitId)){
+                nextCheckOut = true;
+                continue;
+            }
+            if(nextCheckOut){
+                nexyCurrUnitId = unitEntity.getUnit_id();
+                break;
+            }
+        }
+
+        return nexyCurrUnitId;
+    }
+
+    @Override
+    public void updateStep(String reportId) {
+        Integer nextStepUnit = this.checkNextStepUnitId(reportId);
+        reportCustomerDao.updateStep(reportId,nextStepUnit);
+    }
+
+    @Override
+    public Map<String,String> validateSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
+
+        Map<String,String> dataTmp = new HashMap<>();
+        for (ReportCustomerData columData : columDatas) {
+            String unitId = columData.getUnit_id();
+            String columId = columData.getColum_id();
+            dataTmp.put(unitId+"_"+columId,columData.getReport_data());
+        }
+
+        Map<String,String> validateResult  = new HashMap<>();
+        
+        for (SimpleColumDefined definedColum : definedColums) {
+            Integer unitId = definedColum.getUnit_id();
+            Integer columId = definedColum.getColum_id();
+            if(dataTmp.containsKey(unitId+"_"+columId)){
+                Integer columTypeINT = new Integer(definedColum.getColum_data_type());
+                if(Strings.isNullOrEmpty(dataTmp.get(unitId+"_"+columId))){
+                    validateResult.put(definedColum.getColum_name_cn(),"数据不允许为空");
+                    continue;
+                }
+
+                if(ColumType.NUMBER.compareWith(columTypeINT)){
+                    Integer maxValue = definedColum.getMax_value();
+                    Integer minValue = definedColum.getMin_value();
+
+                    try{
+                        Integer dataInt = new Integer(dataTmp.get(unitId+"_"+columId));
+                        if(dataInt<=maxValue&&dataInt>=minValue){
+                        }else{
+                            validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
+                        }
+                    }catch (NumberFormatException e){
+                        try{
+                            Long dataFormatter = new Long(dataTmp.get(unitId+"_"+columId));
+                            if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                            }else{
+                                validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
+                            }
+                        }catch (NumberFormatException e1){
+                            try{
+                                Float dataFormatter = new Float(dataTmp.get(unitId+"_"+columId));
+                                if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                                }else{
+                                    validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                }
+                            }catch(NumberFormatException e2){
+                                try{
+                                    Double dataFormatter = new Double(dataTmp.get(unitId+"_"+columId));
+                                    if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                                    }else{
+                                        validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                    }
+                                }catch(NumberFormatException e3){
+                                    try{
+                                        BigDecimal dataFormatter = new BigDecimal(dataTmp.get(unitId+"_"+columId));
+                                        if((dataFormatter.compareTo(new BigDecimal(minValue))>=0)&&(dataFormatter.compareTo(new BigDecimal(maxValue))<=0)){
+                                        }else{
+                                            validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                        }
+                                    }catch(NumberFormatException e4){
+                                        validateResult.put(definedColum.getColum_name_cn(),"数据格式错误");
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+
+
+                }else if(ColumType.STRING.compareWith(columTypeINT)){
+
+                }else if(ColumType.DATE.compareWith(columTypeINT)){
+
+                }
+            }
+        }
+        
+        return validateResult;
     }
 
     public Object refreshSimpleFomularData(String reportId,String columFomular){
