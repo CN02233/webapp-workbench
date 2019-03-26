@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.reportunit.entity;
 
+import java.util.List;
+
 public class UnitEntity {
 
     private Integer unit_id;
@@ -11,6 +13,12 @@ public class UnitEntity {
     //辅助属性、前端显示name
     private String origin_name;
     private String user_name;
+
+    //add by SongChaoqun
+    private Integer report_defined_id;//属于哪个报表定义
+    private Integer unit_type;//报送类型：单元类型一维静态 一维动态 多维树状 多维静态 详见`UnitDefinedType
+    private List colums;
+
 
     public String getUser_name() {
         return user_name;
@@ -74,5 +82,29 @@ public class UnitEntity {
 
     public void setCreate_user(int create_user) {
         this.create_user = create_user;
+    }
+
+    public Integer getReport_defined_id() {
+        return report_defined_id;
+    }
+
+    public void setReport_defined_id(Integer report_defined_id) {
+        this.report_defined_id = report_defined_id;
+    }
+
+    public Integer getUnit_type() {
+        return unit_type;
+    }
+
+    public void setUnit_type(Integer unit_type) {
+        this.unit_type = unit_type;
+    }
+
+    public List getColums() {
+        return colums;
+    }
+
+    public void setColums(List colums) {
+        this.colums = colums;
     }
 }

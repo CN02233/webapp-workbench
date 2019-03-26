@@ -12,4 +12,6 @@ public interface ReportCustomerService {
     ReportUnitCustomerContext getUnitContext(String reportId, String unitId, String unitType);
 
     void updateSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds,ArrayList<ReportCustomerData> columDatas);
+
+    Object checkUnitStep(String reportId);
 }

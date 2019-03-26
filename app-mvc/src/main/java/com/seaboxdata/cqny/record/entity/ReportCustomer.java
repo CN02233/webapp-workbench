@@ -12,6 +12,7 @@ public class ReportCustomer {
     private Integer last_modify_user;
     private Date report_start_date;
     private Date report_end_date;
+    private Integer active_unit;
 
     public Integer getReport_id() {
         return report_id;
@@ -75,5 +76,13 @@ public class ReportCustomer {
 
     public void setReport_end_date(Date report_end_date) {
         this.report_end_date = report_end_date;
+    }
+
+    public Integer getActive_unit() {
+        return active_unit;
+    }
+
+    public void setActive_unit(Integer active_unit) {
+        this.active_unit = active_unit;
     }
 }

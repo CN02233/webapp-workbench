@@ -5,6 +5,7 @@ import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
 import com.seaboxdata.cqny.record.config.ColumType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
+import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
@@ -101,6 +102,13 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     }
 
+    @Override
+    public Object checkUnitStep(String reportId) {
+        ReportCustomer reportCustomer = reportCustomerDao.checkReportCustomer(reportId);
+
+        return null;
+    }
+
     public Object refreshSimpleFomularData(String reportId,String columFomular){
 
         int value = -1;
@@ -108,6 +116,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         String columFomularTmp = columFomular;
 
         Map<String,Object> fomularParams = new HashMap<>();
+
         while(( value = columFomularTmp.indexOf("#"))>=0){
             columFomularTmp = columFomularTmp.replaceFirst("#","");
             int columEnd = columFomularTmp.indexOf("#");

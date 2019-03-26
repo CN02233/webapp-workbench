@@ -20,6 +20,9 @@ public interface IReportCustomerDao {
                                     @Param("userId") Integer userId);
 
 
+    @Select("select * from report_customer where report_id = #{reportId}")
+    ReportCustomer checkReportCustomer(String reportId);
+
     @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId}")
     List<ReportCustomerData> getColumDatas(@Param("reportId") String reportId, @Param("unitId") String unitId);
 
