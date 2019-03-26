@@ -1,5 +1,5 @@
 <template>
-  <WorkMain :headerItems="['报送管理','报送机构管理']">
+  <WorkMain :headerItems="['报送管理','报送报表']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
         <el-button @click="openAddModal" type="primary">新增</el-button>
@@ -8,36 +8,48 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="originDataList"
+          :data="statementsDataList"
           style="width: 100%">
           <el-table-column
-            prop="origin_id"
+            prop="statements_name"
             align="left"
-            label="机构编号">
+            width="150"
+            label="报表名称">
+          </el-table-column>
+          <el-table-column
+            prop="status"
+            align="left"
+            width="150"
+            label="状态">
           </el-table-column>
           <el-table-column
             prop="origin_name"
             align="left"
-            hidden="hidden"
-            label="机构名称">
+            width="230"
+            label="所属机构">
           </el-table-column>
           <el-table-column
-            prop="parent_origin_id"
+            prop="create_time"
             align="left"
-            label="上级机构编号">
+            width="180"
+            label="创建时间">
           </el-table-column>
           <el-table-column
-            prop="parent_origin_name"
+            prop="user_name"
             align="left"
-            label="上级机构名称"
-            :formatter="formatterSuperName"
-          >
+            width="100"
+            label="创建人">
           </el-table-column>
           <el-table-column
+            fixed="right"
             label="操作"
             align="left"
+            width="250"
             >
             <template slot-scope="scope">
+              <el-button
+                size="mini"
+                >报送单元</el-button>
               <el-button
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -58,43 +70,28 @@
     <!-- 新增、编辑 弹窗-->
     <el-dialog :title="dialogTitle" :visible.sync="showModalPage" >
       <el-row :gutter="16">
-        <el-col :sm="12" >
-          <el-row>
-            <el-input
-              placeholder="输入机构名称快速查找机构"
-              v-model="filterText">
-            </el-input>
-            <el-tree
-              accordion
-              class="filter-tree"
-              :data="data"
-              :props="defaultProps"
-              ref="searchConditionRef"
-              :filter-node-method="filterNode"
-              @node-click="handleNodeClick">
-            </el-tree>
 
-          </el-row>
-        </el-col>
         <el-col :sm="12">
           <el-row>
-            <el-col :span="6" :offset="1">上级机构</el-col>
-            <el-col :span="17">
-              <el-input placeholder="上级机构" v-model="formSubmitData.parent_origin_name" class="input-with-select" readonly="true"></el-input>
+            <el-col :span="8" :offset="1">报表名称</el-col>
+            <el-col :span="15">
+              <el-input placeholder="报送单元名称" v-model="formSubmitData.statements_name" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="6" :offset="1">机构名称</el-col>
-            <el-col :span="17">
-              <el-input placeholder="机构名称" v-model="formSubmitData.origin_name" class="input-with-select" ></el-input>
+            <el-col :span="8" :offset="1">所属报送机构</el-col>
+            <el-col :span="15">
+              <div id="app">
+                <treeselect v-model="formSubmitData.origin_id"  :options="options" />
+              </div>
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="6" :offset="1">机构状态</el-col>
-            <el-col :span="17">
-              <el-select v-model="formSubmitData.origin_status" placeholder="请选择机构状态">
+            <el-col :span="8" :offset="1">报表状态</el-col>
+            <el-col :span="15">
+              <el-select v-model="formSubmitData.status" placeholder="请选择报送单元状态">
                 <el-option
-                  v-for="item in options"
+                  v-for="item in statusOptions"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value">
@@ -116,13 +113,15 @@
 import WorkTablePager from '@/models/public/WorkTablePager'
 import WorkMain from '@/models/public/WorkMain'
 import { required } from 'vuelidate/lib/validators'
+import Treeselect from '@riophae/vue-treeselect'
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 export default {
   name: 'OriginMain',
   data () {
     return {
-      originDataList: [],
-      originDataObjs: {},
-      tableDataUrl: 'submitAU/listSubmitauthority',
+      statementsDataList: [],
+      statementsDataObjs: {},
+      tableDataUrl: 'reportStatements/listReportStatements',
       currPageNum: 1,
       eachPageNum: 10,
       totalPage: 1,
@@ -130,50 +129,43 @@ export default {
       isEditModal: false,
       dialogTitle: '',
       formSubmitData: {
-        origin_name: '',
-        parent_origin_id: '',
-        parent_origin_name: '',
-        origin_status: ''
+        statements_id: null,
+        statements_name: null,
+        origin_id: null,
+        origin_name: null,
+        status: null
       },
-      search: '',
-      defaultProps: {
-        children: 'children',
-        label: 'label'
-      },
-      filterText: '',
-      data: [],
-      options: [{
-        value: '1',
-        label: '正常'
+      options: [],
+      statusOptions: [{
+        value: '100',
+        label: '编辑中'
       }, {
-        value: '0',
-        label: '停用'
+        value: '200',
+        label: '已发布'
       }, {
-        value: '9',
-        label: '注销'
+        value: '300',
+        label: '已使用'
       }]
-    }
-  },
-  watch: {// 监听节点搜索的内容
-    filterText (val) {
-      this.$refs.searchConditionRef.filter(val)
     }
   },
   validations: {// 提交前的验证
     formSubmitData: {
-      origin_name: {
+      statements_name: {
         required
       },
-      origin_status: {
+      origin_id: {
+        required
+      },
+      status: {
         required
       }
     }
   },
   computed: {
     // 初始化加载
-
   },
   components: {
+    Treeselect,
     WorkTablePager,
     WorkMain
   },
@@ -191,24 +183,20 @@ export default {
         params: {currPage: pageNum, pageSize: this.eachPageNum}
       }).then(response => {
         if (response.dataList != null) {
-          response.dataList.forEach(originObj => {
-            $this.originDataObjs[originObj.origin_id] = originObj
+          response.dataList.forEach(statementsObj => {
+            $this.statementsDataObjs[statementsObj.organization_id] = statementsObj
           })
         }
-        $this.originDataList = response.dataList
+        $this.statementsDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
-    formatterSuperName: function (row) {
-      return this.originDataObjs[row.parent_origin_id] != null ? this.originDataObjs[row.parent_origin_id].origin_name : '无'
-    },
     refreshTableList: function (dataList) {
-      this.originDataList = dataList
+      this.statementsDataList = dataList
     },
     openAddModal: function () {
       this.clearData()
-      this.dialogTitle = '新增机构'
-      this.formSubmitData.origin_status = '1'
+      this.dialogTitle = '新增报送报表'
       this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
@@ -224,17 +212,11 @@ export default {
       }).then(response => {
         if (response != null && response.length > 0) {
           this.data = []
+          console.log(response)
+          this.options = response
           this.data = response
         }
       })
-    },
-    handleNodeClick (data) { // 点击树的节点进行赋值
-      this.formSubmitData.parent_origin_id = data.id
-      this.formSubmitData.parent_origin_name = data.label
-    },
-    filterNode (value, data) { // 树节点的过滤
-      if (!value) return true
-      return data.name.indexOf(value) !== -1
     },
     handleInsert () { // 添加、修改确定按钮触发
       if (this.checkInputNull()) {
@@ -247,7 +229,7 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       })
       this.BaseRequest({
-        url: '/submitAU/addSubmitauthority',
+        url: '/reportStatements/addReportStatements',
         method: 'post',
         data: this.formSubmitData
       }).then(() => {
@@ -262,38 +244,39 @@ export default {
       })
     },
     handleEdit (index, row) { // 修改
-      this.dialogTitle = '修改机构'
+      console.log(row)
+      this.dialogTitle = '修改报送报表'
       this.showModalPage = true
       this.isEditModal = true
+      this.formSubmitData.statements_id = row.statements_id
+      this.formSubmitData.statements_name = row.statements_name
       this.formSubmitData.origin_id = row.origin_id
-      this.formSubmitData.origin_name = row.origin_name
-      this.formSubmitData.origin_status = row.origin_status
-      this.formSubmitData.parent_origin_id = row.parent_origin_id
-      this.formSubmitData.parent_origin_name = this.formatterSuperName(row)
+      this.formSubmitData.status = row.status
     },
     clearData () { // 每次添加之前清空数据、
       /* //this.formSubmitData= {};
-        // this.formSubmitData.origin_status= '';
-        // this.formSubmitData.parent_origin_id= '';
-        // this.formSubmitData.parent_origin_name= ''; */
+        // this.formSubmitData.statements_status= '';
+        // this.formSubmitData.parent_statements_id= '';
+        // this.formSubmitData.parent_statements_name= ''; */
       this.formSubmitData = {
-        origin_name: null,
-        parent_origin_id: null,
-        parent_origin_name: null,
-        origin_status: null
+        statements_id: null,
+        statements_name: null,
+        status: null,
+        origin_id: null,
+        origin_name: null
       }
     },
     handleDelete (index, row) { // 删除
-      this.$confirm('确定删除机构【' + row.origin_name + '】？', '提示', {
+      this.$confirm('确定删除报送单元【' + row.statements_name + '】？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         dangerouslyUseHTMLString: true,
         type: 'warning'
       }).then(() => {
         this.BaseRequest({
-          url: '/submitAU/delById',
+          url: '/reportStatements/delById',
           method: 'get',
-          params: {'originId': row.origin_id}
+          params: {'statementsId': row.statements_id}
         }).then(() => {
           this.Message.success('删除成功')
           this.getTableData()
@@ -306,14 +289,14 @@ export default {
       if (checkResult) {
         this.$notify({
           dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>机构名称、机构状态'
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、状态'
         })
       }
       return checkResult
     }
   },
   mounted: function () { // 初始化
-    this.originDataList = []
+    this.statementsDataList = []
     this.getTableData(1)
     this.getOriginList()
   }

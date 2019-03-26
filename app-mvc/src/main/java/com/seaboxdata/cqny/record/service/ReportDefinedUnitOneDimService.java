@@ -27,7 +27,9 @@ public interface ReportDefinedUnitOneDimService {
 
     List<Map> getGroupByUnit(String unitId);
 
-    void editSaveOnedimBat(Map<String, List<SimpleColumDefined>> maps);
+    void editSaveOnedimDynamic(SimpleColumDefined group, Map<String, List<SimpleColumDefined>> maps);
 
     void deleteOneDimDynamic(Integer unitId, String group_id);
+
+    PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, String group_id);
 }

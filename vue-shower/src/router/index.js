@@ -147,6 +147,30 @@ const routes = [
                 ]
               },
 
+              {
+                name: 'oneDimensionsStaticRecord',
+                path: '/record/onedim/onedimRecord',
+                component: () => import('@/models//record/report/onedim/onedimRecord'),
+                children: []
+              },
+              {
+                name: 'multDimensionsStatic',
+                path: '/record/reportDefined/multDimensionsStatic',
+                component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/main'),
+                children: []
+              },
+              {
+                name: 'multDimensionsStaticAdd',
+                path: '/record/reportDefined/multDimensionsStatic/add',
+                component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/add'),
+                children: []
+              },
+              {
+                name: 'multDimensionsStaticEdit',
+                path: '/record/reportDefined/multDimensionsStatic/edit',
+                component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/edit'),
+                children: []
+              }
             ]
           },
           {
@@ -203,6 +227,11 @@ const routes = [
             name: 'reportUnit',
             path: '/record/reportUnit',
             component: () => import('@/models/record/submitAuthority/reportunit'),
+            children: []
+          },{
+            name: 'reportStatements',
+            path: '/record/reportStatements',
+            component: () => import('@/models/record/submitAuthority/reportstatements'),
             children: []
           }
         ]

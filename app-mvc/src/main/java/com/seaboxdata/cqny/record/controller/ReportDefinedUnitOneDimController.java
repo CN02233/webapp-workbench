@@ -108,8 +108,18 @@ public class ReportDefinedUnitOneDimController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult editSaveOnedimDynamic(@RequestBody Map<String,List<SimpleColumDefined>> maps){
-
-        reportDefinedUnitOneDimService.editSaveOnedimBat(maps);
+        SimpleColumDefined group = null;
+        if(maps.containsKey("group")){
+            List<SimpleColumDefined> list = maps.get("group");
+            if(list.size()>0)
+                group = list.get(0);
+        }
+        if(group == null) {
+            JsonResult err = new JsonResult();
+            err.setFaild_reason("格式不正确");
+            return err;
+        }
+        reportDefinedUnitOneDimService.editSaveOnedimDynamic(group, maps);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
@@ -120,6 +130,15 @@ public class ReportDefinedUnitOneDimController {
     public JsonResult deleteOneDimDynamic(Integer unitId, String group_id){
         reportDefinedUnitOneDimService.deleteOneDimDynamic(unitId, group_id);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+        return jsonResult;
+    }
+
+    @RequestMapping("pagerMultdimListStatic")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult pagerMultdimListStatic(Integer currPage,Integer pageSize, Integer unitId, String group_id){
+        PageResult definedpageLIst = reportDefinedUnitOneDimService.pagerMultdimListStatic(currPage,pageSize, unitId, group_id);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,definedpageLIst);
         return jsonResult;
     }
 }
