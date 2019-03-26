@@ -46,8 +46,14 @@ public interface IReportDefinedUnitOneDimDao {
             +" order by group_id,colum_id</script>")
     Page<Map<String, Object>> pagerOnedimListDynamic(@Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize, @Param("unitId") Integer unitId, @Param("group_id") String group_id);
 
-
-    @Select("select distinct group_id,group_name from report_defined_unit_onedim where unit_id = #{unitId}")
+    @Select("select colum_id group_id,colum_name_cn group_name from report_defined_unit_onedim where unit_id = #{unitId} and group_id is null")
     List<Map> getGroupByUnit(String unitId);
+
+    @Select("<script>select * from ( select a.*,b.dim_name from report_defined_unit_onedim a "
+            +" left join (select group_concat(`colum_name_cn`) dim_name, unit_id uid from report_defined_unit_onedim where unit_id=#{unitId} and colum_type='2') b"
+            +" on a.unit_id=b.uid  where unit_id=#{unitId} and colum_type='1'"
+            +"<if test=\"group_id!='' and group_id!=null and group_id!='null'\"> and group_id = #{group_id}</if>"
+            +") x order by group_id,colum_id</script>")
+    Page<Map<String, Object>> pagerMultdimListStatic(@Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize, @Param("unitId") Integer unitId, @Param("group_id") String group_id);
 
 }

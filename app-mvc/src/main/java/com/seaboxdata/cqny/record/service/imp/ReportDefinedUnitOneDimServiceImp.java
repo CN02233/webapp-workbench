@@ -81,18 +81,27 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
     }
 
     /**
-     * 批量保存报送单元
+     * 保存一维动态报送单元
      * @param maps
      */
     @Override
-    public void editSaveOnedimBat(Map<String, List<SimpleColumDefined>> maps)
-    {
+    public void editSaveOnedimDynamic(SimpleColumDefined group, Map<String, List<SimpleColumDefined>> maps) {
+        //是否存在组，不存在新增一行
+        Integer group_id = group.getColum_id();
+        String group_name = group.getColum_name_cn();
+        Integer save_group_id = null;
+        if(group_id == null || group_id.equals(0)){
+            group.setColum_data_type("2");
+            group.setColum_type("1");
+            reportDefinedUnitOneDimDao.addSaveOnedim(group);
+            save_group_id = group.getColum_id();
+        }else{
+            save_group_id = Integer.valueOf(group_id);
+        }
         if(maps.containsKey("add")){
-            int group_id = getTimestamp();//有BUG，不支持多人同步
             for(SimpleColumDefined mod1 : maps.get("add")){
-                Integer gid = mod1.getGroup_id();
-                if(gid == null)
-                    mod1.setGroup_id(group_id);
+                mod1.setGroup_id(save_group_id);
+                mod1.setGroup_name(group_name);
                 reportDefinedUnitOneDimDao.addSaveOnedim(mod1);
             }
         }
@@ -129,5 +138,12 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
         for(Map<String, Object> map : pageData){
             reportDefinedUnitOneDimDao.deleteOneDim(map.get("colum_id").toString());
         }
+    }
+
+    @Override
+    public PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, String group_id) {
+        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerMultdimListStatic(currPage, pageSize, unitId, group_id);
+        PageResult pageResult = PageResult.pageHelperList2PageResult(pageData);
+        return pageResult;
     }
 }
