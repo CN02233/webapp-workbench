@@ -135,7 +135,7 @@
         }else if(defined_type=='2'){
           editUrl = '/record/reportDefined/oneDimensionsDynamic'
         }else if(defined_type=='3'){
-
+          editUrl = '/record/reportDefined/multDimensionsStatic'
         }else if(defined_type=='4'){
 
         }else{
