@@ -65,7 +65,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         Map<String,String> fomularMap = new HashMap<>();
         if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
             simpleColumDefineds.forEach(simpleColumDefined->{
-                Integer columType = new Integer(simpleColumDefined.getColum_data_type());
+                Integer columType = new Integer(simpleColumDefined.getColum_type());
                 if(ColumType.FORMULA.compareWith(columType)){
                     fomularsTmp.put(simpleColumDefined.getUnit_id()+"_"+simpleColumDefined.getColum_id(),simpleColumDefined);
                 }
@@ -154,7 +154,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
             Integer unitId = definedColum.getUnit_id();
             Integer columId = definedColum.getColum_id();
             if(dataTmp.containsKey(unitId+"_"+columId)){
-                Integer columTypeINT = new Integer(definedColum.getColum_data_type());
+                Integer columTypeINT = new Integer(definedColum.getColum_type());
                 if(Strings.isNullOrEmpty(dataTmp.get(unitId+"_"+columId))){
                     validateResult.put(definedColum.getColum_name_cn(),"数据不允许为空");
                     continue;

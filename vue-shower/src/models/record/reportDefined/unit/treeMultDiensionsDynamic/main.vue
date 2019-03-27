@@ -1,6 +1,6 @@
 
 <template>
-  <WorkMain :headerItems="['报送管理','报送设置','报送定义列表','一维静态报送单元']">
+  <WorkMain :headerItems="['报送管理','报送设置','报送定义列表','多维树状动态报送单元']">
 
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
@@ -21,13 +21,18 @@
           <el-table-column
             prop="colum_name_cn"
             align="left"
-            label="输入项名">
+            label="维度名">
           </el-table-column>
           <el-table-column
             prop="colum_type"
             align="left"
             :formatter="formatterDataType"
             label="输入项类型">
+          </el-table-column>
+          <el-table-column
+            prop="parent_id"
+            align="left"
+            label="上级维度">
           </el-table-column>
           <el-table-column
             prop="module_url"
@@ -53,11 +58,20 @@
     <!--新增输入项弹窗-->
     <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" >
       <el-form ref="editForm" class="modal-form" label-position="left" label-width="30%" :model="formData">
-        <el-form-item label="输入项名称" >
-          <el-input v-model="formData.colum_name"  auto-complete="off" ></el-input>
+        <el-form-item label="输入单元名称" >
+          <el-input v-model="formData.group_name" :disabled="group_name!=''"  auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item label="输入项中文名称" >
-          <el-input v-model="formData.colum_name_cn" auto-complete="off" ></el-input>
+        <el-form-item label="上级维度" >
+          <el-select :disabled="isEditModal&&formData.parent_id==0" v-model="formData.parent_id"  :value="formData.parent_id" style="width:100%;" placeholder="请选择数据类型">
+            <el-option key="0" label="无上级" :value="0"></el-option>
+            <el-option :key="unitColum.colum_id" v-for="unitColum in unitColums" :label="unitColum.colum_name_cn" :value="unitColum.colum_id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="维度名称" >
+          <el-input v-model="formData.colum_name" placeholder="输入项代号 例:realBalance"  auto-complete="off" ></el-input>
+        </el-form-item>
+        <el-form-item label="维度中文名称" >
+          <el-input v-model="formData.colum_name_cn" placeholder="维度中文示意 例:实际收入" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="输入项数据类型" >
           <el-select v-model="formData.colum_type" style="width:100%;" placeholder="请选择数据类型">
@@ -173,17 +187,23 @@
         colum_formula_array:[],
         colum_formula_desc_array:[],
         isEditModal:false,
+        group_id:'0',
+        group_name:"",
         addFormData:{
+          'parent_id':0,
           'colum_name':'',
           'colum_name_cn':'',
           'colum_type':'1',
-          'min_value':'',
-          'max_value':'',
+          'min_value':0,
+          'max_value':9999,
           'colum_formula':'',
           'colum_formula_desc':'',
-          'unit_id':''
+          'unit_id':'',
+          'group_id':this.group_id,
+          'group_name':this.group_name
         },
         editFormData:{
+          'parent_id':'',
           'colum_name':'',
           'colum_name_cn':'',
           'colum_type':'1',
@@ -191,7 +211,9 @@
           'max_value':'',
           'colum_formula':'',
           'colum_formula_desc':'',
-          'unit_id':''
+          'unit_id':'',
+          'group_id':"",
+          'group_name':""
         },
         isOpenFormulaEditor:false,
         formulaDescContext:[],
@@ -205,6 +227,9 @@
     },
     validations:{
       formData:{
+        group_name:{
+          required
+        },
         colum_name:{
           required
         },
@@ -215,6 +240,7 @@
           required
         }
       }
+
     },
     methods: {
       getTableData:function(pageNum){
@@ -226,17 +252,23 @@
         const $this = this
 
         this.BaseRequest({
-          url:'unitOneDimColum/pagerOnedimList',
+          url:'unitTreeDimColum/pagerTreedimList',
           method:"get",
           params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId}
         }).then(response=>{
           $this.unitColums = response.dataList
           $this.totalPage = response.totalPage
+          if($this.unitColums!=null&&$this.unitColums.length>0){
+            $this.group_name = $this.unitColums[0].group_name
+            $this.group_id = $this.unitColums[0].group_id
+          }
         })
       },
       addColum(){
         this.addOrEditModelOpend = true
         this.isEditModal = false
+        this.addFormData.group_id = this.group_id
+        this.addFormData.group_name = this.group_name
       },
       viewDefined(){
 
@@ -324,7 +356,7 @@
           $this.addFormData.colum_formula = null
           $this.addFormData.colum_formula_desc = null
         }
-        this.subSave($this.addFormData,'unitOneDimColum/addSaveOnedim')
+        this.subSave($this.addFormData,'unitTreeDimColum/addSaveTreedim')
 
       },
       editSave(){
@@ -345,7 +377,9 @@
           $this.editFormData.colum_formula = null
           $this.editFormData.colum_formula_desc = null
         }
-        this.subSave($this.editFormData,'unitOneDimColum/editSaveOnedim')
+        $this.editFormData.group_name = this.group_name
+        $this.editFormData.group_id = this.group_id
+        this.subSave($this.editFormData,'unitTreeDimColum/editSaveTreedim')
       },
       subSave(sendData,sendUrl){
         const $this = this
@@ -386,7 +420,7 @@
         if(checkResult) {
           this.$notify({
             dangerouslyUseHTMLString: true,
-            message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>输入项名称、输入项中文名称、输入项数据类型'
+            message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>单元名称、维度名称、维度中文名称、输入项数据类型'
           })
         }else{
           if(this.formData.colum_type==='0'){

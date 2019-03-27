@@ -17,9 +17,9 @@ public interface IReportDefinedUnitOneDimDao {
 
     @Insert("insert into report_defined_unit_onedim " +
             "(colum_name,colum_name_cn,group_id," +
-            "group_name,unit_id,colum_data_type,min_value,max_value ,colum_formula,colum_formula_desc," +
+            "group_name,unit_id,min_value,max_value ,colum_formula,colum_formula_desc," +
             "parent_id,parent_name,colum_type,colum_desc) values " +
-            "(#{colum_name},#{colum_name_cn},#{group_id},#{group_name},#{unit_id},#{colum_data_type}," +
+            "(#{colum_name},#{colum_name_cn},#{group_id},#{group_name},#{unit_id}," +
             "#{min_value},#{max_value},#{colum_formula},#{colum_formula_desc}," +
             "#{parent_id},#{parent_name},#{colum_type},#{colum_desc})")
     @Options(useGeneratedKeys = true, keyProperty = "colum_id", keyColumn = "colum_id")
@@ -38,8 +38,7 @@ public interface IReportDefinedUnitOneDimDao {
     SimpleColumDefined getOnedimColumn(String columId);
 
     @Update("update report_defined_unit_onedim set colum_name=#{colum_name},colum_name_cn=#{colum_name_cn}," +
-            "group_id=#{group_id},group_name=#{group_name}," +
-            "colum_data_type=#{colum_data_type},min_value=#{min_value},max_value=#{max_value} ," +
+            "group_id=#{group_id},group_name=#{group_name},min_value=#{min_value},max_value=#{max_value} ," +
             "parent_id=#{parent_id},parent_name=#{parent_name},colum_type=#{colum_type},colum_desc=#{colum_desc} ," +
             "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc} where colum_id=#{colum_id}")
     void editSaveOnedim(SimpleColumDefined simpleColumDefined);

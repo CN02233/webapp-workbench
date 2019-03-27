@@ -9,14 +9,13 @@ public class SimpleColumDefined {
     private Integer group_id;
     private String group_name;
     private Integer unit_id;
-    private String colum_data_type;
+    private String colum_type;
     private Integer min_value;
     private Integer max_value    ;
     private String colum_formula    ;
     private String colum_formula_desc    ;
     private Integer parent_id;
     private String parent_name;
-    private String colum_type;
     private String colum_desc;
 
 
@@ -66,14 +65,6 @@ public class SimpleColumDefined {
 
     public void setUnit_id(Integer unit_id) {
         this.unit_id = unit_id;
-    }
-
-    public String getColum_data_type() {
-        return colum_data_type;
-    }
-
-    public void setColum_data_type(String colum_data_type) {
-        this.colum_data_type = colum_data_type;
     }
 
     public Integer getMin_value() {

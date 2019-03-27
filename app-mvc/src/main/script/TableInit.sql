@@ -42,6 +42,34 @@ INSERT INTO `app_module` VALUES (1,0,'报送管理','/record'),(6,0,'权限管�
 UNLOCK TABLES;
 
 --
+-- Table structure for table `organizations`
+--
+
+DROP TABLE IF EXISTS `organizations`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `organizations` (
+  `organization_id` int(255) NOT NULL AUTO_INCREMENT,
+  `organization_name` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `create_user` varchar(255) DEFAULT NULL,
+  `origin_id` int(11) DEFAULT NULL,
+  `origin_name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`organization_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `organizations`
+--
+
+LOCK TABLES `organizations` WRITE;
+/*!40000 ALTER TABLE `organizations` DISABLE KEYS */;
+INSERT INTO `organizations` VALUES (2,'asdsadsad','2019-03-25 17:47:57','1',50,NULL),(6,'sss','2019-03-22 15:04:25','1',56,NULL),(7,'司法局','2019-03-22 15:04:27','1',48,NULL),(8,'民政局','2019-03-22 15:04:28','1',48,NULL),(9,'税务局1','2019-03-25 15:05:28','1',50,NULL),(10,'国土局','2019-03-22 15:04:32','1',49,NULL),(11,'公安厅','2019-03-22 15:04:35','1',56,NULL),(12,'交通局','2019-03-22 15:04:36','1',49,NULL),(13,'国税局','2019-03-22 15:04:37','1',48,NULL),(14,'名证据','2019-03-22 15:04:38','1',49,NULL),(15,'规划局','2019-03-22 15:04:20','1',56,NULL),(17,'xx','2019-03-22 15:24:26','1',50,NULL),(18,'adad','2019-03-25 17:47:51','1',50,NULL),(19,'asasd','2019-03-25 17:53:56','1',88,NULL);
+/*!40000 ALTER TABLE `organizations` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `origin_template_assign`
 --
 
@@ -151,7 +179,7 @@ CREATE TABLE `report_customer` (
 
 LOCK TABLES `report_customer` WRITE;
 /*!40000 ALTER TABLE `report_customer` DISABLE KEYS */;
-INSERT INTO `report_customer` VALUES (1,1,'报表名称',48,'2019-03-22',1,'2019-03-25','2019-06-25',1),(2,1,'报表名称2',48,'2019-03-22',1,'2019-03-25','2019-06-25',NULL);
+INSERT INTO `report_customer` VALUES (1,1,'报表名称',48,'2019-03-22',1,'2019-03-25','2019-06-25',9),(2,1,'报表名称2',48,'2019-03-22',1,'2019-03-25','2019-06-25',NULL);
 /*!40000 ALTER TABLE `report_customer` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -178,7 +206,7 @@ CREATE TABLE `report_customer_data` (
 
 LOCK TABLES `report_customer_data` WRITE;
 /*!40000 ALTER TABLE `report_customer_data` DISABLE KEYS */;
-INSERT INTO `report_customer_data` VALUES (1,'1',NULL,'8',NULL,'123'),(1,NULL,NULL,'11',NULL,'123'),(1,'1',NULL,'14',NULL,'123'),(1,'1',NULL,'15',NULL,'2230000000000.12'),(1,'1',NULL,'16',NULL,'333'),(1,'1',NULL,'20',NULL,'2.230000026056E12');
+INSERT INTO `report_customer_data` VALUES (1,'7',NULL,'8',NULL,'123'),(1,NULL,NULL,'11',NULL,'123'),(1,'7',NULL,'14',NULL,'8888'),(1,'7',NULL,'15',NULL,'2300.12'),(1,'7',NULL,'16',NULL,'9999'),(1,'7',NULL,'20',NULL,'21187.1201171875'),(1,'8',NULL,'23',NULL,'123'),(1,'8',NULL,'24',NULL,'33'),(1,'8',NULL,'25',NULL,'222'),(1,'8',NULL,'27',NULL,'333'),(1,'8',NULL,'28',NULL,'444'),(1,'8',NULL,'29',NULL,'3331'),(1,'8',NULL,'30',NULL,'3775');
 /*!40000 ALTER TABLE `report_customer_data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -210,34 +238,6 @@ INSERT INTO `report_defined` VALUES (1,'报表名称','报表说明','2019-03-17
 UNLOCK TABLES;
 
 --
--- Table structure for table `report_defined_unit`
---
-
-DROP TABLE IF EXISTS `report_defined_unit`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `report_defined_unit` (
-  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
-  `unit_name` varchar(200) DEFAULT NULL,
-  `report_defined_id` int(11) DEFAULT NULL,
-  `unit_type` int(11) DEFAULT NULL COMMENT '1:一维静态\n2：一维动态\n3：多维静态\n4：多维树状',
-  `create_date` timestamp NULL DEFAULT NULL,
-  `create_user` int(11) DEFAULT NULL,
-  PRIMARY KEY (`unit_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `report_defined_unit`
---
-
-LOCK TABLES `report_defined_unit` WRITE;
-/*!40000 ALTER TABLE `report_defined_unit` DISABLE KEYS */;
-INSERT INTO `report_defined_unit` VALUES (1,'报送单元',1,1,'2019-03-17 16:00:00',1),(2,'报送单元1',1,2,'2019-03-17 16:00:00',1),(3,'报送单元2',1,3,'2019-03-17 16:00:00',1);
-/*!40000 ALTER TABLE `report_defined_unit` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `report_defined_unit_onedim`
 --
 
@@ -251,13 +251,13 @@ CREATE TABLE `report_defined_unit_onedim` (
   `group_id` int(11) DEFAULT NULL,
   `group_name` varchar(200) DEFAULT NULL,
   `unit_id` int(11) DEFAULT NULL,
-  `colum_data_type` varchar(45) DEFAULT NULL COMMENT '0：公式\n1：数值\n2：字符串\n3：日期',
+  `colum_type` varchar(45) DEFAULT NULL COMMENT '0：公式\n1：数值\n2：字符串\n3：日期',
   `min_value` int(11) DEFAULT NULL,
   `max_value` int(11) DEFAULT NULL,
   `colum_formula` varchar(500) DEFAULT NULL,
   `colum_formula_desc` text,
   PRIMARY KEY (`colum_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -266,7 +266,7 @@ CREATE TABLE `report_defined_unit_onedim` (
 
 LOCK TABLES `report_defined_unit_onedim` WRITE;
 /*!40000 ALTER TABLE `report_defined_unit_onedim` DISABLE KEYS */;
-INSERT INTO `report_defined_unit_onedim` VALUES (8,'yunsujiageyunsulv','    （一）执行的运输价格/运价率',NULL,NULL,1,'1',1,10000,'',NULL),(11,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(14,'pqsr','      其中：1.配（售）气收入',NULL,NULL,1,'1',0,10000,NULL,NULL),(15,'gcazsr','2.工程安装收入',NULL,NULL,1,'1',0,10000000,NULL,NULL),(16,'qtywsr','3.其他业务收入',NULL,NULL,1,'1',0,10000,NULL,NULL),(20,'yysr','（二）营业收入',NULL,NULL,1,'0',NULL,NULL,'#1.14#+#1.15#+#1.16#','报送单元.      其中：1.配（售）气收入+报送单元.2.工程安装收入+报送单元.3.其他业务收入#报送单元.      其中：1.配（售）气收入#+#报送单元.2.工程安装收入#+#报送单元.3.其他业务收入#');
+INSERT INTO `report_defined_unit_onedim` VALUES (8,'yunsujiageyunsulv','    （一）执行的运输价格/运价率',NULL,NULL,7,'1',1,10000,'',NULL),(11,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(14,'pqsr','      其中：1.配（售）气收入',NULL,NULL,7,'1',0,10000,NULL,NULL),(15,'gcazsr','2.工程安装收入',NULL,NULL,7,'1',0,10000000,NULL,NULL),(16,'qtywsr','3.其他业务收入',NULL,NULL,7,'1',0,10000,NULL,NULL),(20,'yysr','（二）营业收入',NULL,NULL,7,'0',NULL,NULL,'#7.14#+#7.15#+#7.16#','报送单元.      其中：1.配（售）气收入+报送单元.2.工程安装收入+报送单元.3.其他业务收入#报送单元.      其中：1.配（售）气收入#+#报送单元.2.工程安装收入#+#报送单元.3.其他业务收入#'),(23,'clf','a.材料费',NULL,NULL,8,'1',0,10000,NULL,NULL),(24,'rlf','b.燃料费',NULL,NULL,8,'1',1,111111,NULL,NULL),(25,'dlf',' c.动力费',NULL,NULL,8,'1',1,111111,NULL,NULL),(27,'zgrs','A1.职工人数',NULL,NULL,8,'1',1,11111,NULL,NULL),(28,'gzze','A2.工资总额',NULL,NULL,8,'1',1,111111,NULL,NULL),(29,'xjze','A3.险金总额',NULL,NULL,8,'1',1,111111,NULL,NULL),(30,'zjzgxc','其中：A.直接职工薪酬',NULL,NULL,8,'0',NULL,NULL,'#8.28#+#8.29#','报送单元1.A2.工资总额+报送单元1.A3.险金总额');
 /*!40000 ALTER TABLE `report_defined_unit_onedim` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -449,6 +449,37 @@ INSERT INTO `report_template_sheet` VALUES (31,13,1,'封面',24,14),(32,13,2,'�
 UNLOCK TABLES;
 
 --
+-- Table structure for table `report_unit_info`
+--
+
+DROP TABLE IF EXISTS `report_unit_info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `report_unit_info` (
+  `unit_id` int(11) NOT NULL AUTO_INCREMENT,
+  `unit_name` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `origin_id` int(11) DEFAULT NULL,
+  `create_user` varchar(255) DEFAULT NULL,
+  `create_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `report_defined_id` int(11) DEFAULT NULL,
+  `unit_type` int(11) DEFAULT NULL COMMENT '1:一维静态\n2：一维动态\n3：多维静态\n4：多维树状',
+  `unit_order` int(11) DEFAULT NULL COMMENT '当前报送单元在报表定义中的排序（填报顺序）',
+  PRIMARY KEY (`unit_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `report_unit_info`
+--
+
+LOCK TABLES `report_unit_info` WRITE;
+/*!40000 ALTER TABLE `report_unit_info` DISABLE KEYS */;
+INSERT INTO `report_unit_info` VALUES (4,'11','0',48,'1','2019-03-25 16:47:48',NULL,NULL,NULL),(7,'报送单元','0',48,'1','2019-03-26 14:03:42',1,1,1),(8,'报送单元1','0',48,'1','2019-03-26 15:34:39',1,1,2),(9,'报送单元2','0',48,'1','2019-03-27 10:06:49',1,4,3);
+/*!40000 ALTER TABLE `report_unit_info` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `sys_origin`
 --
 
@@ -611,4 +642,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-03-26  9:34:53
+-- Dump completed on 2019-03-27 10:36:01

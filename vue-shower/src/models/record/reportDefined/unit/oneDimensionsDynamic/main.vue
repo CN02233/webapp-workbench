@@ -37,7 +37,7 @@
             label="输入项名">
           </el-table-column>
           <el-table-column
-            prop="colum_data_type"
+            prop="colum_type"
             align="left"
             :formatter="formatterDataType"
             label="输入项类型">
@@ -99,8 +99,8 @@
             </el-table-column>
             <el-table-column label="输入项数据类型">
               <template slot-scope="scope">
-                <el-form-item :prop="'tableData.' + scope.$index + '.colum_data_type'" :rules='editModel.rules.colum_data_type'>
-                  <el-select v-model="scope.row.colum_data_type" style="width:100%;" placeholder="请选择数据类型">
+                <el-form-item :prop="'tableData.' + scope.$index + '.colum_type'" :rules='editModel.rules.colum_type'>
+                  <el-select v-model="scope.row.colum_type" style="width:100%;" placeholder="请选择数据类型">
                   <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
                 </el-select>
                 </el-form-item>
@@ -108,24 +108,24 @@
             </el-table-column>
             <el-table-column label="最小值">
               <template slot-scope="scope">
-                <el-form-item :prop="'tableData.' + scope.$index + '.min_value'" :rules="scope.row.colum_data_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
-                  <el-input v-if="scope.row.colum_data_type=='1'" v-model="scope.row.min_value"></el-input>
+                <el-form-item :prop="'tableData.' + scope.$index + '.min_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
+                  <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.min_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="最大值">
               <template slot-scope="scope">
-                <el-form-item :prop="'tableData.' + scope.$index + '.max_value'" :rules="scope.row.colum_data_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
-                  <el-input v-if="scope.row.colum_data_type=='1'" v-model="scope.row.max_value"></el-input>
+                <el-form-item :prop="'tableData.' + scope.$index + '.max_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
+                  <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.max_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="公式">
               <template slot-scope="scope">
-                <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_data_type=='0'?{required:true,message:'必填字段'}:{required:false}">
-                  <el-input v-if="scope.row.colum_data_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" ></el-input>
-                  <el-button v-if="scope.row.colum_data_type=='0'" @click="openFormulaEditor(scope.$index,scope.row)" icon="el-icon-edit">定义公式</el-button>
-                  <el-tooltip v-if="formData.colum_data_type=='0'" slot="append" class="item" content="点此设置公式" placement="top">
+                <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}">
+                  <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" ></el-input>
+                  <el-button v-if="scope.row.colum_type=='0'" @click="openFormulaEditor(scope.$index,scope.row)" icon="el-icon-edit">定义公式</el-button>
+                  <el-tooltip v-if="formData.colum_type=='0'" slot="append" class="item" content="点此设置公式" placement="top">
 
                   </el-tooltip>
 
@@ -239,7 +239,7 @@
         addFormData:{
           'colum_name':'',
           'colum_name_cn':'',
-          'colum_data_type':'1',
+          'colum_type':'1',
           'min_value':'',
           'max_value':'',
           'colum_formula':'',
@@ -252,7 +252,7 @@
           'colum_id':'',
           'colum_name':'',
           'colum_name_cn':'',
-          'colum_data_type':'1',
+          'colum_type':'1',
           'min_value':'',
           'max_value':'',
           'colum_formula':'',
@@ -276,14 +276,14 @@
           rules:{
             colum_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
             colum_name_cn:{ type:"string",required:true,message:"必填字段",trigger:"change"},
-            colum_data_type:{ type:"string",required:true,message:"必填字段",trigger:"change"}
+            colum_type:{ type:"string",required:true,message:"必填字段",trigger:"change"}
           },
           group_id:null,
           selectRow:null,
           groupModel:{
             colum_name:'',
             colum_name_cn:'',
-            colum_data_type:'2'
+            colum_type:'2'
           },
           tableData:[],
           delData:[]
@@ -299,7 +299,7 @@
         colum_name_cn:{
           required
         },
-        colum_data_type:{
+        colum_type:{
           required
         }
       }
@@ -391,7 +391,7 @@
         });
       },
       formatterDataType(row){
-        return this.columDataType[row['colum_data_type']]
+        return this.columDataType[row['colum_type']]
       },
       columSave(){
         if(!this.subCheck()){
@@ -403,10 +403,10 @@
         $this.editModel.groupModel.colum_id = $this.editModel.group_id
         $this.editSaveData.group.push($this.editModel.groupModel)
         $this.editModel.tableData.forEach((x, i) => {
-            if(x.colum_data_type=='0'){
+            if(x.colum_type=='0'){
               x.max_value=null
               x.min_value=null
-            }else if(x.colum_data_type=='1'){
+            }else if(x.colum_type=='1'){
               x.colum_formula=null
               x.colum_formula_desc=null
             }else{

@@ -160,6 +160,12 @@ const routes = [
                 children: []
               },
               {
+                name: 'treeMultDiensionsDynamic',
+                path: '/record/reportDefined/treeMultDiensionsDynamic',
+                component: () => import('@/models//record/reportDefined/unit/treeMultDiensionsDynamic/main'),
+                children: []
+              },
+              {
                 name: 'multDimensionsStaticAdd',
                 path: '/record/reportDefined/multDimensionsStatic/add',
                 component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/add'),

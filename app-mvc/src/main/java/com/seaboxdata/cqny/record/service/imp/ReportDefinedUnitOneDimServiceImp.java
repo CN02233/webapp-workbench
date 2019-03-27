@@ -92,7 +92,7 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
         String group_name = group.getColum_name_cn();
         Integer save_group_id = null;
         if(group_id == null || group_id.equals(0)){
-            group.setColum_data_type("2");
+            group.setColum_type("2");
             group.setColum_type("1");
             reportDefinedUnitOneDimDao.addSaveOnedim(group);
             save_group_id = group.getColum_id();
