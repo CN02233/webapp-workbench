@@ -1,14 +1,37 @@
 <template>
-    <router-view></router-view>
+  <WorkMain :headerItems="['报送管理','报表管理','报表填写']">
+    <div class="fill-root">
+      <div class="fill-steps">
+        <el-steps direction="vertical" :active="activeStepNum">
+          <el-step @click.native="e => stepClick(e, unitNum) " v-for="(unitEntity,unitNum) in unitEntities" :title="unitEntity.unit_name"
+                   :icon="getStepIcon(unitNum)"></el-step>
+        </el-steps>
+      </div>
+      <div class="fill-context">
+        <router-view @refreshReportFill="checkUnitStep" :key="$route.fullPath"></router-view>
+      </div>
+    </div>
+
+
+
+  </WorkMain>
 </template>
 
 <script>
+  import WorkMain from "@/models/public/WorkMain"
+
   export default {
     name: "ReportFill",
     describe:"报送填报主页面",
+    components: {
+      WorkMain
+    },
     data() {
       return {
-        reportId:""
+        reportId:"",
+        activeStepNum:1,
+        lastStepNum:1,
+        unitEntities:[],
       }
     },
     methods:{
@@ -20,30 +43,82 @@
           background: 'rgba(0, 0, 0, 0.7)'
         });
         this.BaseRequest({
-          url:"/reportCust/getUnitContext",
+          url:"/reportCust/checkUnitStep",
           params:{
-            reportId:this.reportId,
-            unitId:this.unitId,
-            unitType:this.unitType
+            reportId:this.reportId
           }
         }).then(response=>{
           loading.close();
           if(response){
-            this.definedColums = response.definedColums
-            if(response.columDatas){
-              response.columDatas.forEach(columData=>{
-                const columKey = columData.unit_id + "_"+columData.colum_id
-                this.columDatas[columKey] = columData
-              })
-            }
+            console.log("response has got "+response)
+            const active_unit = response.active_unit
+            this.unitEntities = response.unitEntities
+            this.selectActiveStep(active_unit,true)
           }
         });
       },
-      jumpTo(){
+      selectActiveStep(active_unit,isRefresh){
+        console.log("selectActiveStep is running "+active_unit)
+        if(this.unitEntities){
+          this.unitEntities.forEach((unitEntity,eachNum)=>{
+            const unitId = unitEntity.unit_id
+            const unitType = unitEntity.unit_type
+            if(active_unit===unitId){
+              this.activeStepNum = eachNum
+              if(isRefresh){
+                this.lastStepNum = eachNum
 
+              }
+              let unitAddress = ""
+              if(unitId){
+                if(unitType=='1'){
+                  unitAddress = '/record/onedim/onedimRecord'
+                }else if(unitType=='2'){
+
+                }else if(unitType==='3'){//多维静态
+
+                }else if(unitType==='4'){//多维树状
+
+                }
+                const lastStep = (this.activeStepNum==this.lastStepNum)
+                console.log(lastStep)
+                this.$router.push({
+                  path: unitAddress+"?reportId="+this.reportId+"&unitId="+unitId+"&unitType="+unitType+"&lastStep="+lastStep
+                });
+
+              }
+            }
+          })
+        }
+      },
+      stepClick(clickObj,unitNum){
+        const active_unit = this.unitEntities[unitNum].unit_id
+        if(unitNum<=this.lastStepNum){
+          if(unitNum==this.activeStepNum){
+            //do nothing.....
+            console.log("do nothing....")
+          }else{
+            this.selectActiveStep(active_unit)
+            console.log("select step "+active_unit)
+          }
+        }
+        else{
+          console.log("not yet.....")
+        }
+      },
+      getStepIcon(unitNum){
+        if(unitNum<this.lastStepNum){
+            return 'el-icon-success'
+        }else if(unitNum>this.lastStepNum){
+          return ''
+        }else{
+          return 'el-icon-edit'
+        }
       }
     },
+
     mounted() {
+      console.log("report fill is running.....")
       this.reportId = this.$route.query.reportId
       this.checkUnitStep()
     }
@@ -51,5 +126,23 @@
 </script>
 
 <style scoped>
-
+  .fill-root{
+    width:100%;
+    height:100%;
+    padding:30px 0 0 0 ;
+  }
+  .fill-steps{
+    width:200px;
+    height:70%;
+    position:absolute;
+    z-index: 10086;
+  }
+  .fill-context{
+    width:100%;
+    height:70%;
+    overflow: auto;
+  }
+  .el-step{
+    cursor: pointer;
+  }
 </style>

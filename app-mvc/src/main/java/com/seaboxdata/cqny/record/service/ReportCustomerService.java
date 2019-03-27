@@ -1,11 +1,13 @@
 package com.seaboxdata.cqny.record.service;
 
+import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.webapp.support.page.PageResult;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public interface ReportCustomerService {
     PageResult pagerReport( Integer currPage, Integer pageSize, Integer userId);
@@ -13,5 +15,11 @@ public interface ReportCustomerService {
 
     void updateSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds,ArrayList<ReportCustomerData> columDatas);
 
-    Object checkUnitStep(String reportId);
+    ReportCustomer checkReportCustomer(String reportId);
+
+    Integer checkNextStepUnitId(String reportId);
+
+    void updateStep(String reportId);
+
+    Map<String,String> validateSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
 }

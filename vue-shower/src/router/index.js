@@ -135,8 +135,21 @@ const routes = [
                 children: []
               },
               {
+                name: 'reportFill',
+                path: '/record/report/reportFill',
+                component: () => import('@/models/record/report/reportFill'),
+                children: [
+                  {
+                    name: 'oneDimensionsStaticRecord',
+                    path: '/record/onedim/onedimRecord',
+                    component: () => import('@/models//record/report/onedim/onedimRecord'),
+                  }
+                ]
+              },
+
+              {
                 name: 'oneDimensionsStaticRecord',
-                  path: '/record/onedim/onedimRecord',
+                path: '/record/onedim/onedimRecord',
                 component: () => import('@/models//record/report/onedim/onedimRecord'),
                 children: []
               },
