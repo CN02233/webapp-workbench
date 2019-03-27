@@ -13,4 +13,8 @@ public interface AdministrativeService {
     void addAdministrative(Administrative administrative);
 
     void deleteById(String originId);
+
+    void userOrganizationSave(Integer organizationId, Integer userId);
+
+    Administrative getOrganizationByUser(Integer userId);
 }

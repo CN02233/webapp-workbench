@@ -72,4 +72,21 @@ public class AdministrativeController {
         return jsonResult;
     }
 
+    @RequestMapping("userOrganizationSave")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult userOrganizationSave(Integer organizationId,Integer userId){
+        originService.userOrganizationSave(organizationId,userId);
+        JsonResult jsonpResponse = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
+        return jsonpResponse;
+    }
+
+    @RequestMapping("getOrganizationByUser")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getOrganizationByUser(Integer userId){
+        Administrative organization = originService.getOrganizationByUser(userId);
+        JsonResult jsonpResponse = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null, organization);
+        return jsonpResponse;
+    }
 }

@@ -57,6 +57,11 @@ const routes = [
             component: () => import('@/models/sys/user/userMain')
           },
           {
+            name: 'supervisionUser',
+            path: '/sys/supervisionUser',
+            component: () => import('@/models/sys/user/supervisionUserMain')
+          },
+          {
             name: 'role',
             path: '/sys/role',
             component: () => import('@/models/sys/role/roleMain')

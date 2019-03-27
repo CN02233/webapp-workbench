@@ -38,4 +38,15 @@ public class AdministrativeServiceImp implements AdministrativeService {
     public void deleteById(String originId) {
         administrativeDao.deleteById(originId);
     }
+
+    @Override
+    public void userOrganizationSave(Integer organizationId, Integer userId) {
+        administrativeDao.removeUserOrganization(userId);
+        administrativeDao.userOrganizationSave(organizationId,userId);
+    }
+
+    @Override
+    public Administrative getOrganizationByUser(Integer userId) {
+        return administrativeDao.getOrganizationByUser(userId);
+    }
 }
