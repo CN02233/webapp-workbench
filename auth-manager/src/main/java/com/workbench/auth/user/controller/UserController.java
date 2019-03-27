@@ -124,7 +124,7 @@ public class UserController {
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String updateSaveUser(User user){
+    public String updateSaveUser(@RequestBody User user){
         userService.updateUser(user);
 
         JsonResult jsonResult = new JsonResult();
