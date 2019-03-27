@@ -4,7 +4,7 @@
 
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="7">
-        <el-button @click="addColum()" type="primary">新增</el-button>
+        <el-button @click="addDefined()" type="primary">新增</el-button>
       </el-col>
       <el-col class="align-right" :span="17">
         <el-select v-model="group_id" placeholder="输入项组">
@@ -19,6 +19,7 @@
       <el-col :span="24">
         <el-table
           :data="unitColums"
+          id="list" :span-method="mergeRow" @cell-mouse-leave="cellMouseLeave" @cell-mouse-enter="cellMouseEnter" :row-class-name="cellAddClass"
           style="width: 100%">
           <el-table-column
             prop="colum_id"
@@ -68,7 +69,7 @@
       <el-row style="margin:5px;">
         <el-col :span="24">
           <label class="el-form-item__label" style="width:20%;">输入项名称</label>
-          <div style="margin-left:20%;"><el-input v-model="editModel.group_name"  auto-complete="off" placeholder="输入项组" ></el-input></div>
+          <div style="margin-left:20%;"><el-input v-model="editModel.groupModel.colum_name_cn"  auto-complete="off" placeholder="输入项组" ></el-input></div>
         </el-col>
       </el-row>
       <el-row class="table-row">
@@ -122,18 +123,18 @@
             <el-table-column label="公式">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_data_type=='0'?{required:true,message:'必填字段'}:{required:false}">
-                  <el-input v-if="scope.row.colum_data_type=='0'"
-                    type="textarea"
-                    :rows="3"
-                    v-model="scope.row.colum_formula_desc" :disabled="true" auto-complete="off" >
-                  </el-input>
-                  <el-button v-if="scope.row.colum_data_type=='0'" @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
+                  <el-input v-if="scope.row.colum_data_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" ></el-input>
+                  <el-button v-if="scope.row.colum_data_type=='0'" @click="openFormulaEditor(scope.$index,scope.row)" icon="el-icon-edit">定义公式</el-button>
+                  <el-tooltip v-if="formData.colum_data_type=='0'" slot="append" class="item" content="点此设置公式" placement="top">
+
+                  </el-tooltip>
+
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="操作" width="70">
               <template slot-scope="scope">
-                <el-button type="danger" @click="deleteRow(scope.row)" size="small">删除</el-button>
+                <el-button type="danger" @click="deleteRow(scope.$index, scope.row)" size="small">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -142,9 +143,6 @@
       </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-tooltip v-if="formData.colum_data_type=='0'&&isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
-          <el-button @click="replaceFormulaEditor()" icon="el-icon-edit">重新定义公式</el-button>
-        </el-tooltip>
         <div style="display: inline;width:30%;float:left;text-align:left;">
           <el-button type="primary" @click="insertRow">新增行</el-button>
         </div>
@@ -204,7 +202,9 @@
 
   </WorkMain>
 </template>
-
+<style>
+  .el-table__body tr.hover-row:hover td{background-color: #ecf5ff;}
+</style>
 <script>
   import WorkTablePager from "@/models/public/WorkTablePager"
   import WorkMain from "@/models/public/WorkMain"
@@ -278,12 +278,17 @@
             colum_name_cn:{ type:"string",required:true,message:"必填字段",trigger:"change"},
             colum_data_type:{ type:"string",required:true,message:"必填字段",trigger:"change"}
           },
-          group_name:'',
           group_id:null,
+          selectRow:null,
+          groupModel:{
+            colum_name:'',
+            colum_name_cn:'',
+            colum_data_type:'2'
+          },
           tableData:[],
           delData:[]
         },
-        editSaveData:{'add':[],'edit':[],del:[]}    //输入项组保存数据
+        editSaveData:{'add':[],'edit':[],del:[],group:[]}    //输入项组保存数据
       }
     },
     validations:{
@@ -313,14 +318,16 @@
           method:"get",
           params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId, group_id:this.group_id}
         }).then(response=>{
-          this.mergeMap = {}
           $this.unitColums = response.dataList
           $this.totalPage = response.totalPage
+          $this.rowspan()
         })
       },
-      addColum(){
+      addDefined(){
         this.addOrEditModelOpend = true
         this.isEditModal = false
+        this.editModel.groupModel.colum_name = ''
+        this.editModel.groupModel.colum_name_cn = ''
         this.clearEditModel()
       },
       viewDefined(){
@@ -339,7 +346,8 @@
           params:{unitId:this.unitId,group_id:group_id}
         }).then(response=>{
           loading.close()
-          this.editModel.group_name = group_name
+          this.editModel.groupModel.colum_name_cn = group_name
+          this.editModel.groupModel.colum_name = group_name
           this.editModel.group_id = group_id
           this.editModel.tableData = response.dataList
           this.addOrEditModelOpend = true
@@ -391,6 +399,9 @@
         }
         const $this = this
         $this.clearSaveData()
+        $this.editModel.groupModel.unit_id = $this.unitId
+        $this.editModel.groupModel.colum_id = $this.editModel.group_id
+        $this.editSaveData.group.push($this.editModel.groupModel)
         $this.editModel.tableData.forEach((x, i) => {
             if(x.colum_data_type=='0'){
               x.max_value=null
@@ -407,8 +418,6 @@
             if(x.colum_id){
               $this.editSaveData.edit.push(x)
             }else{
-              x.group_id=$this.editModel.group_id
-              x.group_name=$this.editModel.group_name
               $this.editSaveData.add.push(x)
             }
         })
@@ -467,10 +476,9 @@
         }
         return checkResult
       },
-      replaceFormulaEditor(){
-        this.openFormulaEditor()
-      },
-      openFormulaEditor(){
+      openFormulaEditor(i,row){
+        this.editModel.selectRow = this.editModel.tableData[i]
+        this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
         this.isOpenFormulaEditor = true
       },
       handleItemChange(unitArray) {
@@ -540,21 +548,16 @@
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
         const unitClickId = this.fomularColumnTmp[0]
         this.otherUnits.forEach(unitData=>{
-          console.log(unitData)
           if(unitData.value == unitClickId){
             if(unitData.children){
               unitData.children.forEach(columData=>{
                 if(columData.value == columtClickId) {
                   const finalContext = unitData.label+"."+columData.label
                   this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
-                  this.formulaContext.push({"context":unitData.value+"."+columData.value,"isSymbol":false})
-                  if(this.isEditModal){
-                    this.editModel.colum_formula_desc +=finalContext
-                    this.editModel.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
-                  }else{
-                    this.addFormData.colum_formula_desc +=finalContext
-                    this.addFormData.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
-                  }
+                  this.formulaContext.push({"context":unitData.value+"_"+columData.value,"columKey":unitData.label+'_'+columData.columKey,"isSymbol":false})
+                  this.editModel.selectRow.colum_formula_desc +=finalContext
+                  this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+                  this.editModel.selectRow.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
                 }
               })
             }
@@ -566,14 +569,9 @@
         this.formulaDescContext.push({"context":addContext,"isSymbol":true})
         this.formulaContext.push({"context":addContext,"isSymbol":true})
         // this.formulaDescContextTmp+=addContext
-        if(this.isEditModal){
-          this.editModel.colum_formula_desc +=addContext
-          this.editModel.colum_formula +=addContext
-        }else{
-          this.addFormData.colum_formula_desc +=addContext
-          this.addFormData.colum_formula +=addContext
-        }
-
+        this.editModel.selectRow.colum_formula_desc +=addContext
+        this.editModel.selectRow.colum_formula +=addContext
+        this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
       },
       formulaBack(){
         this.formulaContext.pop()
@@ -582,23 +580,14 @@
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
           const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
-          if(this.isEditModal){
-            if(i==0){
-              this.editModel.colum_formula_desc =formulaDesc.context
-              this.editModel.colum_formula = formulaContext
-            }else{
-              this.editModel.colum_formula_desc +=formulaDesc.context
-              this.editModel.colum_formula +=formulaContext
-            }
+          if(i==0){
+            this.editModel.selectRow.colum_formula_desc =formulaDesc.context
+            this.editModel.selectRow.colum_formula = formulaContext
           }else{
-            if(i==0){
-              this.addFormData.colum_formula_desc =formulaDesc.context
-              this.addFormData.colum_formula =formulaContext
-            }else{
-              this.addFormData.colum_formula_desc +=formulaDesc.context
-              this.addFormData.colum_formula +=formulaContext
-            }
+            this.editModel.selectRow.colum_formula_desc +=formulaDesc.context
+            this.editModel.selectRow.colum_formula +=formulaContext
           }
+          this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
         })
       },
       fomularConfirm(){
@@ -607,6 +596,41 @@
         // this.formulaContext = []
         // this.formulaDescContext = []
         this.isOpenFormulaEditor = false
+
+      },
+      fomularOperation(){
+        const $this = this
+        let fomular = ""
+        if(this.formulaContext){
+          this.formulaContext.forEach(formulaData=>{
+            if(formulaData.columKey){
+              fomular+=formulaData.columKey
+            }else{
+              fomular+=formulaData.context
+            }
+          })
+        }
+
+        const loading = $this.$loading({
+          lock: true,
+          text: '计算中......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        $this.BaseRequest({
+          url:"/reportDefined/formalOperation",
+          method:'post',
+          data:{'fomular':fomular,'operaionValus':this.formularOprationColums}
+        }).then(response=>{
+          loading.close()
+          this.$message({
+            showClose: true,
+            message: '试算结果:'+response
+          });
+        }).catch(error=>{
+          loading.close()
+          $this.Message.success("保存失败:"+error)
+        });
       },
       getGroupname(){
         const $this = this
@@ -623,37 +647,61 @@
       selectRow (val) {
         this.selectedValue = val
       },
-      mergeButton(row, column, rowIndex, columnIndex){
-        if(this.mergeMap[rowIndex])
-          return [0, 0]
-        let c = 0, val = row.colum_id
-        this.editModel.tableData.forEach((x,i)=>{
-          if(x.colum_id == val){
-            this.mergeMap[i] = 1
-            c++
+      cellAddClass({row,rowIndex}){
+        row.className = 'el-table__row hover-row'
+      },
+      cellMouseLeave(row){
+        let k = row.group_id, m = this.mergeMap[k], trs = document.querySelectorAll("#list .el-table__body .el-table__row")
+        if(m){
+          m.mr.forEach((x,i)=>{
+            trs[i].className = 'el-table__row'
+          })
+        }
+      },
+      cellMouseEnter(row){
+        let k = row.group_id, m = this.mergeMap[k], trs = document.querySelectorAll("#list .el-table__body .el-table__row")
+        if(m){
+          for(let i = 0; i < trs.length; i++){
+            if(trs[i].className.indexOf('hover-row') > -1)
+              trs[i].className = 'el-table__row'
+          }
+          m.mr.forEach(x=>{
+            trs[x].className = 'el-table__row hover-row'
+          })
+        }
+      },
+      rowspan(){
+        this.mergeMap = {}
+        this.unitColums.forEach((x,i)=>{
+          let val = x.group_id
+          if(!this.mergeMap[val]){
+            this.mergeMap[val] = {r:i, sp:1,mr:[i] }
+          }else{
+            this.mergeMap[val].mr.push(i)
+            this.mergeMap[val].sp=this.mergeMap[val].sp+1
           }
         })
-        console.log('row'+c)
-        return [c, 0]
       },
       mergeRow({ row, column, rowIndex, columnIndex }){
-        if (columnIndex === 4) {
-          return this.mergeButton(row, column, rowIndex, columnIndex)
-        }else{
-          return [0, 0]
+        if (columnIndex === 1 || columnIndex === 4) {
+          let id = row.group_id, m = this.mergeMap[id]
+          if(m == null)
+            return [1, 1]
+          else if(m.r == rowIndex)
+            return [m.sp, 1]
+          else
+            return [0, 0]
         }
       },
       insertRow(){
         let addObj = Object.assign({},this.addFormData)
         this.editModel.tableData.push(addObj)
       },
-      deleteRow(row){
-        this.editModel.tableData.forEach((v, i) => {
-          if (row.colum_id === v.colum_id) {
-            this.editModel.delData.push({colum_id:v.colum_id})
-            this.editModel.tableData.splice(i, 1)
-          }
-        })
+      deleteRow(i,row){
+        this.editModel.tableData.splice(i, 1)
+        if(row.colum_id){
+          this.editModel.delData.push({colum_id:row.colum_id})
+        }
         this.$refs.table.clearSelection()
       },
       clearEditModel(){
@@ -666,6 +714,7 @@
         this.editSaveData.add.length = 0
         this.editSaveData.edit.length = 0
         this.editSaveData.del.length = 0
+        this.editSaveData.group.length = 0
       }
     },
     computed:{
@@ -681,12 +730,9 @@
       this.unitId = this.$route.query.unitId
       this.addFormData.unit_id = this.$route.query.unitId
       this.getTableData(1)
-      //this.getUnits()
+      this.getUnits()
       this.getGroupname()
     }
   }
 </script>
 
-<style scoped>
-
-</style>

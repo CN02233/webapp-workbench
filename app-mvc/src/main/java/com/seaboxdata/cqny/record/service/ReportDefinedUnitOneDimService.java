@@ -23,7 +23,7 @@ public interface ReportDefinedUnitOneDimService {
 
     void editSaveOnedim(SimpleColumDefined simpleColumDefined);
 
-    PageResult pagerOnedimListDynamic(Integer currPage, Integer pageSize, Integer unitId, String group_id);
+    PageResult pagerOnedimListDynamic(Integer currPage, Integer pageSize, Integer unitId, Map<String,Object> map);
 
     List<Map> getGroupByUnit(String unitId);
 
@@ -31,5 +31,5 @@ public interface ReportDefinedUnitOneDimService {
 
     void deleteOneDimDynamic(Integer unitId, String group_id);
 
-    PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, String group_id);
+    PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, Map<String,Object> map);
 }

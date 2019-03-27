@@ -7,7 +7,7 @@
         <el-button @click="addDefined()" type="primary">新增</el-button>
       </el-col>
       <el-col class="align-right" :span="17">
-        <el-select v-model="group_id" placeholder="输入项组">
+        <el-select v-model="searchModel.group_id" placeholder="输入项组">
           <el-option selected label="请选择输入项组" value=""></el-option>
           <el-option v-for="x in groupnameData" :key="x.group_id" :label="x.group_name" :value="x.group_id"></el-option>
         </el-select>
@@ -15,10 +15,11 @@
       </el-col>
     </el-row>
 
-    <el-row class="table-row"><!--:span-method="mergeRow"-->
+    <el-row class="table-row">
       <el-col :span="24">
         <el-table
           :data="unitColums"
+          id="list" :span-method="mergeRow" @cell-mouse-leave="cellMouseLeave" @cell-mouse-enter="cellMouseEnter" :row-class-name="cellAddClass"
           style="width: 100%">
           <el-table-column prop="colum_id" align="left" label="编号" width="60">
           </el-table-column>
@@ -33,12 +34,11 @@
             label="操作">
             <template slot-scope="scope">
               <!--<el-button type="text" @click="viewDefined()" size="small">查看</el-button>-->
-              <el-button type="text" @click="editDefined(scope.row.colum_id,scope.row.group_name)" size="small">编辑</el-button>
-              <el-button type="text" @click="deleteDefined(scope.row.colum_id)" size="small">删除</el-button>
+              <el-button type="text" @click="editDefined(scope.row.group_id,scope.row.group_name)" size="small">编辑</el-button>
+              <el-button type="text" @click="deleteDefined(scope.row.group_id)" size="small">删除</el-button>
               <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">查看</el-button>-->
             </template>
           </el-table-column>
-
         </el-table>
       </el-col>
     </el-row>
@@ -75,8 +75,7 @@
             tooltip-effect="dark"
             border
             stripe
-            style="width: 100%"
-            @selection-change='selectRow'>
+            style="width: 100%">
               <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
               <el-table-column label="输入项名称" align="center">
                 <template slot-scope="scope">
@@ -122,8 +121,7 @@
             tooltip-effect="dark"
             border
             stripe
-            style="width: 100%"
-            @selection-change='selectRow'>
+            style="width: 100%">
             <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
             <el-table-column  label="输入项名称" align="center">
               <template slot-scope="scope">
@@ -246,6 +244,7 @@
 </template>
 <style>
   .nav{font-size:16px;font-weight: bold;text-align:left;height:28px;line-height:28px;}
+  .el-table__body tr.hover-row:hover td{background-color: #ecf5ff;}
 </style>
 <script>
   import WorkTablePager from "@/models/public/WorkTablePager"
@@ -267,7 +266,6 @@
         eachPageNum:10,
         totalPage:1,
         unitId:'',
-        group_id:'',
         columDataType:{
           '0':'公式'  ,
           '1':'数值'  ,
@@ -297,9 +295,14 @@
         formulaContext:[],
         otherUnits:[],
         fomularColumnTmp :'',
-        selectedValue:'',
         mergeMap:{},
         groupnameData: [], //搜索输入项组
+        searchModel:{
+          group_id:'',
+        },
+        listModel:{
+          selectedValue:'',
+        },
         editModel:{
           rules:{
             colum_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
@@ -331,16 +334,18 @@
         this.BaseRequest({
           url:'unitOneDimColum/pagerMultdimListStatic',
           method:"get",
-          params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId, group_id:this.group_id}
+          params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId, group_id:this.searchModel.group_id}
         }).then(response=>{
-          this.mergeMap = {}
           $this.unitColums = response.dataList
           $this.totalPage = response.totalPage
+          $this.rowspan()
         })
       },
       addDefined(){
         this.addOrEditModelOpend = true
         this.isEditModal = false
+        this.editModel.groupModel.colum_name = ''
+        this.editModel.groupModel.colum_name_cn = ''
         this.clearEditModel()
       },
       viewDefined(){
@@ -356,12 +361,25 @@
         this.BaseRequest({
           url:'unitOneDimColum/pagerOnedimListDynamic',
           method:'get',
-          params:{unitId:this.unitId,group_id:group_id}
+          params:{unitId:this.unitId,inc_group_id:group_id}
         }).then(response=>{
           loading.close()
-          this.editModel.group_name = group_name
-          this.editModel.group_id = group_id
-          this.editModel.tableData = response.dataList
+          if(response.dataList == null)
+            return;
+          const $this = this
+          $this.clearEditModel()
+          response.dataList.forEach(x => {
+            if(!x.group_id){
+              $this.editModel.groupModel = x
+            }else{
+              if(x.colum_type=='2'){
+                $this.editModel.dimData.push(x)
+              }else{
+                $this.editModel.catData.push(x)
+              }
+            }
+          })
+          $this.editModel.group_id = group_id
           this.addOrEditModelOpend = true
           this.isEditModal = true
         }).catch(error=>{
@@ -387,7 +405,7 @@
           this.BaseRequest({
             url:'unitOneDimColum/deleteOneDimDynamic',
             method:'get',
-            params:{unitId:this.unitId,'group_id':this.group_id}
+            params:{unitId:this.unitId,'group_id':group_id}
           }).then(response=>{
             this.Message.success("删除成功")
             loading.close()
@@ -414,11 +432,13 @@
         $this.editModel.groupModel.colum_id = $this.editModel.group_id
         $this.editSaveData.group.push($this.editModel.groupModel)
         $this.editModel.catData.forEach((x, i) => {
+            x.colum_type = '1'
             if(!x.colum_id){
               x.colum_data_type = '2'
+              $this.editSaveData.add.push(x)
+            }else{
+              $this.editSaveData.edit.push(x)
             }
-            x.colum_type = '1'
-            $this.editSaveData.add.push(x)
         })
         $this.editModel.dimData.forEach((x, i) => {
           if(x.colum_data_type=='0'){
@@ -434,7 +454,11 @@
             x.colum_formula_desc=null
           }
           x.colum_type = '2'
-          $this.editSaveData.add.push(x)
+          if(!x.colum_id){
+            $this.editSaveData.add.push(x)
+          }else{
+            $this.editSaveData.edit.push(x)
+          }
         })
         $this.editSaveData.del = $this.editModel.delData
         this.subSave($this.editSaveData,'unitOneDimColum/editSaveOnedimDynamic')
@@ -658,27 +682,50 @@
           $this.Message.success("输入项组加载失败:"+error)
         });
       },
-      selectRow (val) {
-        this.selectedValue = val
+      cellAddClass({row,rowIndex}){
+        row.className = 'el-table__row hover-row'
       },
-      mergeButton(row, column, rowIndex, columnIndex){
-        if(this.mergeMap[rowIndex])
-          return [0, 0]
-        let c = 0, val = row.colum_id
-        this.editModel.tableData.forEach((x,i)=>{
-          if(x.colum_id == val){
-            this.mergeMap[i] = 1
-            c++
+      cellMouseLeave(row){
+        let k = row.group_id, m = this.mergeMap[k], trs = document.querySelectorAll("#list .el-table__body .el-table__row")
+        if(m){
+          m.mr.forEach((x,i)=>{
+            trs[i].className = 'el-table__row'
+          })
+        }
+      },
+      cellMouseEnter(row){
+        let k = row.group_id, m = this.mergeMap[k], trs = document.querySelectorAll("#list .el-table__body .el-table__row")
+        if(m){
+          for(let i = 0; i < trs.length; i++){
+            if(trs[i].className.indexOf('hover-row') > -1)
+              trs[i].className = 'el-table__row'
+          }
+          m.mr.forEach(x=>{
+            trs[x].className = 'el-table__row hover-row'
+          })
+        }
+      },
+      rowspan(){
+        this.mergeMap = {}
+        this.unitColums.forEach((x,i)=>{
+          let val = x.group_id
+          if(!this.mergeMap[val]){
+            this.mergeMap[val] = {r:i, sp:1,mr:[i] }
+          }else{
+            this.mergeMap[val].mr.push(i)
+            this.mergeMap[val].sp=this.mergeMap[val].sp+1
           }
         })
-        console.log('row'+c)
-        return [c, 0]
       },
       mergeRow({ row, column, rowIndex, columnIndex }){
-        if (columnIndex === 4) {
-          return this.mergeButton(row, column, rowIndex, columnIndex)
-        }else{
-          return [0, 0]
+        if (columnIndex === 1 || columnIndex === 4) {
+          let id = row.group_id, m = this.mergeMap[id]
+          if(m == null)
+            return [1, 1]
+          else if(m.r == rowIndex)
+            return [m.sp, 1]
+          else
+            return [0, 0]
         }
       },
       insertCatRow(){
@@ -692,7 +739,7 @@
         }
         this.$refs.table1.clearSelection()
       },
-      insertDimRow(row){
+      insertDimRow(){
         let addObj = Object.assign({},this.addFormData)
         this.editModel.dimData.push(addObj)
       },
@@ -730,7 +777,3 @@
     }
   }
 </script>
-
-<style scoped>
-
-</style>

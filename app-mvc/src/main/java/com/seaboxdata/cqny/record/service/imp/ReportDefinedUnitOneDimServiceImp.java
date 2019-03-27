@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,8 +65,8 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
      * @return
      */
     @Override
-    public PageResult pagerOnedimListDynamic(Integer currPage, Integer pageSize, Integer unitId, String group_id) {
-        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerOnedimListDynamic(currPage, pageSize, unitId, group_id);
+    public PageResult pagerOnedimListDynamic(Integer currPage, Integer pageSize, Integer unitId, Map<String,Object> map) {
+        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerOnedimListDynamic(currPage, pageSize, unitId, map);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pageData);
         return pageResult;
     }
@@ -96,6 +97,7 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
             reportDefinedUnitOneDimDao.addSaveOnedim(group);
             save_group_id = group.getColum_id();
         }else{
+            reportDefinedUnitOneDimDao.editSaveOnedim(group);
             save_group_id = Integer.valueOf(group_id);
         }
         if(maps.containsKey("add")){
@@ -107,6 +109,7 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
         }
         if(maps.containsKey("edit")){
             for(SimpleColumDefined mod2 : maps.get("edit")){
+                mod2.setGroup_name(group_name);
                 reportDefinedUnitOneDimDao.editSaveOnedim(mod2);
             }
         }
@@ -134,15 +137,18 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
      * @param group_id
      */
     public void deleteOneDimDynamic(Integer unitId, String group_id){
-        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerOnedimListDynamic(1, 10000, unitId, group_id);
+        Map<String,Object> m = new HashMap<>();
+        String gid = (group_id == null || "".equals(group_id)) ? "0" : group_id;
+        m.put("inc_group_id",gid);
+        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerOnedimListDynamic(1, 10000, unitId, m);
         for(Map<String, Object> map : pageData){
             reportDefinedUnitOneDimDao.deleteOneDim(map.get("colum_id").toString());
         }
     }
 
     @Override
-    public PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, String group_id) {
-        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerMultdimListStatic(currPage, pageSize, unitId, group_id);
+    public PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, Map<String,Object> map){
+        Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerMultdimListStatic(currPage, pageSize, unitId, map);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pageData);
         return pageResult;
     }
