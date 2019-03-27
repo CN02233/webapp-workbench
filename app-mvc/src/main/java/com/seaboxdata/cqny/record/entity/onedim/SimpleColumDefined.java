@@ -14,7 +14,7 @@ public class SimpleColumDefined {
     private Integer max_value    ;
     private String colum_formula    ;
     private String colum_formula_desc    ;
-    private Integer parent_id;
+    private Integer parent_colum_id;
     private String parent_name;
     private String colum_type;
     private String colum_desc;
@@ -108,12 +108,12 @@ public class SimpleColumDefined {
         this.colum_formula_desc = colum_formula_desc;
     }
 
-    public Integer getParent_id() {
-        return parent_id;
+    public Integer getParent_colum_id() {
+        return parent_colum_id;
     }
 
-    public void setParent_id(Integer parent_id) {
-        this.parent_id = parent_id;
+    public void setParent_colum_id(Integer parent_colum_id) {
+        this.parent_colum_id = parent_colum_id;
     }
 
     public String getParent_name() {
