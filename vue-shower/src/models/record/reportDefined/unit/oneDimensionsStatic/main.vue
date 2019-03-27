@@ -24,7 +24,7 @@
             label="输入项名">
           </el-table-column>
           <el-table-column
-            prop="colum_data_type"
+            prop="colum_type"
             align="left"
             :formatter="formatterDataType"
             label="输入项类型">
@@ -60,17 +60,17 @@
           <el-input v-model="formData.colum_name_cn" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="输入项数据类型" >
-          <el-select v-model="formData.colum_data_type" style="width:100%;" placeholder="请选择数据类型">
+          <el-select v-model="formData.colum_type" style="width:100%;" placeholder="请选择数据类型">
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item v-if="formData.colum_data_type=='1'" label="最小值" >
+        <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
           <el-input v-model="formData.min_value" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_data_type=='1'" label="最大值" >
+        <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
           <el-input v-model="formData.max_value" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_data_type=='0'" label="公式" >
+        <el-form-item v-if="formData.colum_type=='0'" label="公式" >
           <el-input
             type="textarea"
             :rows="10"
@@ -79,10 +79,10 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-tooltip v-if="formData.colum_data_type=='0'&&!isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
+        <el-tooltip v-if="formData.colum_type=='0'&&!isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
           <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
         </el-tooltip>
-        <el-tooltip v-if="formData.colum_data_type=='0'&&isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
+        <el-tooltip v-if="formData.colum_type=='0'&&isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
           <el-button @click="replaceFormulaEditor()" icon="el-icon-edit">重新定义公式</el-button>
         </el-tooltip>
         <el-button @click="addOrEditModelOpend=false">取 消</el-button>
@@ -176,7 +176,7 @@
         addFormData:{
           'colum_name':'',
           'colum_name_cn':'',
-          'colum_data_type':'1',
+          'colum_type':'1',
           'min_value':'',
           'max_value':'',
           'colum_formula':'',
@@ -186,7 +186,7 @@
         editFormData:{
           'colum_name':'',
           'colum_name_cn':'',
-          'colum_data_type':'1',
+          'colum_type':'1',
           'min_value':'',
           'max_value':'',
           'colum_formula':'',
@@ -211,7 +211,7 @@
         colum_name_cn:{
           required
         },
-        colum_data_type:{
+        colum_type:{
           required
         }
       }
@@ -297,7 +297,7 @@
         });
       },
       formatterDataType(row){
-        return this.columDataType[row['colum_data_type']]
+        return this.columDataType[row['colum_type']]
       },
       columSave(){
         if(this.isEditModal){
@@ -312,10 +312,10 @@
         }
 
         const $this = this
-        if($this.addFormData.colum_data_type==='0'){
+        if($this.addFormData.colum_type==='0'){
           $this.addFormData.min_value=null
           $this.addFormData.max_value=null
-        }else if($this.addFormData.colum_data_type==='1'){
+        }else if($this.addFormData.colum_type==='1'){
           $this.addFormData.colum_formula = null
           $this.addFormData.colum_formula_desc = null
         }else{
@@ -333,10 +333,10 @@
         }
 
         const $this = this
-        if($this.editFormData.colum_data_type==='0'){
+        if($this.editFormData.colum_type==='0'){
           $this.editFormData.min_value=null
           $this.editFormData.max_value=null
-        }else if($this.editFormData.colum_data_type==='1'){
+        }else if($this.editFormData.colum_type==='1'){
           $this.editFormData.colum_formula = null
           $this.editFormData.colum_formula_desc = null
         }else{
@@ -369,7 +369,7 @@
           $this.addFormData = {
             'colum_name':'',
             'colum_name_cn':'',
-            'colum_data_type':'1',
+            'colum_type':'1',
             'min_value':'',
             'max_value':'',
             'colum_formula':'',
@@ -389,7 +389,7 @@
             message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>输入项名称、输入项中文名称、输入项数据类型'
           })
         }else{
-          if(this.formData.colum_data_type==='0'){
+          if(this.formData.colum_type==='0'){
             if(!this.colum_formula_array){
               this.$notify({
                 dangerouslyUseHTMLString: true,
@@ -397,7 +397,7 @@
               })
               checkResult = true
             }
-          }else if(this.formData.colum_data_type==='1'){
+          }else if(this.formData.colum_type==='1'){
             if(this.formData.min_value==null||(''+this.formData.min_value)==''||this.formData.max_value==null||this.formData.max_value==''){
               this.$notify({
                 dangerouslyUseHTMLString: true,

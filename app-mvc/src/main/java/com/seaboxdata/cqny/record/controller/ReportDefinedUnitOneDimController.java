@@ -8,10 +8,7 @@ import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -98,8 +95,8 @@ public class ReportDefinedUnitOneDimController {
     @RequestMapping("pagerOnedimListDynamic")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult pagerOnedimListDynamic(Integer currPage,Integer pageSize, Integer unitId, String group_id){
-        PageResult definedpageLIst = reportDefinedUnitOneDimService.pagerOnedimListDynamic(currPage,pageSize, unitId, group_id);
+    public JsonResult pagerOnedimListDynamic(Integer currPage ,Integer pageSize, Integer unitId, @RequestParam Map<String,Object> paramMap){
+        PageResult definedpageLIst = reportDefinedUnitOneDimService.pagerOnedimListDynamic(currPage,pageSize, unitId, paramMap);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,definedpageLIst);
         return jsonResult;
     }
@@ -136,8 +133,8 @@ public class ReportDefinedUnitOneDimController {
     @RequestMapping("pagerMultdimListStatic")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult pagerMultdimListStatic(Integer currPage,Integer pageSize, Integer unitId, String group_id){
-        PageResult definedpageLIst = reportDefinedUnitOneDimService.pagerMultdimListStatic(currPage,pageSize, unitId, group_id);
+    public JsonResult pagerMultdimListStatic(Integer currPage,Integer pageSize, Integer unitId, @RequestParam Map<String,Object> paramMap){
+        PageResult definedpageLIst = reportDefinedUnitOneDimService.pagerMultdimListStatic(currPage,pageSize, unitId, paramMap);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,definedpageLIst);
         return jsonResult;
     }

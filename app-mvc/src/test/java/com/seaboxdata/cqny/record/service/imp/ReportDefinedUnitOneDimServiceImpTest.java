@@ -17,7 +17,7 @@ public class ReportDefinedUnitOneDimServiceImpTest extends AbstractTestService {
         SimpleColumDefined simpleColumDefined = new SimpleColumDefined();
         simpleColumDefined.setColum_name("insertId");
         simpleColumDefined.setColum_name_cn("测试插入");
-        simpleColumDefined.setColum_data_type("1");
+        simpleColumDefined.setColum_type("1");
         simpleColumDefined.setMin_value(0);
         simpleColumDefined.setMin_value(100);
         reportDefinedUnitOneDimService.addSaveOnedim(simpleColumDefined);

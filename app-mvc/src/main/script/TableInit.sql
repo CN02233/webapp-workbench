@@ -251,7 +251,7 @@ CREATE TABLE `report_defined_unit_onedim` (
   `group_id` int(11) DEFAULT NULL,
   `group_name` varchar(200) DEFAULT NULL,
   `unit_id` int(11) DEFAULT NULL,
-  `colum_data_type` varchar(45) DEFAULT NULL COMMENT '0：公式\n1：数值\n2：字符串\n3：日期',
+  `colum_type` varchar(45) DEFAULT NULL COMMENT '0：公式\n1：数值\n2：字符串\n3：日期',
   `min_value` int(11) DEFAULT NULL,
   `max_value` int(11) DEFAULT NULL,
   `colum_formula` varchar(500) DEFAULT NULL,

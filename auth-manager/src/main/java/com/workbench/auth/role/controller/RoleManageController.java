@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -57,7 +58,7 @@ public class RoleManageController {
     @RequestMapping("saveNewRole")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String saveNewRole(Role role){
+    public String saveNewRole(@RequestBody Role role){
         roleManageService.saveNewRole(role);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
 
@@ -69,7 +70,7 @@ public class RoleManageController {
     @RequestMapping("updateSaveRole")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String updateSaveRole(Role role){
+    public String updateSaveRole(@RequestBody Role role){
         roleManageService.updateSaveRole(role);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
 

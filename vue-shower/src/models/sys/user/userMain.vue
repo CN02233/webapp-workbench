@@ -38,7 +38,6 @@
               <el-button type="text" @click="openEditModal(scope.row)" size="small">编辑</el-button>
               <el-button type="text" @click="openAuthModal(scope.row)" size="small">权限</el-button>
               <el-button type="text" @click="delUser(scope.row)" size="small">删除</el-button>
-              <!--<el-button type="text" @click="openOriginModal(scope.row)" size="small">机构</el-button>-->
             </template>
           </el-table-column>
         </el-table>
@@ -52,35 +51,31 @@
 
     <!-- 新增、编辑 弹窗-->
     <el-dialog :title="modalPageTitle" :visible.sync="showModalPage" >
-      <el-form ref="editForm" class="modal-form" :label-position="left" label-width="20%" :model="formData">
+      <el-form  class="modal-form" :label-position="left" label-width="20%" :model="formData">
+        <!--
         <el-form-item :size="small" label="用户登陆名" >
           <el-input   auto-complete="off" ></el-input>
         </el-form-item>
+        -->
         <el-form-item :size="small" label="用户名称" >
           <el-input v-model="formData.user_name" auto-complete="off" ></el-input>
         </el-form-item>
 
         <el-form-item :size="small" label="所属机构" >
-          <el-cascader style="width: 100%"
-                       :show-all-levels="false"
-                       expand-trigger="hover"
-                       :change-on-select = "true"
-                       :options="originList"
-                       v-model="formData.origin">
-          </el-cascader>
+          <treeselect v-model="formData.origin_id"  :options="options" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
-        <el-button type="primary" @click="subWordForm()">确 定</el-button>
+        <el-button type="primary" @click="submitDataForm()">确 定</el-button>
       </div>
     </el-dialog>
 
     <!--用户权限设置-->
     <el-dialog title="用户权限" :visible.sync="showUserAuth" >
-      <el-form ref="editForm" class="modal-form" :label-position="left" label-width="20%" :model="formData">
+      <el-form  class="modal-form" :label-position="left" label-width="20%" :model="formData">
         <el-form-item :size="small" label="用户名称" >
-          <el-input :disabled="true"  :value="editFormData.user_name" auto-complete="off" ></el-input>
+          <el-input :disabled="true"  :value="formData.user_name" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item :size="small" label="角色" >
           <el-select v-model="user_role_id" style="width:100%;" placeholder="请选择角色">
@@ -93,286 +88,221 @@
         <el-button type="primary" @click="saveUserRole()">确 定</el-button>
       </div>
     </el-dialog>
-
-    <!-- 新增、编辑 弹窗-->
-    <el-dialog title="用户机构修改" :visible.sync="showOrigin" >
-      <el-form ref="editForm" class="modal-form" :label-position="left" label-width="20%" :model="formData">
-        <el-form-item :size="small" label="用户名称" >
-          <el-cascader style="width: 100%"
-                       expand-trigger="hover"
-                       :change-on-select = "true"
-                       :options="originList"
-                       v-model="origin">
-          </el-cascader>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="closeModal">取 消</el-button>
-        <el-button type="primary" @click="changeOrigin()">确 定</el-button>
-      </div>
-    </el-dialog>
   </WorkMain>
 </template>
 
 <script>
-  import WorkTablePager from "@/models/public/WorkTablePager"
-  import WorkMain from "@/models/public/WorkMain"
+  import WorkTablePager from '@/models/public/WorkTablePager'
+  import WorkMain from '@/models/public/WorkMain'
   import { required } from 'vuelidate/lib/validators'
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
   export default {
     name: 'UserMain',
-
-    data() {
+    data () {
       return {
-        userDataList:[],
-        originList:[],
-        termForSearch:'',
-        tableDataUrl:'sys/user/listUserPage',
-        currPageNum:1,
-        totalPage:1,
-        showModalPage:false,
-        isEditModal:false,
-        showUserAuth:false,
-        showOrigin:false,
-        allRoleList:[],
-        user_role_id:'',
-        origin:'',
-        editFormData:{
-          user_name:'',
-          origin:''
+        userDataList: [],
+        originList: [],
+        termForSearch: '',
+        tableDataUrl: 'sys/user/listUserPage',
+        currPageNum: 1,
+        totalPage: 1,
+        showModalPage: false,
+        isEditModal: false,
+        showUserAuth: false,
+        showOrigin: false,
+        allRoleList: [],
+        user_role_id: '',
+        formData: {
+          user_id:null,
+          user_name: null,
+          origin_id: null,
         },
-        addFormData:{
-          user_name:'',
-          origin:''
-        }
+        options: []
       }
     },
-    validations:{
-      formData:{
-        user_name:{
+    validations: {
+      formData: {
+        user_name: {
           required
         },
-        origin:{
+        origin_id: {
           required
         }
       }
     },
-    computed:{
-      formData:function(){
-        if(this.isEditModal){
-          return this.editFormData
-        }else{
-          return this.addFormData
-        }
-      },
-      modalPageTitle(){
-        if(this.isEditModal){
-          return "修改用户"
-        }else
-          return "新增用户"
+    computed: {
+      modalPageTitle () {
+        if (this.isEditModal) {
+          return '修改用户'
+        } else { return '新增用户' }
       }
     },
     components: {
+      Treeselect,
       WorkTablePager,
       WorkMain
     },
     methods: {
-      getTableData:function(pageNum){
-        if(pageNum&&pageNum!=''){
-          this.currPageNum = pageNum;
-        }else{
-          pageNum = this.currPageNum;
+      getTableData: function (pageNum) {
+        if (pageNum && pageNum !== '') {
+          this.currPageNum = pageNum
+        } else {
+          pageNum = this.currPageNum
         }
         const $this = this
         this.BaseRequest({
-          url:this.tableDataUrl,
-          method:"get",
-          params:{currPage:pageNum,pageSize:10,search:this.termForSearch||""}
-        }).then(reponse=>{
+          url: this.tableDataUrl,
+          method: 'get',
+          params: {currPage: pageNum, pageSize: 10, search: this.termForSearch || ''}
+        }).then(reponse => {
           $this.totalPage = reponse.totalPage
           $this.refreshTableList(reponse.dataList)
         })
       },
-      getOriginList(){
+      getOriginList () { // 弹出model触发、获取机构树状展示
         this.BaseRequest({
-          url:'origin/listAllOrigin',
-          method:"get"
-        }).then(response=>{
-          if(response!=null&&response.length>0){
-            response.forEach(originData=>{
-
-              function treeMenu(a) {
-                this.tree = a || [];
-                this.groups = {};
-              };
-              treeMenu.prototype = {
-                init: function(pid) {
-                  this.group();
-                  return this.getDom(this.groups[pid]);
-                },
-                group: function() {
-                  for(var i = 0; i < this.tree.length; i++) {
-                    if(this.groups[this.tree[i].parent_origin_id]) {//{value:this.tree[i].origin_id,label:this.tree[i].origin_name}
-                      this.groups[this.tree[i].parent_origin_id].push(this.tree[i]);
-                    } else {
-                      this.groups[this.tree[i].parent_origin_id] = [];
-                      this.groups[this.tree[i].parent_origin_id].push(this.tree[i]);
-                    }
-                  }
-                },
-                getDom: function(a) {
-                  if(!a) {
-                    return ''
-                  }
-                  for(var i = 0; i < a.length; i++) {
-                    a[i].label = a[i].origin_name;
-                    a[i].value = a[i].origin_id;
-                    a[i].children = this.getDom(this.groups[a[i].origin_id])
-                  };
-                  return a;
-                }
-              };
-              this.originList = new treeMenu(response).init("0");
-            })
+          url: 'submitAU/listAllSubmitauthority',
+          method: 'get'
+        }).then(response => {
+          if (response != null && response.length > 0) {
+            this.data = []
+            this.options = response
+            this.data = response
           }
-
         })
       },
-
-      refreshTableList:function(dataList){
+      refreshTableList: function (dataList) {
         this.userDataList = dataList
       },
-      delUser:function(editWordKey){
-        this.$confirm('确定删除用户【'+editWordKey.user_name+"】？", '提示', {
+      delUser: function (row) {
+        this.$confirm('确定删除用户【' + row.user_name + '】？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
-          dangerouslyUseHTMLString:true,
+          dangerouslyUseHTMLString: true,
           type: 'warning'
         }).then(() => {
           this.BaseRequest({
-            url:"sys/user/delUserByUserId",
-            method:'get',
-            params:{"user_id":editWordKey.user_id}
-          }).then(reponse=>{
-            this.Message.success("删除成功")
+            url: 'sys/user/delUserByUserId',
+            method: 'get',
+            params: {'user_id': row.user_id}
+          }).then(() => {
+            this.Message.success('删除成功')
             this.getTableData()
           })
-
         }).catch(() => {
-        });
-
-
+        })
       },
-      openAddModal:function(){
+      openAddModal: function () {
+        this.clearData()
         this.showModalPage = true
         this.isEditModal = false
       },
-      openEditModal:function(editWord){
+      clearData: function () {
+        this.formData = {
+          user_id: null,
+          user_name: null,
+          origin_id: null
+        }
+      },
+      openEditModal: function (row) { // user edit
+        this.clearData()
         this.showModalPage = true
         this.isEditModal = true
-        this.editFormData = editWord
-        // getOriginByUser
+        console.log(row)
+        this.formData.user_name = row.user_name
+        this.formData.user_id = row.user_id
+        // set options value
         this.BaseRequest({
-          url:"origin/getOriginByUser",
-          method:'get',
-          params:{"userId":editWord.user_id}
-        }).then(reponse=>{
-          this.editFormData.origin[0] = reponse.origin_id
-        })
+          url: 'origin/getOriginByUser',
+          method: 'get',
+          params: {'userId': row.user_id}
+        }).then(reponse => {
 
+          this.formData.origin_id = reponse.origin_id
+        })
       },
-      saveUserRole:function(){
-        this.BaseRequest({
-          url:"sys/userRole/updateUserRole",
-          method:'get',
-          params:{user_id:this.editFormData.user_id,user_role_id:this.user_role_id,old_user_role_id:this.editFormData.user_role_id}
-        }).then(response=>{
-          this.Message.success("保存成功")
-          this.showUserAuth = false
-      })
+      submitDataForm: function () { // user submit
+        if (this.checkInputNull()) {
+          return
+        }
+        if (this.isEditModal) { // update
+          this.BaseRequest({
+            url: 'sys/user/updateSaveUser',
+            method: 'POST',
+            data: {'user_name': this.formData.user_name, 'user_id': this.formData.user_id}
+          }).then(() => {
+            this.Message.success('保存成功')
+            // add user——origin relation
+            this.changeOrigin()
+            this.getTableData()
+            this.closeModal()
+          })
+        } else { // insert
+          this.BaseRequest({
+            url: 'sys/user/saveNewUser',
+            method: 'get',
+            params: {'user_name': this.formData.user_name}
+          }).then((response) => {
+            this.Message.success('保存成功')
+            // add user——origin relation
+            this.formData.user_id = response.user_id
+            this.changeOrigin()
+            this.getTableData()
+            this.closeModal()
+          })
+        }
       },
       changeOrigin(){
-        let sendData = this.addFormData
-        if(this.isEditModal){
-          sendData = this.editFormData
-        }
         this.BaseRequest({
           url:"origin/userOriginSave",
           method:'get',
-          params:{"userId":this.editFormData['user_id'],"originId":sendData['origin'][0]}
+          params:{"userId":this.formData.user_id,"originId":this.formData.origin_id}
         }).then(response=>{
           this.Message.success("保存成功")
           this.closeModal()
         })
       },
-      openAuthModal:function(editWord){
+      openAuthModal: function (row) { // edit
         const $this = this
         this.showUserAuth = true
-        this.editFormData = editWord
+        // this.formData = row
+        this.formData.user_id = row.user_id
+        this.formData.user_name = row.user_name
         this.BaseRequest({
-          url:"sys/userRole/getRoleByUserId",
-          method:'get',
-          params:{user_id:this.editFormData.user_id}
-        }).then(response=>{
-          if(response!=null&&response.length>0){
-//          user_role_id
-            $this.user_role_id = response[0]["user_role_id"]
-            $this.editFormData.user_role_id = response[0]["user_role_id"]
+          url: 'sys/userRole/getRoleByUserId',
+          method: 'get',
+          params: {user_id: this.formData.user_id}
+        }).then(response => {
+          if (response != null && response.length > 0) {
+            // set value for update
+            $this.user_role_id = response[0]['user_role_id']
+            $this.formData.user_role_id = response[0]['user_role_id']
           }
         })
-
       },
-      openOriginModal(editWord){
-        this.showOrigin = true
-        this.editFormData = editWord
-      },
-      closeModal:function(){
-        this.showModalPage=false
-        this.isEditModal=false
-        Object.keys(this.formData).forEach(objKey=>{
-          if(objKey ==='origin'){
-
-          }else
-            this.formData[objKey] = ""
+      saveUserRole: function () { // 权限保存修改
+        this.BaseRequest({
+          url: 'sys/userRole/updateUserRole',
+          method: 'get',
+          params: {user_id: this.formData.user_id, user_role_id: this.user_role_id, old_user_role_id: this.formData.user_role_id}
+        }).then(() => {
+          this.Message.success('保存成功')
+          this.showUserAuth = false
         })
       },
-      closeUserAuthModal:function(){
+      closeModal: function () {
+        this.showModalPage = false
+        this.isEditModal = false
+      },
+      closeUserAuthModal: function () {
         this.showUserAuth = false
       },
-      subWordForm:function(){
-        if(this.checkInputNull()){
-          //DO NOTHING
-          return
-        }
 
-        let sendData = this.addFormData
-        if(this.isEditModal){
-          sendData = this.editFormData
-          this.BaseRequest({
-            url:"sys/user/updateSaveUser",
-            method:'POST',
-            data:{"user_name":sendData.user_name,"user_id":sendData.user_id}
-          }).then(response=>{
-            this.Message.success("保存成功")
-            this.getTableData()
-            this.closeModal();
-          })
-        }else{
-          this.BaseRequest({
-            url:"sys/user/saveNewUser",
-            method:'get',
-            params:{"user_name":sendData.user_name}
-          }).then(response=>{
-            this.Message.success("保存成功")
-            this.editFormData['user_id'] = response.user_id
-            this.changeOrigin()
-            this.getTableData()
-          })
-        }
-      },
-      checkInputNull(){
+      checkInputNull () {
         const checkResult = this.$v.$invalid
-        if(checkResult) {
+        if (checkResult) {
           this.$notify({
             dangerouslyUseHTMLString: true,
             message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>用户名称、所属机构'
@@ -381,16 +311,16 @@
         return checkResult
       }
     },
-    mounted:function(){
+    mounted: function () {
       this.userDataList = []
       this.getTableData(1)
       const $this = this
       this.getOriginList()
       this.BaseRequest({
-        url:"sys/role/rolePageData",
-        method:'get',
-        params:{currPage:1,pageSize:100}
-      }).then(response=>{
+        url: 'sys/role/rolePageData',
+        method: 'get',
+        params: {currPage: 1, pageSize: 100}
+      }).then(response => {
         $this.allRoleList = response.dataList
       })
     }
