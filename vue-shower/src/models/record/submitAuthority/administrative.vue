@@ -3,7 +3,6 @@
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
         <el-button @click="openAddModal" type="primary">新增</el-button>
-        <el-button  type="primary">用户关联</el-button>
       </el-col>
     </el-row>
     <el-row class="table-row">
@@ -40,8 +39,16 @@
           <el-table-column
             label="操作"
             align="left"
+            width="350"
+            fixed="right"
             >
             <template slot-scope="scope">
+              <el-button
+                size="mini"
+                >用户关联</el-button>
+              <el-button
+                size="mini"
+                >报送机构</el-button>
               <el-button
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -61,14 +68,18 @@
     </WorkTablePager>
     <!-- 新增、编辑 弹窗-->
     <el-dialog :title="dialogTitle" :visible.sync="showModalPage" >
+      <el-form  class="modal-form" :label-position="left" label-width="20%" >
+        <el-form-item :size="small" label="机构名称" >
+          <el-input placeholder="行政机构名称" v-model="formSubmitData.organization_name" auto-complete="off" ></el-input>
+        </el-form-item>
+      </el-form>
+      <!--
       <el-row :gutter="16">
-
         <el-col :sm="12">
           <el-row>
-            <el-col :span="6" :offset="1">机构名称</el-col>
-            <el-col :span="17">
-              <el-input placeholder="机构名称" v-model="formSubmitData.organization_name" class="input-with-select" ></el-input>
-            </el-col>
+            <el-form-item :size="small" label="行政机构名称" >
+              <el-input placeholder="行政机构名称" v-model="formSubmitData.organization_name" class="input-with-select" ></el-input>
+            </el-form-item>
           </el-row>
           <el-row>
             <el-col :span="6" :offset="1">报送机构</el-col>
@@ -80,6 +91,7 @@
           </el-row>
         </el-col>
       </el-row>
+      -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
         <el-button type="primary" @click="handleInsert">确 定</el-button>
@@ -118,9 +130,6 @@ export default {
   validations: {// 提交前的验证
     formSubmitData: {
       organization_name: {
-        required
-      },
-      origin_id: {
         required
       }
     }
