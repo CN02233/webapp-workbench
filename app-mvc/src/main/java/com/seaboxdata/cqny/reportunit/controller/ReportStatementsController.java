@@ -1,7 +1,7 @@
 package com.seaboxdata.cqny.reportunit.controller;
 
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
-import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
+import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
+import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
@@ -16,14 +16,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * 报送单元的新增 修改 删除 查询
+ * 报送报表的新增 修改 删除 查询
  */
 @Controller
-@RequestMapping("reportUnit")
-public class ReportUnitController {
+@RequestMapping("reportStatements")
+public class ReportStatementsController {
 
     @Autowired
-    private ReportUnitService reportUnitService;
+    private ReportStatementsService reportStatementsService;
 
     /**
      * 列表查询展示
@@ -31,43 +31,43 @@ public class ReportUnitController {
      * @param pageSize
      * @return
      */
-    @RequestMapping("listReportUnit")
+    @RequestMapping("listReportStatements")
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String listReportUnit(int currPage, int pageSize){
-        PageResult originList = reportUnitService.listReportUnit(currPage, pageSize);
+    public String listReportStatements(int currPage, int pageSize){
+        PageResult originList = reportStatementsService.listReportStatements(currPage, pageSize);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }
 
     /**
-     * 新增/修改报送单元
-     * @param reportUnit
+     * 新增/修改报送报表
+     * @param reportStatements
      * @return
      */
-    @RequestMapping("addReportUnit")
+    @RequestMapping("addReportStatements")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult addReportUnit(@RequestBody UnitEntity reportUnit){
+    public JsonResult addReportStatements(@RequestBody StatementsEntity reportStatements){
         User user = SessionSupport.checkoutUserFromSession();
-        reportUnit.setCreate_user(user.getUser_id());
-        reportUnitService.addReportUnit(reportUnit);
+        reportStatements.setCreate_user(user.getUser_id());
+        reportStatementsService.addReportStatements(reportStatements);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
 
 
     /**
-     * 删除报送单元
-     * @param unitId
+     * 删除报送报表
+     * @param statementsId
      * @return
      */
     @RequestMapping("delById")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult deleteById( String unitId){
-        reportUnitService.deleteById(unitId);
+    public JsonResult deleteById( String statementsId){
+        reportStatementsService.deleteById(statementsId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }

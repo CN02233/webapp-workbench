@@ -2,7 +2,6 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.AbstractTestService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
-import junit.framework.TestCase;
 import org.junit.Test;
 
 import javax.annotation.Resource;
@@ -20,5 +19,10 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
     @Test
     public void testGetUnitContext() {
         reportCustomerService.getUnitContext("1","1", "1");
+    }
+
+    @Test
+    public void testCheckUnitStep() {
+        reportCustomerService.checkReportCustomer("1");
     }
 }
