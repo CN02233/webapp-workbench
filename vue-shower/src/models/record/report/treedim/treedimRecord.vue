@@ -48,6 +48,7 @@
         lastStep:false,
         colSpan:0,
         definedColumsTotal:0,
+        definedColums:{},
         elRowDatas:[],
         elColumDefineds:{},
         minLevel:0,
@@ -72,7 +73,7 @@
         }).then(response=>{
           loading.close();
           if(response){
-            // this.definedColums = response.definedColums
+            this.definedColums = response.definedColums
             this.definedColumsTotal = response.definedColums.length
             this.colSpan = Math.floor(24/(this.definedColumsTotal+1))
             this.elColumDefineds = this.elColumDefined(response.definedColums,0,0,0)
@@ -88,6 +89,18 @@
       saveUnitContext(needUpdateStep){
         const $this = this
 
+        const saveColums = new Array()
+        this.elColumDefineds.forEach((elColumDefined,rowNum)=>{
+          elColumDefined.forEach(elColumCol=>{
+              if(elColumCol!=null){
+                elColumCol.colum_id = rowNum
+                saveColums.push(elColumCol)
+              }
+          })
+        })
+
+        console.log(saveColums)
+
         // validateSimpleUnitContext
         const valloading = this.$loading({
           lock: true,
@@ -100,7 +113,7 @@
           method:'post',
           data:{
             definedColums:this.definedColums,
-            columDatas:Object.values(this.columDatas)
+            columDatas:saveColums
           }
         }).then(response=>{
           valloading.close();
@@ -130,11 +143,11 @@
               background: 'rgba(0, 0, 0, 0.7)'
             });
             this.BaseRequest({
-              url:"/reportCust/saveSimpleUnitContext",
+              url:"/reportCust/overrideSimpleUnitContext",
               method:'post',
               data:{
                 definedColums:this.definedColums,
-                columDatas:Object.values(this.columDatas)
+                columDatas:saveColums
               }
             }).then(response=>{
               loading.close();

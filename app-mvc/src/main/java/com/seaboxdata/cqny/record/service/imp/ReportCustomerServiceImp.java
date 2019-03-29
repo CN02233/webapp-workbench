@@ -60,7 +60,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds,ArrayList<ReportCustomerData> columDatas) {
+    public void updateOrInsertSimpleUnitContext(
+            ArrayList<SimpleColumDefined> simpleColumDefineds,
+            ArrayList<ReportCustomerData> columDatas,boolean isUpdate) {
         Map<String,SimpleColumDefined> fomularsTmp = new HashMap<>();
         Map<String,String> fomularMap = new HashMap<>();
         if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
@@ -80,8 +82,14 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 if(fomularsTmp.containsKey(unitId+"_"+columnId)){
                     fomularMap.put(new StringBuilder().append(reportId).append("_").append(unitId).append("_").append(columnId).toString(),
                             fomularsTmp.get(unitId+"_"+columnId).getColum_formula());
-                }else
-                    reportCustomerDao.updateUnitContext(columData);
+                }else{
+                    if(isUpdate){
+                        reportCustomerDao.updateUnitContext(columData);
+                    }else{
+                        reportCustomerDao.insertUnitContext(columData);
+                    }
+
+                }
             });
         }
 
@@ -217,6 +225,18 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         }
         
         return validateResult;
+    }
+
+    /**
+     * 覆盖数据，按单元删除旧数据，将新数据保存
+     * @param definedColums
+     * @param columDatas
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void overrideSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
+        reportCustomerDao.removeUnitContextData(columDatas.get(0).getUnit_id());
+        this.updateOrInsertSimpleUnitContext(definedColums,columDatas,true);
     }
 
     public Object refreshSimpleFomularData(String reportId,String columFomular){

@@ -13,7 +13,7 @@ public interface ReportCustomerService {
     PageResult pagerReport( Integer currPage, Integer pageSize, Integer userId);
     ReportUnitCustomerContext getUnitContext(String reportId, String unitId, String unitType);
 
-    void updateSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds,ArrayList<ReportCustomerData> columDatas);
+    void updateOrInsertSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas,boolean isUpdate);
 
     ReportCustomer checkReportCustomer(String reportId);
 
@@ -22,4 +22,6 @@ public interface ReportCustomerService {
     void updateStep(String reportId);
 
     Map<String,String> validateSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
+
+    void overrideSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
 }

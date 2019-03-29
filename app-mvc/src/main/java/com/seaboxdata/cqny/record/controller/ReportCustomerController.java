@@ -100,7 +100,19 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult saveSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
 
-        reportCustomerService.updateSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
+        reportCustomerService.updateOrInsertSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas(),true);
+//        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+
+        return jsonResult;
+    }
+
+    @RequestMapping("overrideSimpleUnitContext")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult overrideSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
+
+        reportCustomerService.overrideSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
 
