@@ -58,7 +58,6 @@
         });
       },
       selectActiveStep(active_unit,isRefresh){
-        console.log("selectActiveStep is running "+active_unit)
         if(this.unitEntities){
           this.unitEntities.forEach((unitEntity,eachNum)=>{
             const unitId = unitEntity.unit_id
@@ -75,12 +74,12 @@
                   unitAddress = '/record/onedim/onedimRecord'
                 }else if(unitType=='2'){
 
-                }else if(unitType==='3'){//多维静态
+                }else if(unitType=='3'){//多维静态
 
-                }else if(unitType==='4'){//多维树状
-
+                }else if(unitType=='4'){//多维树状
+                  unitAddress = '/record/treedim/treedimRecord'
                 }
-                const lastStep = (this.activeStepNum==this.lastStepNum)
+                const lastStep = (unitType==='4')
                 console.log(lastStep)
                 this.$router.push({
                   path: unitAddress+"?reportId="+this.reportId+"&unitId="+unitId+"&unitType="+unitType+"&lastStep="+lastStep
