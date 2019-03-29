@@ -1,22 +1,26 @@
 <template>
   <!--title-->
-  <div>
-    <el-row v-for="(value,key) in columTemplateData.treeData">
-      <el-col v-for="index in totalColNum" class="tree_colum" :span="colNum" >
-        <el-input v-if="(columTemplateData.level-1)==index"></el-input>
+  <div >
+    <div>
+      <el-col :span="colNum" v-for="forTime in totalColNum">
+        <el-input v-if="columGroupData[forTime-1]" :placeholder="columGroupData[forTime-1].colum_name_cn"></el-input>
         <span v-else> -- </span>
       </el-col>
-    </el-row>
 
 
-    <TreeDimShowerTitle :colNum="colNum" :totalColNum="totalColNum" :columTemplateData="columTemplateDataChildren" v-for="columTemplateDataChildren in columTemplateData.children"></TreeDimShowerTitle>
+      <!--<el-row v-if="columGroupData.children!=null">-->
+        <!--<TreeDimShowerContext :columGroupData="columGroupData.children" :totalColNum="totalColNum"  :colNum="colNum" ></TreeDimShowerContext>-->
+      <!--</el-row>-->
+    </div>
+
   </div>
 
 </template>
 
+
 <script>
   export default {
-    name: 'TreeDimShowerTitle',
+    name: 'TreeDimShowerContext',
     props:{
       colNum:{
         type: Number
@@ -24,12 +28,14 @@
       totalColNum:{
         type: Number
       },
-      columTemplateData:{
-        type: Object
+      columGroupData:{
+        type: Array
       }
     },
     data() {
-      return {}
+      return {
+        columGroupDataChildren : []
+      }
     },
     methods: {}
   }

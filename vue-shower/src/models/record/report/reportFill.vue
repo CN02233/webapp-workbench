@@ -131,14 +131,15 @@
     padding:30px 0 0 0 ;
   }
   .fill-steps{
-    width:200px;
+    width:150px;
     height:70%;
     position:absolute;
     z-index: 10086;
   }
   .fill-context{
-    width:100%;
+    width:calc(100% - 150px);
     height:70%;
+    margin:0 0 0 150px;
     overflow: auto;
   }
   .el-step{
