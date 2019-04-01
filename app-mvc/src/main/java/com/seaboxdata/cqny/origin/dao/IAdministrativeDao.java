@@ -2,11 +2,9 @@ package com.seaboxdata.cqny.origin.dao;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.entity.Administrative;
-import com.seaboxdata.cqny.origin.test.EntityTree;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 @Repository
 public interface IAdministrativeDao {
@@ -54,4 +52,13 @@ public interface IAdministrativeDao {
             "LEFT JOIN `user` c ON a.create_user=c.user_id")
     Page<Administrative> listAdministrative(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
+    @Delete("delete from user_organizations_assign where user_id = #{userId}")
+    void removeUserOrganization(@Param("userId") Integer userId);
+
+    @Insert("insert into user_organizations_assign (organization_id,user_id) values (#{organizationId},#{userId})")
+    void userOrganizationSave(@Param("organizationId") Integer organizationId, @Param("userId") Integer userId);
+
+    @Select("select distinct o.* from organizations o,user_organizations_assign uoa where o.organization_id = uoa.organization_id " +
+            "and uoa.user_id = #{userId}")
+    Administrative getOrganizationByUser(Integer userId);
 }

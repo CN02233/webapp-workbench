@@ -2,8 +2,8 @@ package com.seaboxdata.cqny.origin.controller;
 
 import com.seaboxdata.cqny.origin.entity.Submitauthority;
 import com.seaboxdata.cqny.origin.service.SubmitauthorityService;
-import com.seaboxdata.cqny.origin.test.EntityTree;
-import com.seaboxdata.cqny.origin.test.TreeUtil;
+import com.seaboxdata.cqny.origin.tree.EntityTree;
+import com.seaboxdata.cqny.origin.tree.TreeUtil;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 /**
- * 机构的新增 修改 删除 查询
+ * 报送机构的新增 修改 删除 查询
  */
 @Controller
 @RequestMapping("submitAU")

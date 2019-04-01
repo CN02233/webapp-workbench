@@ -1,10 +1,11 @@
 package com.seaboxdata.cqny.origin.service;
 
 import com.seaboxdata.cqny.origin.entity.Submitauthority;
-import com.seaboxdata.cqny.origin.test.EntityTree;
+import com.seaboxdata.cqny.origin.tree.EntityTree;
 import com.webapp.support.page.PageResult;
 
 import java.util.List;
+
 
 public interface SubmitauthorityService {
 

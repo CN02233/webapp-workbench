@@ -57,6 +57,11 @@ const routes = [
             component: () => import('@/models/sys/user/userMain')
           },
           {
+            name: 'supervisionUser',
+            path: '/sys/supervisionUser',
+            component: () => import('@/models/sys/user/supervisionUserMain')
+          },
+          {
             name: 'role',
             path: '/sys/role',
             component: () => import('@/models/sys/role/roleMain')
@@ -243,6 +248,16 @@ const routes = [
             name: 'reportStatements',
             path: '/record/reportStatements',
             component: () => import('@/models/record/submitAuthority/reportstatements'),
+            children: []
+          },{
+            name: 'reportApproval',
+            path: '/record/reportApproval',
+            component: () => import('@/models/record/submitAuthority/reportapproval'),
+            children: []
+          },{
+            name: 'reportSupervision',
+            path: '/record/reportSupervision',
+            component: () => import('@/models/record/submitAuthority/reportsupervision'),
             children: []
           }
         ]

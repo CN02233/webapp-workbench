@@ -36,4 +36,11 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     public void deleteById(String statementsId) {
         reportStatementsDao.deleteById(statementsId);
     }
+
+    @Override
+    public PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id) {
+        Page<StatementsEntity> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,user_id);
+        PageResult pageResult = PageResult.pageHelperList2PageResult(reportStatementsPage);
+        return pageResult;
+    }
 }

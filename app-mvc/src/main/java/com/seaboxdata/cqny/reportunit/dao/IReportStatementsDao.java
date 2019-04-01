@@ -59,4 +59,27 @@ public interface IReportStatementsDao {
             "\t1 = 1")
     Page<StatementsEntity> listReportStatements(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
+    @Select("SELECT\n" +
+            "\trsi.create_time,\n" +
+            "\trsi.create_user,\n" +
+            "\trsi.origin_id,\n" +
+            "\trsi.statements_id,\n" +
+            "\trsi.statements_name,\n" +
+            "\trsi.`status`\n" +
+            "FROM\n" +
+            "\treport_statements_info rsi\n" +
+            "WHERE\n" +
+            "\trsi.origin_id IN (\n" +
+            "\t\tSELECT\n" +
+            "\t\t\toos.origin_id\n" +
+            "\t\tFROM\n" +
+            "\t\t\tUSER u,\n" +
+            "\t\t\tuser_organizations_assign uos,\n" +
+            "\t\t\torganization_origin_assign oos\n" +
+            "\t\tWHERE\n" +
+            "\t\t\tu.user_id = uos.user_id\n" +
+            "\t\tAND oos.organiztion_id = uos.organization_id\n" +
+            "\t\tAND u.user_id = #{userId}\n" +
+            "\t)")
+    Page<StatementsEntity> listReportStatementsByUser(@Param("currPage")int currPage,@Param("pageSize") int pageSize,@Param("userId") int user_id);
 }

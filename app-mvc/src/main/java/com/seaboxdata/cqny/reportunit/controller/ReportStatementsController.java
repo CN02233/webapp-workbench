@@ -72,4 +72,22 @@ public class ReportStatementsController {
         return jsonResult;
     }
 
+    /**
+     * 报送监管列表查询展示
+     * 通过行政用户的ID->行政机构->报送机构->属于报送机构的所有报送报表
+     * @param currPage
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping("listReportStatementsByUser")
+    @ResponseBody
+    @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
+    public String listReportStatementsByUser(int currPage, int pageSize){
+        User user = SessionSupport.checkoutUserFromSession();
+        PageResult originList = reportStatementsService.listReportStatementsByUser(currPage, pageSize,user.getUser_id());
+        String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
+        return jsonpResponse;
+    }
+
 }

@@ -104,7 +104,7 @@
       return {
         userDataList: [],
         originList: [],
-        termForSearch: '',
+        userType: 1,
         tableDataUrl: 'sys/user/listUserPage',
         currPageNum: 1,
         totalPage: 1,
@@ -155,7 +155,7 @@
         this.BaseRequest({
           url: this.tableDataUrl,
           method: 'get',
-          params: {currPage: pageNum, pageSize: 10, search: this.termForSearch || ''}
+          params: {currPage: pageNum, pageSize: 10, userType: this.userType}
         }).then(reponse => {
           $this.totalPage = reponse.totalPage
           $this.refreshTableList(reponse.dataList)
@@ -231,7 +231,7 @@
           this.BaseRequest({
             url: 'sys/user/updateSaveUser',
             method: 'POST',
-            data: {'user_name': this.formData.user_name, 'user_id': this.formData.user_id}
+            data: {'user_name': this.formData.user_name, 'user_id': this.formData.user_id, 'user_type': this.userType}
           }).then(() => {
             this.Message.success('保存成功')
             // add user——origin relation
@@ -243,7 +243,7 @@
           this.BaseRequest({
             url: 'sys/user/saveNewUser',
             method: 'get',
-            params: {'user_name': this.formData.user_name}
+            params: {'user_name': this.formData.user_name, 'user_type': this.userType}
           }).then((response) => {
             this.Message.success('保存成功')
             // add user——origin relation

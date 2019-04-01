@@ -45,7 +45,7 @@ public class UserServiceImp implements UserService {
 
     public Page<User> listUsersForPage(int currPage,int pageSize,User user){
 
-        Page<User> allUser = userServiceDao.listUsersForPage(currPage,pageSize,user.getUser_id(),user.getUser_name());
+        Page<User> allUser = userServiceDao.listUsersForPage(currPage,pageSize,user.getUser_id(),user.getUser_name(),user.getUser_type());
 
         return allUser;
     }
