@@ -3,15 +3,11 @@
   <WorkMain :headerItems="['报送管理','报送设置','报送定义列表','多维静态报送单元']">
 
     <el-row class="search-row" :gutter="20">
-      <el-col class="align-left" :span="7">
+      <el-col class="align-left" :span="5">
         <el-button @click="addDefined()" type="primary">新增</el-button>
       </el-col>
-      <el-col class="align-right" :span="17">
-        <el-select v-model="searchModel.group_id" placeholder="输入项组">
-          <el-option selected label="请选择输入项组" value=""></el-option>
-          <el-option v-for="x in groupnameData" :key="x.group_id" :label="x.group_name" :value="x.group_id"></el-option>
-        </el-select>
-        <el-button @click="getTableData(1)" type="primary">查询</el-button>
+      <el-col class="align-left" :span="7">
+        <el-button @click="openDimList()" type="primary">维度列表</el-button>
       </el-col>
     </el-row>
 
@@ -19,23 +15,19 @@
       <el-col :span="24">
         <el-table
           :data="unitColums"
-          id="list" :span-method="mergeRow" @cell-mouse-leave="cellMouseLeave" @cell-mouse-enter="cellMouseEnter" :row-class-name="cellAddClass"
           style="width: 100%">
-          <el-table-column prop="colum_id" align="left" label="编号" width="60">
-          </el-table-column>
-          <el-table-column prop="group_name" align="left" label="输入项组名">
-          </el-table-column>
-          <el-table-column prop="colum_name_cn" align="left" label="输入项名">
-          </el-table-column>
-          <el-table-column prop="dim_name" align="left" label="维度列表"></el-table-column>
+          <el-table-column prop="colum_id" align="left" label="编号" width="60"></el-table-column>
+          <el-table-column prop="colum_name_cn" align="left" label="输入项名"></el-table-column>
+          <el-table-column prop="colum_type" align="left" :formatter="formatterDataType" label="输入项类型"></el-table-column>
+          <el-table-column prop="dim_name_cn" align="left" label="维度列表"></el-table-column>
           <el-table-column
             prop="module_url"
             align="center"
             label="操作">
             <template slot-scope="scope">
               <!--<el-button type="text" @click="viewDefined()" size="small">查看</el-button>-->
-              <el-button type="text" @click="editDefined(scope.row.group_id,scope.row.group_name)" size="small">编辑</el-button>
-              <el-button type="text" @click="deleteDefined(scope.row.group_id)" size="small">删除</el-button>
+              <el-button type="text" @click="editDefined(scope.row.colum_id,scope.row.colum_name)" size="small">编辑</el-button>
+              <el-button type="text" @click="deleteDefined(scope.row.colum_id)" size="small">删除</el-button>
               <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">查看</el-button>-->
             </template>
           </el-table-column>
@@ -51,141 +43,55 @@
     <!--新增输入项弹窗-->
     <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" width="80%" >
       <el-form :rules="editModel.rules" :model="editModel"  ref="form">
-      <el-row style="margin:5px;">
-        <el-col :span="8">
-          <label class="el-form-item__label" style="width:25%;">多维组名称</label>
-          <div style="margin-left:25%;"><el-input v-model="editModel.groupModel.colum_name"  auto-complete="off" placeholder="输入多维组名称" ></el-input></div>
-        </el-col>
-        <el-col :span="16">
-          <label class="el-form-item__label" style="width:25%;">多维组中文名称</label>
-          <div style="margin-left:25%;"><el-input v-model="editModel.groupModel.colum_name_cn"  auto-complete="off" placeholder="输入多维组中文名称" ></el-input></div>
-        </el-col>
-      </el-row>
       <el-row class="table-row">
-        <el-col :span="24">
-          <div class="nav" style="float:left;width:70%;">输入项列表</div>
-          <div style="display: inline;width:30%;float:left;text-align:right;">
-            <el-button type="primary" icon="el-icon-circle-plus-outline" size="mini" @click="insertCatRow()">新增项目</el-button>
-          </div>
-        </el-col>
-        <el-col :span="24">
-          <el-table
-            :data="editModel.catData"
-            ref="table1"
-            tooltip-effect="dark"
-            border
-            stripe
-            style="width: 100%">
+          <el-col :span="24">
+            <div class="nav" style="float:left;width:70%;">输入项列表</div>
+            <!--<div style="width:30%;float:left;text-align:right;">
+              <el-button type="primary" icon="el-icon-circle-plus-outline" size="mini" @click="openDimAdd()">新增维度</el-button>
+            </div>-->
+            <el-table
+              :data="editModel.datas"
+              ref="table"
+              tooltip-effect="dark"
+              border
+              stripe
+              style="width: 100%">
               <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
-              <el-table-column label="输入项名称" align="center">
+              <el-table-column label="项目" prop="colum_name_cn">
                 <template slot-scope="scope">
-                  <el-form-item :prop="'catData.' + scope.$index + '.colum_name'" :rules='editModel.rules.colum_name'>
-                    <el-input v-model="scope.row.colum_name"></el-input>
-                  </el-form-item>
-                </template>
-              </el-table-column>
-              <el-table-column label="输入项中文名称">
-                <template slot-scope="scope">
-                  <el-form-item :prop="'catData.' + scope.$index + '.colum_name_cn'" :rules='editModel.rules.colum_name_cn'>
-                    <el-input v-model="scope.row.colum_name_cn"></el-input>
-                  </el-form-item>
-                </template>
-              </el-table-column>
-              <el-table-column label="备注说明">
-              <template slot-scope="scope">
-                <el-form-item :prop="'catData.' + scope.$index + '.colum_desc'">
-                  <el-input v-model="scope.row.colum_desc"></el-input>
-                </el-form-item>
-              </template>
-            </el-table-column>
-              <el-table-column label="操作" width="70">
-                <template slot-scope="scope">
-                  <el-button type="danger" @click="deleteCatRow(scope.$index, scope.row)" size="small">删除</el-button>
-                </template>
-              </el-table-column>
-          </el-table>
-
-        </el-col>
-      </el-row>
-      <el-row class="table-row">
-        <el-col :span="24">
-          <div class="nav" style="float:left;width:70%;">维度列表</div>
-          <div style="display: inline;width:30%;float:left;text-align:right;">
-            <el-button type="primary" icon="el-icon-circle-plus-outline" size="mini" @click="insertDimRow()">新增维度</el-button>
-          </div>
-        </el-col>
-        <el-col :span="24">
-          <el-table
-            :data="editModel.dimData"
-            ref="table2"
-            tooltip-effect="dark"
-            border
-            stripe
-            style="width: 100%">
-            <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
-            <el-table-column  label="输入项名称" align="center">
-              <template slot-scope="scope">
-                <el-form-item :prop="'dimData.' + scope.$index + '.colum_name'" :rules='editModel.rules.colum_name'>
-                  <el-input v-model="scope.row.colum_name"></el-input>
-                </el-form-item>
-              </template>
-            </el-table-column>
-            <el-table-column label="输入项中文名称">
-              <template slot-scope="scope">
-                <el-form-item :prop="'dimData.' + scope.$index + '.colum_name_cn'" :rules='editModel.rules.colum_name_cn'>
-                  <el-input v-model="scope.row.colum_name_cn"></el-input>
-                </el-form-item>
-              </template>
-            </el-table-column>
-            <el-table-column label="输入项数据类型">
-              <template slot-scope="scope">
-                <el-form-item :prop="'dimData.' + scope.$index + '.colum_type'" :rules='editModel.rules.colum_type'>
-                  <el-select v-model="scope.row.colum_type" style="width:100%;" placeholder="请选择数据类型">
-                    <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
-                  </el-select>
-                </el-form-item>
-              </template>
-            </el-table-column>
-            <el-table-column label="最小值">
-              <template slot-scope="scope">
-                <el-form-item :prop="'dimData.' + scope.$index + '.min_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
-                  <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.min_value"></el-input>
-                </el-form-item>
-              </template>
-            </el-table-column>
-            <el-table-column label="最大值">
-              <template slot-scope="scope">
-                <el-form-item :prop="'dimData.' + scope.$index + '.max_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
-                  <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.max_value"></el-input>
-                </el-form-item>
-              </template>
-            </el-table-column>
-            <el-table-column label="公式">
-              <template slot-scope="scope">
-                <el-form-item :prop="'dimData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}">
-                  <el-input v-if="scope.row.colum_type=='0'"
-                            type="textarea"
-                            :rows="1"
-                            v-model="scope.row.colum_formula_desc" :disabled="true" auto-complete="off" >
+                  <el-form-item :prop="'datas.' + scope.$index + '.colum_name_cn'" :rules='editModel.rules.colum_name_cn'>
+                  <el-input v-model="scope.row.colum_name_cn" readonly="readonly">
+                    <el-button slot="append" icon="el-icon-edit-outline" @click="openColAdd(scope.$index,scope.row)"></el-button>
                   </el-input>
-                  <el-button v-if="scope.row.colum_type=='0'" @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
-                </el-form-item>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" width="70">
-              <template slot-scope="scope">
-                <el-button type="danger" @click="deleteDimRow(scope.$index, scope.row)" size="small">删除</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-
-        </el-col>
-      </el-row>
+                  </el-form-item>
+                </template>
+              </el-table-column>
+              <el-table-column v-for="(col,index) in editModel.dimData" :prop="col.dim_name" :label="col.dim_name_cn" width="160" >
+                <!--<template slot="header" slot-scope="scope">
+                  <el-button type="text" @click="openDimAdd(index,col)">{{col.dim_name_cn}}</el-button>
+                  <el-button icon="el-icon-delete" size="mini" circle @click="deleteDimRow(index, col)"></el-button>
+                </template>-->
+                <template slot-scope="scope">
+                  <el-form-item :prop="'datas.' + scope.$index + '.' + col.dim_name + '.colum_type'" :rules='editModel.rules.colum_type'>
+                    <el-input v-model="scope.row[col.dim_name].colum_type_name" readonly="readonly">
+                      <el-button slot="append" icon="el-icon-edit-outline" @click="openCellAdd(scope.$index,scope.row,col.dim_name)"></el-button>
+                    </el-input>
+                  </el-form-item>
+                </template>
+              </el-table-column>
+              <!--<el-table-column label="操作" width="90">
+                <template slot-scope="scope">
+                  <el-button type="text" @click="deleteColRow(scope.$index, scope.row)" size="small">删除</el-button>
+                </template>
+              </el-table-column>-->
+            </el-table>
+            <!--<div style="width:30%;float:left;text-align:left;">
+              <el-button icon="el-icon-circle-plus-outline" type="primary" @click="openColAdd()" size="mini">新增项目</el-button>
+            </div>-->
+          </el-col>
+        </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-tooltip v-if="formData.colum_type=='0'&&isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
-          <el-button @click="replaceFormulaEditor()" icon="el-icon-edit">重新定义公式</el-button>
-        </el-tooltip>
         <el-button @click="addOrEditModelOpend=false">取 消</el-button>
         <el-button type="primary" @click="columSave()">确 定</el-button>
       </div>
@@ -240,11 +146,104 @@
 
     </el-dialog>
 
+    <el-dialog title="维度列表" :close-on-press-escape='false'	:visible.sync="isOpenDimList" >
+      <div style="width:30%;text-align:left;">
+        <el-button type="primary" @click="openDimAdd(-1)" size="mini">新增维度</el-button>
+      </div>
+      <el-form :rules="editModel.rules" :model="editModel" ref="dlform">
+        <el-row class="table-row">
+          <el-col :span="24">
+            <el-table
+              :data="editModel.dimData"
+              ref="dtable"
+              tooltip-effect="dark"
+              border
+              stripe
+              style="width: 100%">
+              <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
+              <el-table-column prop="dim_name" label="维度名称" align="center"></el-table-column>
+              <el-table-column prop="dim_name_cn" label="维度中文名称"></el-table-column>
+              <el-table-column label="操作" width="150">
+                <template slot-scope="scope">
+                  <el-button type="primary" @click="openDimAdd(scope.$index, scope.row)" size="small">编辑</el-button>
+                  <el-button type="danger" @click="deleteDimRow(scope.$index, scope.row)" size="small">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-col>
+        </el-row>
+      </el-form>
+    </el-dialog>
+
+    <el-dialog :title="dimIndex>-1?'编辑维度':'新增维度'" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenDimEditor" >
+      <el-form :rules="editModel.rules" :model="dimForm" ref="dform" class="modal-form" label-position="right" label-width="120px" >
+        <el-form-item label="维度名称" :rules='editModel.rules.colum_name' prop="dim_name" >
+          <el-input v-model="dimForm.dim_name">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="维度中文名称" :rules='editModel.rules.colum_name_cn' prop="dim_name_cn">
+          <el-input v-model="dimForm.dim_name_cn">
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <el-row>
+        <el-button @click="isOpenDimEditor = false">取消</el-button>
+        <el-button type="primary" @click="saveDimRow()">确定</el-button>
+      </el-row>
+    </el-dialog>
+
+    <el-dialog :title="colForm.colum_name_cn!=null?'编辑项目':'新增项目'" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenColEditor" >
+      <el-form :rules="editModel.rules" :model="colForm" ref="cform" class="modal-form" label-position="right" label-width="120px" >
+        <el-form-item label="项目名称" :rules='editModel.rules.colum_name' prop="colum_name" >
+          <el-input v-model="colForm.colum_name"></el-input>
+        </el-form-item>
+        <el-form-item label="项目中文名称" :rules='editModel.rules.colum_name_cn' prop="colum_name_cn" >
+          <el-input v-model="colForm.colum_name_cn">
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <el-row>
+        <el-button @click="isOpenColEditor = false">取消</el-button>
+        <el-button type="primary" @click="insertColRow()">确定</el-button>
+      </el-row>
+    </el-dialog>
+
+    <el-dialog :title="(colIndex>-1&&datField!='')?'编辑输入框':'新增输入框'" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenDatEditor" >
+      <el-form ref="uform" :rules="editModel.rules" :model="datForm" class="modal-form" label-position="left" label-width="30%">
+        <el-form-item label="输入项数据类型" :rules='editModel.rules.colum_type' prop="colum_type">
+          <el-select v-model="datForm.colum_type" style="width:100%;" placeholder="请选择数据类型">
+            <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item v-if="datForm.colum_type=='1'" label="最小值" :rules="datForm.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" prop="min_value" >
+          <el-input v-model="datForm.min_value" auto-complete="off" ></el-input>
+        </el-form-item>
+        <el-form-item v-if="datForm.colum_type=='1'" label="最大值" :rules="datForm.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" prop="max_value" >
+          <el-input v-model="datForm.max_value" auto-complete="off" ></el-input>
+        </el-form-item>
+        <el-form-item v-if="datForm.colum_type=='0'" label="公式" :rules="datForm.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}" prop="colum_formula_desc" >
+          <el-input
+            type="textarea"
+            :rows="6"
+            v-model="datForm.colum_formula_desc" :disabled="true" auto-complete="off" >
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-tooltip v-if="datForm.colum_type=='0'" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
+          <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
+        </el-tooltip>
+        <el-button @click="isOpenDatEditor=false">取 消</el-button>
+        <el-button type="primary" @click="insertDataCell()">确 定</el-button>
+      </div>
+    </el-dialog>
   </WorkMain>
 </template>
 <style>
   .nav{font-size:16px;font-weight: bold;text-align:left;height:28px;line-height:28px;}
   .el-table__body tr.hover-row:hover td{background-color: #ecf5ff;}
+  .el-button--mini.is-circle{border:0;}
+  input.read[readonly]{background-color: #efefef;}
 </style>
 <script>
   import WorkTablePager from "@/models/public/WorkTablePager"
@@ -284,42 +283,58 @@
           'max_value':null,
           'colum_formula':'',
           'colum_formula_desc':'',
+          'colum_id':null,
+          'dim_id':null,
           'unit_id':null,
-          'group_id':null,
-          'group_name':'',
         },
         isOpenFormulaEditor:false,
+        isOpenDimEditor:false,
+        isOpenColEditor:false,
+        isOpenDatEditor:false,
+        isOpenDimList:false,
         formulaDescContext:[],
         formulaColumnDescContext:[],
         formulaDescContextTmp:'',
         formulaContext:[],
         otherUnits:[],
         fomularColumnTmp :'',
-        mergeMap:{},
-        groupnameData: [], //搜索输入项组
-        searchModel:{
-          group_id:'',
+        dimIndex:-1,
+        colIndex:-1,
+        datField:'',
+        addColForm:{
+          colum_id:null,
+          colum_name:'',
+          colum_name_cn:''
         },
-        listModel:{
-          selectedValue:'',
+        addDimForm:{
+          dim_id:null,
+          dim_name:'',
+          dim_name_cn:''
         },
+        addDataForm:{
+          'colum_type':'',
+          'min_value':null,
+          'max_value':null,
+          'colum_formula':'',
+          'colum_formula_desc':'',
+          'colum_id':null,
+          'dim_id':null,
+          'unit_id':null,
+        },
+        colForm:{},
+        dimForm:{},
+        datForm:{},
         editModel:{
           rules:{
             colum_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
             colum_name_cn:{ type:"string",required:true,message:"必填字段",trigger:"change"},
             colum_type:{ type:"string",required:true,message:"必填字段",trigger:"change"}
           },
-          group_id:null,
-          groupModel:{
-            colum_name:'',
-            colum_name_cn:'',
-            colum_type:'2'
-          },
-          catData:[],
+          datas:[],
+          colData:[],
           dimData:[],
-          delData:[]
-        },
-        editSaveData:{'add':[],'edit':[],del:[],group:[]}    //输入项组保存数据
+          dels:{dim:[],dat:[],col:[]}
+        }
       }
     },
     methods: {
@@ -332,26 +347,27 @@
         const $this = this
 
         this.BaseRequest({
-          url:'unitOneDimColum/pagerMultdimListStatic',
+          url:'unitMultDimColum/pagerMultdimListStatic',
           method:"get",
-          params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId, group_id:this.searchModel.group_id}
+          params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId}
         }).then(response=>{
           $this.unitColums = response.dataList
           $this.totalPage = response.totalPage
-          $this.rowspan()
         })
       },
       addDefined(){
-        this.addOrEditModelOpend = true
-        this.isEditModal = false
-        this.editModel.groupModel.colum_name = ''
-        this.editModel.groupModel.colum_name_cn = ''
-        this.clearEditModel()
+        const $this = this
+        $this.addOrEditModelOpend = true
+        $this.isEditModal = false
+        $this.clearEditModel()
+        $this.getDimData(1).then(()=>{
+          $this.addColRow()
+        })
       },
       viewDefined(){
 
       },
-      editDefined(group_id, group_name){
+      editDefined(colum_id, colum_name){
         const loading = this.$loading({
           lock: true,
           text: '获取数据中...',
@@ -359,36 +375,45 @@
           background: 'rgba(0, 0, 0, 0.7)'
         });
         this.BaseRequest({
-          url:'unitOneDimColum/pagerOnedimListDynamic',
+          url:'unitMultDimColum/pagerMultdimList',
           method:'get',
-          params:{unitId:this.unitId,inc_group_id:group_id}
+          params:{unitId:this.unitId,columId:colum_id}
         }).then(response=>{
           loading.close()
           if(response.dataList == null)
             return;
-          const $this = this
-          $this.clearEditModel()
-          response.dataList.forEach(x => {
-            if(!x.group_id){
-              $this.editModel.groupModel = x
-            }else{
-              if(x.colum_type=='2'){
-                $this.editModel.dimData.push(x)
-              }else{
-                $this.editModel.catData.push(x)
-              }
+          const $t = this
+          $t.clearEditModel()
+          const $e = this.editModel
+          let idat = {}, idim = {}, icol = {}
+          response.dataList.forEach((x,i) => {
+            if(!idim[x.dim_id]){
+              $e.dimData.push({dim_id:x.dim_id, dim_name:x.dim_name, dim_name_cn:x.dim_name_cn, unit_id:$t.unitId})
+              idim[x.dim_id] = i+1
             }
+            if(!icol[x.colum_id]){
+              $e.colData.push({colum_id:x.colum_id, colum_name:x.colum_name, colum_name_cn:x.colum_name_cn})
+              icol[x.colum_id] = i+1
+              idat[x.colum_id] = {}
+            }
+            idat[x.colum_id][x.dim_id] = $t.copyDataForm(x)
           })
-          $this.editModel.group_id = group_id
+          $e.colData.forEach(x=>{
+            let z = {colum_name:x.colum_name,colum_name_cn:x.colum_name_cn,colum_id:x.colum_id}
+            $e.dimData.forEach(col=>{
+              z[col.dim_name] = idat[z.colum_id][col.dim_id]
+            })
+            $e.datas.push(z)
+          })
           this.addOrEditModelOpend = true
           this.isEditModal = true
         }).catch(error=>{
           console.log(error)
           loading.close()
-          this.Message.error("删除失败"+error)
+          this.Message.error("加载数据失败"+error)
         })
       },
-      deleteDefined(group_id){
+      deleteDefined(colum_id){
         this.$confirm('确定删除该输入项及所属项组内其他输入项？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -403,14 +428,13 @@
           });
 
           this.BaseRequest({
-            url:'unitOneDimColum/deleteOneDimDynamic',
+            url:'unitMultDimColum/deleteMultdim',
             method:'get',
-            params:{unitId:this.unitId,'group_id':group_id}
+            params:{unitId:this.unitId,columId:colum_id}
           }).then(response=>{
             this.Message.success("删除成功")
             loading.close()
             this.getTableData(1)
-            this.getGroupname()
           }).catch(error=>{
             console.log(error)
             loading.close()
@@ -426,42 +450,43 @@
         if(!this.subCheck()){
           return false
         }
-        const $this = this
-        $this.clearSaveData()
-        $this.editModel.groupModel.unit_id = $this.unitId
-        $this.editModel.groupModel.colum_id = $this.editModel.group_id
-        $this.editSaveData.group.push($this.editModel.groupModel)
-        $this.editModel.catData.forEach((x, i) => {
-            x.colum_type = '1'
+        let $e = this.editModel
+        let saveData = {add_col:[],edit_col:[],add_data:[],edit_data:[]}
+        $e.colData.forEach((x, i) => {
+            x.unit_id = this.unitId
+            x.colum_id_no = i
             if(!x.colum_id){
-              x.colum_type = '2'
-              $this.editSaveData.add.push(x)
+              saveData.add_col.push(x)
             }else{
-              $this.editSaveData.edit.push(x)
+              saveData.edit_col.push(x)
             }
         })
-        $this.editModel.dimData.forEach((x, i) => {
-          if(x.colum_type=='0'){
-            x.max_value=null
-            x.min_value=null
-          }else if(x.colum_type=='1'){
-            x.colum_formula=null
-            x.colum_formula_desc=null
-          }else{
-            x.max_value=null
-            x.min_value=null
-            x.colum_formula=null
-            x.colum_formula_desc=null
-          }
-          x.colum_type = '2'
-          if(!x.colum_id){
-            $this.editSaveData.add.push(x)
-          }else{
-            $this.editSaveData.edit.push(x)
-          }
+        $e.datas.forEach((d, i) => {
+          $e.dimData.forEach((n,j)=>{
+            let x = d[n.dim_name]
+            x.dim_id = n.dim_id
+            x.unit_id = this.unitId
+            x.colum_id_no = i
+            if(x.colum_type=='0'){
+              x.max_value=null
+              x.min_value=null
+            }else if(x.colum_type=='1'){
+              x.colum_formula=null
+              x.colum_formula_desc=null
+            }else{
+              x.max_value=null
+              x.min_value=null
+              x.colum_formula=null
+              x.colum_formula_desc=null
+            }
+            if(!x.colum_id){
+              saveData.add_data.push(x)
+            }else{
+              saveData.edit_data.push(x)
+            }
+          })
         })
-        $this.editSaveData.del = $this.editModel.delData
-        this.subSave($this.editSaveData,'unitOneDimColum/editSaveOnedimDynamic')
+        this.subSave(saveData,'unitMultDimColum/editSaveMultdim')
       },
       subSave(sendData,sendUrl){
         const $this = this
@@ -482,37 +507,16 @@
           $this.getTableData(1)
           $this.addOrEditModelOpend = false
 
-          $this.clearSaveData()
           $this.editModel.delData.length = 0
-          $this.getGroupname()
         }).catch(error=>{
           loading.close()
           $this.Message.success("保存失败:"+error)
         });
       },
       subCheck(){
-        let checkRow = true
-        let checkResult = this.$refs["form"].validate((valid,model)=>{
-          if(!valid)
-            checkRow = false
-        })||true
-        checkResult = checkResult && checkRow
+        let checkResult = this.validForm("form")
         if(checkResult){
-          if(this.editModel.groupModel.colum_name==''){
-            this.$notify({
-              dangerouslyUseHTMLString: true,
-              message: '<span style="font-size:15px;color:red;font-weight: bold">输入项组名称不允许为空</span>'
-            })
-            checkResult = false
-          }
-          if(this.editModel.groupModel.colum_name==''){
-            this.$notify({
-              dangerouslyUseHTMLString: true,
-              message: '<span style="font-size:15px;color:red;font-weight: bold">输入项组中文名称不允许为空</span>'
-            })
-            checkResult = false
-          }
-          if(this.editModel.catData.length<1){
+          if(this.editModel.colData.length<1){
             this.$notify({
               dangerouslyUseHTMLString: true,
               message: '<span style="font-size:15px;color:red;font-weight: bold">请先点击【新增项目】输入项目</span>'
@@ -522,23 +526,193 @@
           if(this.editModel.dimData.length<1){
             this.$notify({
               dangerouslyUseHTMLString: true,
-              message: '<span style="font-size:15px;color:red;font-weight: bold">请先点击【新增维度】输入维度</span>'
+              message: '<span style="font-size:15px;color:red;font-weight: bold">请先新增维度</span>'
             })
             checkResult = false
           }
         }
         return checkResult
       },
-      replaceFormulaEditor(){
-        this.openFormulaEditor()
+      getDimData:function(pageNum){
+        if(pageNum&&pageNum!=''){
+          this.currPageNum = pageNum;
+        }else{
+          pageNum = this.currPageNum;
+        }
+        const $this = this
+
+        return this.BaseRequest({
+          url:'unitMultDimColum/pagerDimList',
+          method:"get",
+          params:{currPage:pageNum,pageSize:this.eachPageNum,unitId:this.unitId}
+        }).then(response=>{
+          $this.editModel.dimData = response.dataList
+          $this.totalPage = response.totalPage
+        })
       },
-      openFormulaEditor(){
-        this.isOpenFormulaEditor = true
+      openDimList(){
+        this.isOpenDimList = true
+        this.getDimData(1)
       },
-      handleItemChange(unitArray) {
-        // console.log('active item:', val);
-        this.getReportColums(unitArray[0])
-        // this.getReportColums(val)
+      openDimAdd(i, row){
+        row = row || this.addDimForm
+        this.isOpenDimEditor = true
+        this.dimIndex = i
+        this.dimForm = Object.assign({},row)
+      },
+      openColAdd(i, row){
+        this.isOpenColEditor = true
+        this.colIndex = i
+        this.colForm = Object.assign({},row)
+      },
+      openCellAdd(i,row,field){
+        this.datField = field
+        this.colIndex = i
+        let o = row[field]
+        this.datForm = o.colum_type=='' ? this.copyDataForm({colum_type:'1'}) : Object.assign({},o)
+        this.isOpenDatEditor = true
+        console.log('get'+JSON.stringify(this.datForm))
+      },
+      saveDimRow(){
+        if(!this.validForm("dform")) return
+        let url = this.dimIndex == -1 ? 'unitMultDimColum/addSaveMultdim_dim' : 'unitMultDimColum/editSaveMultdim_dim'
+        this.saveDim(url, this.dimForm, '保存')
+      },
+      saveDim(url, data, msg){
+        const $this = this
+        const loading = $this.$loading({
+          lock: true,
+          text: msg+'中',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        $this.BaseRequest({
+          url:url,
+          method:'post',
+          data:data
+        }).then(response=>{
+          loading.close()
+          $this.Message.success(msg+"成功")
+          $this.isOpenDimEditor = false
+          $this.getDimData(1)
+        }).catch(error=>{
+          loading.close()
+          $this.Message.success(msg+"失败:"+error)
+        });
+      },
+      addColRow(){
+        const $this = this
+        let z = Object.assign({},$this.addColForm)
+        let addCol = Object.assign({},$this.addColForm)
+        this.editModel.colData.push(addCol)
+        this.editModel.dimData.forEach(x=>{
+          let addDim = $this.newDataForm({},x)
+          z[x.dim_name] = addDim
+        })
+        this.editModel.datas.push(z)
+      },
+      insertColRow(){
+        if(!this.validForm("cform")) return
+        this.editModel.colData[this.colIndex].colum_name = this.colForm.colum_name
+        this.editModel.colData[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
+        this.editModel.datas[this.colIndex].colum_name = this.colForm.colum_name
+        this.editModel.datas[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
+        this.isOpenColEditor = false
+      },
+      insertColRowOld(){
+        if(!this.validForm("cform")) return
+        const $this = this
+        if($this.colIndex == -1){
+          let z = Object.assign({},$this.colForm)
+          let addCol = Object.assign({},$this.colForm)
+          this.editModel.colData.push(addCol)
+          this.editModel.dimData.forEach(x=>{
+            let addDim = $this.newDataForm()
+            z[x.dim_name] = addDim
+          })
+          this.editModel.datas.push(z)
+        }else{
+          this.editModel.colData[this.colIndex].colum_name = this.colForm.colum_name
+          this.editModel.colData[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
+          //rename colum_name
+        }
+        this.isOpenColEditor = false
+      },
+      deleteColRowOld(i,row){
+        this.$confirm('确定删除该项目？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(()=>{
+          this.editModel.colData.splice(i, 1)
+          if(row.colum_id){
+            this.editModel.dels.col.push({colum_id:row.colum_id,unit_id:this.unitId})
+          }
+        })
+      },
+      insertDimRowOld(){
+        if(!this.validForm("dform")) return
+        const $t = this
+        if($t.dimIndex == -1){
+          let addDim = Object.assign({},$t.dimForm)
+          $t.editModel.datas.forEach(x=>{
+            x[addDim.dim_name] = $t.newDataForm()
+          })
+          $t.editModel.dimData.push(addDim)
+        }else{
+          $t.editModel.dimData[$t.dimIndex].colum_name = $t.dimForm.colum_name
+          $t.editModel.dimData[$t.dimIndex].colum_name_cn = $t.dimForm.colum_name_cn
+        }
+        $t.isOpenDimEditor = false
+      },
+      deleteDimRow(i,row){
+        this.$confirm('确定删除该维度？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(()=>{
+          this.saveDim('unitMultDimColum/deleteSaveMultdim_dim', row, '删除')
+        })
+      },
+      insertDataCell(){
+        if(!this.validForm("uform")) return
+        const $t = this
+        $t.editModel.datas[$t.colIndex][$t.datField] = $t.copyDataForm($t.datForm)
+        this.isOpenDatEditor = false
+        console.log('add'+JSON.stringify(this.editModel.datas))
+      },
+      copyDataForm(o){
+        o = o || {}
+        let addObj = Object.assign({},this.addDataForm)
+        for(let n in addObj){
+          if(o[n])
+            addObj[n] = o[n]
+        }
+        addObj.colum_type_name = this.formatterDataType(addObj)
+        return addObj
+      },
+      newDataForm(o,dim){
+        o = o || {}
+        dim = dim || {}
+        let addObj = Object.assign(o,this.addDataForm, dim)
+        addObj.colum_type_name = this.formatterDataType(addObj)
+        return addObj
+      },
+      validForm(k){
+        let b = true
+        this.$refs[k].validate((valid,m)=>{
+          if(!valid)
+            b = false
+        })
+        return b
+      },
+      clearEditModel(){
+        this.editModel.delData = []
+        this.editModel.colData = []
+        this.editModel.dimData = []
+        this.editModel.datas = []
       },
       getUnits(){
         const $this = this
@@ -549,7 +723,7 @@
           background: 'rgba(0, 0, 0, 0.7)'
         });
         $this.BaseRequest({
-          url:"/unitOneDimColum/getUnits",
+          url:"/unitMultDimColum/getUnits",
           method:'get',
           params:{unitId:''}
         }).then(response=>{
@@ -575,7 +749,7 @@
           background: 'rgba(0, 0, 0, 0.7)'
         });
         $this.BaseRequest({
-          url:"/unitOneDimColum/getInputColumn",
+          url:"/unitMultDimColum/getInputColumn",
           method:'get',
           params:{'unitId':unitId}
         }).then(response=>{
@@ -597,6 +771,14 @@
           loading.close()
           $this.Message.success("保存失败:"+error)
         });
+      },
+      openFormulaEditor(){
+        this.isOpenFormulaEditor = true
+      },
+      handleItemChange(unitArray) {
+        // console.log('active item:', val);
+        this.getReportColums(unitArray[0])
+        // this.getReportColums(val)
       },
       formulaColumConfirm(){
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
@@ -670,98 +852,6 @@
         // this.formulaDescContext = []
         this.isOpenFormulaEditor = false
       },
-      getGroupname(){
-        const $this = this
-        $this.BaseRequest({
-          url:"/unitOneDimColum/getGroup",
-          method:'get',
-          params:{'unitId':$this.unitId}
-        }).then(response=>{
-          this.groupnameData = response || [];
-        }).catch(error=>{
-          $this.Message.success("输入项组加载失败:"+error)
-        });
-      },
-      cellAddClass({row,rowIndex}){
-        row.className = 'el-table__row hover-row'
-      },
-      cellMouseLeave(row){
-        let k = row.group_id, m = this.mergeMap[k], trs = document.querySelectorAll("#list .el-table__body .el-table__row")
-        if(m){
-          m.mr.forEach((x,i)=>{
-            trs[i].className = 'el-table__row'
-          })
-        }
-      },
-      cellMouseEnter(row){
-        let k = row.group_id, m = this.mergeMap[k], trs = document.querySelectorAll("#list .el-table__body .el-table__row")
-        if(m){
-          for(let i = 0; i < trs.length; i++){
-            if(trs[i].className.indexOf('hover-row') > -1)
-              trs[i].className = 'el-table__row'
-          }
-          m.mr.forEach(x=>{
-            trs[x].className = 'el-table__row hover-row'
-          })
-        }
-      },
-      rowspan(){
-        this.mergeMap = {}
-        this.unitColums.forEach((x,i)=>{
-          let val = x.group_id
-          if(!this.mergeMap[val]){
-            this.mergeMap[val] = {r:i, sp:1,mr:[i] }
-          }else{
-            this.mergeMap[val].mr.push(i)
-            this.mergeMap[val].sp=this.mergeMap[val].sp+1
-          }
-        })
-      },
-      mergeRow({ row, column, rowIndex, columnIndex }){
-        if (columnIndex === 1 || columnIndex === 4) {
-          let id = row.group_id, m = this.mergeMap[id]
-          if(m == null)
-            return [1, 1]
-          else if(m.r == rowIndex)
-            return [m.sp, 1]
-          else
-            return [0, 0]
-        }
-      },
-      insertCatRow(){
-        let addObj = Object.assign({},this.addFormData)
-        this.editModel.catData.push(addObj)
-      },
-      deleteCatRow(i,row){
-        this.editModel.catData.splice(i, 1)
-        if(row.colum_id){
-          this.editModel.delData.push({colum_id:row.colum_id})
-        }
-        this.$refs.table1.clearSelection()
-      },
-      insertDimRow(){
-        let addObj = Object.assign({},this.addFormData)
-        this.editModel.dimData.push(addObj)
-      },
-      deleteDimRow(i,row){
-        this.editModel.dimData.splice(i, 1)
-        if(row.colum_id){
-          this.editModel.dimData.push({colum_id:row.colum_id})
-        }
-        this.$refs.table2.clearSelection()
-      },
-      clearEditModel(){
-        this.editModel.delData = []
-        this.editModel.catData = []
-        this.editModel.dimData = []
-        this.editModel.group_id = null
-      },
-      clearSaveData(){
-        this.editSaveData.add.length = 0
-        this.editSaveData.edit.length = 0
-        this.editSaveData.del.length = 0
-        this.editSaveData.group.length = 0
-      }
     },
     computed:{
       formData:function(){
@@ -771,9 +861,9 @@
     mounted:function(){
       this.unitId = this.$route.query.unitId
       this.addFormData.unit_id = this.$route.query.unitId
+      this.addDimForm.unit_id = this.unitId
       this.getTableData(1)
-      //this.getUnits()
-      this.getGroupname()
+      this.getUnits()
     }
   }
 </script>

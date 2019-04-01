@@ -38,7 +38,8 @@ public interface IReportDefinedUnitOneDimDao {
     SimpleColumDefined getOnedimColumn(String columId);
 
     @Update("update report_defined_unit_onedim set colum_name=#{colum_name},colum_name_cn=#{colum_name_cn}," +
-            "group_id=#{group_id},group_name=#{group_name},min_value=#{min_value},max_value=#{max_value} ," +
+            "group_id=#{group_id},group_name=#{group_name}," +
+            "min_value=#{min_value},max_value=#{max_value} ," +
             "parent_id=#{parent_id},parent_name=#{parent_name},colum_type=#{colum_type},colum_desc=#{colum_desc} ," +
             "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc} where colum_id=#{colum_id}")
     void editSaveOnedim(SimpleColumDefined simpleColumDefined);
@@ -49,6 +50,9 @@ public interface IReportDefinedUnitOneDimDao {
             +"<if test=\"map.inc_group_id!='' and map.inc_group_id!=null and map.inc_group_id!='null'\"> and (group_id = #{map.inc_group_id} or colum_id = #{map.inc_group_id})</if>"
             +" order by group_id,colum_id</script>")
     Page<Map<String, Object>> pagerOnedimListDynamic(@Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize, @Param("unitId") Integer unitId, @Param("map") Map<String,Object> map);
+
+    @Select("select * from report_defined_unit where defined_id=#{originId}")
+    List<UnitDefined> getDefinedUnitByOrigin(String originId);
 
     @Select("select colum_id group_id,colum_name_cn group_name from report_defined_unit_onedim where unit_id = #{unitId} and group_id is null")
     List<Map> getGroupByUnit(String unitId);

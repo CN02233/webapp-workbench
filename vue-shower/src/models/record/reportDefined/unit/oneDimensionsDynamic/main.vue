@@ -50,7 +50,7 @@
               <!--<el-button type="text" @click="viewDefined()" size="small">查看</el-button>-->
               <el-button type="text" @click="editDefined(scope.row.group_id,scope.row.group_name)" size="small">编辑</el-button>
               <el-button type="text" @click="deleteDefined(scope.row.group_id)" size="small">删除</el-button>
-              <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">查看</el-button>-->
+              <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">清空</el-button>-->
             </template>
           </el-table-column>
 
@@ -123,9 +123,11 @@
             <el-table-column label="公式">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}">
+                  <el-popover v-if="scope.row.colum_type=='0'" placement="top-start" width="200" trigger="hover" :content="scope.row.colum_formula_desc">
+                  </el-popover>
                   <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" ></el-input>
                   <el-button v-if="scope.row.colum_type=='0'" @click="openFormulaEditor(scope.$index,scope.row)" icon="el-icon-edit">定义公式</el-button>
-                  <el-tooltip v-if="formData.colum_type=='0'" slot="append" class="item" content="点此设置公式" placement="top">
+                  <el-tooltip slot="append" class="item" content="点此设置公式" placement="top">
 
                   </el-tooltip>
 
@@ -181,12 +183,12 @@
             type="textarea"
             :rows="10"
             :disabled="true"
-            v-model="formData.colum_formula_desc">
+            v-model="editFormData.colum_formula_desc">
           </el-input>
         </el-form-item>
         <el-form-item label="公式试算" >
-          <el-row :key="formulaColumnDesc.context" v-for="formulaColumnDesc in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
-            <el-col><el-input :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
+          <el-row :key="formulaColumnDesc.context" v-for="(formulaColumnDesc,i) in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
+            <el-col><el-input v-model="formularOprationColums[formulaContext[i].columKey]" :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
             </el-col>
           </el-row>
 
@@ -195,7 +197,7 @@
       <el-row>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
-        <el-button>试算</el-button>
+        <el-button @click="fomularOperation">试算</el-button>
       </el-row>
 
     </el-dialog>
@@ -267,7 +269,8 @@
         formulaDescContextTmp:'',
         formulaContext:[],
         otherUnits:[],
-        fomularColumnTmp :'',
+        fomularColumnTmp :[],
+        formularOprationColums:{},
         selectedValue:'',
         mergeMap:{},
         groupnameData: [], //搜索输入项组
@@ -478,7 +481,9 @@
       },
       openFormulaEditor(i,row){
         this.editModel.selectRow = this.editModel.tableData[i]
-        this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+        this.editModel.selectRow.colum_formula_desc = this.editModel.selectRow.colum_formula_desc || ''
+        this.editModel.selectRow.colum_formula = this.editModel.selectRow.colum_formula || ''
+        this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
         this.isOpenFormulaEditor = true
       },
       handleItemChange(unitArray) {
@@ -533,7 +538,8 @@
                 response.forEach(responseData=>{
                   const colum_id = responseData.colum_id
                   const colum_name = responseData.colum_name_cn
-                  columArray.push({label:colum_name,value:colum_id})
+                  const colum_key = responseData.colum_name
+                  columArray.push({label:colum_name,value:colum_id,columKey:colum_key})
                 })
                 this.otherUnits[i].children = columArray
               }
@@ -556,7 +562,7 @@
                   this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
                   this.formulaContext.push({"context":unitData.value+"_"+columData.value,"columKey":unitData.label+'_'+columData.columKey,"isSymbol":false})
                   this.editModel.selectRow.colum_formula_desc +=finalContext
-                  this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+                  this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
                   this.editModel.selectRow.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
                 }
               })
@@ -571,7 +577,7 @@
         // this.formulaDescContextTmp+=addContext
         this.editModel.selectRow.colum_formula_desc +=addContext
         this.editModel.selectRow.colum_formula +=addContext
-        this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+        this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
       },
       formulaBack(){
         this.formulaContext.pop()
@@ -587,7 +593,7 @@
             this.editModel.selectRow.colum_formula_desc +=formulaDesc.context
             this.editModel.selectRow.colum_formula +=formulaContext
           }
-          this.formData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+          this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
         })
       },
       fomularConfirm(){
