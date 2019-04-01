@@ -2,11 +2,9 @@ package com.seaboxdata.cqny.origin.dao;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.entity.Administrative;
-import com.seaboxdata.cqny.origin.test.EntityTree;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 
 @Repository
 public interface IAdministrativeDao {

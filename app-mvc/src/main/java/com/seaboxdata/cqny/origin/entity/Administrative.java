@@ -1,7 +1,8 @@
 package com.seaboxdata.cqny.origin.entity;
 
-import java.util.Date;
-
+/**
+ * 表organizations
+ */
 public class Administrative {
 
     private Integer origin_id;

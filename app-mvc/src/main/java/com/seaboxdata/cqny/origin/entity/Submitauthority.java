@@ -2,6 +2,9 @@ package com.seaboxdata.cqny.origin.entity;
 
 import java.util.Date;
 
+/**
+ * 表sys_origin
+ */
 public class Submitauthority {
 
     private Integer origin_id;

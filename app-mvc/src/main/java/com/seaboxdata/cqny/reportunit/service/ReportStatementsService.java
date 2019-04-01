@@ -10,4 +10,6 @@ public interface ReportStatementsService {
     void addReportStatements(StatementsEntity reportStatements);
 
     void deleteById(String unitId);
+
+    PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id);
 }

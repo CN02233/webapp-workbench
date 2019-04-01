@@ -2,6 +2,9 @@ package com.seaboxdata.cqny.reportunit.entity;
 
 import java.util.List;
 
+/**
+ * 表report_unit_info
+ */
 public class UnitEntity {
 
     private Integer unit_id;

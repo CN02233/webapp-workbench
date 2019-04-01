@@ -2,7 +2,7 @@ package com.seaboxdata.cqny.origin.dao;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.entity.Submitauthority;
-import com.seaboxdata.cqny.origin.test.EntityTree;
+import com.seaboxdata.cqny.origin.tree.EntityTree;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 

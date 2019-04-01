@@ -1,5 +1,8 @@
 package com.seaboxdata.cqny.reportunit.entity;
 
+/**
+ * 表report_statements_info
+ */
 public class StatementsEntity {
 
     private Integer statements_id;
