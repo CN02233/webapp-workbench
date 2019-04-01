@@ -90,8 +90,9 @@
         const $this = this
 
         const saveColums = new Array()
-        this.elColumDefineds.forEach((elColumDefined,rowNum)=>{
-          elColumDefined.forEach(elColumCol=>{
+
+        this.elRowDatas.forEach((elRowData,rowNum)=>{
+          elRowData.forEach(elColumCol=>{
               if(elColumCol!=null){
                 elColumCol.colum_id = rowNum
                 saveColums.push(elColumCol)

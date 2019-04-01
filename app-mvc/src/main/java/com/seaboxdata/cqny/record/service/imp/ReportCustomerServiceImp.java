@@ -236,7 +236,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     @Transactional(rollbackFor = Exception.class)
     public void overrideSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
         reportCustomerDao.removeUnitContextData(columDatas.get(0).getUnit_id());
-        this.updateOrInsertSimpleUnitContext(definedColums,columDatas,true);
+        this.updateOrInsertSimpleUnitContext(definedColums,columDatas,false);
     }
 
     public Object refreshSimpleFomularData(String reportId,String columFomular){
