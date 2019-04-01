@@ -67,4 +67,8 @@ public interface IReportCustomerDao {
     @Insert("insert into report_customer_data (report_id,unit_id,report_group_id,colum_id,dimensions_id,report_data) " +
             "values (#{report_id},#{unit_id},#{report_group_id},#{colum_id},#{dimensions_id},#{report_data})")
     void insertUnitContext(ReportCustomerData columData);
+
+    @Select("select * from report_customer_data where " +
+            "report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId} and dimensions_id=#{dimensionsId}")
+    ReportCustomerData getSimpleReportCustomerDataBydimensions(String reportId, String unitId,String columId, String dimensionsId);
 }

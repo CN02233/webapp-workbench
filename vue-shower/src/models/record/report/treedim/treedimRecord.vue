@@ -1,17 +1,27 @@
 <template>
   <div>
 
+    <el-row>
+      <el-col align="left" :span="24">
+          <el-button @click="addRootNode">增加{{rootTreeNodeName}}</el-button>
+      </el-col>
+    </el-row>
+
     <el-row >
       <el-col class="tree_title" v-for="(elColumDefined,key) in elColumDefineds" :span="colSpan">{{elColumDefined.colum_name_cn}}</el-col>
+      <el-col class="tree_title" :span="(24-colSpan*definedColumsTotal)">
+       操作
+      </el-col>
     </el-row>
 
     <el-row v-for="(elColDatas,dataRowNum) in elRowDatas">
       <el-col class="tree_colum" :span="colSpan" v-for="elColData in elColDatas">
-        <el-input v-if="elColData!=null" v-model="elColData.report_data"></el-input>
+        <el-input v-if="elColData!=null" :disabled="elColData.colum_type==0" v-model="elColData.report_data"></el-input>
         <span v-else> -- </span>
       </el-col>
 
       <el-col class="tree_colum" :span="(24-colSpan*definedColumsTotal)">
+        <el-button @click="addSonNode(elColDatas,dataRowNum)">增加子项</el-button>
         <el-button @click="cpTmpNode(elColDatas,dataRowNum)">复制</el-button>
         <el-button @click="delTmpNode(elColDatas,dataRowNum)">删除</el-button>
       </el-col>
@@ -52,7 +62,8 @@
         elRowDatas:[],
         elColumDefineds:{},
         minLevel:0,
-        maxLevel:0
+        maxLevel:0,
+        rootTreeNodeName:""
       }
     },
     methods:{
@@ -91,6 +102,7 @@
 
         const saveColums = new Array()
 
+        //重写colum_id 每一行的行号作为column_id
         this.elRowDatas.forEach((elRowData,rowNum)=>{
           elRowData.forEach(elColumCol=>{
               if(elColumCol!=null){
@@ -100,7 +112,6 @@
           })
         })
 
-        console.log(saveColums)
 
         // validateSimpleUnitContext
         const valloading = this.$loading({
@@ -110,7 +121,7 @@
           background: 'rgba(0, 0, 0, 0.7)'
         });
         this.BaseRequest({
-          url:"/reportCust/validateSimpleUnitContext",
+          url:"/reportCust/validateSimpleUnitByDimensions",
           method:'post',
           data:{
             definedColums:this.definedColums,
@@ -260,6 +271,8 @@
                 if(this.elColumDefineds[unit_id+'-'+dimensions_id]!=null){
                   const elColumDefined = this.elColumDefineds[unit_id+'-'+dimensions_id]
                   const columOrder = elColumDefined['columOrder']
+                  const colum_type = elColumDefined['colum_type']
+                  colData.colum_type = colum_type
                   colArray[columOrder] = colData
                 }
 
@@ -300,6 +313,10 @@
             if(parent_id==startParentId){
               if(level<this.minLevel){
                 this.minLevel = level
+              }
+
+              if(startParentId==0){
+                this.rootTreeNodeName = definedColum.colum_name_cn
               }
 
               if(level>this.maxLevel){
@@ -355,6 +372,91 @@
           }
         })
       },
+      addRootNode(){
+        this.elRowDatas.splice(0,0,this.elRowDatas[0])
+      },
+
+      addSonNode(parentElRowData, parentRowNum){
+        let parentRowLevel = 0
+        let sonRowLevel = 0
+        let insertRowNum = 0
+
+        if(parentRowNum==this.maxLevel){
+          return
+        }
+
+        const parentBaseInfo = {}
+
+        parentElRowData.forEach(parentElColData=>{
+          if(parentElColData!=null){
+            const unit_id = parentElColData.unit_id
+            const dimensions_id = parentElColData.dimensions_id
+            const elColumDefined = this.elColumDefineds[unit_id+"-"+dimensions_id]
+            parentRowLevel = elColumDefined.level
+            sonRowLevel = parentRowLevel+1
+            parentBaseInfo.report_group_id = parentElColData.report_group_id
+            parentBaseInfo.report_id = parentElColData.report_id
+            parentBaseInfo.unit_id = parentElColData.unit_id
+          }
+        })
+
+        let insertRowData = null
+
+        for(let rowIndex = 0;rowIndex<this.elRowDatas.length;rowIndex++){
+          const checkRow = this.elRowDatas[rowIndex]
+          let checkRowLevel = 0
+          for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
+            const elColTMp = checkRow[colIndex]
+            if (elColTMp != null) {
+              const report_group_id = elColTMp.report_group_id
+              const report_id = elColTMp.report_id
+              const unit_id = elColTMp.unit_id
+              const dimensions_id = elColTMp.dimensions_id
+              const elColumDefined = this.elColumDefineds[unit_id + "-" + dimensions_id]
+              checkRowLevel = elColumDefined.level
+              if(report_group_id==parentBaseInfo.report_group_id&&
+                report_id==parentBaseInfo.report_id&&
+                unit_id==parentBaseInfo.unit_id&&
+                checkRowLevel == sonRowLevel
+              ){
+                insertRowData = JSON.parse(JSON.stringify(checkRow))
+              }
+              break
+            }
+          }
+        }
+
+        //循环找到第一个当前需要增加子节点的节点的行 在该行前面插入需要增加的子节点
+        for(let insertIndex = (parentRowNum+1);insertIndex<this.elRowDatas.length;insertIndex++){
+          const checkRow = this.elRowDatas[insertIndex]
+          let checkRowLevel = 0
+          for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
+            const elColTMp = checkRow[colIndex]
+            if (elColTMp != null) {
+              const unit_id = elColTMp.unit_id
+              const dimensions_id = elColTMp.dimensions_id
+              const elColumDefined = this.elColumDefineds[unit_id + "-" + dimensions_id]
+              checkRowLevel = elColumDefined.level
+              break
+            }
+          }
+          if(checkRowLevel <= parentRowLevel){
+            insertRowNum = insertIndex
+            break;
+          }
+        }
+
+        insertRowData.forEach(insertColData=>{
+          if(insertColData!=null){
+            insertColData.report_data = ""
+          }
+        })
+
+        this.elRowDatas.splice(insertRowNum,0,insertRowData)
+
+
+      },
+
       cpTmpNode(cpElRowData, cpRowNum){
         let cpRowLevel = 0
 
@@ -383,7 +485,7 @@
               break
             }
           }
-          if (cpRowLevel <= checkRowLevel) {//需要复制
+          if (cpRowLevel < checkRowLevel) {//需要复制
             cpArrayTmp.push(elRowDataTmp)
             console.log("need")
           } else {
@@ -425,11 +527,9 @@
               break
             }
           }
-          if (delRowLevel <= checkRowLevel) {//需要删除
-            console.log("need")
+          if (delRowLevel < checkRowLevel) {//需要删除
           } else {
             endRowNum = delIndex
-            console.log("not need")
 
             break
           }
@@ -456,5 +556,14 @@
 
   .tree_colum{
     padding:5px 2px 5px 2px;
+    text-align: left;
+  }
+
+  .backgroud-type1{
+    background-color: #8cc5ff;
+  }
+
+  .backgroud-type2{
+    background-color: #00ffff;
   }
 </style>

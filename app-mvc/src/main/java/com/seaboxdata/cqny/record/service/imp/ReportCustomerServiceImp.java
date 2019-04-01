@@ -58,6 +58,12 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         return reportUnitCustomerContext;
     }
 
+    /**
+     *
+     * @param simpleColumDefineds 输入项的定义
+     * @param columDatas 用户录入数据集合
+     * @param isUpdate true:更新原数据值 false：插入新数据
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateOrInsertSimpleUnitContext(
@@ -79,10 +85,20 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 Integer reportId = columData.getReport_id();
                 String unitId = columData.getUnit_id();
                 String columnId = columData.getColum_id();
-                if(fomularsTmp.containsKey(unitId+"_"+columnId)){
+                String dimensionsId = columData.getDimensions_id();
+                if(fomularsTmp.containsKey(unitId+"_"+columnId)){//一维静态公式刷新
                     fomularMap.put(new StringBuilder().append(reportId).append("_").append(unitId).append("_").append(columnId).toString(),
                             fomularsTmp.get(unitId+"_"+columnId).getColum_formula());
-                }else{
+                }else if(fomularsTmp.containsKey(unitId+"_"+dimensionsId)){//树状多维公式刷新
+                    fomularMap.put(
+                            new StringBuilder().append(reportId).append("_")
+                                    .append(unitId).append("_")
+                                    .append(columnId)
+                                    .append("_")
+                                    .append(dimensionsId)
+                                    .toString(),
+                            fomularsTmp.get(unitId+"_"+dimensionsId).getColum_formula());
+                } else{//无公式值刷新
                     if(isUpdate){
                         reportCustomerDao.updateUnitContext(columData);
                     }else{
@@ -96,14 +112,23 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         if(fomularMap!=null&&fomularMap.size()>0){
             fomularMap.keySet().forEach(fomularKey->{
                 String[] params = fomularKey.split("_");
+                Object fomularDataResult = null;
                 String reportId = params[0];
                 String unitId = params[1];
                 String columnId = params[2];
-                Object fomularDataResult = refreshSimpleFomularData(reportId, fomularMap.get(fomularKey));
+                String dimensionsId = null;
+                if(params.length==4){
+                    dimensionsId = params[3];
+                    fomularDataResult = refreshDimensionsFomularData(reportId,columnId, fomularMap.get(fomularKey));
+                }else if (params.length==3){
+                    fomularDataResult = refreshSimpleFomularData(reportId, fomularMap.get(fomularKey));
+                }
+
                 ReportCustomerData comularData = new ReportCustomerData();
                 comularData.setReport_id(new Integer(reportId));
                 comularData.setUnit_id(unitId);
                 comularData.setColum_id(columnId);
+                comularData.setDimensions_id(dimensionsId);
                 comularData.setReport_data(String.valueOf(fomularDataResult));
                 reportCustomerDao.updateUnitContext(comularData);
             });
@@ -111,6 +136,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
 
     }
+
 
     @Override
     public ReportCustomer checkReportCustomer(String reportId) {
@@ -147,83 +173,127 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
-    public Map<String,String> validateSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
+    public Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
 
-        Map<String,String> dataTmp = new HashMap<>();
+        Map<String,List<String>> dataTmp = new HashMap<>();
         for (ReportCustomerData columData : columDatas) {
             String unitId = columData.getUnit_id();
             String columId = columData.getColum_id();
-            dataTmp.put(unitId+"_"+columId,columData.getReport_data());
+            String tmpKey = unitId+"_"+columId;
+            if(!dataTmp.containsKey(tmpKey)){
+                dataTmp.put(tmpKey,new ArrayList<String>());
+            }
+            dataTmp.get(tmpKey).add(columData.getReport_data());
         }
 
+
+
+        Map<String,String> validateResult = validateSimpleUnit(dataTmp, definedColums);
+
+        return validateResult;
+    }
+
+    @Override
+    public Map<String,String> validateSimpleUnitByDimensions(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
+        Map<String,List<String>> dataTmp = new HashMap<>();
+        for (ReportCustomerData columData : columDatas) {
+            String unitId = columData.getUnit_id();
+            String columId = columData.getDimensions_id();
+            String tmpKey = unitId+"_"+columId;
+            if(!dataTmp.containsKey(tmpKey)){
+                dataTmp.put(tmpKey,new ArrayList<String>());
+            }
+            dataTmp.get(tmpKey).add(columData.getReport_data());
+        }
+
+        Map<String,String> validateResult = validateSimpleUnit(dataTmp, definedColums);
+        return validateResult;
+    }
+
+    /**
+     * @param dataTmp key：unitId+"_"+columId 对应 SimpleColumDefined.unit_id和SimpleColumDefined.colum_id
+     *                value:data 数据值
+     * @param definedColums
+     */
+    public Map<String, String> validateSimpleUnit(Map<String,List<String>> dataTmp, ArrayList<SimpleColumDefined> definedColums){
         Map<String,String> validateResult  = new HashMap<>();
-        
+
         for (SimpleColumDefined definedColum : definedColums) {
             Integer unitId = definedColum.getUnit_id();
             Integer columId = definedColum.getColum_id();
+
             if(dataTmp.containsKey(unitId+"_"+columId)){
                 Integer columTypeINT = new Integer(definedColum.getColum_type());
-                if(Strings.isNullOrEmpty(dataTmp.get(unitId+"_"+columId))){
-                    validateResult.put(definedColum.getColum_name_cn(),"数据不允许为空");
-                    continue;
-                }
 
-                if(ColumType.NUMBER.compareWith(columTypeINT)){
-                    Integer maxValue = definedColum.getMax_value();
-                    Integer minValue = definedColum.getMin_value();
+                List<String> dataList = dataTmp.get(unitId + "_" + columId);
 
-                    try{
-                        Integer dataInt = new Integer(dataTmp.get(unitId+"_"+columId));
-                        if(dataInt<=maxValue&&dataInt>=minValue){
-                        }else{
-                            validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
-                        }
-                    }catch (NumberFormatException e){
+                for (String dataValue : dataList) {
+                    if(Strings.isNullOrEmpty(dataValue)){
+                        validateResult.put(definedColum.getColum_name_cn(),"数据不允许为空");
+                        continue;
+                    }
+
+                    if(ColumType.NUMBER.compareWith(columTypeINT)){
+                        Integer maxValue = definedColum.getMax_value();
+                        Integer minValue = definedColum.getMin_value();
+
                         try{
-                            Long dataFormatter = new Long(dataTmp.get(unitId+"_"+columId));
-                            if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                            Integer dataInt = new Integer(dataValue);
+                            if(dataInt<=maxValue&&dataInt>=minValue){
                             }else{
                                 validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
                             }
-                        }catch (NumberFormatException e1){
+                        }catch (NumberFormatException e){
                             try{
-                                Float dataFormatter = new Float(dataTmp.get(unitId+"_"+columId));
+                                Long dataFormatter = new Long(dataValue);
                                 if(dataFormatter<=maxValue&&dataFormatter>=minValue){
                                 }else{
                                     validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
                                 }
-                            }catch(NumberFormatException e2){
+                            }catch (NumberFormatException e1){
                                 try{
-                                    Double dataFormatter = new Double(dataTmp.get(unitId+"_"+columId));
+                                    Float dataFormatter = new Float(dataValue);
                                     if(dataFormatter<=maxValue&&dataFormatter>=minValue){
                                     }else{
                                         validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
                                     }
-                                }catch(NumberFormatException e3){
+                                }catch(NumberFormatException e2){
                                     try{
-                                        BigDecimal dataFormatter = new BigDecimal(dataTmp.get(unitId+"_"+columId));
-                                        if((dataFormatter.compareTo(new BigDecimal(minValue))>=0)&&(dataFormatter.compareTo(new BigDecimal(maxValue))<=0)){
+                                        Double dataFormatter = new Double(dataValue);
+                                        if(dataFormatter<=maxValue&&dataFormatter>=minValue){
                                         }else{
                                             validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
                                         }
-                                    }catch(NumberFormatException e4){
-                                        validateResult.put(definedColum.getColum_name_cn(),"数据格式错误");
-                                    }
+                                    }catch(NumberFormatException e3){
+                                        try{
+                                            BigDecimal dataFormatter = new BigDecimal(dataValue);
+                                            if((dataFormatter.compareTo(new BigDecimal(minValue))>=0)&&(dataFormatter.compareTo(new BigDecimal(maxValue))<=0)){
+                                            }else{
+                                                validateResult.put(definedColum.getColum_name_cn(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                            }
+                                        }catch(NumberFormatException e4){
+                                            validateResult.put(definedColum.getColum_name_cn(),"数据格式错误");
+                                        }
 
+                                    }
                                 }
                             }
                         }
+                        if(validateResult.containsKey(definedColum.getColum_name_cn())){
+                            logger.debug("校验×××{} 值{}×××区间{}~{}校验失败.....",definedColum.getColum_name_cn(),dataValue,minValue,maxValue);
+                        }else
+                            logger.debug("校验-->{} 值{}<--区间{}~{}校验PASS.....",definedColum.getColum_name_cn(),dataValue,minValue,maxValue);
+
+                    }else if(ColumType.STRING.compareWith(columTypeINT)){
+
+                    }else if(ColumType.DATE.compareWith(columTypeINT)){
+
                     }
-
-
-                }else if(ColumType.STRING.compareWith(columTypeINT)){
-
-                }else if(ColumType.DATE.compareWith(columTypeINT)){
-
                 }
+
             }
         }
-        
+
         return validateResult;
     }
 
@@ -240,8 +310,17 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     public Object refreshSimpleFomularData(String reportId,String columFomular){
+        return doRefreshSimpleFomular(reportId,null,columFomular);
+    }
 
+
+    private Object refreshDimensionsFomularData(String reportId, String columnId, String columFomular) {
+        return doRefreshSimpleFomular(reportId,columnId,columFomular);
+    }
+
+    private Object doRefreshSimpleFomular(String reportId, String columnId, String columFomular){
         int value = -1;
+        String fomularColumId = null;
         List<String> fomularColums = new ArrayList<>();
         String columFomularTmp = columFomular;
 
@@ -255,12 +334,20 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         }
 
         if(fomularColums!=null&&fomularColums.size()>0){
-            fomularColums.forEach(fomularColum->{
+            for (String fomularColum : fomularColums) {
                 String fomularColumTmp = fomularColum.replace(".", "_");
                 String[] infos = fomularColumTmp.split("_");
                 String unitId = infos[0];
-                String columId = infos[1];
-                ReportCustomerData reportCustomerData = reportCustomerDao.getSimpleReportCustomerData( reportId, unitId, columId);
+                ReportCustomerData reportCustomerData = null;
+                if(Strings.isNullOrEmpty(columnId)){
+                    String columIdDefined = infos[1];
+                    fomularColumId = columIdDefined;
+                    reportCustomerData = reportCustomerDao.getSimpleReportCustomerData( reportId, unitId, columIdDefined);
+                }else{
+                    String dimensionsId = infos[1];
+                    fomularColumId = dimensionsId;
+                    reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions( reportId, unitId, columnId,dimensionsId);
+                }
                 Object dataFormatter = 0;
                 try{
                     dataFormatter = new Integer(reportCustomerData.getReport_data());
@@ -280,9 +367,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                     }
                 }
                 fomularParams.put(
-                        new StringBuilder().append("FL").append(unitId).append("_").append(columId).append("FL").toString(),
+                        new StringBuilder().append("FL").append(unitId).append("_").append(fomularColumId).append("FL").toString(),
                         dataFormatter);
-            });
+            }
         }
 
         String fomular = columFomular.replace("#", "FL").replace(".", "_");
