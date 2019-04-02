@@ -14,8 +14,8 @@
       </el-col>
     </el-row>
 
-    <el-row v-for="(elColDatas,dataRowNum) in elRowDatas">
-      <el-col class="tree_colum" :span="colSpan" v-for="elColData in elColDatas">
+    <el-row  v-for="(elColDatas,dataRowNum) in elRowDatas">
+      <el-col  class="tree_colum" :span="colSpan" v-for="elColData in elColDatas">
         <el-input v-if="elColData!=null" :disabled="elColData.colum_type==0" v-model="elColData.report_data"></el-input>
         <span v-else> -- </span>
       </el-col>
@@ -565,5 +565,9 @@
 
   .backgroud-type2{
     background-color: #00ffff;
+  }
+
+  .skip_line{
+    border-top:1px solid black;
   }
 </style>

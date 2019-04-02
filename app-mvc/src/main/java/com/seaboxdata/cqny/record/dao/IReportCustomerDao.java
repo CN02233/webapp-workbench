@@ -70,5 +70,6 @@ public interface IReportCustomerDao {
 
     @Select("select * from report_customer_data where " +
             "report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId} and dimensions_id=#{dimensionsId}")
-    ReportCustomerData getSimpleReportCustomerDataBydimensions(String reportId, String unitId,String columId, String dimensionsId);
+    ReportCustomerData getSimpleReportCustomerDataBydimensions(@Param("reportId") String reportId,@Param("unitId") String unitId
+            ,@Param("columId") String columId,@Param("dimensionsId") String dimensionsId);
 }
