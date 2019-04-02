@@ -5,6 +5,7 @@ import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.dao.IReportDefinedDao;
 import com.seaboxdata.cqny.record.entity.ExcelTemplate;
 import com.seaboxdata.cqny.record.entity.ReportDefined;
+import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedService;
 import com.webapp.support.page.PageResult;
@@ -36,5 +37,10 @@ public class ReportDefinedServiceImp implements ReportDefinedService {
     @Override
     public List<UnitDefined> getUnitDefinedsByRepotDefinedId(Integer definedId) {
         return null;
+    }
+
+    @Override
+    public void activeReportDefined(String definedId){
+        reportDefinedDao.changeReportDefinedStatus(definedId, ReportDefinedStatus.SUBMIT.value());
     }
 }

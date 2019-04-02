@@ -10,4 +10,5 @@ public interface ReportDefinedService {
     PageResult reportDefinedList(Integer currPage, Integer pageSize);
     ReportDefined getReportDefinedById(Integer definedId);
     List<UnitDefined> getUnitDefinedsByRepotDefinedId(Integer definedId);
+    void activeReportDefined(String definedId);
 }

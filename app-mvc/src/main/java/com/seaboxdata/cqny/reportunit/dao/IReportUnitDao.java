@@ -5,6 +5,8 @@ import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IReportUnitDao {
 
@@ -77,4 +79,5 @@ public interface IReportUnitDao {
             "1 = 1 and a.unit_id = #{unit_id} ")
     UnitEntity getReportUnit(String unit_id);
 
+    List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId);
 }

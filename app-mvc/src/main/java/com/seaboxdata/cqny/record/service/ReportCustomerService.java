@@ -12,7 +12,7 @@ import java.util.Map;
 public interface ReportCustomerService {
     PageResult pagerReport( Integer currPage, Integer pageSize, Integer userId);
     ReportUnitCustomerContext getUnitContext(String reportId, String unitId, String unitType);
-
+    void createReportCustomer(ReportCustomer reportCustomer);
     void updateOrInsertSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas,boolean isUpdate);
 
     ReportCustomer checkReportCustomer(String reportId);

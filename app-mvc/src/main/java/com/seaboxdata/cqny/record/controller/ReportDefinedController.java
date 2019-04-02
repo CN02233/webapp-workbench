@@ -67,5 +67,16 @@ public class ReportDefinedController {
     }
 
 
+    /**
+     * 发布报表，为各个填报机构生成报表
+     * @param reportDefinedId
+     * @return
+     */
+    public JsonResult activeReportDefined(String reportDefinedId){
+        reportDefinedService.activeReportDefined(reportDefinedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "发布完成 ", null, null);
+        return jsonResult;
+    }
+
 }
 

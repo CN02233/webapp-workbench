@@ -58,6 +58,11 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         return reportUnitCustomerContext;
     }
 
+    @Override
+    public void createReportCustomer(ReportCustomer reportCustomer) {
+        reportCustomerDao.createReportCustomer(reportCustomer);
+    }
+
     /**
      *
      * @param simpleColumDefineds 输入项的定义
@@ -223,7 +228,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 List<String> dataList = dataTmp.get(unitId + "_" + columId);
 
                 for (String dataValue : dataList) {
-                    if(Strings.isNullOrEmpty(dataValue)){
+                    if(Strings.isNullOrEmpty(dataValue)&&!ColumType.FORMULA.compareWith(new Integer(definedColum.getColum_type()))){
                         validateResult.put(definedColum.getColum_name_cn(),"数据不允许为空");
                         continue;
                     }
