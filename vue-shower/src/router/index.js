@@ -237,12 +237,12 @@ const routes = [
           },{
             name: 'reportUnit',
             path: '/record/reportUnit',
-            component: () => import('@/models/record/submitAuthority/reportunit'),
+            component: () => import('@/models/record/reportDefined/unit/reportunit'),
             children: []
           },{
             name: 'reportStatements',
             path: '/record/reportStatements',
-            component: () => import('@/models/record/submitAuthority/reportstatements'),
+            component: () => import('@/models/record/reportDefined/unit/reportstatements'),
             children: []
           },{
             name: 'reportApproval',

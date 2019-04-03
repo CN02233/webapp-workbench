@@ -3,10 +3,10 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="statementsDataList"
+          :data="definedDataList"
           style="width: 100%">
           <el-table-column
-            prop="statements_name"
+            prop="defined_name"
             align="left"
             width="150"
             label="报表名称">
@@ -71,15 +71,15 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      statementsDataList: [],
-      statementsDataObjs: {},
+      definedDataList: [],
+      definedDataObjs: {},
       tableDataUrl: 'reportStatements/listReportStatementsByUser',
       currPageNum: 1,
       eachPageNum: 10,
       totalPage: 1,
       showModalPage: false,
       isEditModal: false,
-      dialogTitle: '',
+      dialogTitle: ''
     }
   },
   validations: {// 提交前的验证
@@ -106,16 +106,16 @@ export default {
         params: {currPage: pageNum, pageSize: this.eachPageNum}
       }).then(response => {
         if (response.dataList != null) {
-          response.dataList.forEach(statementsObj => {
-            $this.statementsDataObjs[statementsObj.organization_id] = statementsObj
+          response.dataList.forEach(definedObj => {
+            $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         }
-        $this.statementsDataList = response.dataList
+        $this.definedDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
     refreshTableList: function (dataList) {
-      this.statementsDataList = dataList
+      this.definedDataList = dataList
     },
     closeModal: function () {
       this.showModalPage = false
@@ -133,7 +133,7 @@ export default {
     }
   },
   mounted: function () { // 初始化
-    this.statementsDataList = []
+    this.definedDataList = []
     this.getTableData(1)
   }
 }

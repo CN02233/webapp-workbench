@@ -10,10 +10,14 @@ import com.workbench.auth.user.entity.User;
 import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.beans.Transient;
+import java.util.List;
 
 /**
  * 报送报表的新增 修改 删除 查询
@@ -43,31 +47,72 @@ public class ReportStatementsController {
 
     /**
      * 新增/修改报送报表
-     * @param reportStatements
+     * @param reportDefined
      * @return
      */
     @RequestMapping("addReportStatements")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult addReportStatements(@RequestBody StatementsEntity reportStatements){
+    public JsonResult addReportStatements(@RequestBody StatementsEntity reportDefined){
         User user = SessionSupport.checkoutUserFromSession();
-        reportStatements.setCreate_user(user.getUser_id());
-        reportStatementsService.addReportStatements(reportStatements);
+        reportDefined.setCreate_user(user.getUser_id());
+        reportStatementsService.addReportStatements(reportDefined);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,reportDefined);
+        return jsonResult;
+    }
+
+    /**
+     * 保存关联
+     * @return
+     */
+    @RequestMapping("saveDefinedAndOriginAssign")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    @Transactional
+    public JsonResult saveDefinedAndOriginAssign(String[] originIds,String definedId){
+        delDefinedAndOriginAssign(definedId);
+        reportStatementsService.saveDefinedAndOriginAssign(originIds,definedId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
+        return jsonResult;
+    }
+
+    /**
+     * 删除关联
+     * @return
+     */
+    @RequestMapping("delDefinedAndOriginAssign")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult delDefinedAndOriginAssign(String definedId){
+        reportStatementsService.delDefinedAndOriginAssign(definedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
+        return jsonResult;
+    }
+
+    /**
+     * 获取关联
+     * @return
+     */
+    @RequestMapping("getDefinedAndOriginAssignById")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getDefinedAndOriginAssignById(String definedId){
+        List<String> result=reportStatementsService.getDefinedAndOriginAssignById(definedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,result);
         return jsonResult;
     }
 
 
     /**
      * 删除报送报表
-     * @param statementsId
+     * @param definedId
      * @return
      */
     @RequestMapping("delById")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult deleteById( String statementsId){
-        reportStatementsService.deleteById(statementsId);
+    public JsonResult deleteById( String definedId){
+        reportStatementsService.deleteById(definedId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
