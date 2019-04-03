@@ -1,17 +1,21 @@
 package com.seaboxdata.cqny.reportunit.entity;
 
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
 
 /**
- * 表report_statements_info
+ * 表report_defined
  */
 public class StatementsEntity {
 
-    private Integer statements_id;
-    private String statements_name;
+    private Integer defined_id;
+    private String defined_name;
+    @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    private Date create_date;
     private Integer origin_id;
     private String status;
-    private String create_time;
     private int create_user;
     //辅助属性、前端显示name
     private String origin_name;
@@ -20,36 +24,28 @@ public class StatementsEntity {
     //add by SongChaoqun
     private List<UnitEntity> units;
 
-    public String getUser_name() {
-        return user_name;
+    public Integer getDefined_id() {
+        return defined_id;
     }
 
-    public void setUser_name(String user_name) {
-        this.user_name = user_name;
+    public void setDefined_id(Integer defined_id) {
+        this.defined_id = defined_id;
     }
 
-    public String getOrigin_name() {
-        return origin_name;
+    public String getDefined_name() {
+        return defined_name;
     }
 
-    public void setOrigin_name(String origin_name) {
-        this.origin_name = origin_name;
+    public void setDefined_name(String defined_name) {
+        this.defined_name = defined_name;
     }
 
-    public Integer getStatements_id() {
-        return statements_id;
+    public Date getCreate_date() {
+        return create_date;
     }
 
-    public void setStatements_id(Integer statements_id) {
-        this.statements_id = statements_id;
-    }
-
-    public String getStatements_name() {
-        return statements_name;
-    }
-
-    public void setStatements_name(String statements_name) {
-        this.statements_name = statements_name;
+    public void setCreate_date(Date create_date) {
+        this.create_date = create_date;
     }
 
     public Integer getOrigin_id() {
@@ -68,14 +64,6 @@ public class StatementsEntity {
         this.status = status;
     }
 
-    public String getCreate_time() {
-        return create_time;
-    }
-
-    public void setCreate_time(String create_time) {
-        this.create_time = create_time;
-    }
-
     public int getCreate_user() {
         return create_user;
     }
@@ -90,5 +78,21 @@ public class StatementsEntity {
 
     public void setUnits(List<UnitEntity> units) {
         this.units = units;
+    }
+
+    public String getOrigin_name() {
+        return origin_name;
+    }
+
+    public void setOrigin_name(String origin_name) {
+        this.origin_name = origin_name;
+    }
+
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
     }
 }

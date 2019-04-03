@@ -42,7 +42,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
         if(reportDefined==null){
             return;
         }
-        List<Origin> alOrigin = getAllOrigin(reportDefinedId);
+        List<String> alOrigin = getAllOrigin(reportDefinedId);
         List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin);
         createReportDefaultData(reportDefined,reportIds);
     }
@@ -66,8 +66,8 @@ public class SubmitReportServiceImp implements SubmitReportService {
         return reportDefined;
     }
 
-    private List<Origin> getAllOrigin(String reportDefindId){
-        List<Origin> originList = reportStatementsService.getOriginsByReportDefind(reportDefindId);
+    private List<String> getAllOrigin(String reportDefindId){
+        List<String> originList = reportStatementsService.getDefinedAndOriginAssignById(reportDefindId);
         return originList;
     }
 
@@ -77,15 +77,15 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param allOrigin
      * @return
      */
-    private List<Integer> createReportBaseData(StatementsEntity reportDefined, List<Origin> allOrigin){
+    private List<Integer> createReportBaseData(StatementsEntity reportDefined, List<String> allOrigin){
         List<Integer> reportBaseIds = new ArrayList<>();
         ReportCustomer reportCustomer = new ReportCustomer();
-        reportCustomer.setReport_defined_id(reportDefined.getStatements_id());
-        reportCustomer.setReport_name(reportDefined.getStatements_name());
+        reportCustomer.setReport_defined_id(reportDefined.getDefined_id());
+        reportCustomer.setReport_name(reportDefined.getDefined_name());
         reportCustomer.setReport_origin(0);
         reportCustomer.setCreate_date(new Date());
-        for (Origin origin : allOrigin) {
-            reportCustomer.setReport_origin(origin.getOrigin_id());
+        for (String origin : allOrigin) {
+            reportCustomer.setReport_origin(new Integer(origin));
             reportCustomerService.createReportCustomer(reportCustomer);
             reportBaseIds.add(reportCustomer.getReport_id());
         }

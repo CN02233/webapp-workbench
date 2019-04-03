@@ -10,7 +10,7 @@ public interface ReportStatementsService {
 
     PageResult listReportStatements(int currPage, int pageSize);
 
-    void addReportStatements(StatementsEntity reportStatements);
+    void addReportStatements(StatementsEntity reportDefined);
 
     void deleteById(String unitId);
 
@@ -18,5 +18,9 @@ public interface ReportStatementsService {
 
     StatementsEntity getReportDefinedById(Integer integer);
 
-    List<Origin> getOriginsByReportDefind(String reportDefindId);
+    void saveDefinedAndOriginAssign(String[] originIds, String definedId);
+
+    List<String> getDefinedAndOriginAssignById(String definedId);
+
+    void delDefinedAndOriginAssign(String definedId);
 }

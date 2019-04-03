@@ -3,10 +3,10 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="statementsDataList"
+          :data="definedDataList"
           style="width: 100%">
           <el-table-column
-            prop="statements_name"
+            prop="defined_name"
             align="left"
             width="150"
             label="报表名称">
@@ -69,7 +69,7 @@
           <el-row>
             <el-col :span="8" :offset="1">报表名称</el-col>
             <el-col :span="15">
-              <el-input placeholder="报送单元名称" v-model="formSubmitData.statements_name" class="input-with-select" ></el-input>
+              <el-input placeholder="报送单元名称" v-model="formSubmitData.defined_name" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
           <el-row>
@@ -113,8 +113,8 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      statementsDataList: [],
-      statementsDataObjs: {},
+      definedDataList: [],
+      definedDataObjs: {},
       tableDataUrl: 'reportStatements/listReportStatements',
       currPageNum: 1,
       eachPageNum: 10,
@@ -123,8 +123,8 @@ export default {
       isEditModal: false,
       dialogTitle: '',
       formSubmitData: {
-        statements_id: null,
-        statements_name: null,
+        defined_id: null,
+        defined_name: null,
         origin_id: null,
         origin_name: null,
         status: null
@@ -144,7 +144,7 @@ export default {
   },
   validations: {// 提交前的验证
     formSubmitData: {
-      statements_name: {
+      defined_name: {
         required
       },
       origin_id: {
@@ -177,16 +177,16 @@ export default {
         params: {currPage: pageNum, pageSize: this.eachPageNum}
       }).then(response => {
         if (response.dataList != null) {
-          response.dataList.forEach(statementsObj => {
-            $this.statementsDataObjs[statementsObj.organization_id] = statementsObj
+          response.dataList.forEach(definedObj => {
+            $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         }
-        $this.statementsDataList = response.dataList
+        $this.definedDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
     refreshTableList: function (dataList) {
-      this.statementsDataList = dataList
+      this.definedDataList = dataList
     },
     openAddModal: function () {
       this.clearData()
@@ -239,12 +239,12 @@ export default {
     },
     clearData () { // 每次添加之前清空数据、
       /* //this.formSubmitData= {};
-        // this.formSubmitData.statements_status= '';
-        // this.formSubmitData.parent_statements_id= '';
-        // this.formSubmitData.parent_statements_name= ''; */
+        // this.formSubmitData.defined_status= '';
+        // this.formSubmitData.parent_defined_id= '';
+        // this.formSubmitData.parent_defined_name= ''; */
       this.formSubmitData = {
-        statements_id: null,
-        statements_name: null,
+        defined_id: null,
+        defined_name: null,
         status: null,
         origin_id: null,
         origin_name: null
@@ -268,7 +268,7 @@ export default {
     }
   },
   mounted: function () { // 初始化
-    this.statementsDataList = []
+    this.definedDataList = []
     this.getTableData(1)
     this.getOriginList()
   }

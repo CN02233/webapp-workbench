@@ -1,9 +1,7 @@
 package com.seaboxdata.cqny.reportunit.dao;
 
 import com.github.pagehelper.Page;
-import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -12,28 +10,29 @@ import java.util.List;
 @Repository
 public interface IReportStatementsDao {
 
-    @Insert("INSERT INTO report_statements_info (\n" +
-            "\tstatements_name,\n" +
-            "\tcreate_time,\n" +
+    @Insert("INSERT INTO report_defined (\n" +
+            "\tdefined_id,\n" +
+            "\tdefined_name,\n" +
+            "\tcreate_date,\n" +
             "\tcreate_user,\n" +
             "\torigin_id,\n" +
             "\tstatus\n" +
             ")\n" +
             "VALUES\n" +
             "\t(\n" +
-            "\t#{ statements_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
+            "\t#{ defined_id },#{ defined_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
             "\t)")
-    void addReportStatements(StatementsEntity reportStatements);
+    void addReportStatements(StatementsEntity reportDefined);
 
-    @Delete("delete from report_statements_info where statements_id = #{statementsId}")
-    void deleteById(@Param("statementsId") String statements_id);
+    @Delete("delete from report_defined where defined_id = #{definedId}")
+    void deleteById(@Param("definedId") String defined_id);
 
-    @Update("<script>update report_statements_info <set>"
+    @Update("<script>update report_defined <set>"
             +"<if test='origin_id!=null'>"
             +"origin_id=#{origin_id} ,"
             +"</if>"
-            +"<if test='statements_name!=null'>"
-            +"statements_name=#{statements_name} ,"
+            +"<if test='defined_name!=null'>"
+            +"defined_name=#{defined_name} ,"
             +"</if>"
             +"<if test='status!=null'>"
             +"status=#{status} ,"
@@ -41,21 +40,21 @@ public interface IReportStatementsDao {
             +"<if test='create_user!=null'>"
             +"create_user=#{create_user} ,"
             +"</if>"
-            +"create_time=sysdate() "
-            +"</set>where statements_id = #{statements_id}</script>")
-    void updateReportStatements(StatementsEntity reportStatements);
+            +"create_date=sysdate() "
+            +"</set>where defined_id = #{defined_id}</script>")
+    void updateReportStatements(StatementsEntity reportDefined);
 
     @Select("SELECT\n" +
-            "\ta.create_time,\n" +
+            "\ta.create_date,\n" +
             "\ta.`status`,\n" +
-            "\ta.statements_id,\n" +
-            "\ta.statements_name,\n" +
+            "\ta.defined_id,\n" +
+            "\ta.defined_name,\n" +
             "\tb.origin_name,\n" +
             "\tc.user_name,\n" +
             "\tb.create_user,\n" +
             "\ta.origin_id\n" +
             "FROM\n" +
-            "\treport_statements_info a\n" +
+            "\treport_defined a\n" +
             "LEFT JOIN sys_origin b ON a.origin_id = b.origin_id\n" +
             "LEFT JOIN `user` c ON a.create_user = c.user_id\n" +
             "WHERE\n" +
@@ -63,14 +62,14 @@ public interface IReportStatementsDao {
     Page<StatementsEntity> listReportStatements(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
     @Select("SELECT\n" +
-            "\trsi.create_time,\n" +
+            "\trsi.create_date,\n" +
             "\trsi.create_user,\n" +
             "\trsi.origin_id,\n" +
-            "\trsi.statements_id,\n" +
-            "\trsi.statements_name,\n" +
+            "\trsi.defined_id,\n" +
+            "\trsi.defined_name,\n" +
             "\trsi.`status`\n" +
             "FROM\n" +
-            "\treport_statements_info rsi\n" +
+            "\treport_defined rsi\n" +
             "WHERE\n" +
             "\trsi.origin_id IN (\n" +
             "\t\tSELECT\n" +
@@ -81,7 +80,7 @@ public interface IReportStatementsDao {
             "\t\t\torganization_origin_assign oos\n" +
             "\t\tWHERE\n" +
             "\t\t\tu.user_id = uos.user_id\n" +
-            "\t\tAND oos.organiztion_id = uos.organization_id\n" +
+            "\t\tAND oos.organization_id = uos.organization_id\n" +
             "\t\tAND u.user_id = #{userId}\n" +
             "\t)")
     Page<StatementsEntity> listReportStatementsByUser(@Param("currPage")int currPage,@Param("pageSize") int pageSize,@Param("userId") int user_id);
@@ -103,7 +102,22 @@ public interface IReportStatementsDao {
             " statements_id = #{definedId}")
     StatementsEntity getReportDefinedById(Integer definedId);
 
-    @Select("select so.* from report_defined_origin_assign rdoa, sys_origin so where rdoa.defined_id=#{reportDefindId}" +
-            " and so.origin_id = rdoa.origin_id")
-    List<Origin> getOriginsByReportDefind(String reportDefindId);
+    @Insert("<script>INSERT INTO report_defined_origin_assign (defined_id,origin_id)\n" +
+            "VALUES " +
+            "<foreach item=\"item\" index=\"index\" collection=\"originIds\" separator=\",\">" +
+            "(#{definedId},#{item})" +
+            "</foreach></script>")
+    void saveDefinedAndOriginAssign(@Param("originIds")String[] originIds,@Param("definedId") String definedId);
+
+    @Select("SELECT\n" +
+            "\ta.origin_id\n" +
+            "FROM\n" +
+            "\treport_defined_origin_assign a\n" +
+            "WHERE\n" +
+            "\t1 = 1" +
+            " and defined_id= #{definedId}")
+    List<String> getDefinedAndOriginAssignById(@Param("definedId") String definedId);
+
+    @Delete("delete from report_defined_origin_assign where defined_id = #{definedId}")
+    void delDefinedAndOriginAssign(String definedId);
 }
