@@ -73,9 +73,9 @@
                 if(unitType=='1'){
                   unitAddress = '/record/onedim/onedimRecord'
                 }else if(unitType=='2'){
-
+                  unitAddress = '/record/groupdim/groupdimRecord'
                 }else if(unitType=='3'){//多维静态
-
+                  unitAddress = '/record/multdim/griddimRecord'
                 }else if(unitType=='4'){//多维树状
                   unitAddress = '/record/treedim/treedimRecord'
                 }
