@@ -30,16 +30,8 @@ const routes = [
     props: { menuAlign: 'left' },//left==>菜单在左侧 top==>菜单在上方
     children: [
       {
-        path: '/infoInput',
-        component: () => import("@/models/infoManage/infoInput")
-      },
-      {
         path: `/welcome`,
         component: () => import("@/models/home/welcome")
-      },
-      {
-        path: '/infoList',
-        component: () => import('@/models/infoManage/infoList')
       },
       {
         name: 'auth',
@@ -79,12 +71,6 @@ const routes = [
         path: '/record',
         component: () => import('@/models/record/main'),
         children: [
-          {
-            name: 'report',
-            path: '/record/report',
-            component: () => import('@/models/record/report/reportMain'),
-            children: []
-          },
           {
             name: 'reportDefined',
             path: '/record/reportDefined',
@@ -198,12 +184,6 @@ const routes = [
                 children: []
               }
             ]
-          },
-          {
-            name: 'template',
-            path: '/record/template',
-            component: () => import('@/models/record/template/templateMain'),
-            children: []
           },
           // {
           //   name: 'templateView',
