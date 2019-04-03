@@ -146,7 +146,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
             }
         }
-//        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
+        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
         return dataList;
     }
 
@@ -165,7 +165,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
             dataList.addAll(this.makeTreeDatas(dimTree, reportId, reportGroupId, 0));
         }
 
-//        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
+        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
         return dataList;
     }
 

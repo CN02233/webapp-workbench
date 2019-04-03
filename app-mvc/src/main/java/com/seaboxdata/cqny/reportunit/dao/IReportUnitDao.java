@@ -51,6 +51,9 @@ public interface IReportUnitDao {
             "\tb.origin_name,\n" +
             "\tc.user_name,\n" +
             "\tb.create_user,\n" +
+            "\ta.unit_type,\n" +
+            "\ta.unit_order,\n" +
+            "\ta.report_defined_id,\n" +
             "\ta.origin_id\n" +
             "FROM\n" +
             "\treport_unit_info a\n" +
@@ -84,16 +87,11 @@ public interface IReportUnitDao {
             "a.`status`," +
             "a.unit_id," +
             "a.unit_name," +
-            "b.origin_name," +
-            "c.user_name," +
-            "b.create_user," +
             "a.report_defined_id," +
             "a.unit_type," +
             "a.origin_id " +
             "FROM " +
             "report_unit_info a " +
-            "LEFT JOIN sys_origin b ON a.origin_id = b.origin_id " +
-            "LEFT JOIN `user` c ON a.create_user = c.user_id " +
             "WHERE " +
             "1 = 1 and a.report_defined_id = #{reportDefinedId} ")
     List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId);

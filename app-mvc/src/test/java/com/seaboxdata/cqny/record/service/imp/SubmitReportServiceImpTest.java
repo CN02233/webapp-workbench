@@ -14,6 +14,6 @@ public class SubmitReportServiceImpTest extends AbstractTestService {
 
     @Test
     public void testDoSubmit() {
-        submitReportService.doSubmit("8");
+        submitReportService.doSubmit("1");
     }
 }

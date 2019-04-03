@@ -304,7 +304,7 @@ export default {
       }else if(defined_type=='3'){
         editUrl = '/record/reportDefined/multDimensionsStatic'
       }else if(defined_type=='4'){
-
+        editUrl = '/record/reportDefined/treeMultDiensionsDynamic'
       }else{
         return
       }
