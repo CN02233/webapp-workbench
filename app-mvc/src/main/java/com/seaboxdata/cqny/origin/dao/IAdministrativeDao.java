@@ -5,6 +5,8 @@ import com.seaboxdata.cqny.origin.entity.Administrative;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 
 @Repository
 public interface IAdministrativeDao {
@@ -61,4 +63,23 @@ public interface IAdministrativeDao {
     @Select("select distinct o.* from organizations o,user_organizations_assign uoa where o.organization_id = uoa.organization_id " +
             "and uoa.user_id = #{userId}")
     Administrative getOrganizationByUser(Integer userId);
+
+    @Insert("<script>INSERT INTO organization_origin_assign (organization_id,origin_id)\n" +
+            "VALUES " +
+            "<foreach item=\"item\" index=\"index\" collection=\"originIds\" separator=\",\">" +
+            "(#{organizationId},#{item})" +
+            "</foreach></script>")
+    void saveOrganizationAndOriginAssign(@Param("originIds")String[] originIds, @Param("organizationId")String organizationId);
+
+    @Select("SELECT\n" +
+            "\ta.origin_id\n" +
+            "FROM\n" +
+            "\torganization_origin_assign a\n" +
+            "WHERE\n" +
+            "\t1 = 1" +
+            " and organization_id= #{organizationId}")
+    List<String> getOrganizationAndOriginAssignById(@Param("organizationId")String organizationId);
+
+    @Delete("delete from organization_origin_assign where organization_id = #{organizationId}")
+    void delOrganizationAndOriginAssign(@Param("organizationId")String organizationId);
 }

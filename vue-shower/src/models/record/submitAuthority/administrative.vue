@@ -48,7 +48,7 @@
                 >用户关联</el-button>
               <el-button
                 size="mini"
-                >报送机构</el-button>
+                @click="bindOrigin(scope.$index, scope.row)">报送机构</el-button>
               <el-button
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -70,31 +70,27 @@
     <el-dialog :title="dialogTitle" :visible.sync="showModalPage" >
       <el-form  class="modal-form" :label-position="left" label-width="20%" >
         <el-form-item :size="small" label="机构名称" >
-          <el-input placeholder="行政机构名称" v-model="formSubmitData.organization_name" auto-complete="off" ></el-input>
+          <el-input placeholder="行政机构名称" v-model="formSubmitData.organization_name" auto-complete="off" :disabled="isShowOrigin==true"></el-input>
+        </el-form-item>
+        <el-form-item :size="small" label="报送机构" v-show="isShowOrigin==true">
+        <el-row>
+          <el-col :span="24">
+            <el-tree
+              accordion
+              class="filter-tree"
+              :data="treeData"
+              show-checkbox
+              node-key = "id"
+              ref="tree">
+            </el-tree>
+          </el-col>
+        </el-row>
         </el-form-item>
       </el-form>
-      <!--
-      <el-row :gutter="16">
-        <el-col :sm="12">
-          <el-row>
-            <el-form-item :size="small" label="行政机构名称" >
-              <el-input placeholder="行政机构名称" v-model="formSubmitData.organization_name" class="input-with-select" ></el-input>
-            </el-form-item>
-          </el-row>
-          <el-row>
-            <el-col :span="6" :offset="1">报送机构</el-col>
-            <el-col :span="17">
-              <div id="app">
-                <treeselect v-model="formSubmitData.origin_id"  :options="options" />
-              </div>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
-      -->
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
-        <el-button type="primary" @click="handleInsert">确 定</el-button>
+        <el-button type="primary" @click="handleInsert" v-show="isShowOrigin==false">确 定</el-button>
+        <el-button type="primary" @click="saveAssign" v-show="isShowOrigin==true">关联</el-button>
       </div>
     </el-dialog>
   </WorkMain>
@@ -121,10 +117,11 @@ export default {
       dialogTitle: '',
       formSubmitData: {
         organization_name: '',
-        origin_id: null,
         origin_name: ''
       },
-      options: []
+      isShowOrigin: false,
+      treeData: [],
+      origin_ids : []
     }
   },
   validations: {// 提交前的验证
@@ -173,6 +170,7 @@ export default {
       this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
+      this.isShowOrigin = false
     },
     closeModal: function () {
       this.showModalPage = false
@@ -184,10 +182,9 @@ export default {
         method: 'get'
       }).then(response => {
         if (response != null && response.length > 0) {
-          this.data = []
-          console.log(response)
+          this.treeData = []
           this.options = response
-          this.data = response
+          this.treeData = response
         }
       })
     },
@@ -216,12 +213,52 @@ export default {
         this.Message.error('保存失败' + error)
       })
     },
+    bindOrigin (index, row) { // 关联报送机构初始化设值
+      this.dialogTitle = '关联报送机构'
+      this.showModalPage = true
+      this.isEditModal = true
+      this.isShowOrigin = true
+      this.formSubmitData.organization_id = row.organization_id
+      this.formSubmitData.organization_name = row.organization_name
+      this.getDefinedAndOriginAssign(row.organization_id, this)
+    },
+    saveAssign () { // 保存关联关系到表中
+      this.getTreeNode()
+      this.BaseRequest({
+        url: '/administrative/saveOrganizationAndOriginAssign',
+        method: 'get',
+        params: {'organizationId': this.formSubmitData.organization_id, 'originIds': this.origin_ids.join()}
+      }).then(() => {
+        this.Message.success('保存成功')
+        this.closeModal()
+      })
+    },
+    getDefinedAndOriginAssign (organizationId, thisRef) { // 获取选择的机构id 进行勾选渲染
+      thisRef.$refs.tree.setCheckedKeys([])
+      this.BaseRequest({
+        url: '/administrative/getOrganizationAndOriginAssignById',
+        method: 'get',
+        params: {'organizationId': organizationId}
+      }).then(response => {
+        if (response != null && response.length > 0) {
+          thisRef.$refs.tree.setCheckedKeys(response)
+        }
+      })
+    },
+    getTreeNode () { // 获取选择的节点id
+      this.origin_ids = []
+      let nodeData = this.$refs.tree.getCheckedNodes()
+      for (let i = 0; i < nodeData.length; i++) {
+        this.origin_ids.push(nodeData[i].id)
+      }
+      JSON.stringify(this.origin_ids)
+    },
     handleEdit (index, row) { // 修改
       this.dialogTitle = '修改机构'
       this.showModalPage = true
       this.isEditModal = true
+      this.isShowOrigin = false
       this.formSubmitData.organization_id = row.organization_id
-      this.formSubmitData.origin_id = row.origin_id
       this.formSubmitData.origin_name = row.origin_name
       this.formSubmitData.organization_name = row.organization_name
     },
@@ -233,7 +270,6 @@ export default {
       this.formSubmitData = {
         organization_name: null,
         organization_id: null,
-        origin_id: null,
         origin_name: null
       }
     },

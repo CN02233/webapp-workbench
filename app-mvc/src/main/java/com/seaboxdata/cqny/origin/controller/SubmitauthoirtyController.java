@@ -73,7 +73,7 @@ public class SubmitauthoirtyController {
     }
 
     /**
-     * 机构数结构
+     * 机构的树结构
      * @return
      */
     @RequestMapping("listAllSubmitauthority")

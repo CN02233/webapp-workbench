@@ -8,6 +8,8 @@ import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 @Service("administrative")
 public class AdministrativeServiceImp implements AdministrativeService {
@@ -46,5 +48,20 @@ public class AdministrativeServiceImp implements AdministrativeService {
     @Override
     public Administrative getOrganizationByUser(Integer userId) {
         return administrativeDao.getOrganizationByUser(userId);
+    }
+
+    @Override
+    public void saveOrganizationAndOriginAssign(String[] originIds, String organizationId) {
+        administrativeDao.saveOrganizationAndOriginAssign(originIds,organizationId);
+    }
+
+    @Override
+    public List<String> getOrganizationAndOriginAssignById(String organizationId) {
+        return administrativeDao.getOrganizationAndOriginAssignById(organizationId);
+    }
+
+    @Override
+    public void delOrganizationAndOriginAssign(String organizationId) {
+        administrativeDao.delOrganizationAndOriginAssign(organizationId);
     }
 }
