@@ -11,4 +11,6 @@ public interface ReportDefinedService {
     ReportDefined getReportDefinedById(Integer definedId);
     List<UnitDefined> getUnitDefinedsByRepotDefinedId(Integer definedId);
     void activeReportDefined(String definedId);
+
+    List<Integer> getOriginsByReportDefind(String reportDefindId);
 }

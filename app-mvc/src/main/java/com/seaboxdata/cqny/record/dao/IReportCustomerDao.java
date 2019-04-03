@@ -30,6 +30,7 @@ public interface IReportCustomerDao {
             "(report_defined_id,report_name,report_origin,create_date,report_start_date,report_end_date,active_unit) " +
             "values " +
             "(#{report_defined_id},#{report_name},#{report_origin},#{create_date},#{report_start_date},#{report_end_date},#{active_unit})")
+    @Options(useGeneratedKeys = true, keyProperty = "report_id", keyColumn = "report_id")
     void createReportCustomer(ReportCustomer reportCustomer);
 
     @Select("select " +

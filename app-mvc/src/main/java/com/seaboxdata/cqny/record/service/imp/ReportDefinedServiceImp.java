@@ -43,4 +43,9 @@ public class ReportDefinedServiceImp implements ReportDefinedService {
     public void activeReportDefined(String definedId){
         reportDefinedDao.changeReportDefinedStatus(definedId, ReportDefinedStatus.SUBMIT.value());
     }
+
+    @Override
+    public List<Integer> getOriginsByReportDefind(String reportDefindId) {
+        return reportDefinedDao.getOriginsByReportDefind(reportDefindId);
+    }
 }

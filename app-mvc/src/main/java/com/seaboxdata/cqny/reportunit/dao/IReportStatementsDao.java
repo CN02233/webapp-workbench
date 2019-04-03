@@ -1,10 +1,13 @@
 package com.seaboxdata.cqny.reportunit.dao;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface IReportStatementsDao {
@@ -82,4 +85,25 @@ public interface IReportStatementsDao {
             "\t\tAND u.user_id = #{userId}\n" +
             "\t)")
     Page<StatementsEntity> listReportStatementsByUser(@Param("currPage")int currPage,@Param("pageSize") int pageSize,@Param("userId") int user_id);
+
+    @Select("SELECT" +
+            " a.create_time," +
+            " a.`status`," +
+            " a.statements_id," +
+            " a.statements_name," +
+            " b.origin_name," +
+            " c.user_name," +
+            " b.create_user," +
+            " a.origin_id" +
+            " FROM" +
+            " report_statements_info a" +
+            " LEFT JOIN sys_origin b ON a.origin_id = b.origin_id" +
+            " LEFT JOIN `user` c ON a.create_user = c.user_id" +
+            " WHERE" +
+            " statements_id = #{definedId}")
+    StatementsEntity getReportDefinedById(Integer definedId);
+
+    @Select("select so.* from report_defined_origin_assign rdoa, sys_origin so where rdoa.defined_id=#{reportDefindId}" +
+            " and so.origin_id = rdoa.origin_id")
+    List<Origin> getOriginsByReportDefind(String reportDefindId);
 }

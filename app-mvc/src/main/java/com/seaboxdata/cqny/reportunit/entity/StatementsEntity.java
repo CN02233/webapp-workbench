@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.reportunit.entity;
 
+import java.util.List;
+
 /**
  * 表report_statements_info
  */
@@ -14,6 +16,9 @@ public class StatementsEntity {
     //辅助属性、前端显示name
     private String origin_name;
     private String user_name;
+
+    //add by SongChaoqun
+    private List<UnitEntity> units;
 
     public String getUser_name() {
         return user_name;
@@ -77,5 +82,13 @@ public class StatementsEntity {
 
     public void setCreate_user(int create_user) {
         this.create_user = create_user;
+    }
+
+    public List<UnitEntity> getUnits() {
+        return units;
+    }
+
+    public void setUnits(List<UnitEntity> units) {
+        this.units = units;
     }
 }

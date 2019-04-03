@@ -1,13 +1,15 @@
 package com.seaboxdata.cqny.reportunit.service.impl;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.reportunit.dao.IReportStatementsDao;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service("reportStatements")
 public class ReportStatementsServiceImp implements ReportStatementsService {
@@ -42,5 +44,16 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
         Page<StatementsEntity> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,user_id);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportStatementsPage);
         return pageResult;
+    }
+
+    @Override
+    public StatementsEntity getReportDefinedById(Integer definedId) {
+        StatementsEntity reportDefined = reportStatementsDao.getReportDefinedById(definedId);
+        return reportDefined;
+    }
+
+    @Override
+    public List<Origin> getOriginsByReportDefind(String reportDefindId) {
+        return reportStatementsDao.getOriginsByReportDefind(reportDefindId);
     }
 }
