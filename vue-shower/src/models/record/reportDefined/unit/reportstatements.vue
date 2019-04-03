@@ -8,10 +8,10 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="statementsDataList"
+          :data="definedDataList"
           style="width: 100%">
           <el-table-column
-            prop="statements_name"
+            prop="defined_name"
             align="left"
             width="150"
             label="报表名称">
@@ -48,7 +48,7 @@
             >
             <template slot-scope="scope">
               <el-button
-                size="mini"
+                size="mini" @click="definedUnit(scope.row.defined_id)"
                 >报送单元</el-button>
               <el-button
                 size="mini"
@@ -70,25 +70,33 @@
     <!-- 新增、编辑 弹窗-->
     <el-dialog :title="dialogTitle" :visible.sync="showModalPage" >
       <el-row :gutter="16">
-
-        <el-col :sm="12">
+        <el-col :sm="20">
           <el-row>
             <el-col :span="8" :offset="1">报表名称</el-col>
             <el-col :span="15">
-              <el-input placeholder="报送单元名称" v-model="formSubmitData.statements_name" class="input-with-select" ></el-input>
+              <el-input placeholder="报送单元名称" v-model="formSubmitData.defined_name" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
           <el-row>
             <el-col :span="8" :offset="1">所属报送机构</el-col>
             <el-col :span="15">
-              <div id="app">
-                <treeselect v-model="formSubmitData.origin_id"  :options="options" />
-              </div>
+               <!-- <treeselect   multiple v-model="formSubmitData.origin_id"  :options="options" />-->
+                <el-tree
+                  accordion
+                  class="filter-tree"
+                  :data="data"
+                  show-checkbox
+                  :props="defaultProps"
+                  node-key = "id"
+                  ref="tree"
+                  :filter-node-method="filterNode"
+                  @node-click="handleNodeClick">
+                </el-tree>
             </el-col>
           </el-row>
           <el-row>
             <el-col :span="8" :offset="1">报表状态</el-col>
-            <el-col :span="15">
+            <el-col :span="8" >
               <el-select v-model="formSubmitData.status" placeholder="请选择报送单元状态">
                 <el-option
                   v-for="item in statusOptions"
@@ -119,8 +127,8 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      statementsDataList: [],
-      statementsDataObjs: {},
+      definedDataList: [],
+      definedDataObjs: {},
       tableDataUrl: 'reportStatements/listReportStatements',
       currPageNum: 1,
       eachPageNum: 10,
@@ -128,10 +136,10 @@ export default {
       showModalPage: false,
       isEditModal: false,
       dialogTitle: '',
+      origin_ids: [],
       formSubmitData: {
-        statements_id: null,
-        statements_name: null,
-        origin_id: null,
+        defined_id: null,
+        defined_name: null,
         origin_name: null,
         status: null
       },
@@ -145,20 +153,33 @@ export default {
       }, {
         value: '300',
         label: '已使用'
-      }]
+      }],
+      search: '',
+      defaultProps: {
+        id: 'id',
+        children: 'children',
+        label: 'label'
+      },
+      filterText: '',
+      data: []
+    }
+  },
+  watch: {// 监听节点搜索的内容
+    filterText (val) {
+      this.$refs.tree.filter(val)
     }
   },
   validations: {// 提交前的验证
     formSubmitData: {
-      statements_name: {
-        required
-      },
-      origin_id: {
+      defined_name: {
         required
       },
       status: {
         required
       }
+    },
+    origin_ids: {
+      required
     }
   },
   computed: {
@@ -170,6 +191,14 @@ export default {
     WorkMain
   },
   methods: {
+    handleNodeClick (data) { // 点击树的节点进行赋值
+      // console.log(data)
+      // console.log(this.$refs.tree.getCheckedNodes())
+    },
+    filterNode (value, data) { // 树节点的过滤
+      if (!value) return true
+      return data.name.indexOf(value) !== -1
+    },
     getTableData: function (pageNum) {
       if (pageNum && pageNum !== '') {
         this.currPageNum = pageNum
@@ -183,16 +212,16 @@ export default {
         params: {currPage: pageNum, pageSize: this.eachPageNum}
       }).then(response => {
         if (response.dataList != null) {
-          response.dataList.forEach(statementsObj => {
-            $this.statementsDataObjs[statementsObj.organization_id] = statementsObj
+          response.dataList.forEach(definedObj => {
+            $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         }
-        $this.statementsDataList = response.dataList
+        $this.definedDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
     refreshTableList: function (dataList) {
-      this.statementsDataList = dataList
+      this.definedDataList = dataList
     },
     openAddModal: function () {
       this.clearData()
@@ -212,13 +241,36 @@ export default {
       }).then(response => {
         if (response != null && response.length > 0) {
           this.data = []
-          console.log(response)
           this.options = response
           this.data = response
         }
       })
     },
+    getDefinedAndOriginAssign (definedId, thisRef) { // 获取选择的机构id
+      thisRef.$refs.tree.setCheckedKeys([])
+      this.BaseRequest({
+        url: '/reportStatements/getDefinedAndOriginAssignById',
+        method: 'get',
+        params: {'definedId': definedId}
+      }).then(response => {
+        if (response != null && response.length > 0) {
+          thisRef.$refs.tree.setCheckedKeys(response)
+          // this.data = []
+          // this.options = response
+          // this.data = response
+        }
+      })
+    },
+    getTreeNode () {
+      this.origin_ids = []
+      let nodeData = this.$refs.tree.getCheckedNodes()
+      for (let i = 0; i < nodeData.length; i++) {
+        this.origin_ids.push(nodeData[i].id)
+      }
+      JSON.stringify(this.origin_ids)
+    },
     handleInsert () { // 添加、修改确定按钮触发
+      this.getTreeNode()
       if (this.checkInputNull()) {
         return
       }
@@ -232,8 +284,10 @@ export default {
         url: '/reportStatements/addReportStatements',
         method: 'post',
         data: this.formSubmitData
-      }).then(() => {
+      }).then((response) => {
         this.Message.success('保存成功')
+        this.formSubmitData.defined_id = response.defined_id
+        this.saveAssign()
         loading.close()
         this.closeModal()
         this.getTableData()
@@ -243,31 +297,41 @@ export default {
         this.Message.error('保存失败' + error)
       })
     },
+    saveAssign () {
+      this.BaseRequest({
+        url: 'reportStatements/saveDefinedAndOriginAssign',
+        method: 'get',
+        params: {'definedId': this.formSubmitData.defined_id, 'originIds': this.origin_ids.join()}
+      }).then(() => {
+        this.Message.success('保存成功')
+        this.closeModal()
+      })
+    },
     handleEdit (index, row) { // 修改
-      console.log(row)
+      this.getOriginList()
       this.dialogTitle = '修改报送报表'
       this.showModalPage = true
       this.isEditModal = true
-      this.formSubmitData.statements_id = row.statements_id
-      this.formSubmitData.statements_name = row.statements_name
-      this.formSubmitData.origin_id = row.origin_id
+      this.formSubmitData.defined_id = row.defined_id
+      this.formSubmitData.defined_name = row.defined_name
       this.formSubmitData.status = row.status
+      this.getDefinedAndOriginAssign(row.defined_id, this)
     },
     clearData () { // 每次添加之前清空数据、
       /* //this.formSubmitData= {};
-        // this.formSubmitData.statements_status= '';
-        // this.formSubmitData.parent_statements_id= '';
-        // this.formSubmitData.parent_statements_name= ''; */
+        // this.formSubmitData.defined_status= '';
+        // this.formSubmitData.parent_defined_id= '';
+        // this.formSubmitData.parent_defined_name= ''; */
+      this.$refs.tree.setCheckedKeys([]);
       this.formSubmitData = {
-        statements_id: null,
-        statements_name: null,
+        defined_id: null,
+        defined_name: null,
         status: null,
-        origin_id: null,
         origin_name: null
       }
     },
     handleDelete (index, row) { // 删除
-      this.$confirm('确定删除报送单元【' + row.statements_name + '】？', '提示', {
+      this.$confirm('确定删除报送单元【' + row.defined_name + '】？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         dangerouslyUseHTMLString: true,
@@ -276,7 +340,7 @@ export default {
         this.BaseRequest({
           url: '/reportStatements/delById',
           method: 'get',
-          params: {'statementsId': row.statements_id}
+          params: {'definedId': row.defined_id}
         }).then(() => {
           this.Message.success('删除成功')
           this.getTableData()
@@ -293,10 +357,18 @@ export default {
         })
       }
       return checkResult
+    },
+    definedUnit(definedId){
+      this.$router.push({
+        path: '/record/reportUnit',
+        query:{
+          'definedId':definedId
+        }
+      });
     }
   },
   mounted: function () { // 初始化
-    this.statementsDataList = []
+    this.definedDataList = []
     this.getTableData(1)
     this.getOriginList()
   }

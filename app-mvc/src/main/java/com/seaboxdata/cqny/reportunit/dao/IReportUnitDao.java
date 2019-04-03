@@ -5,6 +5,8 @@ import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IReportUnitDao {
 
@@ -49,6 +51,9 @@ public interface IReportUnitDao {
             "\tb.origin_name,\n" +
             "\tc.user_name,\n" +
             "\tb.create_user,\n" +
+            "\ta.unit_type,\n" +
+            "\ta.unit_order,\n" +
+            "\ta.report_defined_id,\n" +
             "\ta.origin_id\n" +
             "FROM\n" +
             "\treport_unit_info a\n" +
@@ -77,4 +82,17 @@ public interface IReportUnitDao {
             "1 = 1 and a.unit_id = #{unit_id} ")
     UnitEntity getReportUnit(String unit_id);
 
+    @Select("SELECT " +
+            "a.create_time," +
+            "a.`status`," +
+            "a.unit_id," +
+            "a.unit_name," +
+            "a.report_defined_id," +
+            "a.unit_type," +
+            "a.origin_id " +
+            "FROM " +
+            "report_unit_info a " +
+            "WHERE " +
+            "1 = 1 and a.report_defined_id = #{reportDefinedId} ")
+    List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId);
 }

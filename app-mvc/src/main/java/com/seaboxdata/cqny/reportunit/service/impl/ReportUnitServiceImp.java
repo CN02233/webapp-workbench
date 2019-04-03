@@ -67,4 +67,10 @@ public class ReportUnitServiceImp implements ReportUnitService {
         }
         return columsDatas;
     }
+
+    @Override
+    public List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId) {
+        List<UnitEntity> unitEntities = reportUnitDao.getUnitDefinedByReportDefindId(reportDefinedId);
+        return unitEntities;
+    }
 }

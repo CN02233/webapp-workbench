@@ -373,7 +373,7 @@
         })
       },
       addRootNode(){
-        this.elRowDatas.splice(0,0,this.elRowDatas[0])
+        this.elRowDatas.splice(0,0,JSON.parse(JSON.stringify(this.elRowDatas[0])))
       },
 
       addSonNode(parentElRowData, parentRowNum){

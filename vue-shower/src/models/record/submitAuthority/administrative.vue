@@ -1,5 +1,5 @@
 <template>
-  <WorkMain :headerItems="['报送管理','报送机构管理']">
+  <WorkMain :headerItems="['报送管理','行政机构管理']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
         <el-button @click="openAddModal" type="primary">新增</el-button>
