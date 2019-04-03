@@ -360,7 +360,7 @@ export default {
     },
     definedUnit(definedId){
       this.$router.push({
-        path: '/record/reportDefined/unitMain',
+        path: '/record/reportUnit',
         query:{
           'definedId':definedId
         }
