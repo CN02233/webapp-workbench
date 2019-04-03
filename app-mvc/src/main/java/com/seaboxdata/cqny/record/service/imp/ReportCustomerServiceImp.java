@@ -9,6 +9,7 @@ import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
@@ -365,6 +366,80 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         Expression expression= AviatorEvaluator.compile(fomular);
         Object result = expression.execute(fomularParams);
         return result;
+    }
+
+    /**
+     *
+     * @param simpleColumDefineds 输入项的定义
+     * @param columDatas 用户录入数据集合
+     * @param isUpdate true:更新原数据值 false：插入新数据
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateOrInsertGridUnitContext(
+            ArrayList<GridColumDefined> simpleColumDefineds,
+            ArrayList<ReportCustomerData> columDatas,boolean isUpdate) {
+        Map<String,GridColumDefined> fomularsTmp = new HashMap<>();
+        if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
+            simpleColumDefineds.forEach(simpleColumDefined->{
+                Integer columType = new Integer(simpleColumDefined.getColum_type());
+                if(ColumType.FORMULA.compareWith(columType)){
+                    fomularsTmp.put(simpleColumDefined.getUnit_id()+"_"+simpleColumDefined.getColum_id(),simpleColumDefined);
+                }
+            });
+        }
+
+        List<FomularTmpEntity> fomularArray = new ArrayList();
+
+        if(columDatas!=null&&columDatas.size()>0){
+            columDatas.forEach(columData->{
+                Integer reportId = columData.getReport_id();
+                String unitId = columData.getUnit_id();
+                String columnId = columData.getColum_id();
+                String dimensionsId = columData.getDimensions_id();
+                //unitId+"_"+columnId: 一维静态公式刷新 unitId+"_"+dimensionsId:多维树状公式刷新
+                if(fomularsTmp.containsKey(unitId+"_"+columnId)||fomularsTmp.containsKey(unitId+"_"+dimensionsId)){
+
+                    FomularTmpEntity fomularTmpEntity = new FomularTmpEntity();
+                    fomularTmpEntity.reportId = reportId;
+                    fomularTmpEntity.unitId = unitId;
+                    fomularTmpEntity.columId = columnId;
+                    fomularTmpEntity.dimensionsId = dimensionsId;
+                    fomularTmpEntity.reportGroupId = columData.getReport_group_id();
+                    String fomularScriptVal = fomularsTmp.get(unitId + "_" + dimensionsId) != null ?
+                            fomularsTmp.get(unitId + "_" + dimensionsId).getColum_formula() :
+                            fomularsTmp.get(unitId + "_" + columnId).getColum_formula();
+                    fomularTmpEntity.fomularScript = fomularScriptVal;
+                    fomularArray.add(fomularTmpEntity);
+                } else{//无公式值刷新
+                    if(isUpdate){
+                        reportCustomerDao.updateGridUnitContext(columData);
+                    }else{
+                        reportCustomerDao.insertUnitContext(columData);
+                    }
+
+                }
+            });
+        }
+
+        if(fomularArray!=null&&fomularArray.size()>0){
+            for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+                Object fomularDataResult = doRefreshSimpleFomular(fomularTmpEntity);
+                ReportCustomerData comularData = new ReportCustomerData();
+                comularData.setReport_id(fomularTmpEntity.reportId);
+                comularData.setUnit_id(fomularTmpEntity.unitId);
+                comularData.setColum_id(fomularTmpEntity.columId);
+                comularData.setDimensions_id(fomularTmpEntity.dimensionsId);
+                comularData.setReport_data(String.valueOf(fomularDataResult));
+                comularData.setReport_group_id(fomularTmpEntity.reportGroupId);
+                if(isUpdate){
+                    reportCustomerDao.updateUnitContext(comularData);
+                }else{
+                    reportCustomerDao.insertUnitContext(comularData);
+                }
+            }
+        }
+
     }
 
     private class FomularTmpEntity{

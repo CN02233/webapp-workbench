@@ -72,4 +72,7 @@ public interface IReportCustomerDao {
             "report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId} and dimensions_id=#{dimensionsId}")
     ReportCustomerData getSimpleReportCustomerDataBydimensions(@Param("reportId") String reportId,@Param("unitId") String unitId
             ,@Param("columId") String columId,@Param("dimensionsId") String dimensionsId);
+
+    @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id} and dimensions_id=#{dimensions_id}")
+    void updateGridUnitContext(ReportCustomerData columDatas);
 }

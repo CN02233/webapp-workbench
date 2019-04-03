@@ -69,7 +69,9 @@ public interface IReportDefinedUnitMultDimDao {
     @Select("select * from report_defined_unit where report_defined_id=#{originId}")
     List<UnitDefined> getUnitByOrigin(String originId);
 
-    @Select("select * from report_defined_unit_onedim where unit_id = #{unitId}")
+    @Select("<script>select a.*,'' colum_name, '' colum_name_cn,'1' colum_meta_type from report_defined_unit_multdim a where a.unit_id=#{unitId}" +
+            "union select #{unitId},colum_id,'','','','','','',colum_name,colum_name_cn,'2' colum_meta_type from report_defined_unit_multdim_col b where b.colum_id in (select colum_id from report_defined_unit_multdim where unit_id=#{unitId})" +
+            "union select unit_id,'',dim_id,'','','','','',dim_name,dim_name_cn,'3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
     List<GridColumDefined> getColumByUnit(String unitId);
 
     @Select("select * from report_defined_unit_onedim where colum_id=#{columId}")
