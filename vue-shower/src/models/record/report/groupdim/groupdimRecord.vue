@@ -1,10 +1,12 @@
 <template>
   <div>
-    <el-form ref="form"  label-width="40%">
-      <el-form-item  v-for="definedColum in definedColums" :label="definedColum.colum_name_cn">
-        <el-input v-model="columDatas[definedColum.unit_id+'_'+definedColum.colum_id].report_data"
-                  :disabled="definedColum.colum_type==0" style="width:50%;float: left;" ></el-input>
-      </el-form-item>
+    <el-form ref="form" label-width="40%">
+      <div v-for="group in definedGroup">
+        <el-form-item :label="group.colum_name_cn"></el-form-item>
+        <el-form-item v-for="col in group.children" :label="col.colum_name_cn">
+          <el-input v-model="col.report_data" style="width:50%;float: left;" ></el-input>
+        </el-form-item>
+      </div>
     </el-form>
 
     <el-button @click="saveUnitContext(false)" type="info">保存</el-button>
@@ -17,8 +19,8 @@
   import WorkMain from "@/models/public/WorkMain"
 
   export default {
-    name: "onedimRecord",
-    describe:"一维报表填报单元",
+    name: "groupdimRecord",
+    describe:"一维动态报表填报单元",
     components: {
       WorkMain
     },
@@ -28,6 +30,7 @@
         unitId:"",
         unitType:"",
         lastStep:false,
+        definedGroup:[],
         definedColums:[],
         columDatas:{}
       }
@@ -40,11 +43,6 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
-        console.log({
-          reportId:this.reportId,
-          unitId:this.unitId,
-          unitType:this.unitType
-        })
         this.BaseRequest({
           url:"/reportCust/getUnitContext",
           params:{
@@ -55,13 +53,31 @@
         }).then(response=>{
           loading.close();
           if(response){
-            this.definedColums = response.definedColums
+            const $t = this
             if(response.columDatas){
               response.columDatas.forEach(columData=>{
                 const columKey = columData.unit_id + "_"+columData.colum_id
-                this.columDatas[columKey] = columData
+                $t.columDatas[columKey] = columData
               })
             }
+            response.definedColums.forEach(x=>{
+              if(x.group_id == null){
+                let xx = Object.assign({children:[]}, x)
+                $t.definedGroup.push(xx)
+              }else{
+                $t.definedColums.push(x)
+              }
+            })
+            $t.definedGroup.forEach(t=>{
+              response.definedColums.forEach(x=>{
+                if(t.colum_id == x.group_id){
+                  let xx = Object.assign({}, x)
+                  if($t.columDatas[x.unit_id+'_'+x.colum_id])
+                    xx.report_data = $t.columDatas[x.unit_id+'_'+x.colum_id].report_data
+                  t.children.push(xx)
+                }
+              })
+            })
           }
         }).catch(error=>{
             this.Message.success(error)
@@ -71,7 +87,12 @@
       },
       saveUnitContext(needUpdateStep){
         const $this = this
-
+        $this.definedGroup.forEach(g=>{
+          g.children.forEach(x=>{
+            if(x.report_data)
+              $this.columDatas[x.unit_id+'_'+x.colum_id].report_data = x.report_data
+          })
+        })
         // validateSimpleUnitContext
         const valloading = this.$loading({
           lock: true,
@@ -169,6 +190,7 @@
     mounted:function(){
       this.reportId = this.$route.query.reportId
       this.unitId = this.$route.query.unitId
+      this.unitType = this.$route.query.unitType
       this.unitType = this.$route.query.unitType
       this.lastStep = this.$route.query.lastStep
       this.getUnitContext()

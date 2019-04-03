@@ -60,4 +60,16 @@ public interface IReportCustomerDao {
 
     @Update("update report_customer set active_unit= #{nextStepUnit} where report_id = #{reportId}")
     void updateStep(@Param("reportId") String reportId,@Param("nextStepUnit") Integer nextStepUnit);
+
+    @Delete("delete from report_customer_data where unit_id=#{unit_id}")
+    void removeUnitContextData(String unit_id);
+
+    @Insert("insert into report_customer_data (report_id,unit_id,report_group_id,colum_id,dimensions_id,report_data) " +
+            "values (#{report_id},#{unit_id},#{report_group_id},#{colum_id},#{dimensions_id},#{report_data})")
+    void insertUnitContext(ReportCustomerData columData);
+
+    @Select("select * from report_customer_data where " +
+            "report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId} and dimensions_id=#{dimensionsId}")
+    ReportCustomerData getSimpleReportCustomerDataBydimensions(@Param("reportId") String reportId,@Param("unitId") String unitId
+            ,@Param("columId") String columId,@Param("dimensionsId") String dimensionsId);
 }

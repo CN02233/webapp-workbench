@@ -17,8 +17,8 @@
   import WorkMain from "@/models/public/WorkMain"
 
   export default {
-    name: "onedimRecord",
-    describe:"一维报表填报单元",
+    name: "griddimRecord",
+    describe:"多维静态报表填报单元",
     components: {
       WorkMain
     },
@@ -169,6 +169,7 @@
     mounted:function(){
       this.reportId = this.$route.query.reportId
       this.unitId = this.$route.query.unitId
+      this.unitType = this.$route.query.unitType
       this.unitType = this.$route.query.unitType
       this.lastStep = this.$route.query.lastStep
       this.getUnitContext()

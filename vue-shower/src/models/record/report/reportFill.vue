@@ -58,7 +58,6 @@
         });
       },
       selectActiveStep(active_unit,isRefresh){
-        console.log("selectActiveStep is running "+active_unit)
         if(this.unitEntities){
           this.unitEntities.forEach((unitEntity,eachNum)=>{
             const unitId = unitEntity.unit_id
@@ -74,13 +73,13 @@
                 if(unitType=='1'){
                   unitAddress = '/record/onedim/onedimRecord'
                 }else if(unitType=='2'){
-
-                }else if(unitType==='3'){//多维静态
-
-                }else if(unitType==='4'){//多维树状
-
+                  unitAddress = '/record/groupdim/groupdimRecord'
+                }else if(unitType=='3'){//多维静态
+                  unitAddress = '/record/multdim/griddimRecord'
+                }else if(unitType=='4'){//多维树状
+                  unitAddress = '/record/treedim/treedimRecord'
                 }
-                const lastStep = (this.activeStepNum==this.lastStepNum)
+                const lastStep = (unitType==='4')
                 console.log(lastStep)
                 this.$router.push({
                   path: unitAddress+"?reportId="+this.reportId+"&unitId="+unitId+"&unitType="+unitType+"&lastStep="+lastStep
@@ -132,14 +131,15 @@
     padding:30px 0 0 0 ;
   }
   .fill-steps{
-    width:200px;
+    width:150px;
     height:70%;
     position:absolute;
     z-index: 10086;
   }
   .fill-context{
-    width:100%;
+    width:calc(100% - 150px);
     height:70%;
+    margin:0 0 0 150px;
     overflow: auto;
   }
   .el-step{
