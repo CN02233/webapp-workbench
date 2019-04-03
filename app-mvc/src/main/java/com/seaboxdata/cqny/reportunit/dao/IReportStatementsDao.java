@@ -88,8 +88,8 @@ public interface IReportStatementsDao {
     @Select("SELECT" +
             " a.create_time," +
             " a.`status`," +
-            " a.statements_id," +
-            " a.statements_name," +
+            " a.defined_id," +
+            " a.defined_name," +
             " b.origin_name," +
             " c.user_name," +
             " b.create_user," +
@@ -99,7 +99,7 @@ public interface IReportStatementsDao {
             " LEFT JOIN sys_origin b ON a.origin_id = b.origin_id" +
             " LEFT JOIN `user` c ON a.create_user = c.user_id" +
             " WHERE" +
-            " statements_id = #{definedId}")
+            " defined_id = #{definedId}")
     StatementsEntity getReportDefinedById(Integer definedId);
 
     @Insert("<script>INSERT INTO report_defined_origin_assign (defined_id,origin_id)\n" +

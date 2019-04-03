@@ -1,7 +1,6 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
-import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
@@ -24,9 +23,6 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
     private static Logger logger = LoggerFactory.getLogger(SubmitReportServiceImp.class);
 
-//    @Autowired
-//    private ReportDefinedService reportDefinedService;
-
     @Autowired
     private ReportStatementsService reportStatementsService;
 
@@ -38,12 +34,19 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
     @Override
     public void doSubmit(String reportDefinedId) {
+        logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
         StatementsEntity reportDefined = getReportDefined(reportDefinedId);
+        logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
         if(reportDefined==null){
             return;
         }
+        logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
         List<String> alOrigin = getAllOrigin(reportDefinedId);
+        logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
+        logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
         List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin);
+        logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
+        logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
         createReportDefaultData(reportDefined,reportIds);
     }
 
@@ -104,17 +107,21 @@ public class SubmitReportServiceImp implements SubmitReportService {
         for (UnitEntity unitDefind : unitDefinds) {
             Integer unitTypeInt = unitDefind.getUnit_type();
             if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitTypeInt)){//一维静态
+                logger.info("报表发布->{}：报送单元【{}】为【一维报送】单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
                 ArrayList<SimpleColumDefined> oneColumDefinedsList = (ArrayList<SimpleColumDefined>) unitDefind.getColums();
-                createOneDimDatas(oneColumDefinedsList,reportIds);
+                ArrayList<ReportCustomerData> dataList = createOneDimDatas(oneColumDefinedsList, reportIds);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
             }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
 
             }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
 
             }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
+                logger.info("报表发布->{}：报送单元【{}】为【多维树状】报送单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
                 ArrayList<SimpleColumDefined> oneColumDefinedsList = (ArrayList<SimpleColumDefined>) unitDefind.getColums();
-                createTreeDimDatas(oneColumDefinedsList,reportIds);
+                ArrayList<ReportCustomerData> dataList = createTreeDimDatas(oneColumDefinedsList,reportIds);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
             }else{
-
+                logger.info("报表发布->{}：报送单元【{}】,生成失败，未找到对应的报送单元类型{}",unitTypeInt);
             }
         }
     }
@@ -124,7 +131,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param columDefineds
      * @param reportIds
      */
-    private void createOneDimDatas(ArrayList<SimpleColumDefined> columDefineds,List<Integer> reportIds){
+    private ArrayList<ReportCustomerData> createOneDimDatas(ArrayList<SimpleColumDefined> columDefineds, List<Integer> reportIds){
         ArrayList<ReportCustomerData> dataList = new ArrayList<>();
         if(columDefineds!=null){
             for (SimpleColumDefined columDefined : columDefineds) {
@@ -134,14 +141,13 @@ public class SubmitReportServiceImp implements SubmitReportService {
                     reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
                     reportCustomerData.setReport_id(reportId);
                     reportCustomerData.setReport_data("1");
+                    dataList.add(reportCustomerData);
                 }
 
             }
         }
-        logger.debug("一维数组结构数据{}",dataList);
-
 //        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
-
+        return dataList;
     }
 
     /**
@@ -149,7 +155,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param columDefineds
      * @param reportIds
      */
-    private void createTreeDimDatas(ArrayList<SimpleColumDefined> columDefineds,List<Integer> reportIds){
+    private ArrayList<ReportCustomerData> createTreeDimDatas(ArrayList<SimpleColumDefined> columDefineds, List<Integer> reportIds){
         SimpleDateFormat format = new SimpleDateFormat("HHmmss");
         String reportGroupId = format.format(new Date());
         ArrayList<Map<String, Object>> dimTree = makeDimTree(columDefineds, 0);
@@ -159,10 +165,8 @@ public class SubmitReportServiceImp implements SubmitReportService {
             dataList.addAll(this.makeTreeDatas(dimTree, reportId, reportGroupId, 0));
         }
 
-        logger.debug("树状结构数据{}",dataList);
-
 //        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
-
+        return dataList;
     }
 
     /**
