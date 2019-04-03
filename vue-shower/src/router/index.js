@@ -153,6 +153,16 @@ const routes = [
                     name: 'treeDimensionsDynRecord',
                     path: '/record/treedim/treedimRecord',
                     component: () => import('@/models//record/report/treedim/treedimRecord'),
+                  },
+                  {
+                    name: 'oneDimensionsDynamicRecord',
+                    path: '/record/groupdim/groupdimRecord',
+                    component: () => import('@/models//record/report/groupdim/groupdimRecord'),
+                  },
+                  {
+                    name: 'multDimensionsStaticRecord',
+                    path: '/record/multdim/griddimRecord',
+                    component: () => import('@/models//record/report/multdim/griddimRecord'),
                   }
                 ]
               },
