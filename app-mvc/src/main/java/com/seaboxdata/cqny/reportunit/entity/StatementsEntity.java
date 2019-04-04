@@ -1,7 +1,7 @@
 package com.seaboxdata.cqny.reportunit.entity;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -20,6 +20,9 @@ public class StatementsEntity {
     //辅助属性、前端显示name
     private String origin_name;
     private String user_name;
+
+    //add by SongChaoqun
+    private List<UnitEntity> units;
 
     public Integer getDefined_id() {
         return defined_id;
@@ -67,6 +70,14 @@ public class StatementsEntity {
 
     public void setCreate_user(int create_user) {
         this.create_user = create_user;
+    }
+
+    public List<UnitEntity> getUnits() {
+        return units;
+    }
+
+    public void setUnits(List<UnitEntity> units) {
+        this.units = units;
     }
 
     public String getOrigin_name() {

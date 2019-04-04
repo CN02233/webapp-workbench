@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.reportunit.service;
 
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import com.webapp.support.page.PageResult;
 
@@ -14,6 +15,8 @@ public interface ReportStatementsService {
     void deleteById(String unitId);
 
     PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id);
+
+    StatementsEntity getReportDefinedById(Integer integer);
 
     void saveDefinedAndOriginAssign(String[] originIds, String definedId);
 

@@ -17,6 +17,7 @@ public class GridColumDefined {
     private String colum_formula_desc    ;
     private String colum_id_no;
     private String dim_id_no;
+    private String colum_meta_type;
 
     public Integer getColum_id() {
         return colum_id;
@@ -128,5 +129,13 @@ public class GridColumDefined {
 
     public void setDim_id_no(String dim_id_no) {
         this.dim_id_no = dim_id_no;
+    }
+
+    public String getColum_meta_type() {
+        return colum_meta_type;
+    }
+
+    public void setColum_meta_type(String colum_meta_type) {
+        this.colum_meta_type = colum_meta_type;
     }
 }

@@ -64,11 +64,17 @@
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="输入项单位" >
+          <el-input v-model="formData.colum_point" auto-complete="off" ></el-input>
+        </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
           <el-input v-model="formData.min_value" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
           <el-input v-model="formData.max_value" auto-complete="off" ></el-input>
+        </el-form-item>
+        <el-form-item label="输入项备注" >
+          <el-input v-model="formData.colum_desc" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='0'" label="公式" >
           <el-input
@@ -181,7 +187,9 @@
           'max_value':'',
           'colum_formula':'',
           'colum_formula_desc':'',
-          'unit_id':''
+          'unit_id':'',
+          'colum_point':'',
+          'colum_desc':''
         },
         editFormData:{
           'colum_name':'',
@@ -191,7 +199,9 @@
           'max_value':'',
           'colum_formula':'',
           'colum_formula_desc':'',
-          'unit_id':''
+          'unit_id':'',
+          'colum_point':'',
+          'colum_desc':''
         },
         isOpenFormulaEditor:false,
         formulaDescContext:[],

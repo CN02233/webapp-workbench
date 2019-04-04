@@ -30,16 +30,8 @@ const routes = [
     props: { menuAlign: 'left' },//left==>菜单在左侧 top==>菜单在上方
     children: [
       {
-        path: '/infoInput',
-        component: () => import("@/models/infoManage/infoInput")
-      },
-      {
         path: `/welcome`,
         component: () => import("@/models/home/welcome")
-      },
-      {
-        path: '/infoList',
-        component: () => import('@/models/infoManage/infoList')
       },
       {
         name: 'auth',
@@ -80,28 +72,10 @@ const routes = [
         component: () => import('@/models/record/main'),
         children: [
           {
-            name: 'report',
-            path: '/record/report',
-            component: () => import('@/models/record/report/reportMain'),
-            children: []
-          },
-          {
             name: 'reportDefined',
             path: '/record/reportDefined',
             component: () => import('@/models/record/reportDefined'),
             children: [
-              {
-                name: 'reportDefinedMain',
-                path: '/record/reportDefined/reportDefinedMain',
-                component: () => import('@/models/record/reportDefined/base/reportDefinedMain'),
-                children: []
-              },
-              {
-                name: 'reportDefinedUnit',
-                path: '/record/reportDefined/unitMain',
-                component: () => import('@/models/record/reportDefined/unit/unitMain'),
-                children: []
-              },
               {
                 name: 'oneDimensionsStatic',
                 path: '/record/reportDefined/oneDimensionsStatic',
@@ -109,18 +83,6 @@ const routes = [
                 children: []
               }
               ,
-              {
-                name: 'oneDimensionsStaticAdd',
-                path: '/record/reportDefined/oneDimensionsStatic/add',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/add'),
-                children: []
-              },
-              {
-                name: 'oneDimensionsStaticEdit',
-                path: '/record/reportDefined/oneDimensionsStatic/edit',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/edit'),
-                children: []
-              },
               {
                 name: 'oneDimensionsDynamic',
                   path: '/record/reportDefined/oneDimensionsDynamic',
@@ -200,46 +162,6 @@ const routes = [
             ]
           },
           {
-            name: 'template',
-            path: '/record/template',
-            component: () => import('@/models/record/template/templateMain'),
-            children: []
-          },
-          {
-            name: 'templateView',
-            path: '/record/template/templateView',
-            component: () => import('@/models/record/template/templateView')
-          },
-          {
-            name: 'templateEdit',
-            path: '/record/template/templateEdit',
-            component: () => import('@/models/record/template/templateEdit')
-          },
-          {
-            name: 'reportCreate',
-            path: '/record/report/edit',
-            component: () => import('@/models/record/report/reportEdit')
-          },
-          {
-            name: 'reviewMain',
-            path: '/record/review',
-            component: () => import('@/models/record/approve/reviewMain')
-          },
-          {
-            name: 'confirm',
-            path: '/record/confirm',
-            component: () => import('@/models/record/approve/confirmMain')
-          },{
-            name: 'reportStepsMain',
-            path: '/record/reportSteps',
-            component: () => import('@/models/record/report/reportStepsMain'),
-            children: []
-          },{
-            name: 'stepsEdit',
-            path: '/record/stepsEdit',
-            component: () => import('@/models/record/report/stepsEdit'),
-            children: []
-          },{
             name: 'submitAUmanager',
             path: '/record/submitAUmanager',
             component: () => import('@/models/record/submitAuthority/submitAUmanager'),

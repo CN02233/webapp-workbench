@@ -92,6 +92,22 @@ public interface IReportStatementsDao {
             "\t)")
     Page<StatementsEntity> listReportStatementsByUser(@Param("currPage")int currPage,@Param("pageSize") int pageSize,@Param("userId") int user_id);
 
+    @Select("SELECT" +
+            " a.create_date," +
+            " a.`status`," +
+            " a.defined_id," +
+            " a.defined_name," +
+            " b.origin_name," +
+            " c.user_name," +
+            " b.create_user," +
+            " a.origin_id" +
+            " FROM" +
+            " report_defined a" +
+            " LEFT JOIN sys_origin b ON a.origin_id = b.origin_id" +
+            " LEFT JOIN `user` c ON a.create_user = c.user_id" +
+            " WHERE" +
+            " defined_id = #{definedId}")
+    StatementsEntity getReportDefinedById(Integer definedId);
 
     @Insert("<script>INSERT INTO report_defined_origin_assign (defined_id,origin_id)\n" +
             "VALUES " +

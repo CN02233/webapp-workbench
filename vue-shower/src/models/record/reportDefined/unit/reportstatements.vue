@@ -48,7 +48,7 @@
             >
             <template slot-scope="scope">
               <el-button
-                size="mini"
+                size="mini" @click="definedUnit(scope.row.defined_id)"
                 >报送单元</el-button>
               <el-button
                 size="mini"
@@ -357,6 +357,14 @@ export default {
         })
       }
       return checkResult
+    },
+    definedUnit(definedId){
+      this.$router.push({
+        path: '/record/reportUnit',
+        query:{
+          'definedId':definedId
+        }
+      });
     }
   },
   mounted: function () { // 初始化

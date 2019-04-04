@@ -8,6 +8,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.Random;
 
 public class OriginServiceImpTest extends AbstractTestService {
@@ -50,5 +51,11 @@ public class OriginServiceImpTest extends AbstractTestService {
     @Test
     public void testGetOriginById() {
         System.out.println(originService.getOriginById(48));
+    }
+
+    @Test
+    public void testCheckAllChildren() {
+        List<Origin> resultOrigins = originService.checkAllChildren(55);
+        System.out.println(resultOrigins);
     }
 }

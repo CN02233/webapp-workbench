@@ -49,6 +49,7 @@
             <template slot-scope="scope">
               <el-button
                 size="mini"
+                @click="definedUnit(scope.row.unit_id,scope.row.unit_type)"
                 >录入项</el-button>
               <el-button
                 size="mini"
@@ -119,6 +120,7 @@ export default {
   name: 'OriginMain',
   data () {
     return {
+      definedId:'',
       unitDataList: [],
       unitDataObjs: {},
       tableDataUrl: 'reportUnit/listReportUnit',
@@ -292,9 +294,30 @@ export default {
         })
       }
       return checkResult
-    }
+    },
+    definedUnit(unitId,defined_type){//add by SongChaoqun 编辑该单元的报送项内容
+      let editUrl = ''
+      if(defined_type=='1'){
+        editUrl = '/record/reportDefined/oneDimensionsStatic'
+      }else if(defined_type=='2'){
+        editUrl = '/record/reportDefined/oneDimensionsDynamic'
+      }else if(defined_type=='3'){
+        editUrl = '/record/reportDefined/multDimensionsStatic'
+      }else if(defined_type=='4'){
+        editUrl = '/record/reportDefined/treeMultDiensionsDynamic'
+      }else{
+        return
+      }
+      this.$router.push({
+        path: editUrl,
+        query:{
+          'unitId':unitId
+        }
+      });
+    },
   },
   mounted: function () { // 初始化
+    this.definedId = this.$route.query.definedId
     this.unitDataList = []
     this.getTableData(1)
     this.getOriginList()

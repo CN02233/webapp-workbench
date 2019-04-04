@@ -16,4 +16,6 @@ public interface ReportUnitService {
     UnitEntity getReportUnit(String unitId);
 
     List getDefinedColums(String unitId, String unitType);
+
+    List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId);
 }

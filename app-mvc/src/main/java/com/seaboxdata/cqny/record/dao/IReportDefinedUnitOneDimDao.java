@@ -18,10 +18,10 @@ public interface IReportDefinedUnitOneDimDao {
     @Insert("insert into report_defined_unit_onedim " +
             "(colum_name,colum_name_cn,group_id," +
             "group_name,unit_id,min_value,max_value ,colum_formula,colum_formula_desc," +
-            "parent_id,parent_name,colum_type,colum_desc) values " +
+            "parent_id,parent_name,colum_type,colum_desc,colum_point) values " +
             "(#{colum_name},#{colum_name_cn},#{group_id},#{group_name},#{unit_id}," +
             "#{min_value},#{max_value},#{colum_formula},#{colum_formula_desc}," +
-            "#{parent_id},#{parent_name},#{colum_type},#{colum_desc})")
+            "#{parent_id},#{parent_name},#{colum_type},#{colum_desc},#{colum_point})")
     @Options(useGeneratedKeys = true, keyProperty = "colum_id", keyColumn = "colum_id")
     void addSaveOnedim(SimpleColumDefined simpleColumDefined);
 
@@ -41,7 +41,7 @@ public interface IReportDefinedUnitOneDimDao {
             "group_id=#{group_id},group_name=#{group_name}," +
             "min_value=#{min_value},max_value=#{max_value} ," +
             "parent_id=#{parent_id},parent_name=#{parent_name},colum_type=#{colum_type},colum_desc=#{colum_desc} ," +
-            "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc} where colum_id=#{colum_id}")
+            "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc},colum_point=#{colum_point} where colum_id=#{colum_id}")
     void editSaveOnedim(SimpleColumDefined simpleColumDefined);
 
     @Select("<script>select * from report_defined_unit_onedim where unit_id = #{unitId}"

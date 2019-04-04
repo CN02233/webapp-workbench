@@ -97,7 +97,7 @@
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="输入项数据类型">
+            <el-table-column label="输入项数据类型" width="120">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_type'" :rules='editModel.rules.colum_type'>
                   <el-select v-model="scope.row.colum_type" style="width:100%;" placeholder="请选择数据类型">
@@ -106,14 +106,14 @@
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="最小值">
+            <el-table-column label="最小值" width="100">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.min_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
                   <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.min_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="最大值">
+            <el-table-column label="最大值" width="100">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.max_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
                   <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.max_value"></el-input>
@@ -125,8 +125,9 @@
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}">
                   <el-popover v-if="scope.row.colum_type=='0'" placement="top-start" width="200" trigger="hover" :content="scope.row.colum_formula_desc">
                   </el-popover>
-                  <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" ></el-input>
-                  <el-button v-if="scope.row.colum_type=='0'" @click="openFormulaEditor(scope.$index,scope.row)" icon="el-icon-edit">定义公式</el-button>
+                  <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" >
+                    <el-button slot="append" icon="el-icon-edit-outline" @click="openFormulaEditor(scope.$index,scope.row)"></el-button>
+                  </el-input>
                   <el-tooltip slot="append" class="item" content="点此设置公式" placement="top">
 
                   </el-tooltip>
@@ -154,7 +155,6 @@
     </el-dialog>
 
     <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
-
       <el-form class="modal-form" label-position="right" label-width="100px" >
         <el-form-item label="选择输入项" >
           <el-cascader

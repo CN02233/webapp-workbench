@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.record.entity;
 
+import com.webapp.support.json.JsonSupport;
+
 public class ReportCustomerData {
     private Integer report_id;
     private String unit_id;
@@ -54,5 +56,9 @@ public class ReportCustomerData {
 
     public void setReport_data(String report_data) {
         this.report_data = report_data;
+    }
+
+    public String toString(){
+        return JsonSupport.objectToJson(this);
     }
 }

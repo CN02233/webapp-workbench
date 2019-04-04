@@ -9,6 +9,7 @@ import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,5 +49,25 @@ public class OriginServiceImp implements OriginService {
     @Override
     public Origin getOriginByUser(Integer userId) {
         return originDao.getOriginByUserId(userId);
+    }
+
+
+    @Override
+    public List<Origin> checkAllChildren(Integer originId){
+        List<Origin> allOriginList = originDao.listAllOrigin();
+        List<Origin> allSons = checkoutSons(originId, allOriginList);
+        return allSons;
+    }
+
+    private List<Origin> checkoutSons(Integer parentOriginId,List<Origin> originList){
+        List<Origin> sons = new ArrayList();
+        for (Origin origin : originList) {
+            Integer parentId = origin.getParent_origin_id();
+            if(parentOriginId.equals(parentId)){
+                sons.add(origin);
+                sons.addAll(this.checkoutSons(origin.getOrigin_id(),originList));
+            }
+        }
+        return sons;
     }
 }

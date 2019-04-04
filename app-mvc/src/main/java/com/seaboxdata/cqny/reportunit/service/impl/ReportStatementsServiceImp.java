@@ -76,4 +76,10 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     public void delDefinedAndOriginAssign(String definedId) {
         reportStatementsDao.delDefinedAndOriginAssign(definedId);
     }
+
+    @Override
+    public StatementsEntity getReportDefinedById(Integer definedId) {
+        StatementsEntity reportDefined = reportStatementsDao.getReportDefinedById(definedId);
+        return reportDefined;
+    }
 }

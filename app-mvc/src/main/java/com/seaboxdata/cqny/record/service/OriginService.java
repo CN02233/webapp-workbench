@@ -18,4 +18,6 @@ public interface OriginService {
     void userOriginSave(Integer originId, Integer userId);
 
     Origin getOriginByUser(Integer userId);
+
+    List<Origin> checkAllChildren(Integer originId);
 }

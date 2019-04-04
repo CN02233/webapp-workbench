@@ -3,6 +3,7 @@ package com.seaboxdata.cqny.record.controller;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
@@ -155,6 +156,17 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("saveGridUnitContext")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult saveGridUnitContext(@RequestBody SaveGridUnitContext saveUnitContext){
+
+        reportCustomerService.updateOrInsertGridUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+
+        return jsonResult;
+    }
+
     class SaveSimpleUnitContext{
         private ArrayList<ReportCustomerData> columDatas;
         private ArrayList<SimpleColumDefined> definedColums;
@@ -172,6 +184,26 @@ public class ReportCustomerController {
         }
 
         public void setDefinedColums(ArrayList<SimpleColumDefined> definedColums) {
+            this.definedColums = definedColums;
+        }
+    }
+    class SaveGridUnitContext{
+        private ArrayList<ReportCustomerData> columDatas;
+        private ArrayList<GridColumDefined> definedColums;
+
+        public ArrayList<ReportCustomerData> getColumDatas() {
+            return columDatas;
+        }
+
+        public void setColumDatas(ArrayList<ReportCustomerData> columDatas) {
+            this.columDatas = columDatas;
+        }
+
+        public ArrayList<GridColumDefined> getDefinedColums() {
+            return definedColums;
+        }
+
+        public void setDefinedColums(ArrayList<GridColumDefined> definedColums) {
             this.definedColums = definedColums;
         }
     }
