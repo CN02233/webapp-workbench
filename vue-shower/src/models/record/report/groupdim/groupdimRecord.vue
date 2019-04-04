@@ -52,6 +52,8 @@
           }
         }).then(response=>{
           loading.close();
+          this.definedGroup = []
+          this.definedColums = []
           if(response){
             const $t = this
             if(response.columDatas){
@@ -201,3 +203,4 @@
 <style scoped>
 
 </style>
+
