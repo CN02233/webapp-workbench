@@ -89,6 +89,7 @@ public interface IReportUnitDao {
             "a.unit_name," +
             "a.report_defined_id," +
             "a.unit_type," +
+            "a.unit_order," +
             "a.origin_id " +
             "FROM " +
             "report_unit_info a " +

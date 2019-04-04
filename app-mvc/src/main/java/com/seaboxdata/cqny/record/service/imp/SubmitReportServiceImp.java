@@ -64,6 +64,15 @@ public class SubmitReportServiceImp implements SubmitReportService {
                 unitEntity.setColums(columList);
             }
         }
+        unitList.sort(new Comparator<UnitEntity>() {
+            @Override
+            public int compare(UnitEntity o1, UnitEntity o2) {
+                Integer o1Order = o1.getUnit_order();
+                Integer o2Order = o2.getUnit_order();
+                return o1Order-o2Order;
+            }
+        });
+
         reportDefined.setUnits(unitList);
 //        reportDefined.setUnits(unitList);
         return reportDefined;
@@ -89,6 +98,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
         reportCustomer.setCreate_date(new Date());
         for (String origin : allOrigin) {
             reportCustomer.setReport_origin(new Integer(origin));
+            reportCustomer.setActive_unit(reportDefined.getUnits().get(0).getUnit_id());
             reportCustomerService.createReportCustomer(reportCustomer);
             reportBaseIds.add(reportCustomer.getReport_id());
         }
