@@ -8,7 +8,10 @@
     </el-row>
 
     <el-row >
-      <el-col class="tree_title" v-for="(elColumDefined,key) in elColumDefineds" :span="colSpan">{{elColumDefined.colum_name_cn}}</el-col>
+      <el-col class="tree_title" v-for="(elColumDefined,key) in elColumDefineds" :span="colSpan">
+        {{elColumDefined.colum_name_cn}}
+        {{elColumDefined.colum_point!=null&&elColumDefined.colum_point!=''?'('+elColumDefined.colum_point+')':''}}
+      </el-col>
       <el-col class="tree_title" :span="(24-colSpan*definedColumsTotal)">
        操作
       </el-col>

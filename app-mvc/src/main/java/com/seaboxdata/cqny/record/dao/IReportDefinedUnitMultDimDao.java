@@ -66,7 +66,7 @@ public interface IReportDefinedUnitMultDimDao {
     @Delete("delete from report_defined_unit_multdim_col where colum_id=#{columId}")
     void deleteMultDim_col(@Param("columId") Integer columId);
 
-    @Select("select * from report_defined_unit where report_defined_id=#{originId}")
+    @Select("select * from report_unit_info where report_defined_id=#{originId}")
     List<UnitDefined> getUnitByOrigin(String originId);
 
     @Select("<script>select a.*,'' colum_name, '' colum_name_cn,'1' colum_meta_type from report_defined_unit_multdim a where a.unit_id=#{unitId}" +

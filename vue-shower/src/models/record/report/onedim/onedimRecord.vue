@@ -2,8 +2,18 @@
   <div>
     <el-form ref="form"  label-width="40%">
       <el-form-item  v-for="definedColum in definedColums" :label="definedColum.colum_name_cn">
-        <el-input v-model="columDatas[definedColum.unit_id+'_'+definedColum.colum_id].report_data"
-                  :disabled="definedColum.colum_type==0" style="width:50%;float: left;" ></el-input>
+
+        <el-col :span="23">
+          <el-tooltip class="item" effect="dark" :content="definedColum.colum_desc" placement="top">
+            <el-input v-model="columDatas[definedColum.unit_id+'_'+definedColum.colum_id].report_data"
+                      :disabled="definedColum.colum_type==0" style="width:50%;float: left;" >
+              <template v-if="definedColum.colum_point!=null&&definedColum.colum_point!=''" slot="append">{{definedColum.colum_point}}</template>
+            </el-input>
+          </el-tooltip>
+
+        </el-col>
+
+
       </el-form-item>
     </el-form>
 

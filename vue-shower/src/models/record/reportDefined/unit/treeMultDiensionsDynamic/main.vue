@@ -78,6 +78,9 @@
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="单位" >
+          <el-input v-model="formData.colum_point" auto-complete="off" ></el-input>
+        </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
           <el-input v-model="formData.min_value" auto-complete="off" ></el-input>
         </el-form-item>
@@ -194,6 +197,7 @@
           'colum_name':'',
           'colum_name_cn':'',
           'colum_type':'1',
+          'colum_point':'',
           'min_value':0,
           'max_value':9999,
           'colum_formula':'',
@@ -207,6 +211,7 @@
           'colum_name':'',
           'colum_name_cn':'',
           'colum_type':'1',
+          'colum_point':'',
           'min_value':'',
           'max_value':'',
           'colum_formula':'',
