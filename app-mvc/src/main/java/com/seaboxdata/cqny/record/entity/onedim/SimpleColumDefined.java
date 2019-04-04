@@ -12,6 +12,7 @@ public class SimpleColumDefined {
     private String colum_type;
     private Integer min_value;
     private Integer max_value    ;
+    private String colum_point;
     private String colum_formula    ;
     private String colum_formula_desc    ;
     private Integer parent_id;
@@ -129,5 +130,13 @@ public class SimpleColumDefined {
 
     public void setColum_desc(String colum_desc) {
         this.colum_desc = colum_desc;
+    }
+
+    public String getColum_point() {
+        return colum_point;
+    }
+
+    public void setColum_point(String colum_point) {
+        this.colum_point = colum_point;
     }
 }

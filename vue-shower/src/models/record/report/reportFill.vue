@@ -31,6 +31,7 @@
         reportId:"",
         activeStepNum:1,
         lastStepNum:1,
+        currUnitId:'',
         unitEntities:[],
       }
     },
@@ -50,7 +51,6 @@
         }).then(response=>{
           loading.close();
           if(response){
-            console.log("response has got "+response)
             const active_unit = response.active_unit
             this.unitEntities = response.unitEntities
             this.selectActiveStep(active_unit,true)
@@ -66,7 +66,7 @@
               this.activeStepNum = eachNum
               if(isRefresh){
                 this.lastStepNum = eachNum
-
+                this.currUnitId = active_unit
               }
               let unitAddress = ""
               if(unitId){
@@ -79,8 +79,7 @@
                 }else if(unitType=='4'){//多维树状
                   unitAddress = '/record/treedim/treedimRecord'
                 }
-                const lastStep = (unitType==='4')
-                console.log(lastStep)
+                const lastStep = (this.currUnitId===active_unit)
                 this.$router.push({
                   path: unitAddress+"?reportId="+this.reportId+"&unitId="+unitId+"&unitType="+unitType+"&lastStep="+lastStep
                 });
@@ -95,14 +94,11 @@
         if(unitNum<=this.lastStepNum){
           if(unitNum==this.activeStepNum){
             //do nothing.....
-            console.log("do nothing....")
           }else{
             this.selectActiveStep(active_unit)
-            console.log("select step "+active_unit)
           }
         }
         else{
-          console.log("not yet.....")
         }
       },
       getStepIcon(unitNum){
@@ -117,7 +113,6 @@
     },
 
     mounted() {
-      console.log("report fill is running.....")
       this.reportId = this.$route.query.reportId
       this.checkUnitStep()
     }

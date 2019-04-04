@@ -84,18 +84,6 @@ const routes = [
               }
               ,
               {
-                name: 'oneDimensionsStaticAdd',
-                path: '/record/reportDefined/oneDimensionsStatic/add',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/add'),
-                children: []
-              },
-              {
-                name: 'oneDimensionsStaticEdit',
-                path: '/record/reportDefined/oneDimensionsStatic/edit',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/edit'),
-                children: []
-              },
-              {
                 name: 'oneDimensionsDynamic',
                   path: '/record/reportDefined/oneDimensionsDynamic',
                 component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/main'),
@@ -173,42 +161,7 @@ const routes = [
               }
             ]
           },
-          // {
-          //   name: 'templateView',
-          //   path: '/record/template/templateView',
-          //   component: () => import('@/models/record/template/templateView')
-          // },
-          // {
-          //   name: 'templateEdit',
-          //   path: '/record/template/templateEdit',
-          //   component: () => import('@/models/record/template/templateEdit')
-          // },
-          // {
-          //   name: 'reportCreate',
-          //   path: '/record/report/edit',
-          //   component: () => import('@/models/record/report/reportEdit')
-          // },
-          // {
-          //   name: 'reviewMain',
-          //   path: '/record/review',
-          //   component: () => import('@/models/record/approve/reviewMain')
-          // },
-          // {
-          //   name: 'confirm',
-          //   path: '/record/confirm',
-          //   component: () => import('@/models/record/approve/confirmMain')
-          // },
           {
-            name: 'reportStepsMain',
-            path: '/record/reportSteps',
-            component: () => import('@/models/record/report/reportStepsMain'),
-            children: []
-          },{
-            name: 'stepsEdit',
-            path: '/record/stepsEdit',
-            component: () => import('@/models/record/report/stepsEdit'),
-            children: []
-          },{
             name: 'submitAUmanager',
             path: '/record/submitAUmanager',
             component: () => import('@/models/record/submitAuthority/submitAUmanager'),
