@@ -1,6 +1,5 @@
 package com.seaboxdata.cqny.record.controller;
 
-import com.seaboxdata.cqny.record.service.ReportDefinedService;
 import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;

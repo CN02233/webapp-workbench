@@ -21,27 +21,10 @@
           :data="unitColums"
           id="list" :span-method="mergeRow" @cell-mouse-leave="cellMouseLeave" @cell-mouse-enter="cellMouseEnter" :row-class-name="cellAddClass"
           style="width: 100%">
-          <el-table-column
-            prop="colum_id"
-            align="left"
-            label="编号">
-          </el-table-column>
-          <el-table-column
-            prop="group_name"
-            align="left"
-            label="输入项组名">
-          </el-table-column>
-          <el-table-column
-            prop="colum_name_cn"
-            align="left"
-            label="输入项名">
-          </el-table-column>
-          <el-table-column
-            prop="colum_type"
-            align="left"
-            :formatter="formatterDataType"
-            label="输入项类型">
-          </el-table-column>
+          <el-table-column prop="group_name" align="left" label="输入项组名"></el-table-column>
+          <el-table-column prop="colum_id" align="left" label="编号" width="80"></el-table-column>
+          <el-table-column prop="colum_name_cn" align="left" label="输入项名"></el-table-column>
+          <el-table-column prop="colum_type" align="left" :formatter="formatterDataType" label="输入项类型"></el-table-column>
           <el-table-column
             prop="module_url"
             align="center"
@@ -63,7 +46,7 @@
                     :pageCount="totalPage">
     </WorkTablePager>
 
-    <!--新增输入项弹窗-->
+    <!--新增输入项弹窗--><!--:rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}"-->
     <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" width="80%" >
       <el-form :rules="editModel.rules" :model="editModel"  ref="form">
       <el-row style="margin:5px;">
@@ -80,17 +63,16 @@
             tooltip-effect="dark"
             border
             stripe
-            style="width: 100%"
-            @selection-change='selectRow'>
-            <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
-            <el-table-column  label="输入项名称" align="center">
+            style="width: 100%">
+            <el-table-column label="序号"  type="index" width="60" fixed align="center"></el-table-column>
+            <el-table-column  label="输入项名称" align="center" width="150">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_name'" :rules='editModel.rules.colum_name'>
                   <el-input v-model="scope.row.colum_name"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="输入项中文名称">
+            <el-table-column label="输入项中文名称" width="250">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_name_cn'" :rules='editModel.rules.colum_name_cn'>
                   <el-input v-model="scope.row.colum_name_cn"></el-input>
@@ -106,36 +88,46 @@
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="最小值" width="100">
+            <el-table-column label="最小值" width="90">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.min_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
                   <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.min_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="最大值" width="100">
+            <el-table-column label="最大值" width="90">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.max_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
                   <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.max_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="公式">
+            <el-table-column label="公式" width="200">
               <template slot-scope="scope">
-                <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}">
+                <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段',validator: validateFormula}:{required:false}">
                   <el-popover v-if="scope.row.colum_type=='0'" placement="top-start" width="200" trigger="hover" :content="scope.row.colum_formula_desc">
                   </el-popover>
-                  <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="true" effect="gray" auto-complete="off" >
+                  <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="readonly" effect="gray" auto-complete="off" >
                     <el-button slot="append" icon="el-icon-edit-outline" @click="openFormulaEditor(scope.$index,scope.row)"></el-button>
                   </el-input>
-                  <el-tooltip slot="append" class="item" content="点此设置公式" placement="top">
-
-                  </el-tooltip>
-
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="70">
+            <el-table-column label="输入项单位" width="100">
+              <template slot-scope="scope">
+                <el-form-item :prop="'tableData.' + scope.$index + '.colum_point'">
+                  <el-input v-model="scope.row.colum_point"></el-input>
+                </el-form-item>
+              </template>
+            </el-table-column>
+            <el-table-column label="输入项备注" width="150">
+              <template slot-scope="scope">
+                <el-form-item :prop="'tableData.' + scope.$index + '.colum_desc'">
+                  <el-input v-model="scope.row.colum_desc"></el-input>
+                </el-form-item>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="70" fixed="right">
               <template slot-scope="scope">
                 <el-button type="danger" @click="deleteRow(scope.$index, scope.row)" size="small">删除</el-button>
               </template>
@@ -165,9 +157,9 @@
             :change-on-select="false"
             @active-item-change="handleItemChange"
           ></el-cascader>
-          <el-button @click="formulaColumConfirm">确定输入项</el-button>
+          <el-button @click="formulaColumConfirm" v-if="isFormulaEmpty">确定输入项</el-button>
         </el-form-item>
-        <el-form-item label="设置运算符" >
+        <el-form-item label="设置运算符" v-if="isFormulaEmpty">
           <el-button @click="formulaAdd('+')">+</el-button>
           <el-button @click="formulaAdd('-')">-</el-button>
           <!--<el-button @click="formulaAdd('%')">%</el-button>-->
@@ -183,7 +175,7 @@
             type="textarea"
             :rows="10"
             :disabled="true"
-            v-model="editFormData.colum_formula_desc">
+            v-model="editModel.selectRow.colum_formula_desc">
           </el-input>
         </el-form-item>
         <el-form-item label="公式试算" >
@@ -195,9 +187,10 @@
         </el-form-item>
       </el-form>
       <el-row>
+        <el-button type="danger" @click="fomularClear">重新定义公式</el-button>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
-        <el-button @click="fomularOperation">试算</el-button>
+        <el-button v-if="isFormulaEmpty" @click="fomularOperation">试算</el-button>
       </el-row>
 
     </el-dialog>
@@ -221,6 +214,14 @@
       WorkMain
     },
     data() {
+      var validateFormula = (rule, value, callback) => {
+        console.log(value)
+        if (value === '') {
+          callback(new Error('必填字段'));
+        }else{
+          callback();
+        }
+      };
       return {
         unitColums:[],
         currPageNum:1,
@@ -249,6 +250,8 @@
           'unit_id':'',
           'group_id':null,
           'group_name':'',
+          'colum_point':'',
+          'colum_desc':''
         },
         editFormData:{
           'colum_id':'',
@@ -261,9 +264,12 @@
           'colum_formula_desc':'',
           'unit_id':'',
           'group_id':'',
-          'group_name':''
+          'group_name':'',
+          'colum_point':'',
+          'colum_desc':''
         },
         isOpenFormulaEditor:false,
+        isFormulaEmpty:true,
         formulaDescContext:[],
         formulaColumnDescContext:[],
         formulaDescContextTmp:'',
@@ -271,7 +277,6 @@
         otherUnits:[],
         fomularColumnTmp :[],
         formularOprationColums:{},
-        selectedValue:'',
         mergeMap:{},
         groupnameData: [], //搜索输入项组
         tableData: [], //输入项组数据
@@ -279,10 +284,12 @@
           rules:{
             colum_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
             colum_name_cn:{ type:"string",required:true,message:"必填字段",trigger:"change"},
-            colum_type:{ type:"string",required:true,message:"必填字段",trigger:"change"}
+            colum_type:{ type:"string",required:true,message:"必填字段",trigger:"change"},
+            colum_formula_desc:{validator: validateFormula, trigger: 'blur'}
           },
           group_id:null,
-          selectRow:null,
+          selectRow:{},
+          selectNo:-1,
           groupModel:{
             colum_name:'',
             colum_name_cn:'',
@@ -480,11 +487,13 @@
         return checkResult
       },
       openFormulaEditor(i,row){
+        this.editModel.selectNo = i
         this.editModel.selectRow = this.editModel.tableData[i]
         this.editModel.selectRow.colum_formula_desc = this.editModel.selectRow.colum_formula_desc || ''
         this.editModel.selectRow.colum_formula = this.editModel.selectRow.colum_formula || ''
-        this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
         this.isOpenFormulaEditor = true
+        if(this.editModel.selectRow.colum_formula != '')
+          this.isFormulaEmpty = false
       },
       handleItemChange(unitArray) {
         // console.log('active item:', val);
@@ -562,7 +571,6 @@
                   this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
                   this.formulaContext.push({"context":unitData.value+"_"+columData.value,"columKey":unitData.label+'_'+columData.columKey,"isSymbol":false})
                   this.editModel.selectRow.colum_formula_desc +=finalContext
-                  this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
                   this.editModel.selectRow.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
                 }
               })
@@ -577,7 +585,6 @@
         // this.formulaDescContextTmp+=addContext
         this.editModel.selectRow.colum_formula_desc +=addContext
         this.editModel.selectRow.colum_formula +=addContext
-        this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
       },
       formulaBack(){
         this.formulaContext.pop()
@@ -586,14 +593,8 @@
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
           const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
-          if(i==0){
-            this.editModel.selectRow.colum_formula_desc =formulaDesc.context
-            this.editModel.selectRow.colum_formula = formulaContext
-          }else{
-            this.editModel.selectRow.colum_formula_desc +=formulaDesc.context
-            this.editModel.selectRow.colum_formula +=formulaContext
-          }
-          this.editFormData.colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+          this.editModel.selectRow.colum_formula_desc +=formulaDesc.context
+          this.editModel.selectRow.colum_formula +=formulaContext
         })
       },
       fomularConfirm(){
@@ -601,8 +602,10 @@
         this.colum_formula_desc_array = this.formulaDescContext
         // this.formulaContext = []
         // this.formulaDescContext = []
+        this.editModel.tableData[this.editModel.selectNo].colum_formula = this.editModel.selectRow.colum_formula
+        this.editModel.tableData[this.editModel.selectNo].colum_formula_desc = this.editModel.selectRow.colum_formula_desc
+        console.log(this.editModel.tableData[this.editModel.selectNo].colum_formula_desc)
         this.isOpenFormulaEditor = false
-
       },
       fomularOperation(){
         const $this = this
@@ -638,6 +641,13 @@
           $this.Message.success("保存失败:"+error)
         });
       },
+      fomularClear(){
+        this.formulaContext.length = 0
+        this.formulaDescContext.length = 0
+        this.editModel.selectRow.colum_formula = ''
+        this.editModel.selectRow.colum_formula_desc = ''
+        this.isFormulaEmpty = true
+      },
       getGroupname(){
         const $this = this
         $this.BaseRequest({
@@ -649,9 +659,6 @@
         }).catch(error=>{
           $this.Message.success("输入项组加载失败:"+error)
         });
-      },
-      selectRow (val) {
-        this.selectedValue = val
       },
       cellAddClass({row,rowIndex}){
         row.className = 'el-table__row hover-row'
@@ -689,7 +696,7 @@
         })
       },
       mergeRow({ row, column, rowIndex, columnIndex }){
-        if (columnIndex === 1 || columnIndex === 4) {
+        if (columnIndex === 0 || columnIndex === 4) {
           let id = row.group_id, m = this.mergeMap[id]
           if(m == null)
             return [1, 1]
