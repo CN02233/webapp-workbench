@@ -122,6 +122,7 @@
           <el-button @click="formulaColumConfirm">确定输入项</el-button>
         </el-form-item>
         <el-form-item label="设置运算符" >
+          <el-button @click="formulaAdd('SUM:')">SUM</el-button>
           <el-button @click="formulaAdd('+')">+</el-button>
           <el-button @click="formulaAdd('-')">-</el-button>
           <!--<el-button @click="formulaAdd('%')">%</el-button>-->

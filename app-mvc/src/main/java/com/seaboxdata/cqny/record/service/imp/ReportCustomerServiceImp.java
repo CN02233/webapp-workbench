@@ -327,6 +327,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
         if(fomularColums!=null&&fomularColums.size()>0){
             for (String fomularColum : fomularColums) {
+                if(fomularColum.indexOf("SUM:")>=0){
+                    System.out.println("get");
+                }
                 String fomularColumTmp = fomularColum.replace(".", "_");
                 String[] infos = fomularColumTmp.split("_");
                 String unitId = infos[0];

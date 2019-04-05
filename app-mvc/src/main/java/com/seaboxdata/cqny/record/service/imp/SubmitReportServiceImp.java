@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
+import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -32,7 +34,11 @@ public class SubmitReportServiceImp implements SubmitReportService {
     @Autowired
     private ReportCustomerService reportCustomerService;
 
+    @Autowired
+    private IReportCustomerDao reportCustomerDao;
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void doSubmit(String reportDefinedId) {
         logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
         StatementsEntity reportDefined = getReportDefined(reportDefinedId);
@@ -142,7 +148,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param reportIds
      */
     private ArrayList<ReportCustomerData> createOneDimDatas(ArrayList<SimpleColumDefined> columDefineds, List<Integer> reportIds){
-        ArrayList<ReportCustomerData> dataList = new ArrayList<>();
+        ArrayList<ReportCustomerData> columDatas = new ArrayList<>();
         if(columDefineds!=null){
             for (SimpleColumDefined columDefined : columDefineds) {
                 for (Integer reportId : reportIds) {
@@ -150,14 +156,13 @@ public class SubmitReportServiceImp implements SubmitReportService {
                     reportCustomerData.setColum_id(columDefined.getColum_id().toString());
                     reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
                     reportCustomerData.setReport_id(reportId);
-                    reportCustomerData.setReport_data("1");
-                    dataList.add(reportCustomerData);
+                    reportCustomerData.setReport_data("0");
+                    columDatas.add(reportCustomerData);
                 }
 
             }
         }
-        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
-        return dataList;
+        return saveColumDatas(columDatas);
     }
 
     /**
@@ -167,15 +172,38 @@ public class SubmitReportServiceImp implements SubmitReportService {
      */
     private ArrayList<ReportCustomerData> createTreeDimDatas(ArrayList<SimpleColumDefined> columDefineds, List<Integer> reportIds){
         SimpleDateFormat format = new SimpleDateFormat("HHmmss");
-        String reportGroupId = format.format(new Date());
-        ArrayList<Map<String, Object>> dimTree = makeDimTree(columDefineds, 0);
+        String reportFormatDate = format.format(new Date());
 
+        Map<Integer,ArrayList<SimpleColumDefined>> columDefinedGroup = new HashMap<>();
+        for (SimpleColumDefined columDefined : columDefineds) {
+            Integer columDefinedGroupId = columDefined.getGroup_id();
+            if(!columDefinedGroup.containsKey(columDefinedGroupId)){
+                columDefinedGroup.put(columDefinedGroupId,new ArrayList<SimpleColumDefined>());
+            }
+            columDefinedGroup.get(columDefinedGroupId).add(columDefined);
+        }
         ArrayList<ReportCustomerData> dataList = new ArrayList<>();
-        for (Integer reportId : reportIds) {
-            dataList.addAll(this.makeTreeDatas(dimTree, reportId, reportGroupId, 0));
+
+        int groupNum = 0;
+        for (Integer columDefinedGroupKey : columDefinedGroup.keySet()) {
+            ArrayList<SimpleColumDefined> columDefinedDatas = columDefinedGroup.get(columDefinedGroupKey);
+            ArrayList<Map<String, Object>> dimTree = makeDimTree(columDefinedDatas, 0);
+            for (Integer reportId : reportIds) {
+                dataList.addAll(this.makeTreeDatas(dimTree, reportId,
+                        new StringBuilder().append(reportFormatDate).append(groupNum).toString(), 0));
+            }
+            groupNum++;
         }
 
-        reportCustomerService.updateOrInsertSimpleUnitContext(columDefineds,dataList,false);
+        return saveColumDatas(dataList);
+    }
+
+    private ArrayList<ReportCustomerData> saveColumDatas(ArrayList<ReportCustomerData> dataList) {
+        if(dataList!=null&&dataList.size()>0){
+            for (ReportCustomerData columData : dataList) {
+                reportCustomerDao.insertUnitContext(columData);
+            }
+        }
         return dataList;
     }
 
@@ -213,7 +241,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
             reportCustomerData.setUnit_id(simpleColumDefined.getUnit_id().toString());
             reportCustomerData.setReport_id(reportId);
             reportCustomerData.setReport_group_id(reportGroupId);
-            reportCustomerData.setReport_data("1");
+            reportCustomerData.setReport_data("0");
             dataList.add(reportCustomerData);
             ArrayList<Map<String, Object>> children = (ArrayList<Map<String, Object>>) stringObjectMap.get("children");
             dataList.addAll(this.makeTreeDatas(children,reportId,reportGroupId,offset));

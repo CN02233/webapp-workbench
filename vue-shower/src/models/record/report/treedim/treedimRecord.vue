@@ -1,34 +1,39 @@
 <template>
   <div>
 
-    <el-row>
-      <el-col align="left" :span="24">
-          <el-button @click="addRootNode">增加{{rootTreeNodeName}}</el-button>
-      </el-col>
-    </el-row>
+    <div v-for="(groupDatas,groupKey) in definedColumsGroup">
+      <el-row v-if="Object.keys(groupDatas.elColumDefineds).length>1">
+        <el-col align="left" :span="24">
+          <el-button @click="addRootNode">添加{{groupDatas.rootTreeNodeName}}</el-button>
+        </el-col>
+      </el-row>
 
-    <el-row >
-      <el-col class="tree_title" v-for="(elColumDefined,key) in elColumDefineds" :span="colSpan">
-        {{elColumDefined.colum_name_cn}}
-        {{elColumDefined.colum_point!=null&&elColumDefined.colum_point!=''?'('+elColumDefined.colum_point+')':''}}
-      </el-col>
-      <el-col class="tree_title" :span="(24-colSpan*definedColumsTotal)">
-       操作
-      </el-col>
-    </el-row>
+      <el-row >
+        <el-col class="tree_title" v-for="(elColumDefined,key) in groupDatas.elColumDefineds"
+                :span="Object.keys(groupDatas.elColumDefineds).length>1?groupDatas.colSpan:4">
+          {{elColumDefined.colum_name_cn}}
+          {{elColumDefined.colum_point!=null&&elColumDefined.colum_point!=''?'('+elColumDefined.colum_point+')':''}}
+        </el-col>
+        <el-col class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
+          操作
+        </el-col>
+      </el-row>
 
-    <el-row  v-for="(elColDatas,dataRowNum) in elRowDatas">
-      <el-col  class="tree_colum" :span="colSpan" v-for="elColData in elColDatas">
-        <el-input v-if="elColData!=null" :disabled="elColData.colum_type==0" v-model="elColData.report_data"></el-input>
-        <span v-else> -- </span>
-      </el-col>
-
-      <el-col class="tree_colum" :span="(24-colSpan*definedColumsTotal)">
-        <el-button @click="addSonNode(elColDatas,dataRowNum)">增加子项</el-button>
-        <el-button @click="cpTmpNode(elColDatas,dataRowNum)">复制</el-button>
-        <el-button @click="delTmpNode(elColDatas,dataRowNum)">删除</el-button>
-      </el-col>
-    </el-row>
+      <el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">
+        <el-col  class="tree_colum"
+                 :span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"
+                 v-for="elColData in elColDatas">
+          <el-input v-if="elColData!=null" :disabled="elColData.colum_type==0" v-model="elColData.report_data"></el-input>
+          <span v-else> -- </span>
+        </el-col>
+        <!--{{groupDatas.columNameLink[]}}-->
+        <el-col v-if="groupDatas.elRowDatas.length>1" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
+          <el-button @click="addSonNode(elColDatas,dataRowNum)">添加子项</el-button>
+          <el-button @click="cpTmpNode(elColDatas,dataRowNum)">复制</el-button>
+          <el-button @click="delTmpNode(elColDatas,dataRowNum)">删除</el-button>
+        </el-col>
+      </el-row>
+    </div>
     
     <el-button @click="saveUnitContext(false)" type="info">保存</el-button>
     <!--<el-button type="primary">上一步</el-button>-->
@@ -60,10 +65,21 @@
         unitType:"",
         lastStep:false,
         colSpan:0,
-        definedColumsTotal:0,
-        definedColums:{},
-        elRowDatas:[],
-        elColumDefineds:{},
+        definedColumsGroup:{
+          '123':{
+            definedColumsTotal:0,
+            definedColums:{},
+            elRowDatas:[],
+            elColumDefineds:{},
+            columNameLink:{
+              '1-2':{pre:'管线',name:'上气点',next:'下气点'}
+            },
+            minLevel:0,
+            maxLevel:0,
+            rootTreeNodeName:""
+          }
+        },
+
         minLevel:0,
         maxLevel:0,
         rootTreeNodeName:""
@@ -87,12 +103,83 @@
         }).then(response=>{
           loading.close();
           if(response){
+            console.log("response running....")
             this.definedColums = response.definedColums
-            this.definedColumsTotal = response.definedColums.length
-            this.colSpan = Math.floor(24/(this.definedColumsTotal+1))
-            this.elColumDefineds = this.elColumDefined(response.definedColums,0,0,0)
-            const groupResult = this.groupDatas(response.columDatas)
-            this.elRowDatas = this.makeElRows(groupResult)
+
+            //分组
+            const definedColumsGroup = {}
+            const treeDatasGroup = {}
+
+            response.definedColums.forEach(definedColum=>{
+              const groupId = definedColum['group_id']
+              if(definedColumsGroup[groupId]==null){
+                definedColumsGroup[groupId] = []
+                treeDatasGroup[groupId]={
+                  definedColumsTotal:0,
+                  colSpan:0,
+                  elColumDefineds:{},
+                  columNameLink:{},
+                  columDatas:[],
+                  elRowDatas:[],
+                  rootTreeNodeName:''
+                }
+              }
+              definedColumsGroup[groupId].push(definedColum)
+              const groupArray = definedColumsGroup[groupId]
+              console.log(groupArray)
+              const columNameLink = treeDatasGroup[groupId].columNameLink
+              columNameLink[definedColum.unit_id+'-'+definedColum.colum_id] = {}
+              columNameLink[definedColum.unit_id+'-'+definedColum.colum_id].name = definedColum.colum_name_cn
+
+              if(groupArray.length>1){
+                const preDefinedColum = groupArray[groupArray.length-2]
+                const preUnitId = preDefinedColum.unit_id
+                const preColumId = preDefinedColum.colum_id
+                columNameLink[definedColum.unit_id+'-'+definedColum.colum_id].pre =  columNameLink[preUnitId+'-'+preColumId].name
+                columNameLink[preUnitId+'-'+preColumId].next = definedColum.colum_name_cn
+              }
+            })
+
+
+            const groupKeys = Object.keys(definedColumsGroup)
+            groupKeys.forEach(groupKey=>{
+              const defineds = definedColumsGroup[groupKey]
+              const definedColumsTotal = defineds.length
+              const colSpan = Math.floor(24/(definedColumsTotal+1))
+              const elColumDefineds = this.elColumDefined(defineds,0,0,0)
+              treeDatasGroup[groupKey].definedColumsTotal = definedColumsTotal
+              treeDatasGroup[groupKey].colSpan = colSpan
+              treeDatasGroup[groupKey].elColumDefineds = elColumDefineds
+              treeDatasGroup[groupKey].rootTreeNodeName = ''+this.rootTreeNodeName
+
+            })
+
+            response.columDatas.forEach(columData=>{
+              const unit_id = columData['unit_id']
+              const dimensions_id = columData['dimensions_id']
+              response.definedColums.forEach(definedColum=>{
+                if(unit_id==definedColum['unit_id']&&dimensions_id==definedColum['colum_id']){
+                  console.log(unit_id+"--"+dimensions_id+"--"+definedColum['unit_id']+"---"+definedColum['colum_id'])
+                  treeDatasGroup[definedColum['group_id']].columDatas.push(columData)
+                }
+              })
+            })
+
+            groupKeys.forEach(groupKey=>{
+              const columDatas = treeDatasGroup[groupKey].columDatas
+              const groupResult = this.groupDatas(columDatas)
+              const elRowDatas = this.makeElRows(groupResult,treeDatasGroup[groupKey])
+              treeDatasGroup[groupKey].elRowDatas = elRowDatas
+
+            })
+
+            this.definedColumsGroup = treeDatasGroup
+            //
+            // this.definedColumsTotal = response.definedColums.length
+            // this.colSpan = Math.floor(24/(this.definedColumsTotal+1))
+            // this.elColumDefineds = this.elColumDefined(response.definedColums,0,0,0)
+            // const groupResult = this.groupDatas(response.columDatas)
+            // this.elRowDatas = this.makeElRows(groupResult)
           }
         }).catch(error=>{
             this.Message.success(error)
@@ -250,8 +337,14 @@
         }
         return groupDataTmp
       },
-      makeElRows(groupDatas){
+      makeElRows(groupDatas,treeGroup){
         //单元-组-行-列
+        // definedColumsTotal:0,
+        //   colSpan:0,
+        //   elColumDefineds:{},
+        // columDatas:[],
+        //   elRowDatas:[]
+
         const elRows = new Array()
         const $this = this
         const groupIds = Object.keys(groupDatas)
@@ -263,7 +356,7 @@
             const rowKeys = Object.keys(rows)
             rowKeys.forEach(rowKey=>{
               const rowData = rows[rowKey]
-              const colArray =new Array(this.definedColumsTotal).fill(null);
+              const colArray =new Array(treeGroup.definedColumsTotal).fill(null);
               rowData.forEach(colData=>{
                 const report_id = colData['report_id']
                 const unit_id = colData['unit_id']
@@ -271,8 +364,8 @@
                 const colum_id = colData['colum_id']
                 const dimensions_id = colData['dimensions_id']
                 const report_data = colData['report_data']
-                if(this.elColumDefineds[unit_id+'-'+dimensions_id]!=null){
-                  const elColumDefined = this.elColumDefineds[unit_id+'-'+dimensions_id]
+                if(treeGroup.elColumDefineds[unit_id+'-'+dimensions_id]!=null){
+                  const elColumDefined = treeGroup.elColumDefineds[unit_id+'-'+dimensions_id]
                   const columOrder = elColumDefined['columOrder']
                   const colum_type = elColumDefined['colum_type']
                   colData.colum_type = colum_type
