@@ -322,7 +322,7 @@ export default {
         // this.formSubmitData.defined_status= '';
         // this.formSubmitData.parent_defined_id= '';
         // this.formSubmitData.parent_defined_name= ''; */
-      this.$refs.tree.setCheckedKeys([]);
+      this.$refs.tree.setCheckedKeys([])
       this.formSubmitData = {
         defined_id: null,
         defined_name: null,

@@ -62,26 +62,33 @@ public interface IReportStatementsDao {
     Page<StatementsEntity> listReportStatements(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
     @Select("SELECT\n" +
-            "\trsi.create_date,\n" +
-            "\trsi.create_user,\n" +
-            "\trsi.origin_id,\n" +
-            "\trsi.defined_id,\n" +
-            "\trsi.defined_name,\n" +
-            "\trsi.`status`\n" +
+            "\trd.create_date,\n" +
+            "\trd.create_user,\n" +
+            "\trd.origin_id,\n" +
+            "\trd.defined_id,\n" +
+            "\trd.defined_name,\n" +
+            "\trd.`status`\n" +
             "FROM\n" +
-            "\treport_defined rsi\n" +
+            "\treport_defined rd\n" +
             "WHERE\n" +
-            "\trsi.origin_id IN (\n" +
+            "\trd.defined_id IN (\n" +
             "\t\tSELECT\n" +
-            "\t\t\toos.origin_id\n" +
+            "\t\t\tdefined_id\n" +
             "\t\tFROM\n" +
-            "\t\t\tUSER u,\n" +
-            "\t\t\tuser_organizations_assign uos,\n" +
-            "\t\t\torganization_origin_assign oos\n" +
+            "\t\t\treport_defined_origin_assign rdo\n" +
             "\t\tWHERE\n" +
-            "\t\t\tu.user_id = uos.user_id\n" +
-            "\t\tAND oos.organization_id = uos.organization_id\n" +
-            "\t\tAND u.user_id = #{userId}\n" +
+            "\t\t\trdo.origin_id IN (\n" +
+            "\t\t\t\tSELECT\n" +
+            "\t\t\t\t\toos.origin_id\n" +
+            "\t\t\t\tFROM\n" +
+            "\t\t\t\t\tUSER u,\n" +
+            "\t\t\t\t\tuser_organizations_assign uos,\n" +
+            "\t\t\t\t\torganization_origin_assign oos\n" +
+            "\t\t\t\tWHERE\n" +
+            "\t\t\t\t\tu.user_id = uos.user_id\n" +
+            "\t\t\t\tAND oos.organization_id = uos.organization_id\n" +
+            "\t\t\t\tAND u.user_id = 1\n" +
+            "\t\t\t)\n" +
             "\t)")
     Page<StatementsEntity> listReportStatementsByUser(@Param("currPage")int currPage,@Param("pageSize") int pageSize,@Param("userId") int user_id);
 

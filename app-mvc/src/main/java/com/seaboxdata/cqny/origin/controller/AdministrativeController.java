@@ -10,10 +10,13 @@ import com.workbench.auth.user.entity.User;
 import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 /**
  * 行政机构的新增 修改 删除 查询
@@ -88,5 +91,46 @@ public class AdministrativeController {
         Administrative organization = originService.getOrganizationByUser(userId);
         JsonResult jsonpResponse = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null, organization);
         return jsonpResponse;
+    }
+
+    /**
+     * 表organization-origin-assign 保存organizationId-originId关联
+     * @return
+     */
+    @RequestMapping("saveOrganizationAndOriginAssign")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    @Transactional
+    public JsonResult saveOrganizationAndOriginAssign(String[] originIds,String organizationId){
+        delOrganizationAndOriginAssign(organizationId);
+        originService.saveOrganizationAndOriginAssign(originIds,organizationId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
+        return jsonResult;
+    }
+
+    /**
+     * 删除关联
+     * @return
+     */
+    @RequestMapping("delOrganizationAndOriginAssign")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult delOrganizationAndOriginAssign(String organizationId){
+        originService.delOrganizationAndOriginAssign(organizationId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
+        return jsonResult;
+    }
+
+    /**
+     * 获取关联
+     * @return
+     */
+    @RequestMapping("getOrganizationAndOriginAssignById")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getOrganizationAndOriginAssignById(String organizationId){
+        List<String> result=originService.getOrganizationAndOriginAssignById(organizationId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,result);
+        return jsonResult;
     }
 }
