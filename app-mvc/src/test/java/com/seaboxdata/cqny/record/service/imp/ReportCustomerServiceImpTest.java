@@ -25,4 +25,7 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
     public void testCheckUnitStep() {
         reportCustomerService.checkReportCustomer("1");
     }
+
+    public void testDoRefreshSimpleFomular() {
+    }
 }

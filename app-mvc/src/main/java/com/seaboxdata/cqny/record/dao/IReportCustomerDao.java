@@ -6,6 +6,7 @@ import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import org.apache.ibatis.annotations.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,4 +83,12 @@ public interface IReportCustomerDao {
 
     @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id} and dimensions_id=#{dimensions_id}")
     void updateGridUnitContext(ReportCustomerData columDatas);
+
+    @Select("select sum(report_data) as sum_value from report_customer_data where " +
+            "report_id=#{reportId} and unit_id=#{unitId} and dimensions_id = #{dimVal} ")
+    BigDecimal sumColumForDimensions(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("dimVal") String dimVal);
+
+    @Select("select sum(report_data) as sum_value from report_customer_data where report_id=#{reportId} and" +
+            "s unit_id=#{unitId} and colum_id = #{dimVal}")
+    Object sumColumForColums(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("dimVal") String dimVal);
 }

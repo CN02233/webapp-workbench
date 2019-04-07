@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 
 public class IReportCustomerDaoTest extends AbstractTestService {
 
@@ -15,6 +16,9 @@ public class IReportCustomerDaoTest extends AbstractTestService {
     @Test
     public void testtttt(){
         Object pageData = reportCustomerDao.pageReport(1, 10, 1);
-        System.out.println(pageData);
+
+        Object result = reportCustomerDao.sumColumForDimensions("1", "19","61");
+        System.out.println(result);
+
     }
 }
