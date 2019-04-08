@@ -30,5 +30,5 @@ public interface ReportCustomerService {
     Map<String,Object> checkCustOrFomular(ArrayList<SimpleColumDefined> simpleColumDefineds,
                                           ArrayList<ReportCustomerData> columDatas);
 
-    Object doRefreshSimpleFomular(FomularTmpEntity fomularTmpEntity);
+    Object getSimpleFomularData(FomularTmpEntity fomularTmpEntity);
 }
