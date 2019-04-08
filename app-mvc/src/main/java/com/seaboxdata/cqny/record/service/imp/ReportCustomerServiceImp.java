@@ -66,6 +66,13 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         reportCustomerDao.createReportCustomer(reportCustomer);
     }
 
+    /**
+     * 检查本次输入项是公式项还是用户输入项
+     * @param simpleColumDefineds
+     * @param columDatas
+     * @return Map.key = custDataArray 用户输入项列表,Map.value = List<ReportCustomerData>
+     *         Map.key = fomularArray 公式项列表,Map.value = List<FomularTmpEntity>
+     */
     public Map<String,Object> checkCustOrFomular(ArrayList<SimpleColumDefined> simpleColumDefineds,
                                                  ArrayList<ReportCustomerData> columDatas){
 

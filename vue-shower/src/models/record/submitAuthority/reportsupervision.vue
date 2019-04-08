@@ -71,7 +71,7 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      reportDataLIst: [],
+      definedDataList: [],
       definedDataObjs: {},
       tableDataUrl: 'reportStatements/listReportStatementsByUser',
       currPageNum: 1,
@@ -110,7 +110,7 @@ export default {
             $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         }
-        $this.reportDataLIst = response.dataList
+        $this.definedDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
