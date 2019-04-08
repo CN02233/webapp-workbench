@@ -62,8 +62,8 @@ public class ReportDefinedUnitMultDimController {
     @RequestMapping("getInputColumn")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult getInputColumn(String unitId){
-        List<GridColumDefined> colums = reportDefinedUnitMultDimService.getColumByUnit(unitId);
+    public JsonResult getInputColumn(String unitId, String unitType){
+        List<GridColumDefined> colums = reportDefinedUnitMultDimService.getMultColumByUnit(unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,colums);
         return jsonResult;
     }
