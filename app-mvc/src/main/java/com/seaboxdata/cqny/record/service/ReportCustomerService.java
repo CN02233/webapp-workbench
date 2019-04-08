@@ -25,5 +25,6 @@ public interface ReportCustomerService {
     Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
     Map<String,String> validateSimpleUnitByDimensions(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
     void overrideSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
+    void updateOrInsertGroupUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas,boolean isUpdate);
     void updateOrInsertGridUnitContext(ArrayList<GridColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas, boolean isUpdate);
 }

@@ -377,7 +377,139 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     /**
-     *
+     * 一维动态数据更新，report_data含有非数字项
+     * @param simpleColumDefineds 输入项的定义
+     * @param columDatas 用户录入数据集合
+     * @param isUpdate true:更新原数据值 false：插入新数据
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateOrInsertGroupUnitContext(
+            ArrayList<SimpleColumDefined> simpleColumDefineds,
+            ArrayList<ReportCustomerData> columDatas,boolean isUpdate) {
+        Map<String,SimpleColumDefined> fomularsTmp = new HashMap<>();
+        if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
+            simpleColumDefineds.forEach(simpleColumDefined->{
+                Integer columType = new Integer(simpleColumDefined.getColum_type());
+                if(ColumType.FORMULA.compareWith(columType)){
+                    fomularsTmp.put(simpleColumDefined.getUnit_id()+"_"+simpleColumDefined.getColum_id(),simpleColumDefined);
+                }
+            });
+        }
+
+        List<FomularTmpEntity> fomularArray = new ArrayList();
+
+        if(columDatas!=null&&columDatas.size()>0){
+            columDatas.forEach(columData->{
+                Integer reportId = columData.getReport_id();
+                String unitId = columData.getUnit_id();
+                String columnId = columData.getColum_id();
+                String dimensionsId = columData.getDimensions_id();
+                //unitId+"_"+columnId: 一维静态公式刷新 unitId+"_"+dimensionsId:多维树状公式刷新
+                if(fomularsTmp.containsKey(unitId+"_"+columnId)||fomularsTmp.containsKey(unitId+"_"+dimensionsId)){
+
+                    FomularTmpEntity fomularTmpEntity = new FomularTmpEntity();
+                    fomularTmpEntity.reportId = reportId;
+                    fomularTmpEntity.unitId = unitId;
+                    fomularTmpEntity.columId = columnId;
+                    fomularTmpEntity.dimensionsId = dimensionsId;
+                    fomularTmpEntity.reportGroupId = columData.getReport_group_id();
+                    String fomularScriptVal = fomularsTmp.get(unitId + "_" + dimensionsId) != null ?
+                            fomularsTmp.get(unitId + "_" + dimensionsId).getColum_formula() :
+                            fomularsTmp.get(unitId + "_" + columnId).getColum_formula();
+                    fomularTmpEntity.fomularScript = fomularScriptVal;
+                    fomularArray.add(fomularTmpEntity);
+                } else{//无公式值刷新
+                    if(isUpdate){
+                        reportCustomerDao.updateUnitContext(columData);
+                    }else{
+                        reportCustomerDao.insertUnitContext(columData);
+                    }
+
+                }
+            });
+        }
+
+        if(fomularArray!=null&&fomularArray.size()>0){
+            for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+                Object fomularDataResult = doRefreshGroupFomular(fomularTmpEntity);
+                ReportCustomerData comularData = new ReportCustomerData();
+                comularData.setReport_id(fomularTmpEntity.reportId);
+                comularData.setUnit_id(fomularTmpEntity.unitId);
+                comularData.setColum_id(fomularTmpEntity.columId);
+                comularData.setDimensions_id(fomularTmpEntity.dimensionsId);
+                comularData.setReport_data(String.valueOf(fomularDataResult));
+                comularData.setReport_group_id(fomularTmpEntity.reportGroupId);
+                if(isUpdate){
+                    reportCustomerDao.updateUnitContext(comularData);
+                }else{
+                    reportCustomerDao.insertUnitContext(comularData);
+                }
+            }
+        }
+    }
+    private Object doRefreshGroupFomular(FomularTmpEntity fomularTmpEntity){
+        int value = -1;
+        String fomularColumId = null;
+        List<String> fomularColums = new ArrayList<>();
+        String columFomularTmp = fomularTmpEntity.fomularScript;
+
+        Map<String,Object> fomularParams = new HashMap<>();
+
+        while(( value = columFomularTmp.indexOf("#"))>=0){
+            columFomularTmp = columFomularTmp.replaceFirst("#","");
+            int columEnd = columFomularTmp.indexOf("#");
+            fomularColums.add(columFomularTmp.substring(value, columEnd));
+            columFomularTmp = columFomularTmp.replaceFirst("#","");
+        }
+
+        if(fomularColums!=null&&fomularColums.size()>0){
+            for (String fomularColum : fomularColums) {
+                if(fomularColum.indexOf("SUM:")>=0){
+                    System.out.println("get");
+                }
+                String fomularColumTmp = fomularColum.replace(".", "_");
+                String[] infos = fomularColumTmp.split("_");
+                String unitId = infos[0];
+                ReportCustomerData reportCustomerData = null;
+                //一维动态公式刷新
+                String columIdDefined = infos[1];
+                fomularColumId = columIdDefined;
+                reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions(fomularTmpEntity.reportId.toString(), unitId, columIdDefined, "0");
+
+                Object dataFormatter = 0;
+                try{
+                    dataFormatter = new Integer(reportCustomerData.getReport_data());
+                }catch (NumberFormatException e){
+                    try{
+                        dataFormatter = new Long(reportCustomerData.getReport_data());
+                    }catch (NumberFormatException e1){
+                        try{
+                            dataFormatter = new Float(reportCustomerData.getReport_data());
+                        }catch(NumberFormatException e2){
+                            try{
+                                dataFormatter = new Double(reportCustomerData.getReport_data());
+                            }catch(NumberFormatException e3){
+                                dataFormatter = new BigDecimal(reportCustomerData.getReport_data());
+                            }
+                        }
+                    }
+                }
+                fomularParams.put(
+                        new StringBuilder().append("FL").append(unitId).append("_").append(fomularColumId).append("FL").toString(),
+                        dataFormatter);
+            }
+        }
+
+
+
+        String fomular = fomularTmpEntity.fomularScript.replace("#", "FL").replace(".", "_");
+        Expression expression= AviatorEvaluator.compile(fomular);
+        Object result = expression.execute(fomularParams);
+        return result;
+    }
+    /**
+     * 多维静态数据更新
      * @param simpleColumDefineds 输入项的定义
      * @param columDatas 用户录入数据集合
      * @param isUpdate true:更新原数据值 false：插入新数据

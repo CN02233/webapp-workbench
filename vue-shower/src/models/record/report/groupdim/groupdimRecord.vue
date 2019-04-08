@@ -157,7 +157,7 @@
               background: 'rgba(0, 0, 0, 0.7)'
             });
             this.BaseRequest({
-              url:"/reportCust/saveSimpleUnitContext",
+              url:"/reportCust/saveGroupUnitContext",
               method:'post',
               data:{
                 definedColums:this.definedColums,
