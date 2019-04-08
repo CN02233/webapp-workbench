@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.record.service;
 
+import com.seaboxdata.cqny.record.entity.FomularTmpEntity;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
@@ -27,4 +28,8 @@ public interface ReportCustomerService {
     void overrideSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
     void updateOrInsertGroupUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas,boolean isUpdate);
     void updateOrInsertGridUnitContext(ArrayList<GridColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas, boolean isUpdate);
+    Map<String,Object> checkCustOrFomular(ArrayList<SimpleColumDefined> simpleColumDefineds,
+                                          ArrayList<ReportCustomerData> columDatas);
+
+    Object doRefreshSimpleFomular(FomularTmpEntity fomularTmpEntity);
 }

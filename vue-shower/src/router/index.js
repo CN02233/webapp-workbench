@@ -77,6 +77,18 @@ const routes = [
             component: () => import('@/models/record/reportDefined'),
             children: [
               {
+                name: 'reportStatements',
+                path: '/record/reportStatements',
+                component: () => import('@/models/record/reportDefined/unit/reportstatements'),
+                children: []
+              },
+              {
+                name: 'reportUnit',
+                path: '/record/reportUnit',
+                component: () => import('@/models/record/reportDefined/unit/reportunit'),
+                children: []
+              },
+              {
                 name: 'oneDimensionsStatic',
                 path: '/record/reportDefined/oneDimensionsStatic',
                 component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/main'),
@@ -90,52 +102,6 @@ const routes = [
                 children: []
               },
               {
-                name: 'oneDimensionsDynamicAdd',
-                  path: '/record/reportDefined/oneDimensionsDynamic/add',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/add'),
-                children: []
-              },
-              {
-                name: 'oneDimensionsDynamicEdit',
-                  path: '/record/reportDefined/oneDimensionsDynamic/edit',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/edit'),
-                children: []
-              },
-              {
-                name: 'reportFill',
-                path: '/record/report/reportFill',
-                component: () => import('@/models/record/report/reportFill'),
-                children: [
-                  {
-                    name: 'oneDimensionsStaticRecord',
-                    path: '/record/onedim/onedimRecord',
-                    component: () => import('@/models//record/report/onedim/onedimRecord'),
-                  },
-                  {
-                    name: 'treeDimensionsDynRecord',
-                    path: '/record/treedim/treedimRecord',
-                    component: () => import('@/models//record/report/treedim/treedimRecord'),
-                  },
-                  {
-                    name: 'oneDimensionsDynamicRecord',
-                    path: '/record/groupdim/groupdimRecord',
-                    component: () => import('@/models//record/report/groupdim/groupdimRecord'),
-                  },
-                  {
-                    name: 'multDimensionsStaticRecord',
-                    path: '/record/multdim/griddimRecord',
-                    component: () => import('@/models//record/report/multdim/griddimRecord'),
-                  }
-                ]
-              },
-
-              {
-                name: 'oneDimensionsStaticRecord',
-                path: '/record/onedim/onedimRecord',
-                component: () => import('@/models//record/report/onedim/onedimRecord'),
-                children: []
-              },
-              {
                 name: 'multDimensionsStatic',
                 path: '/record/reportDefined/multDimensionsStatic',
                 component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/main'),
@@ -146,51 +112,68 @@ const routes = [
                 path: '/record/reportDefined/treeMultDiensionsDynamic',
                 component: () => import('@/models//record/reportDefined/unit/treeMultDiensionsDynamic/main'),
                 children: []
-              },
-              {
-                name: 'multDimensionsStaticAdd',
-                path: '/record/reportDefined/multDimensionsStatic/add',
-                component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/add'),
-                children: []
-              },
-              {
-                name: 'multDimensionsStaticEdit',
-                path: '/record/reportDefined/multDimensionsStatic/edit',
-                component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/edit'),
-                children: []
               }
             ]
           },
           {
-            name: 'submitAUmanager',
-            path: '/record/submitAUmanager',
-            component: () => import('@/models/record/submitAuthority/submitAUmanager'),
-            children: []
-          },{
-            name: 'administrative',
-            path: '/record/administrative',
-            component: () => import('@/models/record/submitAuthority/administrative'),
-            children: []
-          },{
-            name: 'reportUnit',
-            path: '/record/reportUnit',
-            component: () => import('@/models/record/reportDefined/unit/reportunit'),
-            children: []
-          },{
-            name: 'reportStatements',
-            path: '/record/reportStatements',
-            component: () => import('@/models/record/reportDefined/unit/reportstatements'),
-            children: []
-          },{
-            name: 'reportApproval',
-            path: '/record/reportApproval',
-            component: () => import('@/models/record/submitAuthority/reportapproval'),
-            children: []
-          },{
-            name: 'reportSupervision',
-            path: '/record/reportSupervision',
-            component: () => import('@/models/record/submitAuthority/reportsupervision'),
-            children: []
+            name: 'reportFill',
+            path: '/record/report/reportFill',
+            component: () => import('@/models/record/report/reportFill'),
+            children: [
+              {
+                name: 'oneDimensionsStaticRecord',
+                path: '/record/onedim/onedimRecord',
+                component: () => import('@/models//record/report/onedim/onedimRecord'),
+              },
+              {
+                name: 'oneDimensionsStaticRecord',
+                path: '/record/onedim/onedimRecord',
+                component: () => import('@/models//record/report/onedim/onedimRecord'),
+              },
+              {
+                name: 'treeDimensionsDynRecord',
+                path: '/record/treedim/treedimRecord',
+                component: () => import('@/models//record/report/treedim/treedimRecord'),
+              },
+              {
+                name: 'oneDimensionsDynamicRecord',
+                path: '/record/groupdim/groupdimRecord',
+                component: () => import('@/models//record/report/groupdim/groupdimRecord'),
+              },
+              {
+                name: 'multDimensionsStaticRecord',
+                path: '/record/multdim/griddimRecord',
+                component: () => import('@/models//record/report/multdim/griddimRecord'),
+              }
+            ]
+          },
+          {
+            name: 'submitAuthority',
+            path: '/record/submitAuthority',
+            component: () => import('@/models/record/submitAuthority'),
+            children: [
+              {
+                name: 'submitAUmanager',
+                path: '/record/submitAUmanager',
+                component: () => import('@/models/record/submitAuthority/submitAUmanager'),
+                children: []
+              },{
+                name: 'administrative',
+                path: '/record/administrative',
+                component: () => import('@/models/record/submitAuthority/administrative'),
+                children: []
+              },{
+                name: 'reportApproval',
+                path: '/record/reportApproval',
+                component: () => import('@/models/record/submitAuthority/reportapproval'),
+                children: []
+              },{
+                name: 'reportSupervision',
+                path: '/record/reportSupervision',
+                component: () => import('@/models/record/submitAuthority/reportsupervision'),
+                children: []
+              }
+            ]
           }
         ]
       }

@@ -5,6 +5,7 @@
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
         <el-button @click="addColum()" type="primary">新增</el-button>
+        <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
     </el-row>
 
