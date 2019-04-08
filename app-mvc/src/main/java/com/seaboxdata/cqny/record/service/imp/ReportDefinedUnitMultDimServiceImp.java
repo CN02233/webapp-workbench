@@ -43,10 +43,21 @@ public class ReportDefinedUnitMultDimServiceImp implements ReportDefinedUnitMult
     }
 
     @Override
+    public List<GridColumDefined> getMultColumByUnit(String unitId,String unitType) {
+        List<GridColumDefined> columList = null;
+        if(unitType.equals("3"))
+            columList = reportDefinedUnitMultDimDao.getColumByUnit(unitId);
+        else
+            columList = reportDefinedUnitMultDimDao.getOneColumByUnit(unitId);
+        return columList;
+    }
+
+    @Override
     public List<GridColumDefined> getColumByUnit(String unitId) {
         List<GridColumDefined> columList = reportDefinedUnitMultDimDao.getColumByUnit(unitId);
         return columList;
     }
+
 
     @Override
     public GridColumDefined getOnedimColumn(String columId) {

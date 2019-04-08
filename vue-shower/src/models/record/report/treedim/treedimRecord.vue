@@ -47,12 +47,16 @@
 <script>
   import WorkMain from "@/models/public/WorkMain"
 
+  import ColumTitles from "@/models/record/report/treedim/treeDimShowerTitle"
+  import ColumContext from "@/models/record/report/treedim/treeDimShowerContext"
 
   export default {
     name: "treedimRecord",
     describe:"树状报表填报单元",
     components: {
-      WorkMain
+      WorkMain,
+      ColumTitles,
+      ColumContext
     },
     data() {
       return {
@@ -212,60 +216,96 @@
           saveColums.push(saveObjTmp)
         })
 
-
-        // // validateSimpleUnitContext
-        const valloading = this.$loading({
+        const loading = this.$loading({
           lock: true,
-          text: '数据校验中.......',
+          text: '保存报送信息中.......',
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
         this.BaseRequest({
-          url:"/treeReportCust/validateTreeData",
+          url:"/treeReportCust/saveTreeData",
           method:'post',
           data:saveColums
         }).then(response=>{
-          valloading.close();
-          let validateFailed = false
-          if(response!=null){
-            const validateFailedKeys = Object.keys(response)
-            let failtMes = ""
-            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
-              validateFailed = true
-              validateFailedKeys.forEach(validateFailedKey=>{
-                const failedReason = response[validateFailedKey]
-                failtMes+=(validateFailedKey+":"+failedReason+"<br><br>")
-              })
-
-              this.$notify({
-                dangerouslyUseHTMLString: true,
-                message: '<span style="font-size:15px;color:red;font-weight: bold">'+failtMes+'</span>'
-              })
-            }
-          }
-
-          if(!validateFailed){
-            const loading = this.$loading({
-              lock: true,
-              text: '保存报送信息中.......',
-              spinner: 'el-icon-loading',
-              background: 'rgba(0, 0, 0, 0.7)'
-            });
-            this.BaseRequest({
-              url:"/treeReportCust/saveTreeData",
-              method:'post',
-              data:saveColums
-            }).then(response=>{
-              loading.close();
-              $this.Message.success("保存成功")
-              if(needUpdateStep){
-                $this.updateStep()
-              }else{
-                $this.getUnitContext()
-              }
-            });
+          loading.close();
+          $this.Message.success("保存成功")
+          if(needUpdateStep){
+            $this.updateStep()
+          }else{
+            $this.getUnitContext()
           }
         });
+
+        //重写colum_id 每一行的行号作为column_id
+        // this.elRowDatas.forEach((elRowData,rowNum)=>{
+        //   elRowData.forEach(elColumCol=>{
+        //     if(elColumCol!=null){
+        //       elColumCol.colum_id = rowNum
+        //       saveColums.push(elColumCol)
+        //     }
+        //   })
+        // })
+        //
+        //
+        // // validateSimpleUnitContext
+        // const valloading = this.$loading({
+        //   lock: true,
+        //   text: '数据校验中.......',
+        //   spinner: 'el-icon-loading',
+        //   background: 'rgba(0, 0, 0, 0.7)'
+        // });
+        // this.BaseRequest({
+        //   url:"/reportCust/validateSimpleUnitByDimensions",
+        //   method:'post',
+        //   data:{
+        //     definedColums:this.definedColums,
+        //     columDatas:saveColums
+        //   }
+        // }).then(response=>{
+        //   valloading.close();
+        //   let validateFailed = false
+        //   if(response!=null){
+        //     const validateFailedKeys = Object.keys(response)
+        //     let failtMes = ""
+        //     if(validateFailedKeys!=null&&validateFailedKeys.length>0){
+        //       validateFailed = true
+        //       validateFailedKeys.forEach(validateFailedKey=>{
+        //         const failedReason = response[validateFailedKey]
+        //         failtMes+=(validateFailedKey+":"+failedReason+"<br><br>")
+        //       })
+        //
+        //       this.$notify({
+        //         dangerouslyUseHTMLString: true,
+        //         message: '<span style="font-size:15px;color:red;font-weight: bold">'+failtMes+'</span>'
+        //       })
+        //     }
+        //   }
+        //
+        //   if(!validateFailed){
+        //     const loading = this.$loading({
+        //       lock: true,
+        //       text: '保存报送信息中.......',
+        //       spinner: 'el-icon-loading',
+        //       background: 'rgba(0, 0, 0, 0.7)'
+        //     });
+        //     this.BaseRequest({
+        //       url:"/reportCust/overrideSimpleUnitContext",
+        //       method:'post',
+        //       data:{
+        //         definedColums:this.definedColums,
+        //         columDatas:saveColums
+        //       }
+        //     }).then(response=>{
+        //       loading.close();
+        //       $this.Message.success("保存成功")
+        //       if(needUpdateStep){
+        //         $this.updateStep()
+        //       }else{
+        //         $this.getUnitContext()
+        //       }
+        //     });
+        //   }
+        // });
       },
       updateStep(){
         const loading = this.$loading({
