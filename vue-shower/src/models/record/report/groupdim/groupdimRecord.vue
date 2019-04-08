@@ -214,14 +214,13 @@
         $t.baseGroup.forEach((t, i) => {
           let key0 = t.unit_id + '_' + t.colum_id + '_' + $t.last_dim_id
           $t.columDatas[key0] = Object.assign({report_id:$t.reportId,dimensions_id:$t.last_dim_id,report_data:t.colum_name_cn}, t)
-          $t.columDatas[key0].report_group_id = -1
           let tt = Object.assign({children:[],dimensions_id:$t.last_dim_id,report_data:t.colum_name_cn}, t)
           $t.definedColums.forEach(c=>{
             if(tt.colum_id == c.group_id){
               let cc = Object.assign({}, c)
               let key = c.unit_id + '_' + c.colum_id + '_' + $t.last_dim_id
               $t.columDatas[key] = Object.assign({report_id:$t.reportId,dimensions_id:$t.last_dim_id,report_data:''}, c)
-              $t.columDatas[key].report_group_id = -1 * parseInt($t.columDatas[key].group_id) + ''
+              $t.columDatas[key].report_group_id = $t.columDatas[key].group_id
               cc.report_data = ''
               tt.children.push(cc)
             }

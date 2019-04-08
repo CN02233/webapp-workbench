@@ -111,13 +111,16 @@ public class FomularServiceImp implements FomularService {
             fomularTmpEntity.setUnitId(unitId.toString());
             fomularTmpEntity.setFomularScript(fomularDefined.getColum_formula());
 
-            if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitType)||
-                    UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitType)){
+            if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitType)){
                 fomularTmpEntity.setColumId(fomularDefined.getColum_id().toString());
-            }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitType)){
+            }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitType)) {
+                fomularTmpEntity.setDimensionsId(fomularDefined.getColum_id().toString());
+            }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitType)) {
+                fomularTmpEntity.setColumId(fomularDefined.getColum_id().toString());
                 fomularTmpEntity.setDimensionsId(fomularDefined.getColum_id().toString());
             }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitType)){
-
+                fomularTmpEntity.setColumId(fomularDefined.getColum_id().toString());
+                fomularTmpEntity.setDimensionsId(fomularDefined.getColum_id().toString());
             }
             fomularArray.add(fomularTmpEntity);
         }
@@ -230,8 +233,7 @@ public class FomularServiceImp implements FomularService {
             Integer unitType = unitDefined.getUnit_type();
 
             ReportCustomerData reportCustomerData = null;
-            if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitType)||
-                    UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitType)){
+            if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitType)){
                 reportCustomerData = reportCustomerDao.getSimpleReportCustomerData(
                         fomularTmpEntity.getReportId().toString(), unitId, columOrDimensionsIdDefined);
             }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitType)){
@@ -242,9 +244,14 @@ public class FomularServiceImp implements FomularService {
                     reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataByDimId(fomularTmpEntity.getReportId().toString(),
                             unitId, columOrDimensionsIdDefined);
                 }
-
-            }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitType)){
-
+            } else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitType)){
+                String dimensionsId = fomularTmpEntity.getDimensionsId();
+                reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions(
+                        fomularTmpEntity.getReportId().toString(), unitId, columOrDimensionsIdDefined, dimensionsId);
+            } else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitType)){
+                String dimensionsId = infos.length > 2 ? infos[2] : fomularTmpEntity.getDimensionsId();
+                reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions(
+                        fomularTmpEntity.getReportId().toString(), unitId, columOrDimensionsIdDefined, dimensionsId);
             }
 
             Object formatData = dataFormat(reportCustomerData.getReport_data());
