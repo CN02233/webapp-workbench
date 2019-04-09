@@ -68,9 +68,12 @@
           this.definedGroup = []
           this.definedColums = []
           this.baseGroup = []
+          let report_id = null
           if(response){
             const $t = this
             if(response.columDatas){
+              if(response.columDatas.length>0)
+                report_id = response.columDatas[0].report_id
               response.columDatas.forEach(columData=>{
                 const columKey = columData.unit_id + "_"+columData.colum_id + "_" + (columData.dimensions_id || '0')
                 $t.columDatas[columKey] = columData
@@ -93,7 +96,13 @@
                     if(tt.colum_id == c.group_id){
                       let cc = Object.assign({}, c)
                       let key = c.unit_id + '_' + c.colum_id + '_' + $t.last_dim_id
-                      cc.report_data = $t.columDatas[key].report_data
+                      if($t.columDatas[key]){
+                        cc.report_data = $t.columDatas[key].report_data
+                      }else if(report_id){
+                        //补充遗漏数据
+                        let newCC = Object.assign({report_id:report_id,report_data:'',report_group_id:c.group_id,dimensions_id:$t.last_dim_id}, c)
+                        $t.columDatas[key] = newCC
+                      }
                       tt.children.push(cc)
                     }
                   })
@@ -111,9 +120,13 @@
       saveUnitContext(needUpdateStep){
         const $this = this
         $this.definedGroup.forEach(g=>{
-          $this.columDatas[g.unit_id + '_' + g.colum_id + '_' + g.dimensions_id].report_data = g.report_data
+          let key0 = g.unit_id + '_' + g.colum_id + '_' + g.dimensions_id
+          if($this.columDatas[key0])
+            $this.columDatas[key0].report_data = g.report_data
           g.children.forEach(x=>{
-            $this.columDatas[x.unit_id+'_'+x.colum_id + '_' + g.dimensions_id].report_data = x.report_data
+            let key1 = x.unit_id+'_'+x.colum_id + '_' + g.dimensions_id
+            if($this.columDatas[key1])
+              $this.columDatas[key1].report_data = x.report_data
           })
         })
         const valloading = this.$loading({

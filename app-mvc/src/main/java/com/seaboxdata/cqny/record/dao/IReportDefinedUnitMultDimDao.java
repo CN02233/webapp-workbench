@@ -12,7 +12,7 @@ import java.util.Map;
 public interface IReportDefinedUnitMultDimDao {
 
     @Select("<script>select * from "
-            +" (select a.*,b.colum_name,b.colum_name_cn,c.dim_name,c.dim_name_cn from report_defined_unit_multdim a" +
+            +" (select a.*,b.colum_name,b.colum_name_cn,b.colum_point,b.colum_desc,c.dim_name,c.dim_name_cn from report_defined_unit_multdim a" +
             " left join report_defined_unit_multdim_col b on a.colum_id=b.colum_id" +
             " left join report_defined_unit_multdim_dim c on a.dim_id=c.dim_id" +
             " where a.unit_id=#{unitId}" +
@@ -33,8 +33,8 @@ public interface IReportDefinedUnitMultDimDao {
             "(#{unit_id},#{colum_id},#{dim_id},#{min_value},#{max_value}," +
             "#{colum_formula},#{colum_formula_desc},#{colum_type})")
     void addSaveMultdim(GridColumDefined simpleColumDefined);
-    @Insert("insert into report_defined_unit_multdim_col(colum_name,colum_name_cn) values " +
-            "(#{colum_name},#{colum_name_cn})")
+    @Insert("insert into report_defined_unit_multdim_col(colum_name,colum_name_cn,unit_id,colum_point,colum_desc) values " +
+            "(#{colum_name},#{colum_name_cn},#{unit_id},#{colum_point},#{colum_desc})")
     @Options(useGeneratedKeys = true, keyProperty = "colum_id", keyColumn = "colum_id")
     void addSaveMultdim_col(GridColumDefined simpleColumDefined);
 
@@ -48,7 +48,7 @@ public interface IReportDefinedUnitMultDimDao {
             " where unit_id=#{unit_id} and colum_id=#{colum_id} and dim_id=#{dim_id}")
     void editSaveMultdim(GridColumDefined simpleColumDefined);
 
-    @Update("update report_defined_unit_multdim_col set colum_name=#{colum_name},colum_name_cn=#{colum_name_cn} where colum_id=#{colum_id}")
+    @Update("update report_defined_unit_multdim_col set colum_name=#{colum_name},colum_name_cn=#{colum_name_cn},unit_id=#{unit_id},colum_point=#{colum_point},colum_desc=#{colum_desc} where colum_id=#{colum_id}")
     void editSaveMultdim_col(GridColumDefined simpleColumDefined);
 
     @Update("update report_defined_unit_multdim_dim set dim_name=#{dim_name},dim_name_cn=#{dim_name_cn},unit_id=#{unit_id} where dim_id=#{dim_id}")
@@ -90,8 +90,9 @@ public interface IReportDefinedUnitMultDimDao {
     List<Map> getGroupByUnit(String unitId);
 
     @Select("<script>select colum_id,max(colum_name_cn) colum_name_cn, max(colum_type) colum_type, max(min_value) min_value, max(max_value) max_value, "
-            +"max(colum_formula) colum_formula, max(colum_formula_desc) colum_formula_desc,group_concat(dim_name_cn ORDER BY dim_id) dim_name_cn"
-            +" from (select a.*,b.colum_name_cn,c.dim_name_cn from report_defined_unit_multdim a" +
+            +"max(colum_point) colum_point, max(colum_desc) colum_desc,max(colum_formula) colum_formula, max(colum_formula_desc) colum_formula_desc," +
+            "group_concat(dim_name_cn ORDER BY dim_id) dim_name_cn"
+            +" from (select a.*,b.colum_name_cn,c.dim_name_cn,b.colum_point,b.colum_desc from report_defined_unit_multdim a" +
             " left join report_defined_unit_multdim_col b on a.colum_id=b.colum_id" +
             " left join report_defined_unit_multdim_dim c on a.dim_id=c.dim_id where a.unit_id=#{unitId}" +
             ") x group by colum_id order by colum_id</script>")
