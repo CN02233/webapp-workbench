@@ -109,9 +109,9 @@
             :change-on-select="false"
             @active-item-change="handleItemChange"
           ></el-cascader>
-          <el-button @click="formulaColumConfirm">确定输入项</el-button>
+          <el-button @click="formulaColumConfirm" v-if="isFormulaEmpty">确定输入项</el-button>
         </el-form-item>
-        <el-form-item label="设置运算符" >
+        <el-form-item label="设置运算符" v-if="isFormulaEmpty">
           <el-button @click="formulaAdd('+')">+</el-button>
           <el-button @click="formulaAdd('-')">-</el-button>
           <!--<el-button @click="formulaAdd('%')">%</el-button>-->
@@ -127,7 +127,7 @@
             type="textarea"
             :rows="10"
             :disabled="true"
-            v-model="formData.colum_formula_desc">
+            v-model="datForm.colum_formula_desc">
           </el-input>
         </el-form-item>
         <el-form-item label="公式试算" >
@@ -139,9 +139,10 @@
         </el-form-item>
       </el-form>
       <el-row>
+        <el-button type="danger" @click="fomularClear">重新定义公式</el-button>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
-        <el-button>试算</el-button>
+        <el-button @click="fomularOperation" v-if="isFormulaEmpty">试算</el-button>
       </el-row>
 
     </el-dialog>
@@ -240,6 +241,7 @@
       <div slot="footer" class="dialog-footer">
         <el-tooltip v-if="datForm.colum_type=='0'" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
           <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
+          <el-button type="danger" @click="fomularClear" icon="el-icon-edit">重新定义公式</el-button>
         </el-tooltip>
         <el-button @click="isOpenDatEditor=false">取 消</el-button>
         <el-button type="primary" @click="insertDataCell()">确 定</el-button>
@@ -300,19 +302,24 @@
         isOpenColEditor:false,
         isOpenDatEditor:false,
         isOpenDimList:false,
+        isFormulaEmpty:true,
         formulaDescContext:[],
         formulaColumnDescContext:[],
         formulaDescContextTmp:'',
         formulaContext:[],
         otherUnits:[],
-        fomularColumnTmp :'',
+        fomularColumnTmp :[],
+        unitMap:{},
         dimIndex:-1,
         colIndex:-1,
         datField:'',
         addColForm:{
           colum_id:null,
           colum_name:'',
-          colum_name_cn:''
+          colum_name_cn:'',
+          colum_point:'',
+          colum_desc:'',
+          unit_id:null
         },
         addDimForm:{
           dim_id:null,
@@ -402,14 +409,14 @@
               idim[x.dim_id] = i+1
             }
             if(!icol[x.colum_id]){
-              $e.colData.push({colum_id:x.colum_id, colum_name:x.colum_name, colum_name_cn:x.colum_name_cn})
+              $e.colData.push({colum_id:x.colum_id, colum_name:x.colum_name, colum_name_cn:x.colum_name_cn, unit_id:$t.unitId, colum_point:x.colum_point, colum_desc:x.colum_desc})
               icol[x.colum_id] = i+1
               idat[x.colum_id] = {}
             }
             idat[x.colum_id][x.dim_id] = $t.copyDataForm(x)
           })
           $e.colData.forEach(x=>{
-            let z = {colum_name:x.colum_name,colum_name_cn:x.colum_name_cn,colum_id:x.colum_id}
+            let z = Object.assign({},x)
             $e.dimData.forEach(col=>{
               z[col.dim_name] = idat[z.colum_id][col.dim_id]
             })
@@ -581,7 +588,8 @@
         let o = row[field]
         this.datForm = o.colum_type=='' ? this.copyDataForm({colum_type:'1'}) : Object.assign({},o)
         this.isOpenDatEditor = true
-        console.log('get'+JSON.stringify(this.datForm))
+        if(this.datForm.colum_formula != '')
+          this.isFormulaEmpty = false
       },
       saveDimRow(){
         if(!this.validForm("dform")) return
@@ -625,6 +633,8 @@
         if(!this.validForm("cform")) return
         this.editModel.colData[this.colIndex].colum_name = this.colForm.colum_name
         this.editModel.colData[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
+        this.editModel.colData[this.colIndex].colum_point = this.colForm.colum_point
+        this.editModel.colData[this.colIndex].colum_desc = this.colForm.colum_desc
         this.editModel.datas[this.colIndex].colum_name = this.colForm.colum_name
         this.editModel.datas[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
         this.isOpenColEditor = false
@@ -647,34 +657,6 @@
           //rename colum_name
         }
         this.isOpenColEditor = false
-      },
-      deleteColRowOld(i,row){
-        this.$confirm('确定删除该项目？', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          dangerouslyUseHTMLString:true,
-          type: 'warning'
-        }).then(()=>{
-          this.editModel.colData.splice(i, 1)
-          if(row.colum_id){
-            this.editModel.dels.col.push({colum_id:row.colum_id,unit_id:this.unitId})
-          }
-        })
-      },
-      insertDimRowOld(){
-        if(!this.validForm("dform")) return
-        const $t = this
-        if($t.dimIndex == -1){
-          let addDim = Object.assign({},$t.dimForm)
-          $t.editModel.datas.forEach(x=>{
-            x[addDim.dim_name] = $t.newDataForm()
-          })
-          $t.editModel.dimData.push(addDim)
-        }else{
-          $t.editModel.dimData[$t.dimIndex].colum_name = $t.dimForm.colum_name
-          $t.editModel.dimData[$t.dimIndex].colum_name_cn = $t.dimForm.colum_name_cn
-        }
-        $t.isOpenDimEditor = false
       },
       deleteDimRow(i,row){
         this.$confirm('确定删除该维度？', '提示', {
@@ -741,6 +723,7 @@
           if(response){
             this.otherUnits = []
             response.forEach(unitData=>{
+              this.unitMap['u'+unitData.unit_id] = unitData
               this.otherUnits.push({'label':unitData.unit_name,'value':unitData.unit_id,'children':[]})
             })
           }
@@ -758,12 +741,7 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
-        let unitType = 1
-        $this.otherUnits.forEach(x=>{
-          if(x.unit_id == unitId){
-            unitType = x.unit_type;
-          }
-        })
+        let unitType = $this.unitMap['u'+unitId] ? $this.unitMap['u'+unitId].unit_type : '1'
         $this.BaseRequest({
           url:"/unitMultDimColum/getInputColumn",
           method:'get',
@@ -776,9 +754,10 @@
                 const columArray = []
                 if(response){
                   response.forEach(responseData=>{
-                    const colum_id = responseData.colum_id
-                    const colum_name = responseData.colum_name_cn
+                    let colum_id = responseData.colum_id
+                    let colum_name = responseData.colum_name_cn
                     columArray.push({label:colum_name,value:colum_id})
+                    $this.unitMap['c'+colum_id] = colum_name
                   })
                   this.otherUnits[i].children = columArray
                 }
@@ -796,17 +775,17 @@
                 dims.push(responseData)
               }
             })
-            datas.forEach(x=>{
-              dims.forEach(d=>{
-                if(d.dim_id==x.dim_id){
-                  x.dim_name = d.colum_name
-                  x.dim_name_cn = d.colum_name_cn
+            datas.forEach(s=>{
+              cols.forEach(c=>{
+                if(c.colum_id == s.colum_id){
+                  s.colum_name = c.colum_name
+                  s.colum_name_cn = c.colum_name_cn
                 }
               })
-              cols.forEach(c=>{
-                if(c.colum_id==x.colum_id){
-                  x.colum_name = c.colum_name
-                  x.colum_name_cn = c.colum_name_cn
+              dims.forEach(d=>{
+                if(d.dim_id == s.dim_id){
+                  s.dim_name = d.colum_name
+                  s.dim_name_cn = d.colum_name_cn
                 }
               })
             })
@@ -815,9 +794,10 @@
               if(unitData.value == unitId){
                 const columArray = []
                 datas.forEach(d=>{
-                  colum_id = d.colum_id +  '.' + d.dim_id
-                  colum_name = d.colum_name_cn + '.' + d.dim_name_cn
+                  let colum_id = d.colum_id + '.' + d.dim_id
+                  let colum_name = d.colum_name_cn + '.' + d.dim_name_cn
                   columArray.push({label:colum_name,value:colum_id})
+                  $this.unitMap['c'+colum_id] = colum_name
                 })
                 this.otherUnits[i].children = columArray
               }
@@ -826,7 +806,7 @@
 
         }).catch(error=>{
           loading.close()
-          $this.Message.success("保存失败:"+error)
+          $this.Message.success("读取失败:"+error)
         });
       },
       openFormulaEditor(){
@@ -838,42 +818,22 @@
         // this.getReportColums(val)
       },
       formulaColumConfirm(){
+        debugger
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
         const unitClickId = this.fomularColumnTmp[0]
-        this.otherUnits.forEach(unitData=>{
-          if(unitData.value == unitClickId){
-            if(unitData.children){
-              unitData.children.forEach(columData=>{
-                if(columData.value == columtClickId) {
-                  const finalContext = unitData.label+"."+columData.label
-                  this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
-                  this.formulaContext.push({"context":unitData.value+"."+columData.value,"isSymbol":false})
-                  if(this.isEditModal){
-                    this.editModel.colum_formula_desc +=finalContext
-                    this.editModel.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
-                  }else{
-                    this.addFormData.colum_formula_desc +=finalContext
-                    this.addFormData.colum_formula +=("#"+unitData.value+"."+columData.value+"#")
-                  }
-                }
-              })
-            }
-
-          }
-        })
+        const unitLabel = this.unitMap['u'+unitClickId].unit_id
+        const columLabel = this.unitMap['c'+columtClickId]
+        const finalContext = unitLabel+"."+columLabel
+        this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
+        this.formulaContext.push({"context":unitClickId+"."+columtClickId,"isSymbol":false})
+        this.datForm.colum_formula_desc +=finalContext
+        this.datForm.colum_formula +=("#"+unitClickId+"."+columtClickId+"#")
       },
       formulaAdd(addContext){
         this.formulaDescContext.push({"context":addContext,"isSymbol":true})
         this.formulaContext.push({"context":addContext,"isSymbol":true})
-        // this.formulaDescContextTmp+=addContext
-        if(this.isEditModal){
-          this.editModel.colum_formula_desc +=addContext
-          this.editModel.colum_formula +=addContext
-        }else{
-          this.addFormData.colum_formula_desc +=addContext
-          this.addFormData.colum_formula +=addContext
-        }
-
+        this.datForm.colum_formula_desc +=addContext
+        this.datForm.colum_formula +=addContext
       },
       formulaBack(){
         this.formulaContext.pop()
@@ -882,22 +842,12 @@
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
           const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
-          if(this.isEditModal){
-            if(i==0){
-              this.editModel.colum_formula_desc =formulaDesc.context
-              this.editModel.colum_formula = formulaContext
-            }else{
-              this.editModel.colum_formula_desc +=formulaDesc.context
-              this.editModel.colum_formula +=formulaContext
-            }
+          if(i==0){
+            this.datForm.colum_formula_desc =formulaDesc.context
+            this.datForm.colum_formula = formulaContext
           }else{
-            if(i==0){
-              this.addFormData.colum_formula_desc =formulaDesc.context
-              this.addFormData.colum_formula =formulaContext
-            }else{
-              this.addFormData.colum_formula_desc +=formulaDesc.context
-              this.addFormData.colum_formula +=formulaContext
-            }
+            this.datForm.colum_formula_desc +=formulaDesc.context
+            this.datForm.colum_formula +=formulaContext
           }
         })
       },
@@ -907,6 +857,47 @@
         // this.formulaContext = []
         // this.formulaDescContext = []
         this.isOpenFormulaEditor = false
+      },
+      fomularOperation(){
+        const $this = this
+        let fomular = ""
+        if(this.formulaContext){
+          this.formulaContext.forEach(formulaData=>{
+            if(formulaData.columKey){
+              fomular+=formulaData.columKey
+            }else{
+              fomular+=formulaData.context
+            }
+          })
+        }
+
+        const loading = $this.$loading({
+          lock: true,
+          text: '计算中......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        $this.BaseRequest({
+          url:"/reportDefined/formalOperation",
+          method:'post',
+          data:{'fomular':fomular,'operaionValus':this.formularOprationColums}
+        }).then(response=>{
+          loading.close()
+          this.$message({
+            showClose: true,
+            message: '试算结果:'+response
+          });
+        }).catch(error=>{
+          loading.close()
+          $this.Message.success("保存失败:"+error)
+        });
+      },
+      fomularClear(){
+        this.formulaContext.length = 0
+        this.formulaDescContext.length = 0
+        this.datForm.colum_formula = ''
+        this.datForm.colum_formula_desc = ''
+        this.isFormulaEmpty = true
       },
     },
     computed:{

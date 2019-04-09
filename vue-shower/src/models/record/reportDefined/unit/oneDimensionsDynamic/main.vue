@@ -190,7 +190,7 @@
         <el-button type="danger" @click="fomularClear">重新定义公式</el-button>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
-        <el-button v-if="isFormulaEmpty" @click="fomularOperation">试算</el-button>
+        <el-button @click="fomularOperation" v-if="isFormulaEmpty">试算</el-button>
       </el-row>
 
     </el-dialog>
@@ -604,7 +604,6 @@
         // this.formulaDescContext = []
         this.editModel.tableData[this.editModel.selectNo].colum_formula = this.editModel.selectRow.colum_formula
         this.editModel.tableData[this.editModel.selectNo].colum_formula_desc = this.editModel.selectRow.colum_formula_desc
-        console.log(this.editModel.tableData[this.editModel.selectNo].colum_formula_desc)
         this.isOpenFormulaEditor = false
       },
       fomularOperation(){
