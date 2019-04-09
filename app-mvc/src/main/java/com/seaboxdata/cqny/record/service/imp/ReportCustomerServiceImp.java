@@ -378,7 +378,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         List<ReportCustomerData> dbcolumData = reportCustomerDao.getColumDatas(reportId.toString(), unitId);
 
         //保存用户录入项内容
-        for (ReportCustomerData columData : custDataArray) {
+        for (ReportCustomerData columData : columDatas) {
             boolean bAdd = true;
             for(ReportCustomerData dbData : dbcolumData){
                 if(columData.getColum_id().equals(dbData.getColum_id()) &&
