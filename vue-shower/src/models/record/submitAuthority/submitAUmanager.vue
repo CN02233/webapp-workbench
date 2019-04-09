@@ -284,7 +284,7 @@ export default {
       }
     },
     handleDelete (index, row) { // 删除
-      this.$confirm('确定删除机构【' + row.origin_name + '】？', '提示', {
+      this.$confirm("确定要删除【"+row.origin_name+"】机构？删除动作为级联操作，会使该机构下的所有机构都被删除！！！", '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         dangerouslyUseHTMLString: true,

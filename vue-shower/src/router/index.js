@@ -168,6 +168,11 @@ const routes = [
                 component: () => import('@/models/record/submitAuthority/reportapproval'),
                 children: []
               },{
+                name: 'reportReview',
+                path: '/record/reportReview',
+                component: () => import('@/models/record/submitAuthority/reportreview'),
+                children: []
+              },{
                 name: 'reportSupervision',
                 path: '/record/reportSupervision',
                 component: () => import('@/models/record/submitAuthority/reportsupervision'),

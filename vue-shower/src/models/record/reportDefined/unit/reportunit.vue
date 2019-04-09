@@ -21,7 +21,9 @@
             prop="status"
             align="left"
             width="150"
-            label="报送单元状态">
+            label="报送单元状态"
+            :formatter="formatStatus"
+          >
           </el-table-column>
           <el-table-column
             prop="origin_name"
@@ -121,7 +123,7 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      definedId:'',
+      definedId: '',
       unitDataList: [],
       unitDataObjs: {},
       tableDataUrl: 'reportUnit/listReportUnit',
@@ -173,6 +175,17 @@ export default {
     WorkMain
   },
   methods: {
+    formatStatus: function (row, column) {
+      if (row.status === '0') {
+        return '正常'
+      }
+      if (row.status === '1') {
+        return '停用'
+      }
+      if (row.status === '9') {
+        return '注销'
+      }
+    },
     getTableData: function (pageNum) {
       if (pageNum && pageNum !== '') {
         this.currPageNum = pageNum
@@ -296,26 +309,26 @@ export default {
       }
       return checkResult
     },
-    definedUnit(unitId,defined_type){//add by SongChaoqun 编辑该单元的报送项内容
+    definedUnit (unitId, defined_type) { // add by SongChaoqun 编辑该单元的报送项内容
       let editUrl = ''
-      if(defined_type=='1'){
+      if (defined_type == '1') {
         editUrl = '/record/reportDefined/oneDimensionsStatic'
-      }else if(defined_type=='2'){
+      } else if (defined_type == '2') {
         editUrl = '/record/reportDefined/oneDimensionsDynamic'
-      }else if(defined_type=='3'){
+      } else if (defined_type == '3') {
         editUrl = '/record/reportDefined/multDimensionsStatic'
-      }else if(defined_type=='4'){
+      } else if (defined_type == '4') {
         editUrl = '/record/reportDefined/treeMultDiensionsDynamic'
-      }else{
+      } else {
         return
       }
       this.$router.push({
         path: editUrl,
-        query:{
-          'unitId':unitId
+        query: {
+          'unitId': unitId
         }
-      });
-    },
+      })
+    }
   },
   mounted: function () { // 初始化
     this.definedId = this.$route.query.definedId

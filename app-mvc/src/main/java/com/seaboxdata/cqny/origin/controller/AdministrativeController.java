@@ -26,7 +26,7 @@ import java.util.List;
 public class AdministrativeController {
 
     @Autowired
-    private AdministrativeService originService;
+    private AdministrativeService administrativeService;
 
     /**
      * 列表查询展示
@@ -39,7 +39,7 @@ public class AdministrativeController {
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
     public String listAdministrative(int currPage, int pageSize){
-        PageResult originList = originService.listAdministrative(currPage, pageSize);
+        PageResult originList = administrativeService.listAdministrative(currPage, pageSize);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }
@@ -55,7 +55,7 @@ public class AdministrativeController {
     public JsonResult addAdministrative(@RequestBody Administrative administrative){
         User user = SessionSupport.checkoutUserFromSession();
         administrative.setCreate_user(user.getUser_id());
-        originService.addAdministrative(administrative);
+        administrativeService.addAdministrative(administrative);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
@@ -70,25 +70,32 @@ public class AdministrativeController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult deleteById( String organizationId){
-        originService.deleteById(organizationId);
+        administrativeService.deleteById(organizationId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
 
+    /**
+     * 表user-organization-assign 保存organizationId-userId关联
+     */
     @RequestMapping("userOrganizationSave")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult userOrganizationSave(Integer organizationId,Integer userId){
-        originService.userOrganizationSave(organizationId,userId);
+        administrativeService.userOrganizationSave(organizationId,userId);
         JsonResult jsonpResponse = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
         return jsonpResponse;
     }
 
+    /**
+     * 获取用户的行政机构Id
+     * 通过userId获取表user-organization-assign 中的organization
+     */
     @RequestMapping("getOrganizationByUser")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getOrganizationByUser(Integer userId){
-        Administrative organization = originService.getOrganizationByUser(userId);
+        Administrative organization = administrativeService.getOrganizationByUser(userId);
         JsonResult jsonpResponse = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null, organization);
         return jsonpResponse;
     }
@@ -103,33 +110,34 @@ public class AdministrativeController {
     @Transactional
     public JsonResult saveOrganizationAndOriginAssign(String[] originIds,String organizationId){
         delOrganizationAndOriginAssign(organizationId);
-        originService.saveOrganizationAndOriginAssign(originIds,organizationId);
+        administrativeService.saveOrganizationAndOriginAssign(originIds,organizationId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
 
     /**
-     * 删除关联
+     * 删除关联 organizationId-originId
      * @return
      */
     @RequestMapping("delOrganizationAndOriginAssign")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult delOrganizationAndOriginAssign(String organizationId){
-        originService.delOrganizationAndOriginAssign(organizationId);
+        administrativeService.delOrganizationAndOriginAssign(organizationId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
 
     /**
-     * 获取关联
+     * 获取关联 organizationId-originId
+     * 通过行政机构Id获取报送机构的Ids
      * @return
      */
     @RequestMapping("getOrganizationAndOriginAssignById")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getOrganizationAndOriginAssignById(String organizationId){
-        List<String> result=originService.getOrganizationAndOriginAssignById(organizationId);
+        List<String> result=administrativeService.getOrganizationAndOriginAssignById(organizationId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,result);
         return jsonResult;
     }

@@ -8,36 +8,38 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="definedDataList"
+          :data="reportDataList"
           style="width: 100%">
           <el-table-column
             prop="defined_name"
             align="left"
-            width="150"
+            width="200"
             label="报表名称">
           </el-table-column>
           <el-table-column
             prop="status"
             align="left"
             width="150"
-            label="状态">
+            label="状态"
+            :formatter="formatStatus"
+          >
           </el-table-column>
-          <el-table-column
+        <!--  <el-table-column
             prop="origin_name"
             align="left"
             width="230"
             label="所属机构">
-          </el-table-column>
+          </el-table-column>-->
           <el-table-column
-            prop="create_time"
+            prop="create_date"
             align="left"
-            width="180"
+            width="200"
             label="创建时间">
           </el-table-column>
           <el-table-column
             prop="user_name"
             align="left"
-            width="100"
+            width="150"
             label="创建人">
           </el-table-column>
           <el-table-column
@@ -84,7 +86,7 @@
                 <el-tree
                   accordion
                   class="filter-tree"
-                  :data="data"
+                  :data="treeData"
                   show-checkbox
                   :props="defaultProps"
                   node-key = "id"
@@ -127,7 +129,7 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      reportDataLIst: [],
+      reportDataList: [],
       definedDataObjs: {},
       tableDataUrl: 'reportStatements/listReportStatements',
       currPageNum: 1,
@@ -161,7 +163,7 @@ export default {
         label: 'label'
       },
       filterText: '',
-      data: []
+      treeData: []
     }
   },
   watch: {// 监听节点搜索的内容
@@ -191,6 +193,17 @@ export default {
     WorkMain
   },
   methods: {
+    formatStatus: function (row, column) {
+      if (row.status === '100') {
+        return '编辑中'
+      }
+      if (row.status === '200') {
+        return '已发布'
+      }
+      if (row.status === '300') {
+        return '已使用'
+      }
+    },
     handleNodeClick (data) { // 点击树的节点进行赋值
       // console.log(data)
       // console.log(this.$refs.tree.getCheckedNodes())
@@ -216,19 +229,20 @@ export default {
             $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         }
-        $this.reportDataLIst = response.dataList
+        $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
     refreshTableList: function (dataList) {
-      this.definedDataList = dataList
+      this.reportDataList = dataList
     },
     openAddModal: function () {
-      this.clearData()
       this.dialogTitle = '新增报送报表'
       this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
+      this.$refs.tree.setCheckedKeys([])
+      this.clearData()
     },
     closeModal: function () {
       this.showModalPage = false
@@ -240,9 +254,9 @@ export default {
         method: 'get'
       }).then(response => {
         if (response != null && response.length > 0) {
-          this.data = []
+          this.treeData = []
           this.options = response
-          this.data = response
+          this.treeData = response
         }
       })
     },
@@ -255,7 +269,6 @@ export default {
       }).then(response => {
         if (response != null && response.length > 0) {
           thisRef.$refs.tree.setCheckedKeys(response)
-          // this.data = []
           // this.options = response
           // this.data = response
         }
@@ -322,7 +335,6 @@ export default {
         // this.formSubmitData.defined_status= '';
         // this.formSubmitData.parent_defined_id= '';
         // this.formSubmitData.parent_defined_name= ''; */
-      this.$refs.tree.setCheckedKeys([])
       this.formSubmitData = {
         defined_id: null,
         defined_name: null,
@@ -368,7 +380,7 @@ export default {
     }
   },
   mounted: function () { // 初始化
-    this.definedDataList = []
+    this.reportDataList = []
     this.getTableData(1)
     this.getOriginList()
   }
