@@ -64,4 +64,7 @@ public interface IReportDefinedUnitOneDimDao {
             +") x order by group_id,colum_id</script>")
     Page<Map<String, Object>> pagerMultdimListStatic(@Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize, @Param("unitId") Integer unitId, @Param("map") Map<String,Object> map);
 
+
+    @Select("select * from report_defined_unit_onedim where colum_formula like CONCAT('%','${fomularParamName}','%' )")
+    List<SimpleColumDefined> checkSimpleDefinedFomulars(@Param("fomularParamName") String fomularParamName);
 }

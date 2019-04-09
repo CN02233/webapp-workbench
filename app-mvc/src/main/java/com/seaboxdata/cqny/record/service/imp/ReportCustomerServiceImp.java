@@ -2,8 +2,6 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.google.common.base.Strings;
-import com.googlecode.aviator.AviatorEvaluator;
-import com.googlecode.aviator.Expression;
 import com.seaboxdata.cqny.record.config.ColumType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.FomularTmpEntity;
@@ -12,6 +10,7 @@ import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.service.FomularService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
@@ -20,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -39,6 +37,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Autowired
     private ReportUnitService reportDefinedUnitService;
+
+    @Autowired
+    private FomularService fomularService;
 
 
     @Override
@@ -66,6 +67,13 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         reportCustomerDao.createReportCustomer(reportCustomer);
     }
 
+    /**
+     * 检查本次输入项是公式项还是用户输入项
+     * @param simpleColumDefineds
+     * @param columDatas
+     * @return Map.key = custDataArray 用户输入项列表,Map.value = List<ReportCustomerData>
+     *         Map.key = fomularArray 公式项列表,Map.value = List<FomularTmpEntity>
+     */
     public Map<String,Object> checkCustOrFomular(ArrayList<SimpleColumDefined> simpleColumDefineds,
                                                  ArrayList<ReportCustomerData> columDatas){
 
@@ -134,6 +142,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         List<ReportCustomerData> custDataArray = (List<ReportCustomerData>) custOrFomular.get("custDataArray");
         List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) custOrFomular.get("fomularArray");
 
+        //保存用户录入项内容
         for (ReportCustomerData columData : custDataArray) {
             if(isUpdate){
                 reportCustomerDao.updateUnitContext(columData);
@@ -142,16 +151,10 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
             }
         }
 
+        //刷新公式项内容
         if(fomularArray!=null&&fomularArray.size()>0){
             for (FomularTmpEntity fomularTmpEntity : fomularArray) {
-                Object fomularDataResult = doRefreshSimpleFomular(fomularTmpEntity);
-                ReportCustomerData comularData = new ReportCustomerData();
-                comularData.setReport_id(fomularTmpEntity.getReportId());
-                comularData.setUnit_id(fomularTmpEntity.getUnitId());
-                comularData.setColum_id(fomularTmpEntity.getColumId());
-                comularData.setDimensions_id(fomularTmpEntity.getDimensionsId());
-                comularData.setReport_data(String.valueOf(fomularDataResult));
-                comularData.setReport_group_id(fomularTmpEntity.getReportGroupId());
+                ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
                 if(isUpdate){
                     reportCustomerDao.updateUnitContext(comularData);
                 }else{
@@ -159,6 +162,21 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 }
             }
         }
+
+        //检查用户输入项是否被其他公式关联，并刷新关联公式的内容
+
+        new Thread(new Runnable(){
+            public void run(){
+                logger.info("刷新关联到用户输入项的公式值");
+                List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(custDataArray);
+                logger.info("需要刷新的内容{}",needRefresDatas);
+                if(needRefresDatas!=null){
+                    for (ReportCustomerData needRefresData : needRefresDatas) {
+                        reportCustomerDao.updateUnitContext(needRefresData);
+                    }
+                }
+            }
+        }).start();
 
     }
 
@@ -334,87 +352,78 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         this.updateOrInsertSimpleUnitContext(definedColums,columDatas,false);
     }
 
-    public Object doRefreshSimpleFomular(FomularTmpEntity fomularTmpEntity){
-        int value = -1;
-        String fomularColumId = null;
-        List<String> fomularColums = new ArrayList<>();
-        String columFomularTmp = fomularTmpEntity.getFomularScript();
-        if(columFomularTmp.indexOf("SUM:")>=0){
-            Integer reportId = fomularTmpEntity.getReportId();
-            String unitId = fomularTmpEntity.getUnitId();
-            BigDecimal result = null;
-            String[] fomularColumArray = columFomularTmp.replace("#", "").replace(".","_").split("_");
-            if(!Strings.isNullOrEmpty(fomularTmpEntity.getDimensionsId())){
-                result = reportCustomerDao.sumColumForDimensions(reportId.toString(), unitId, fomularColumArray[1]);
-                logger.debug("{}",result);
-            }else{
-                result = reportCustomerDao.sumColumForDimensions(reportId.toString(), unitId,fomularColumArray[1]);
-                logger.debug("{}",result);
-            }
-            return result;
-        }
-        Map<String,Object> fomularParams = new HashMap<>();
-
-        while(( value = columFomularTmp.indexOf("#"))>=0){
-            columFomularTmp = columFomularTmp.replaceFirst("#","");
-            int columEnd = columFomularTmp.indexOf("#");
-            fomularColums.add(columFomularTmp.substring(value, columEnd));
-            columFomularTmp = columFomularTmp.replaceFirst("#","");
-        }
-
-        if(fomularColums!=null&&fomularColums.size()>0){
-            for (String fomularColum : fomularColums) {
-
-                String fomularColumTmp = fomularColum.replace(".", "_");
-                String[] infos = fomularColumTmp.split("_");
-                String unitId = infos[0];
-                ReportCustomerData reportCustomerData = null;
-                if(Strings.isNullOrEmpty(fomularTmpEntity.getDimensionsId())){//一维单元公式刷新
-                    String columIdDefined = infos[1];
-                    fomularColumId = columIdDefined;
-                    reportCustomerData = reportCustomerDao.getSimpleReportCustomerData(
-                            fomularTmpEntity.getReportId().toString(), unitId, columIdDefined);
-                }else{//树状单元公式刷新
-                    String dimensionsId = infos[1];
-                    fomularColumId = dimensionsId;
-                    reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions(
-                            fomularTmpEntity.getReportId().toString(), unitId,
-                            fomularTmpEntity.getColumId(),dimensionsId);
-                }
-                Object dataFormatter = 0;
-                try{
-                    dataFormatter = new Integer(reportCustomerData.getReport_data());
-                }catch (NumberFormatException e){
-                    try{
-                        dataFormatter = new Long(reportCustomerData.getReport_data());
-                    }catch (NumberFormatException e1){
-                        try{
-                            dataFormatter = new Float(reportCustomerData.getReport_data());
-                        }catch(NumberFormatException e2){
-                            try{
-                                dataFormatter = new Double(reportCustomerData.getReport_data());
-                            }catch(NumberFormatException e3){
-                                dataFormatter = new BigDecimal(reportCustomerData.getReport_data());
-                            }
-                        }
-                    }
-                }
-                fomularParams.put(
-                        new StringBuilder().append("FL").append(unitId).append("_").append(fomularColumId).append("FL").toString(),
-                        dataFormatter);
-            }
-        }
-
-
-
-        String fomular = fomularTmpEntity.getFomularScript().replace("#", "FL").replace(".", "_");
-        Expression expression= AviatorEvaluator.compile(fomular);
-        Object result = expression.execute(fomularParams);
+    public Object getSimpleFomularData(FomularTmpEntity fomularTmpEntity){
+        Object result = fomularService.getFomularData(fomularTmpEntity);
         return result;
     }
 
     /**
-     *
+     * 一维动态数据更新，report_data含有非数字项
+     * @param simpleColumDefineds 输入项的定义
+     * @param columDatas 用户录入数据集合
+     * @param isUpdate true:更新原数据值 false：插入新数据
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateOrInsertGroupUnitContext(
+            ArrayList<SimpleColumDefined> simpleColumDefineds,
+            ArrayList<ReportCustomerData> columDatas,boolean isUpdate) {
+        Map<String, Object> custOrFomular = checkCustOrFomular(simpleColumDefineds, columDatas);
+
+        List<ReportCustomerData> custDataArray = (List<ReportCustomerData>) custOrFomular.get("custDataArray");
+        List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) custOrFomular.get("fomularArray");
+
+        Integer reportId = columDatas.get(0).getReport_id();
+        String unitId = columDatas.get(0).getUnit_id();
+        List<ReportCustomerData> dbcolumData = reportCustomerDao.getColumDatas(reportId.toString(), unitId);
+
+        //保存用户录入项内容
+        for (ReportCustomerData columData : custDataArray) {
+            boolean bAdd = true;
+            for(ReportCustomerData dbData : dbcolumData){
+                if(columData.getColum_id().equals(dbData.getColum_id()) &&
+                        columData.getDimensions_id().equals(dbData.getDimensions_id())){
+                    bAdd = false;
+                    break;
+                }
+            }
+            if(bAdd){
+                reportCustomerDao.insertUnitContext(columData);
+            }else{
+                reportCustomerDao.updateGridUnitContext(columData);
+            }
+        }
+
+        //刷新公式项内容
+        if(fomularArray!=null&&fomularArray.size()>0){
+            for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+                ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
+                if(isUpdate){
+                    reportCustomerDao.updateGridUnitContext(comularData);
+                }else{
+                    reportCustomerDao.insertUnitContext(comularData);
+                }
+            }
+        }
+
+        //检查用户输入项是否被其他公式关联，并刷新关联公式的内容
+        new Thread(new Runnable(){
+            public void run(){
+                logger.info("刷新关联到用户输入项的公式值");
+                List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(custDataArray);
+                logger.info("需要刷新的内容{}",needRefresDatas);
+                if(needRefresDatas!=null){
+                    for (ReportCustomerData needRefresData : needRefresDatas) {
+                        reportCustomerDao.updateGridUnitContext(needRefresData);
+                    }
+                }
+            }
+        }).start();
+
+    }
+
+    /**
+     * 多维静态数据更新
      * @param simpleColumDefineds 输入项的定义
      * @param columDatas 用户录入数据集合
      * @param isUpdate true:更新原数据值 false：插入新数据
@@ -424,60 +433,22 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     public void updateOrInsertGridUnitContext(
             ArrayList<GridColumDefined> simpleColumDefineds,
             ArrayList<ReportCustomerData> columDatas,boolean isUpdate) {
-        Map<String,GridColumDefined> fomularsTmp = new HashMap<>();
-        if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
-            simpleColumDefineds.forEach(simpleColumDefined->{
-                Integer columType = new Integer(simpleColumDefined.getColum_type());
-                if(ColumType.FORMULA.compareWith(columType)){
-                    fomularsTmp.put(simpleColumDefined.getUnit_id()+"_"+simpleColumDefined.getColum_id(),simpleColumDefined);
-                }
-            });
-        }
+        Map<String, Object> custOrFomular = null;//checkCustOrFomular(simpleColumDefineds, columDatas);
 
-        List<FomularTmpEntity> fomularArray = new ArrayList();
+        List<ReportCustomerData> custDataArray = (List<ReportCustomerData>) custOrFomular.get("custDataArray");
+        List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) custOrFomular.get("fomularArray");
 
-        if(columDatas!=null&&columDatas.size()>0){
-            columDatas.forEach(columData->{
-                Integer reportId = columData.getReport_id();
-                String unitId = columData.getUnit_id();
-                String columnId = columData.getColum_id();
-                String dimensionsId = columData.getDimensions_id();
-                //unitId+"_"+columnId: 一维静态公式刷新 unitId+"_"+dimensionsId:多维树状公式刷新
-                if(fomularsTmp.containsKey(unitId+"_"+columnId)||fomularsTmp.containsKey(unitId+"_"+dimensionsId)){
-
-                    FomularTmpEntity fomularTmpEntity = new FomularTmpEntity();
-                    fomularTmpEntity.setReportId(reportId);
-                    fomularTmpEntity.setUnitId(unitId);
-                    fomularTmpEntity.setColumId(columnId);
-                    fomularTmpEntity.setDimensionsId(dimensionsId);
-                    fomularTmpEntity.setReportGroupId(columData.getReport_group_id());
-
-                    String fomularScriptVal = fomularsTmp.get(unitId + "_" + dimensionsId) != null ?
-                            fomularsTmp.get(unitId + "_" + dimensionsId).getColum_formula() :
-                            fomularsTmp.get(unitId + "_" + columnId).getColum_formula();
-                    fomularTmpEntity.setFomularScript(fomularScriptVal);
-                    fomularArray.add(fomularTmpEntity);
-                } else{//无公式值刷新
-                    if(isUpdate){
-                        reportCustomerDao.updateGridUnitContext(columData);
-                    }else{
-                        reportCustomerDao.insertUnitContext(columData);
-                    }
-
-                }
-            });
+        for (ReportCustomerData columData : custDataArray) {
+            if(isUpdate){
+                reportCustomerDao.updateUnitContext(columData);
+            }else{
+                reportCustomerDao.insertUnitContext(columData);
+            }
         }
 
         if(fomularArray!=null&&fomularArray.size()>0){
             for (FomularTmpEntity fomularTmpEntity : fomularArray) {
-                Object fomularDataResult = doRefreshSimpleFomular(fomularTmpEntity);
-                ReportCustomerData comularData = new ReportCustomerData();
-                comularData.setReport_id(fomularTmpEntity.getReportId());
-                comularData.setUnit_id(fomularTmpEntity.getUnitId());
-                comularData.setColum_id(fomularTmpEntity.getColumId());
-                comularData.setDimensions_id(fomularTmpEntity.getDimensionsId());
-                comularData.setReport_data(String.valueOf(fomularDataResult));
-                comularData.setReport_group_id(fomularTmpEntity.getReportGroupId());
+                ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
                 if(isUpdate){
                     reportCustomerDao.updateUnitContext(comularData);
                 }else{
@@ -485,8 +456,6 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 }
             }
         }
-
     }
-
 
 }

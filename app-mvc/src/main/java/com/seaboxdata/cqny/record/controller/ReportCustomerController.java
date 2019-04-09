@@ -156,6 +156,16 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("saveGroupUnitContext")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult saveGroupUnitContext(@RequestBody SaveSimpleUnitContext saveUnitContext){
+        reportCustomerService.updateOrInsertGroupUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+
+        return jsonResult;
+    }
+
     @RequestMapping("saveGridUnitContext")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")

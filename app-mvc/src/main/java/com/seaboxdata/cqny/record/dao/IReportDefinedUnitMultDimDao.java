@@ -17,7 +17,7 @@ public interface IReportDefinedUnitMultDimDao {
             " left join report_defined_unit_multdim_dim c on a.dim_id=c.dim_id" +
             " where a.unit_id=#{unitId}" +
             "<if test=\"columId!=null\"> and a.colum_id = #{columId}</if>"+
-            ") x order by colum_id</script>")
+            ") x order by colum_id, dim_id</script>")
     Page<Map<String, Object>> pagerMultdimList(@Param("unitId") Integer unitId, @Param("columId") Integer columId, @Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize);
 
     @Select("select * from report_defined_unit_multdim_dim where unit_id=#{unitId}")
@@ -66,9 +66,11 @@ public interface IReportDefinedUnitMultDimDao {
     @Delete("delete from report_defined_unit_multdim_col where colum_id=#{columId}")
     void deleteMultDim_col(@Param("columId") Integer columId);
 
-    @Select("select * from report_unit_info where report_defined_id=#{originId}")
+    @Select("select * from report_unit_info where report_defined_id in (select report_defined_id from report_unit_info where unit_id=#{originId})")
     List<UnitDefined> getUnitByOrigin(String originId);
 
+    @Select("select colum_id, colum_name, colum_name_cn, group_id dim_id, group_name dim_name, unit_id, colum_type, min_value, max_value, colum_point, colum_formula, colum_formula_desc, colum_desc from report_defined_unit_onedim where unit_id = #{unitId}")
+    List<GridColumDefined> getOneColumByUnit(String unitId);
     @Select("<script>select a.*,'' colum_name, '' colum_name_cn,'1' colum_meta_type from report_defined_unit_multdim a where a.unit_id=#{unitId}" +
             "union select #{unitId},colum_id,'','','','','','',colum_name,colum_name_cn,'2' colum_meta_type from report_defined_unit_multdim_col b where b.colum_id in (select colum_id from report_defined_unit_multdim where unit_id=#{unitId})" +
             "union select unit_id,'',dim_id,'','','','','',dim_name,dim_name_cn,'3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")

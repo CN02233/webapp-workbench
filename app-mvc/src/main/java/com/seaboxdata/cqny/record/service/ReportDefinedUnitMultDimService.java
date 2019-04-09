@@ -19,6 +19,8 @@ public interface ReportDefinedUnitMultDimService {
 
     List<GridColumDefined> getColumByUnit(String unitId);
 
+    List<GridColumDefined> getMultColumByUnit(String unitId,String unitType);
+
     GridColumDefined getOnedimColumn(String columId);
 
     PageResult pagerOnedimListDynamic(Integer currPage, Integer pageSize, Integer unitId, Map<String, Object> map);

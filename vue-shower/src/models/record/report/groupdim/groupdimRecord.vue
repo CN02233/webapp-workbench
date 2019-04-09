@@ -6,9 +6,9 @@
       </el-col>
     </el-row>
     <el-form ref="form" label-width="40%">
-      <div v-for="group in definedGroup">
+      <div v-for="(group,ig) in definedGroup">
         <div style="text-align:left;margin-bottom: 22px;margin-left:20%;">
-          <el-input v-model="group.report_data" style="width:150px;"></el-input>
+          <el-input v-model="group.report_data" class="group" style="width:150px;"></el-input>
         </div>
         <el-form-item v-for="col in group.children" :label="col.colum_name_cn">
           <el-tooltip class="item" effect="dark" :content="col.colum_desc" placement="top">
@@ -157,7 +157,7 @@
               background: 'rgba(0, 0, 0, 0.7)'
             });
             this.BaseRequest({
-              url:"/reportCust/saveSimpleUnitContext",
+              url:"/reportCust/saveGroupUnitContext",
               method:'post',
               data:{
                 definedColums:this.definedColums,
@@ -211,15 +211,16 @@
       addGroup(){
         const $t = this
         $t.last_dim_id = parseInt($t.last_dim_id) + 1
-        $t.baseGroup.forEach(t => {
+        $t.baseGroup.forEach((t, i) => {
           let key0 = t.unit_id + '_' + t.colum_id + '_' + $t.last_dim_id
-          $t.columDatas[key0] = Object.assign({dimensions_id:$t.last_dim_id,report_data:t.colum_name_cn}, t)
+          $t.columDatas[key0] = Object.assign({report_id:$t.reportId,dimensions_id:$t.last_dim_id,report_data:t.colum_name_cn}, t)
           let tt = Object.assign({children:[],dimensions_id:$t.last_dim_id,report_data:t.colum_name_cn}, t)
           $t.definedColums.forEach(c=>{
             if(tt.colum_id == c.group_id){
               let cc = Object.assign({}, c)
               let key = c.unit_id + '_' + c.colum_id + '_' + $t.last_dim_id
-              $t.columDatas[key] = Object.assign({dimensions_id:$t.last_dim_id,report_data:''}, c)
+              $t.columDatas[key] = Object.assign({report_id:$t.reportId,dimensions_id:$t.last_dim_id,report_data:''}, c)
+              $t.columDatas[key].report_group_id = $t.columDatas[key].group_id
               cc.report_data = ''
               tt.children.push(cc)
             }
@@ -240,6 +241,6 @@
 </script>
 
 <style scoped>
-
+.group{}
 </style>
 

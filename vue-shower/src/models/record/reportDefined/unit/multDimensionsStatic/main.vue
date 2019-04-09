@@ -66,7 +66,7 @@
                   </el-form-item>
                 </template>
               </el-table-column>
-              <el-table-column v-for="(col,index) in editModel.dimData" :prop="col.dim_name" :label="col.dim_name_cn" width="160" >
+              <el-table-column v-for="col in editModel.dimData" :prop="col.dim_name" :label="col.dim_name_cn" width="160" >
                 <!--<template slot="header" slot-scope="scope">
                   <el-button type="text" @click="openDimAdd(index,col)">{{col.dim_name_cn}}</el-button>
                   <el-button icon="el-icon-delete" size="mini" circle @click="deleteDimRow(index, col)"></el-button>
@@ -201,6 +201,14 @@
           <el-input v-model="colForm.colum_name_cn">
           </el-input>
         </el-form-item>
+        <el-form-item label="项目单位" prop="colum_point" >
+          <el-input v-model="colForm.colum_point">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="项目备注" prop="colum_desc" >
+          <el-input v-model="colForm.colum_desc">
+          </el-input>
+        </el-form-item>
       </el-form>
       <el-row>
         <el-button @click="isOpenColEditor = false">取消</el-button>
@@ -317,6 +325,8 @@
           'max_value':null,
           'colum_formula':'',
           'colum_formula_desc':'',
+          'colum_point':'',
+          'colum_desc':'',
           'colum_id':null,
           'dim_id':null,
           'unit_id':null,
@@ -725,7 +735,7 @@
         $this.BaseRequest({
           url:"/unitMultDimColum/getUnits",
           method:'get',
-          params:{unitId:''}
+          params:{originId:this.unitId}
         }).then(response=>{
           loading.close()
           if(response){
@@ -748,25 +758,72 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
+        let unitType = 1
+        $this.otherUnits.forEach(x=>{
+          if(x.unit_id == unitId){
+            unitType = x.unit_type;
+          }
+        })
         $this.BaseRequest({
           url:"/unitMultDimColum/getInputColumn",
           method:'get',
-          params:{'unitId':unitId}
+          params:{'unitId':unitId,'unitType':unitType}
         }).then(response=>{
           loading.close()
-          this.otherUnits.forEach((unitData,i)=>{
-            if(unitData.value == unitId){
-              const columArray = []
-              if(response){
-                response.forEach(responseData=>{
-                  const colum_id = responseData.colum_id
-                  const colum_name = responseData.colum_name_cn
+          if(unitType != 3){
+            this.otherUnits.forEach((unitData,i)=>{
+              if(unitData.value == unitId){
+                const columArray = []
+                if(response){
+                  response.forEach(responseData=>{
+                    const colum_id = responseData.colum_id
+                    const colum_name = responseData.colum_name_cn
+                    columArray.push({label:colum_name,value:colum_id})
+                  })
+                  this.otherUnits[i].children = columArray
+                }
+              }
+            })
+          }
+          else{
+            let datas = [], dims = [], cols = []
+            response.forEach(responseData=>{
+              if(responseData.colum_meta_type=='1'){
+                datas.push(responseData)
+              }else if(responseData.colum_meta_type == '2'){
+                cols.push(responseData)
+              }else if(responseData.colum_meta_type == '3'){
+                dims.push(responseData)
+              }
+            })
+            datas.forEach(x=>{
+              dims.forEach(d=>{
+                if(d.dim_id==x.dim_id){
+                  x.dim_name = d.colum_name
+                  x.dim_name_cn = d.colum_name_cn
+                }
+              })
+              cols.forEach(c=>{
+                if(c.colum_id==x.colum_id){
+                  x.colum_name = c.colum_name
+                  x.colum_name_cn = c.colum_name_cn
+                }
+              })
+            })
+
+            this.otherUnits.forEach((unitData,i)=>{
+              if(unitData.value == unitId){
+                const columArray = []
+                datas.forEach(d=>{
+                  colum_id = d.colum_id +  '.' + d.dim_id
+                  colum_name = d.colum_name_cn + '.' + d.dim_name_cn
                   columArray.push({label:colum_name,value:colum_id})
                 })
                 this.otherUnits[i].children = columArray
               }
-            }
-          })
+            })
+          }
+
         }).catch(error=>{
           loading.close()
           $this.Message.success("保存失败:"+error)
@@ -784,7 +841,6 @@
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
         const unitClickId = this.fomularColumnTmp[0]
         this.otherUnits.forEach(unitData=>{
-          console.log(unitData)
           if(unitData.value == unitClickId){
             if(unitData.children){
               unitData.children.forEach(columData=>{

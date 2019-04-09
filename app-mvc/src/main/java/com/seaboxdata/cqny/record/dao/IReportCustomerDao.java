@@ -3,6 +3,7 @@ package com.seaboxdata.cqny.record.dao;
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
+import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import org.apache.ibatis.annotations.*;
 
@@ -52,6 +53,10 @@ public interface IReportCustomerDao {
     @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id}")
     void updateUnitContext(ReportCustomerData columDatas);
 
+    @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and " +
+            "( colum_id=#{colum_id} or dimensions_id=#{dimensions_id})")
+    void updateUnitContextSimple(ReportCustomerData columDatas);
+
     @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId}")
     ReportCustomerData getSimpleReportCustomerData(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("columId") String columId);
 
@@ -81,6 +86,13 @@ public interface IReportCustomerDao {
     ReportCustomerData getSimpleReportCustomerDataBydimensions(@Param("reportId") String reportId,@Param("unitId") String unitId
             ,@Param("columId") String columId,@Param("dimensionsId") String dimensionsId);
 
+    @Select("select * from report_customer_data where " +
+            "report_id=#{reportId} and unit_id=#{unitId} and dimensions_id=#{dimensionsId}")
+    ReportCustomerData getSimpleReportCustomerDataByDimId(
+            @Param("reportId") String reportId,
+            @Param("unitId") String unitId
+            ,@Param("dimensionsId") String dimensionsId);
+
     @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id} and dimensions_id=#{dimensions_id}")
     void updateGridUnitContext(ReportCustomerData columDatas);
 
@@ -91,4 +103,5 @@ public interface IReportCustomerDao {
     @Select("select sum(report_data) as sum_value from report_customer_data where report_id=#{reportId} and" +
             "s unit_id=#{unitId} and colum_id = #{dimVal}")
     Object sumColumForColums(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("dimVal") String dimVal);
+
 }
