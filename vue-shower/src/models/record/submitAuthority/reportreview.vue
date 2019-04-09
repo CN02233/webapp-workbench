@@ -1,5 +1,5 @@
 <template>
-  <WorkMain :headerItems="['报送管理','报送审批']">
+  <WorkMain :headerItems="['报送管理','报送复核']">
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
@@ -22,7 +22,8 @@
             align="left"
             width="150"
             label="状态"
-            :formatter="formatStatus">
+            :formatter="formatStatus"
+          >
           </el-table-column>
           <el-table-column
             prop="create_date"
@@ -41,7 +42,7 @@
             label="操作"
             align="left"
             width="250"
-            >
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -49,6 +50,9 @@
               <el-button
                 size="mini"
                 @click="handleReject(scope.$index, scope.row)">驳回</el-button>
+              <el-button
+                size="mini"
+                @click="handleRefill(scope.$index, scope.row)">返回重填</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -85,7 +89,7 @@ export default {
     return {
       reportDataList: [],
       definedDataObjs: {},
-      tableDataUrl: 'reportApproval/listReportApproval',
+      tableDataUrl: 'reportApproval/listReportReview',
       currPageNum: 1,
       eachPageNum: 10,
       totalPage: 1,
@@ -107,8 +111,8 @@ export default {
   },
   methods: {
     formatStatus: function (row, column) {
-      if (row.report_status === '1') {
-        return '审核中'
+      if (row.report_status === '2') {
+        return '复核中'
       }
     },
     getTableData: function (pageNum) {
@@ -124,11 +128,10 @@ export default {
         params: {currPage: pageNum, pageSize: this.eachPageNum}
       }).then(response => {
         /* if (response.dataList != null) {
-          response.dataList.forEach(definedObj => {
-            $this.definedDataObjs[definedObj.organization_id] = definedObj
-          })
-        } */
-        console.log(response)
+            response.dataList.forEach(definedObj => {
+              $this.definedDataObjs[definedObj.organization_id] = definedObj
+            })
+          } */
         $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
       })
@@ -142,21 +145,31 @@ export default {
     },
     handlePass (index, row) { // 通过
       this.BaseRequest({
-        url: '/reportApproval/ReportApprovalOperator',
+        url: '/reportApproval/ReportReviewOperator',
         method: 'get',
         params: {'reportId': row.report_id, 'reportStatus': 'pass'}
       }).then(() => {
-        this.Message.success('审批成功')
+        this.Message.success('复核通过成功')
         this.getTableData()
       })
     },
     handleReject (index, row) { // 驳回
       this.BaseRequest({
-        url: '/reportApproval/ReportApprovalOperator',
+        url: '/reportApproval/ReportReviewOperator',
         method: 'get',
         params: {'reportId': row.report_id, 'reportStatus': 'reject'}
       }).then(() => {
-        this.Message.success('审批成功')
+        this.Message.success('驳回成功')
+        this.getTableData()
+      })
+    },
+    handleRefill (index, row) { // 重填
+      this.BaseRequest({
+        url: '/reportApproval/ReportReviewOperator',
+        method: 'get',
+        params: {'reportId': row.report_id, 'reportStatus': 'refill'}
+      }).then(() => {
+        this.Message.success('返回重填执行成功')
         this.getTableData()
       })
     },

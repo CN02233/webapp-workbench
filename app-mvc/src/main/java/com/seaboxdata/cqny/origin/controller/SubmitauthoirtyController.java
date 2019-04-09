@@ -25,7 +25,7 @@ import java.util.List;
 public class SubmitauthoirtyController {
 
     @Autowired
-    private SubmitauthorityService originService;
+    private SubmitauthorityService submitauthorityService;
 
     /**
      * 列表查询展示
@@ -38,7 +38,7 @@ public class SubmitauthoirtyController {
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
     public String listSubmitauthority(int currPage, int pageSize){
-        PageResult originList = originService.listSubmitauthority(currPage, pageSize);
+        PageResult originList = submitauthorityService.listSubmitauthority(currPage, pageSize);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }
@@ -52,7 +52,7 @@ public class SubmitauthoirtyController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult addSubmitauthority(@RequestBody Submitauthority submitauthority){
-        originService.addSubmitauthority(submitauthority);
+        submitauthorityService.addSubmitauthority(submitauthority);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
         return jsonResult;
     }
@@ -67,7 +67,7 @@ public class SubmitauthoirtyController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult deleteById( String originId){
-        originService.deleteById(originId);
+        submitauthorityService.deleteById(originId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
@@ -81,8 +81,8 @@ public class SubmitauthoirtyController {
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
     public String listAllSubmitauthority(){
-        //List<EntityTree> originList = originService.listAllSubmitauthority();
-        List<EntityTree> list = originService.listAllSubmitauthority();//返回的最终集合，可根据自己返回类型更改。
+        //List<EntityTree> originList = submitauthorityService.listAllSubmitauthority();
+        List<EntityTree> list = submitauthorityService.listAllSubmitauthority();//返回的最终集合，可根据自己返回类型更改。
         List<EntityTree> tree = TreeUtil.getTreeList("0", list);//调用工具类，第一个参数是默认传入的顶级id，和查询出来的数据
         //EntityTree result = new EntityTree();//我在已经生成好的树形结构外面有包了一层。视情况而定，可以不用写
         //result.setId("0");

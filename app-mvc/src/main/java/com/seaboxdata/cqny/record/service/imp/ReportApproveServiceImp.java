@@ -63,7 +63,6 @@ public class ReportApproveServiceImp implements ReportApproveService {
 
     private List getOrigins(int user_id) {
         Origin origin = iOriginDao.getOriginByUserId(user_id);
-
         Map<String, Object> originTree = iOriginDao.getOriginById(origin.getOrigin_id());
         List finalOriginList = new ArrayList();
         checkOrigins(originTree,finalOriginList);

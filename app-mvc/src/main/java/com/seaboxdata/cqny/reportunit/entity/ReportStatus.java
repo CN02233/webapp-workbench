@@ -1,4 +1,4 @@
-package com.seaboxdata.cqny.record.entity;
+package com.seaboxdata.cqny.reportunit.entity;
 
 /**
  * 0：正常
@@ -17,29 +17,24 @@ public enum ReportStatus {
     LOCK(3,"锁定"),
     REMOVE(4,"失效"),
     APPROVE(5,"报表发布"),
-    UP_SIGIN(6,"待上传签名");
+    UP_SIGN(6,"待上传签名");
 
     private Integer value;
     private String comment;
 
-    private ReportStatus(int value,String comment){
+    private ReportStatus(int value, String comment){
         this.comment=comment;
         this.value=value;
     }
 
-    private ReportStatus(int value){
-        this.value = value;
-    }
     public String toString(){
         return this.value.toString();
-
     }
 
-    public static void main(String[] args) {
-        String s=ReportStatus.UP_SIGIN.getComment();
-        System.out.println(ReportStatus.UP_SIGIN);
-    }
-    private String getComment() {
+    public String getComment() {
         return this.comment;
+    }
+    public Integer getValue() {
+        return this.value;
     }
 }
