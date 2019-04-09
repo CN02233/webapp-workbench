@@ -19,6 +19,8 @@ public class SimpleColumDefined {
     private String parent_name;
     private String colum_desc;
 
+    private String need_remember;//是否需要记忆用户输入
+
 
     public Integer getColum_id() {
         return colum_id;
@@ -138,5 +140,13 @@ public class SimpleColumDefined {
 
     public void setColum_point(String colum_point) {
         this.colum_point = colum_point;
+    }
+
+    public String getNeed_remember() {
+        return need_remember;
+    }
+
+    public void setNeed_remember(String need_remember) {
+        this.need_remember = need_remember;
     }
 }

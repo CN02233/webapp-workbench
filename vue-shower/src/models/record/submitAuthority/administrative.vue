@@ -31,11 +31,11 @@
             align="left"
             label="创建人">
           </el-table-column>
-          <el-table-column
+          <!--<el-table-column
             prop="origin_name"
             align="left"
             label="报送机构">
-          </el-table-column>
+          </el-table-column>-->
           <el-table-column
             label="操作"
             align="left"
@@ -121,7 +121,7 @@ export default {
       },
       isShowOrigin: false,
       treeData: [],
-      origin_ids : []
+      origin_ids: []
     }
   },
   validations: {// 提交前的验证
