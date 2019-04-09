@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.reportunit.dao;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
@@ -61,36 +62,6 @@ public interface IReportStatementsDao {
             "\t1 = 1")
     Page<StatementsEntity> listReportStatements(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
-    @Select("SELECT\n" +
-            "\trd.create_date,\n" +
-            "\trd.create_user,\n" +
-            "\trd.origin_id,\n" +
-            "\trd.defined_id,\n" +
-            "\trd.defined_name,\n" +
-            "\trd.`status`\n" +
-            "FROM\n" +
-            "\treport_defined rd\n" +
-            "WHERE\n" +
-            "\trd.defined_id IN (\n" +
-            "\t\tSELECT\n" +
-            "\t\t\tdefined_id\n" +
-            "\t\tFROM\n" +
-            "\t\t\treport_defined_origin_assign rdo\n" +
-            "\t\tWHERE\n" +
-            "\t\t\trdo.origin_id IN (\n" +
-            "\t\t\t\tSELECT\n" +
-            "\t\t\t\t\toos.origin_id\n" +
-            "\t\t\t\tFROM\n" +
-            "\t\t\t\t\tUSER u,\n" +
-            "\t\t\t\t\tuser_organizations_assign uos,\n" +
-            "\t\t\t\t\torganization_origin_assign oos\n" +
-            "\t\t\t\tWHERE\n" +
-            "\t\t\t\t\tu.user_id = uos.user_id\n" +
-            "\t\t\t\tAND oos.organization_id = uos.organization_id\n" +
-            "\t\t\t\tAND u.user_id = 1\n" +
-            "\t\t\t)\n" +
-            "\t)")
-    Page<StatementsEntity> listReportStatementsByUser(@Param("currPage")int currPage,@Param("pageSize") int pageSize,@Param("userId") int user_id);
 
     @Select("SELECT" +
             " a.create_date," +
@@ -127,4 +98,33 @@ public interface IReportStatementsDao {
 
     @Delete("delete from report_defined_origin_assign where defined_id = #{definedId}")
     void delDefinedAndOriginAssign(String definedId);
+
+    /**
+     * 监管用户获取报送报表的列表
+     * @param currPage
+     * @param pageSize
+     * @param finalOriginList
+     * @return
+     */
+    @Select("<script>SELECT \n" +
+            "\trc.active_unit,\n" +
+            "\trc.create_date,\n" +
+            "\trc.report_status,\n" +
+            "\t(select u.user_name from `user` u where u.user_id=rc.last_modify_user) last_modify_user,\n" +
+            "\trc.report_defined_id,\n" +
+            "\trc.report_end_date,\n" +
+            "\trc.report_id,\n" +
+            "\trc.report_name,\n" +
+            "\trc.report_origin,\n" +
+            "\trc.report_start_date\n" +
+            "FROM\n" +
+            "\treport_customer rc  LEFT JOIN report_defined rd on rc.report_defined_id=rd.defined_id \n" +
+            "where \n" +
+            " rc.report_origin IN " +
+            "<foreach item='item' index='index' collection='originList' open='(' separator=',' close=')'> " +
+            " #{item} " +
+            "</foreach>" +
+            "</script>")
+    Page<ReportCustomer> listReportStatementsByUser(@Param("currPage")int currPage, @Param("pageSize") int pageSize, @Param("originList")List finalOriginList);
+
 }

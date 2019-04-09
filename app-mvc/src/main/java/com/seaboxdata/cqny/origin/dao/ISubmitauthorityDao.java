@@ -76,7 +76,30 @@ public interface ISubmitauthorityDao {
             @Result(property = "childrens",column = "origin_id" ,javaType= List.class, many=@Many(select="getSonOrigins"))})
     List<Map<String,Object>> getSonOrigins(Integer parent_id);
 
+    /**
+     * 直接从sys_origin 表和user_origin_assign 表获取用户所对应的origin
+     */
     @Select("select distinct so.* from sys_origin so ,user_origin_assign uoa where so.origin_id = uoa.origin_id " +
             "and uoa.user_id = #{userId} and origin_status!=3")
     Origin getOriginByUserId(Integer userId);
+
+    /**
+     * 从user_organizations_assign 表获取用户对应的行政机构organization_id ,再取得行政机构所关联的origin_id列表
+     * @param userId
+     * @return
+     */
+    @Select("SELECT\n" +
+            "\tooa.origin_id\n" +
+            "FROM\n" +
+            "\torganization_origin_assign ooa\n" +
+            "WHERE\n" +
+            "\tooa.organization_id IN (\n" +
+            "\t\tSELECT\n" +
+            "\t\t\tuos.organization_id\n" +
+            "\t\tFROM\n" +
+            "\t\t\tuser_organizations_assign uos\n" +
+            "\t\tWHERE\n" +
+            "\t\t\tuos.user_id = #{userId}\n" +
+            "\t)")
+    List<String> getOriginIdListByUserId(@Param("userId") Integer userId);
 }
