@@ -45,9 +45,6 @@
             <template slot-scope="scope">
               <el-button
                 size="mini"
-                >用户关联</el-button>
-              <el-button
-                size="mini"
                 @click="bindOrigin(scope.$index, scope.row)">报送机构</el-button>
               <el-button
                 size="mini"

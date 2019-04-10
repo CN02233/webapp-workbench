@@ -23,8 +23,8 @@ public interface IReportCustomerDao {
 
     @Select("select * from report_customer where report_id = #{reportId}")
     @Results(value={
-            @Result(property = "report_id",column = "report_id"),
-            @Result(property = "unitEntities",column = "report_id" ,javaType= List.class, many=@Many(select="getAllUnitEntityByReportId"))
+            @Result(property = "report_defined_id",column = "report_defined_id"),
+            @Result(property = "unitEntities",column = "report_defined_id" ,javaType= List.class, many=@Many(select="getAllUnitEntityByReportId"))
     })
     ReportCustomer checkReportCustomer(String reportId);
 

@@ -12,6 +12,12 @@
             label="报表ID">
           </el-table-column>
           <el-table-column
+            prop="report_name"
+            align="left"
+            width="150"
+            label="报表名称">
+          </el-table-column>
+          <el-table-column
             prop="active_unit"
             align="left"
             width="150"

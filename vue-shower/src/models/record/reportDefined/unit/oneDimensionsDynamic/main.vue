@@ -102,6 +102,16 @@
                 </el-form-item>
               </template>
             </el-table-column>
+            <el-table-column label="是否记忆用户输入" width="100">
+              <template slot-scope="scope">
+                <el-form-item :prop="'tableData.' + scope.$index + '.need_remember'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段',validator: validateFormula}:{required:false}">
+                  <el-select v-model="scope.row.need_remember" style="width:100%;" placeholder="请选择">
+                    <el-option  label="是" value="Y"></el-option>
+                    <el-option  label="否" value="N"></el-option>
+                  </el-select>
+                </el-form-item>
+              </template>
+            </el-table-column>
             <el-table-column label="公式" width="200">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段',validator: validateFormula}:{required:false}">
@@ -248,6 +258,7 @@
           'colum_formula':'',
           'colum_formula_desc':'',
           'unit_id':'',
+          'need_remember':'N',
           'group_id':null,
           'group_name':'',
           'colum_point':'',

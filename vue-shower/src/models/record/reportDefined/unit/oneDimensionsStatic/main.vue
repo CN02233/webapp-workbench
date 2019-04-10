@@ -74,6 +74,12 @@
         <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
           <el-input v-model="formData.max_value" auto-complete="off" ></el-input>
         </el-form-item>
+        <el-form-item v-if="formData.colum_type!='0'" label="是否需要记忆" >
+          <el-select v-model="formData.need_remember" style="width:100%;" placeholder="请选择">
+            <el-option  label="是" value="Y"></el-option>
+            <el-option  label="否" value="N"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="输入项备注" >
           <el-input v-model="formData.colum_desc" auto-complete="off" ></el-input>
         </el-form-item>
@@ -186,6 +192,7 @@
           'colum_type':'1',
           'min_value':'',
           'max_value':'',
+          'need_remember':'N',
           'colum_formula':'',
           'colum_formula_desc':'',
           'unit_id':'',
@@ -198,6 +205,7 @@
           'colum_type':'1',
           'min_value':'',
           'max_value':'',
+          'need_remember':'N',
           'colum_formula':'',
           'colum_formula_desc':'',
           'unit_id':'',

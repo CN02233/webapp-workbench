@@ -6,8 +6,11 @@ import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.treedim.TreeUnitContext;
 import com.seaboxdata.cqny.record.service.FomularService;
+import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.TreeDimReportCustomerService;
+import com.webapp.support.session.SessionSupport;
+import com.workbench.auth.user.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +35,9 @@ public class TreeDimReportCustomerServiceImp implements TreeDimReportCustomerSer
 
     @Autowired
     private FomularService fomularService;
+
+    @Autowired
+    private RememberCustDataService rememberCustDataService;
 
     @Override
     @Transactional(rollbackFor = Exception.class,propagation= Propagation.REQUIRED)
@@ -80,12 +86,21 @@ public class TreeDimReportCustomerServiceImp implements TreeDimReportCustomerSer
             }
         }
 
-        new Thread(new Runnable(){
-            public void run(){
-                logger.info("刷新关联到用户输入项的公式值");
-                List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(checkRefreshFomular);
-                logger.info("需要刷新的内容{}",needRefresDatas);
+        User currUser = SessionSupport.checkoutUserFromSession();
+        new Thread(() -> {
+            logger.info("刷新关联到用户输入项的公式值");
+            List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(checkRefreshFomular);
+            logger.info("需要刷新的内容{}",needRefresDatas);
+
+            for (TreeUnitContext treeUnitContext : treeUnitContexts) {
+
+                logger.info("查看用户录入项是否需要自动记忆，如需要，将用户输入数据保存");
+                rememberCustDataService.rememberCustData(treeUnitContext.getDefinedColums(),
+                        treeUnitContext.getColumDatas(),currUser.getUser_id());
+                logger.info("用户录入记忆完成");
             }
+
+
         }).start();
 
 

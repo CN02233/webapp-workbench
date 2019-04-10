@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.record.service.imp;
 
+import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
@@ -128,7 +129,9 @@ public class SubmitReportServiceImp implements SubmitReportService {
                 ArrayList<ReportCustomerData> dataList = createOneDimDatas(oneColumDefinedsList, reportIds);
                 logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
             }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
-
+                ArrayList<SimpleColumDefined> oneColumDefinedsList = (ArrayList<SimpleColumDefined>) unitDefind.getColums();
+                ArrayList<ReportCustomerData> dataList = createOneDimDynDatas(oneColumDefinedsList, reportIds);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
             }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
 
             }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
@@ -162,6 +165,34 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
             }
         }
+        return saveColumDatas(columDatas);
+    }
+
+    private ArrayList<ReportCustomerData> createOneDimDynDatas(ArrayList<SimpleColumDefined> columDefineds, List<Integer> reportIds){
+        ArrayList<ReportCustomerData> columDatas = new ArrayList<>();
+        if(columDefineds!=null){
+            for (SimpleColumDefined columDefined : columDefineds) {
+                for (Integer reportId : reportIds) {
+                    Integer groupId = columDefined.getGroup_id();
+                    ReportCustomerData reportCustomerData = new ReportCustomerData();
+                    reportCustomerData.setReport_id(reportId);
+                    reportCustomerData.setColum_id(columDefined.getColum_id().toString());
+                    reportCustomerData.setDimensions_id("0");
+                    if(columDefined.getGroup_id()!=null){
+                        reportCustomerData.setReport_group_id(String.valueOf(columDefined.getGroup_id()));
+                    }
+                    reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
+                    if(groupId!=null){
+                        reportCustomerData.setReport_data("0");
+                    }else{
+                        reportCustomerData.setReport_data(columDefined.getColum_name_cn());
+                    }
+                    columDatas.add(reportCustomerData);
+                }//
+
+            }
+        }
+
         return saveColumDatas(columDatas);
     }
 
