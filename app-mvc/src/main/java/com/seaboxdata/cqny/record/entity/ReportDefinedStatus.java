@@ -6,12 +6,14 @@ package com.seaboxdata.cqny.record.entity;
  * 2:锁定
  * 3:软删除
  * 4:已发布
+ * 5:发布中
  */
 public enum ReportDefinedStatus {
     NORMAL(0),
     FAIL(1),
     LOCK(2),
     DELETE(3),
+    SUBMITING(5),
     SUBMIT(4);
 
     private Integer value;

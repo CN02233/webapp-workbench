@@ -59,6 +59,11 @@
                 size="mini"
                 type="danger"
                 @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              <el-button v-if="scope.row.status==0"
+                size="mini"
+                type="success"
+                @click="submitReport(scope.row)">发布</el-button>
+
             </template>
           </el-table-column>
         </el-table>
@@ -194,15 +199,22 @@ export default {
   },
   methods: {
     formatStatus: function (row, column) {
-      if (row.status === '100') {
-        return '编辑中'
+      if (row.status === '0') {
+        return '正常'
       }
-      if (row.status === '200') {
+      if (row.status === '1') {
+        return '失效'
+      }
+      if (row.status === '2') {
+        return '锁定'
+      }
+      if (row.status === '4') {
         return '已发布'
       }
-      if (row.status === '300') {
-        return '已使用'
+      if (row.status === '5') {
+        return '发布中'
       }
+      return '未知'
     },
     handleNodeClick (data) { // 点击树的节点进行赋值
       // console.log(data)
@@ -376,6 +388,26 @@ export default {
         query:{
           'definedId':definedId
         }
+      });
+    },
+    submitReport(subReport){
+      const defined_id = subReport.defined_id
+
+      const loading = this.$loading({
+        lock: true,
+        text: '发布中',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.BaseRequest({
+        url:"/reportStatements/sumitReportDefined",
+        params:{
+          reportDefinedId:defined_id
+        }
+      }).then(response=>{
+        loading.close();
+        this.Message.success('发布流程已启动')
+        this.getTableData(1)
       });
     }
   },

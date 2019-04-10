@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.reportunit.controller;
 
+import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
+import com.seaboxdata.cqny.record.service.SubmitReportService;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.webapp.support.json.JsonSupport;
@@ -8,6 +10,8 @@ import com.webapp.support.page.PageResult;
 import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
 import com.workbench.spring.aop.annotation.JsonpCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +29,13 @@ import java.util.List;
 @RequestMapping("reportStatements")
 public class ReportStatementsController {
 
+    private Logger logger = LoggerFactory.getLogger(ReportStatementsService.class);
+
     @Autowired
     private ReportStatementsService reportStatementsService;
+
+    @Autowired
+    private SubmitReportService reportDefinedSubmitService;
 
     /**
      * 列表查询展示
@@ -131,6 +140,24 @@ public class ReportStatementsController {
         User user = SessionSupport.checkoutUserFromSession();
         PageResult originList = reportStatementsService.listReportStatementsByUser(currPage, pageSize,user.getUser_id());
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
+        return jsonpResponse;
+    }
+
+
+//    reportDefinedSubmitService
+
+    @RequestMapping("sumitReportDefined")
+    @ResponseBody
+    @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
+    public String sumitReportDefined(String reportDefinedId){
+        logger.info("更新报表状态为发布中-->{}",reportDefinedId);
+        reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.SUBMITING);
+
+        new Thread(() -> {
+            reportDefinedSubmitService.doSubmit(reportDefinedId);
+        }).start();
+        String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "已开始发布", null, null);
         return jsonpResponse;
     }
 

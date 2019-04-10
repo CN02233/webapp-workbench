@@ -127,4 +127,6 @@ public interface IReportStatementsDao {
             "</script>")
     Page<ReportCustomer> listReportStatementsByUser(@Param("currPage")int currPage, @Param("pageSize") int pageSize, @Param("originList")List finalOriginList);
 
+    @Update("update report_defined set status = #{status} where defined_id=#{definedId}")
+    void changeDeindStatus(@Param("definedId") String definedId,@Param("status") int status);
 }

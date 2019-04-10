@@ -8,25 +8,22 @@
           <el-table-column
             prop="report_name"
             align="left"
-            width="200"
             label="报表名称">
           </el-table-column>
           <el-table-column
               prop="report_origin"
               align="left"
-              width="230"
-              label="所属机构">
+              :formatter="getOriginName"
+              label="报送机构">
             </el-table-column>
           <el-table-column
             prop="report_start_date"
             align="left"
-            width="200"
             label="报送开始时间">
           </el-table-column>
           <el-table-column
             prop="report_end_date"
             align="left"
-            width="200"
             label="报送结束时间">
           </el-table-column>
 
@@ -37,16 +34,8 @@
             width="250"
           >
             <template slot-scope="scope">
-              <el-button
-                size="mini" @click="definedUnit(scope.row.defined_id)"
-              >报送单元</el-button>
-              <el-button
-                size="mini"
-                @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-              <el-button
-                size="mini"
-                type="danger"
-                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              <el-button size="mini" @click="reportFIll(scope.row.report_id)">填报</el-button>
+              <el-button size="mini" type="danger" @click="handleEdit(scope.$index, scope.row)">提交</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -62,16 +51,23 @@
 </template>
 
 <script>
+  import WorkTablePager from '@/models/public/WorkTablePager'
+  import WorkMain from '@/models/public/WorkMain'
   export default {
     name: "ReportMain",
     describe:"报送填报列表页面",
     data () {
       return {
         reportDataList: [],
+        origins: {},
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1
       }
+    },
+    components: {
+      WorkTablePager,
+      WorkMain
     },
     methods: {
       getTableData(pageNum){
@@ -86,9 +82,22 @@
           method: 'get',
           params: {currPage: pageNum, pageSize: this.eachPageNum}
         }).then(response => {
+          response.origins.forEach(origin=>{
+            $this.origins[origin['origin_id']] = origin
+          })
           $this.reportDataList = response.dataList
+          // $this.origins = response.origins
           $this.totalPage = response.totalPage
+
         })
+      },
+      reportFIll(reportId){
+        this.$router.push({
+          path: "/record/report/reportFill?reportId="+reportId
+        });
+      },
+      getOriginName(rowData){
+        return this.origins[rowData.report_origin].origin_name
       }
     },
     mounted: function () { // 初始化

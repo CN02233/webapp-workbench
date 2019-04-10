@@ -5,6 +5,7 @@ import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
+import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
@@ -41,20 +42,35 @@ public class SubmitReportServiceImp implements SubmitReportService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void doSubmit(String reportDefinedId) {
-        logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
-        StatementsEntity reportDefined = getReportDefined(reportDefinedId);
-        logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
-        if(reportDefined==null){
-            return;
+        try {
+            logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
+            StatementsEntity reportDefined = getReportDefined(reportDefinedId);
+            logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
+            if(reportDefined==null){
+                return;
+            }
+
+            logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
+            List<String> alOrigin = getAllOrigin(reportDefinedId);
+            logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
+            logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
+            List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin);
+            logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
+            logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
+            createReportDefaultData(reportDefined,reportIds);
+
+            logger.info("更新报表状态为发布完成-->{}",reportDefinedId);
+            reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.SUBMIT);
+        }catch (Exception e){
+            logger.info("报表发布出现异常->{},回滚报表状态为正常",reportDefinedId);
+
+            reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.NORMAL);
+            throw e;
+        }finally {
+
         }
-        logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
-        List<String> alOrigin = getAllOrigin(reportDefinedId);
-        logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
-        logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
-        List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin);
-        logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
-        logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
-        createReportDefaultData(reportDefined,reportIds);
+
+
     }
 
     /**

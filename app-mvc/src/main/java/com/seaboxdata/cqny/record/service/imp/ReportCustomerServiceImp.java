@@ -45,25 +45,11 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     @Autowired
     private RememberCustDataService rememberCustDataService;
 
-    @Autowired
-    private OriginService originService;
-
-
     @Override
-    public PageResult pagerReport(Integer currPage, Integer pageSize, Integer userId) {
-        Origin userOrigin = originService.getOriginByUser(userId);
-        Integer userOriginId = userOrigin.getOrigin_id();
-        List<Origin> childrenOrigin = originService.checkAllChildren(userOriginId);
-        List<Integer> originParams = new ArrayList<>();
-        originParams.add(userOriginId);
-        if(childrenOrigin!=null){
-            for (Origin origin : childrenOrigin) {
-                originParams.add(origin.getOrigin_id());
-            }
-        }
-
-        Page pagerData = reportCustomerDao.pageReportByOrigins(currPage,pageSize,originParams);
+    public PageResult pagerReport(Integer currPage, Integer pageSize,  List<Integer> originIds) {
+        Page pagerData = reportCustomerDao.pageReportByOrigins(currPage,pageSize,originIds);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pagerData);
+
         return pageResult;
 //        return null;
     }
