@@ -121,6 +121,15 @@ public class ReportDefinedUnitMultDimController {
         return jsonResult;
     }
 
+    @RequestMapping("saveMultdim_col")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult saveMultdim_col(@RequestBody GridColumDefined maps){
+        reportDefinedUnitMultDimService.saveMultdim_col(maps);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,maps);
+        return jsonResult;
+    }
+
     @RequestMapping("deleteMultdim")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")

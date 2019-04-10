@@ -71,12 +71,19 @@ public class FomularServiceImp implements FomularService {
         String columFomularTmp = fomularTmpEntity.getFomularScript();
 
         //#19.16#+#18.25#提取出 19.16 18.25 放到fomularColums中
+
         List<String> fomularColums = fomularParamNames(columFomularTmp);
 
         if(fomularColums!=null&&fomularColums.size()>0){
             Map<String, Object> fomularParams = this.makeFomularParams(fomularColums, fomularTmpEntity);
-
-            String fomular = fomularTmpEntity.getFomularScript().replace("#", "FL").replace(".", "_");
+            //循环替换，支持带点常数 #15.41#*0.2
+            //String fomular = fomularTmpEntity.getFomularScript().replace("#", "FL").replace(".", "_");
+            String fomular = fomularTmpEntity.getFomularScript();
+            for(String col : fomularColums){
+                String vars = "#" + col + "#";
+                fomular = fomular.replace(vars, vars.replace(".","_"));
+            }
+            fomular = fomular.replace("#","FL");
             Expression expression= AviatorEvaluator.compile(fomular);
             Object result = expression.execute(fomularParams);
             return result;
@@ -228,6 +235,7 @@ public class FomularServiceImp implements FomularService {
             String[] infos = fomularColumTmp.split("_");
             String unitId = infos[0];
             String columOrDimensionsIdDefined = infos[1];
+            String dimensionsGridId = "";
 
             UnitEntity unitDefined = this.checkUnit(unitId);
             Integer unitType = unitDefined.getUnit_type();
@@ -249,15 +257,21 @@ public class FomularServiceImp implements FomularService {
                 reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions(
                         fomularTmpEntity.getReportId().toString(), unitId, columOrDimensionsIdDefined, dimensionsId);
             } else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitType)){
-                String dimensionsId = infos.length > 2 ? infos[2] : fomularTmpEntity.getDimensionsId();
+                dimensionsGridId = infos.length > 2 ? infos[2] : fomularTmpEntity.getDimensionsId();
                 reportCustomerData = reportCustomerDao.getSimpleReportCustomerDataBydimensions(
-                        fomularTmpEntity.getReportId().toString(), unitId, columOrDimensionsIdDefined, dimensionsId);
+                        fomularTmpEntity.getReportId().toString(), unitId, columOrDimensionsIdDefined, dimensionsGridId);
             }
 
             Object formatData = dataFormat(reportCustomerData.getReport_data());
-            fomularParams.put(
-                    new StringBuilder().append("FL").append(unitId).append("_").append(columOrDimensionsIdDefined).append("FL").toString(),
-                    formatData);
+            if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitType)){
+                fomularParams.put(
+                        new StringBuilder().append("FL").append(unitId).append("_").append(columOrDimensionsIdDefined).append("_").append(dimensionsGridId).append("FL").toString(),
+                        formatData);
+            }else{
+                fomularParams.put(
+                        new StringBuilder().append("FL").append(unitId).append("_").append(columOrDimensionsIdDefined).append("FL").toString(),
+                        formatData);
+            }
         }
 
         return fomularParams;
