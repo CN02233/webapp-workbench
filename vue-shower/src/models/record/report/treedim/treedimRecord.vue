@@ -14,23 +14,23 @@
           {{elColumDefined.colum_name_cn}}
           {{elColumDefined.colum_point!=null&&elColumDefined.colum_point!=''?'('+elColumDefined.colum_point+')':''}}
         </el-col>
-        <el-col class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
+        <el-col align="center" class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
           操作
         </el-col>
       </el-row>
 
       <el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">
-        <el-col  class="tree_colum"
+        <el-col  align="left" class="tree_colum"
                  :span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"
                  v-for="elColData in elColDatas">
           <el-input v-if="elColData!=null" :disabled="elColData.colum_type==0" v-model="elColData.report_data"></el-input>
           <span v-else> -- </span>
         </el-col>
         <!--{{groupDatas.columNameLink[]}}-->
-        <el-col v-if="groupDatas.elRowDatas.length>1" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
+        <el-col align="center" v-if="groupDatas.elRowDatas.length>1" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
           <el-button @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
-          <el-button @click="cpTmpNode(elColDatas,dataRowNum)">复制</el-button>
-          <el-button @click="delTmpNode(elColDatas,dataRowNum)">删除</el-button>
+          <!--<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>-->
+          <el-button @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
         </el-col>
       </el-row>
     </div>
@@ -604,14 +604,14 @@
         this.definedColumsGroup[groupId].elRowDatas.splice((insertRowNum),0,insertRowData)
       },
 
-      cpTmpNode(cpElRowData, cpRowNum){
+      cpTmpNode(cpElRowData, cpRowNum,groupId){
         let cpRowLevel = 0
 
         cpElRowData.forEach(cpColData=>{
           if(cpColData!=null){
             const unit_id = cpColData.unit_id
             const dimensions_id = cpColData.dimensions_id
-            const elColumDefined = this.elColumDefineds[unit_id+"-"+dimensions_id]
+            const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id+"-"+dimensions_id]
             cpRowLevel = elColumDefined.level
             //array.splice(2, 0, "three");
           }
@@ -619,15 +619,15 @@
 
         const cpArrayTmp = []
         let endRowNum = 0
-        for(let cpIndex = (cpRowNum+1);cpIndex<this.elRowDatas.length;cpIndex++){
-          const elRowDataTmp =  this.elRowDatas[cpIndex]
+        for(let cpIndex = (cpRowNum+1);cpIndex<this.definedColumsGroup[groupId].elRowDatas.length;cpIndex++){
+          const elRowDataTmp =  this.definedColumsGroup[groupId].elRowDatas[cpIndex]
           let checkRowLevel = 0
           for(let colIndex = 0;colIndex<elRowDataTmp.length;colIndex++) {
             const elColTMp = elRowDataTmp[colIndex]
             if (elColTMp != null) {
               const unit_id = elColTMp.unit_id
               const dimensions_id = elColTMp.dimensions_id
-              const elColumDefined = this.elColumDefineds[unit_id + "-" + dimensions_id]
+              const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id + "-" + dimensions_id]
               checkRowLevel = elColumDefined.level
               break
             }
@@ -642,34 +642,33 @@
             break
           }
         }
-        this.elRowDatas.splice(endRowNum,0,cpElRowData)
+        this.definedColumsGroup[groupId].elRowDatas.splice(endRowNum,0,cpElRowData)
         cpArrayTmp.forEach((cpTmp,i)=>{
-          this.elRowDatas.splice((endRowNum+i+1),0,cpTmp)
+          this.definedColumsGroup[groupId].elRowDatas.splice((endRowNum+i+1),0,cpTmp)
         })
       },
-      delTmpNode(delElRowData, delRowNum){
+      delTmpNode(delElRowData, delRowNum,groupId){
         let delRowLevel = 0
-
         delElRowData.forEach(delColData=>{
           if(delColData!=null){
             const unit_id = delColData.unit_id
             const dimensions_id = delColData.dimensions_id
-            const elColumDefined = this.elColumDefineds[unit_id+"-"+dimensions_id]
+            const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id+"-"+dimensions_id]
             delRowLevel = elColumDefined.level
           }
         })
 
         const delArrayTmp = []
         let endRowNum = 0
-        for(let delIndex = (delRowNum+1);delIndex<this.elRowDatas.length;delIndex++){
-          const elRowDataTmp =  this.elRowDatas[delIndex]
+        for(let delIndex = (delRowNum+1);delIndex<this.definedColumsGroup[groupId].elRowDatas.length;delIndex++){
+          const elRowDataTmp =  this.definedColumsGroup[groupId].elRowDatas[delIndex]
           let checkRowLevel = 0
           for(let colIndex = 0;colIndex<elRowDataTmp.length;colIndex++) {
             const elColTMp = elRowDataTmp[colIndex]
             if (elColTMp != null) {
               const unit_id = elColTMp.unit_id
               const dimensions_id = elColTMp.dimensions_id
-              const elColumDefined = this.elColumDefineds[unit_id + "-" + dimensions_id]
+              const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id + "-" + dimensions_id]
               checkRowLevel = elColumDefined.level
               break
             }
@@ -681,7 +680,7 @@
             break
           }
         }
-        this.elRowDatas.splice(delRowNum,(endRowNum-delRowNum))
+        this.definedColumsGroup[groupId].elRowDatas.splice(delRowNum,(endRowNum-delRowNum))
       }
     },
     mounted:function(){
@@ -703,7 +702,7 @@
 
   .tree_colum{
     padding:5px 2px 5px 2px;
-    text-align: left;
+    /*text-align: left;*/
   }
 
   .backgroud-type1{

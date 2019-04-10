@@ -5,6 +5,7 @@ import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public interface RememberCustDataService {
 
@@ -14,5 +15,5 @@ public interface RememberCustDataService {
 
     boolean needOrNotRemember(SimpleColumDefined simpleColumDefined);
 
-    void doRemember(RememberCustData reportCustomerData);
+    void doRemember(List<RememberCustData> rememberCustDatas);
 }

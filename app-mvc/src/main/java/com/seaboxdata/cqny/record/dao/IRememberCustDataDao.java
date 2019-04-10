@@ -29,7 +29,7 @@ public interface IRememberCustDataDao {
             "(colum_id = #{columOrDimId} or dimensions_id=#{dimensions_id})")
     void deleteRememberCustDataByColum(@Param("reportId") String reportId,@Param("columOrDimId")  String columOrDimId);
 
-    @Insert("insert into report_remembers (user_id,unit_id,colum_id,dimensions_id,remember_data) values " +
-            "(#{user_id},#{unit_id},#{colum_id},#{dimensions_id},#{remember_data})")
+    @Insert("insert into report_remembers (report_id,user_id,unit_id,colum_id,dimensions_id,remember_data) values " +
+            "(#{report_id},#{user_id},#{unit_id},#{colum_id},#{dimensions_id},#{remember_data})")
     void saveRememberCustData(RememberCustData rememberCustData);
 }

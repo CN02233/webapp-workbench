@@ -9,14 +9,14 @@ import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.reportunit.dao.IReportUnitDao;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
-import com.webapp.support.session.SessionSupport;
-import com.workbench.auth.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service("rememberCustDataService")
 
@@ -41,23 +41,38 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
             ArrayList<ReportCustomerData> columDatas,Integer rememberUser) {
         userId.set(rememberUser);
 
+        Map<String,SimpleColumDefined> needRememberTmp = new HashMap<>();
         if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
             for (SimpleColumDefined simpleColumDefined : simpleColumDefineds) {
                 if(this.needOrNotRemember(simpleColumDefined)){
                     if(unitEntity.get()==null){
                         unitEntity.set(reportUnitDao.getReportUnit(simpleColumDefined.getUnit_id().toString()));
-                        break;
+                    }
+                    Integer entityType = unitEntity.get().getUnit_type();
+                    if(UnitDefinedType.ONEDIMSTATIC.compareWith(entityType)||
+                            UnitDefinedType.ONEDIMDYNAMIC.compareWith(entityType)||UnitDefinedType.MANYDIMTREE.compareWith(entityType)){
+                        needRememberTmp.put(simpleColumDefined.getUnit_id()+"-"+simpleColumDefined.getColum_id(),simpleColumDefined);
+                    }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(entityType)){
+
+
                     }
                 }
             }
         }
 
         if(columDatas!=null&&columDatas.size()>0){
+            List<RememberCustData> rememberList = new ArrayList<>();
             for (ReportCustomerData columData : columDatas) {
-                RememberCustData rememberData = null;
-                rememberData = makeRememberData(columData);
-                this.doRemember(rememberData);
+                if(needRememberTmp.containsKey(columData.getUnit_id()+"-"+columData.getColum_id())||
+                        needRememberTmp.containsKey(columData.getUnit_id()+"-"+columData.getDimensions_id())){
+                    RememberCustData rememberData = null;
+                    rememberData = makeRememberData(columData);
+                    rememberList.add(rememberData);
+                }
             }
+
+            this.doRemember(rememberList);
+
         }
     }
 
@@ -72,14 +87,22 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void doRemember(RememberCustData rememberCustData) {
-        rememberCustData.setUser_id(userId.get());
-        rememberCustDataDao.deleteRememberCustDataByUnit(
-                rememberCustData.getReport_id().toString(),
-                rememberCustData.getUnit_id().toString(),
-                String.valueOf(userId));
+    public void doRemember(List<RememberCustData> rememberCustDatas) {
 
-        rememberCustDataDao.saveRememberCustData(rememberCustData);
+        boolean removeOld = false;
+        for (RememberCustData rememberCustData : rememberCustDatas) {
+            if(!removeOld){
+                removeOld = true;
+                rememberCustDataDao.deleteRememberCustDataByUnit(
+                        rememberCustData.getReport_id().toString(),
+                        rememberCustData.getUnit_id().toString(),
+                        String.valueOf(userId.get()));
+            }
+            rememberCustData.setUser_id(userId.get());
+            rememberCustDataDao.saveRememberCustData(rememberCustData);
+        }
+
+
     }
 
     public RememberCustData makeRememberData(ReportCustomerData reportCustomerData){
