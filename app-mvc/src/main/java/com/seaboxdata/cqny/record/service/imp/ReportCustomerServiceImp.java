@@ -11,10 +11,13 @@ import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.FomularService;
+import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
 import com.webapp.support.page.PageResult;
+import com.webapp.support.session.SessionSupport;
+import com.workbench.auth.user.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Autowired
     private FomularService fomularService;
+
+    @Autowired
+    private RememberCustDataService rememberCustDataService;
 
 
     @Override
@@ -164,7 +170,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         }
 
         //检查用户输入项是否被其他公式关联，并刷新关联公式的内容
-
+        User currUser = SessionSupport.checkoutUserFromSession();
         new Thread(new Runnable(){
             public void run(){
                 logger.info("刷新关联到用户输入项的公式值");
@@ -175,6 +181,10 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                         reportCustomerDao.updateUnitContext(needRefresData);
                     }
                 }
+
+                logger.info("查看用户录入项是否需要自动记忆，如需要，将用户输入数据保存");
+                rememberCustDataService.rememberCustData(simpleColumDefineds,columDatas,currUser.getUser_id());
+                logger.info("用户录入记忆完成");
             }
         }).start();
 

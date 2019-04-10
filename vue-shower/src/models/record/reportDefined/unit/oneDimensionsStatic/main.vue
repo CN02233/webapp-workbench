@@ -75,9 +75,9 @@
           <el-input v-model="formData.max_value" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type!='0'" label="是否需要记忆" >
-          <el-select v-model="formData.need_remember" style="width:100%;" placeholder="请选择数据类型">
-            <el-option :key="Y" label="是" value="Y"></el-option>
-            <el-option :key="N" label="否" value="N"></el-option>
+          <el-select v-model="formData.need_remember" style="width:100%;" placeholder="请选择">
+            <el-option  label="是" value="Y"></el-option>
+            <el-option  label="否" value="N"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="输入项备注" >
