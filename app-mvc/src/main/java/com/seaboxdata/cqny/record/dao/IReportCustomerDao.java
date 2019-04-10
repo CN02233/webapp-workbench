@@ -20,6 +20,16 @@ public interface IReportCustomerDao {
                                     @Param("pageSize") Integer pageSize,
                                     @Param("userId") Integer userId);
 
+    @Select("<script>" +
+            "select rc.* from report_customer rc where rc.report_origin in " +
+            "<foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> " +
+            "#{item}" +
+            "</foreach>" +
+            "</script>")
+    Page<ReportCustomer> pageReportByOrigins(@Param("currPage") Integer currPage,
+                                    @Param("pageSize") Integer pageSize,
+                                    @Param("originParams") List<Integer> originParams);
+
 
     @Select("select * from report_customer where report_id = #{reportId}")
     @Results(value={

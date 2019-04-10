@@ -28,4 +28,7 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
 
     public void testDoRefreshSimpleFomular() {
     }
+
+    public void testPagerReport1() {
+    }
 }
