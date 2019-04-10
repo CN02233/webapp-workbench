@@ -116,6 +116,13 @@ const routes = [
             ]
           },
           {
+            name: 'reportMain',
+            path: '/record/report/reportMain',
+            component: () => import('@/models/record/report/reportMain'),
+            children: [
+              ]
+          },
+          {
             name: 'reportFill',
             path: '/record/report/reportFill',
             component: () => import('@/models/record/report/reportFill'),
