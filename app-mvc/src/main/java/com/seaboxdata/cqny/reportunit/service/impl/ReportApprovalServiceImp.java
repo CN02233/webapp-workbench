@@ -1,9 +1,8 @@
 package com.seaboxdata.cqny.reportunit.service.impl;
 
 import com.github.pagehelper.Page;
-import com.seaboxdata.cqny.record.dao.IOriginDao;
+import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
 import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.record.entity.ReportInfo;
 import com.seaboxdata.cqny.reportunit.dao.IReportApprovalDao;
 import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
 import com.seaboxdata.cqny.reportunit.entity.ReportStatus;
@@ -26,7 +25,7 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
     private IReportApprovalDao reportApprovalDao;
 
     @Autowired
-    private IOriginDao iOriginDao;
+    private ISubmitauthorityDao submitauthorityDao;
 
     @Override
     public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize) {
@@ -49,8 +48,8 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     private List getOrigins(int user_id) {
         Origin origin;
-        origin = iOriginDao.getOriginByUserId(user_id);
-        Map<String, Object> originTree = iOriginDao.getOriginById(origin.getOrigin_id());
+        origin = submitauthorityDao.getOriginByUserId(user_id);
+        Map<String, Object> originTree = submitauthorityDao.getOriginById(origin.getOrigin_id().toString());
         List finalOriginList = new ArrayList();
         checkOrigins(originTree,finalOriginList);
         return finalOriginList;

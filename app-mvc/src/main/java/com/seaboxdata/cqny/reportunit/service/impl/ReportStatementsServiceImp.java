@@ -1,21 +1,19 @@
 package com.seaboxdata.cqny.reportunit.service.impl;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
 import com.seaboxdata.cqny.reportunit.dao.IReportStatementsDao;
+import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.webapp.support.page.PageResult;
-import com.workbench.auth.user.service.imp.UserServiceImp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service("reportStatements")
 public class ReportStatementsServiceImp implements ReportStatementsService {
@@ -24,6 +22,8 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     @Autowired
     private IReportStatementsDao reportStatementsDao;
 
+    @Autowired
+    private ISubmitauthorityDao submitauthorityDao;
 
     @Override
     public PageResult listReportStatements(int currPage, int pageSize) {
@@ -57,11 +57,26 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 
     @Override
     public PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id) {
-        Page<StatementsEntity> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,user_id);
+        List<String> originList=submitauthorityDao.getOriginIdListByUserId(user_id);
+        //用获得的originList取得机构的所有下属机构id
+        List finalOriginList = new ArrayList();
+        for (String origin:originList) {
+            Map<String, Object> originTree = submitauthorityDao.getOriginById(origin);
+            checkOrigins(originTree,finalOriginList);
+        }
+        Page<ReportCustomer> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,finalOriginList);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportStatementsPage);
         return pageResult;
     }
-
+    private void checkOrigins(Map<String, Object> origin,List finalOriginList){
+        List<Map<String, Object>> children = (List) origin.get("childrens");
+        finalOriginList.add(origin.get("origin_id"));
+        if(children!=null&&children.size()>0){
+            children.forEach(child->{
+                checkOrigins(child,finalOriginList);
+            });
+        }
+    }
     @Override
     public void saveDefinedAndOriginAssign(String[] originIds, String definedId) {
         reportStatementsDao.saveDefinedAndOriginAssign(originIds,definedId);

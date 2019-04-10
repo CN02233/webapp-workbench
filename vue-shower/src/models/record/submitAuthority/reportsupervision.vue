@@ -3,37 +3,44 @@
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
-          :data="definedDataList"
+          :data="reportDataList"
           style="width: 100%">
           <el-table-column
-            prop="defined_name"
+            prop="report_id"
+            align="left"
+            width="150"
+            label="报表ID">
+          </el-table-column>
+          <el-table-column
+            prop="report_name"
             align="left"
             width="150"
             label="报表名称">
           </el-table-column>
           <el-table-column
-            prop="status"
+            prop="active_unit"
             align="left"
             width="150"
-            label="状态">
+            label="报表步骤数">
           </el-table-column>
           <el-table-column
-            prop="origin_name"
+            prop="report_status"
             align="left"
-            width="230"
-            label="所属机构">
+            width="150"
+            label="状态"
+            :formatter="formatStatus">
           </el-table-column>
           <el-table-column
-            prop="create_time"
+            prop="report_end_date"
             align="left"
             width="180"
-            label="创建时间">
+            label="最后保存日期">
           </el-table-column>
           <el-table-column
-            prop="user_name"
+            prop="last_modify_user"
             align="left"
             width="100"
-            label="创建人">
+            label="最后填报人">
           </el-table-column>
           <el-table-column
             fixed="right"
@@ -71,7 +78,7 @@ export default {
   name: 'OriginMain',
   data () {
     return {
-      reportDataLIst: [],
+      reportDataList: [],
       definedDataObjs: {},
       tableDataUrl: 'reportStatements/listReportStatementsByUser',
       currPageNum: 1,
@@ -93,6 +100,29 @@ export default {
     WorkMain
   },
   methods: {
+    formatStatus: function (row, column) {
+      if (row.report_status === '0') {
+        return '正常'
+      }
+      if (row.report_status === '1') {
+        return '审核中'
+      }
+      if (row.report_status === '2') {
+        return '复核中'
+      }
+      if (row.report_status === '3') {
+        return '锁定'
+      }
+      if (row.report_status === '4') {
+        return '报表发布'
+      }
+      if (row.report_status === '5') {
+        return '锁定'
+      }
+      if (row.report_status === '6') {
+        return '待上传签名'
+      }
+    },
     getTableData: function (pageNum) {
       if (pageNum && pageNum !== '') {
         this.currPageNum = pageNum
@@ -110,12 +140,12 @@ export default {
             $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         }
-        $this.reportDataLIst = response.dataList
+        $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
       })
     },
     refreshTableList: function (dataList) {
-      this.definedDataList = dataList
+      this.reportDataList = dataList
     },
     closeModal: function () {
       this.showModalPage = false
@@ -133,7 +163,7 @@ export default {
     }
   },
   mounted: function () { // 初始化
-    this.definedDataList = []
+    this.reportDataList = []
     this.getTableData(1)
   }
 }
