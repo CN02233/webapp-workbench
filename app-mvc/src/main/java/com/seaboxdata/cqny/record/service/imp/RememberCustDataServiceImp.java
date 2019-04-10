@@ -9,6 +9,8 @@ import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.reportunit.dao.IReportUnitDao;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,8 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
 
     private static final String NEED_REMEMBER = "Y";
     private static final String NOT_NEED_REMEMBER = "N";
+
+    private Logger logger = LoggerFactory.getLogger(RememberCustDataServiceImp.class);
 
     @Autowired
     private IReportUnitDao reportUnitDao;
@@ -61,7 +65,7 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
         }
 
         if(columDatas!=null&&columDatas.size()>0){
-            List<RememberCustData> rememberList = new ArrayList<>();
+             List<RememberCustData> rememberList = new ArrayList<>();
             for (ReportCustomerData columData : columDatas) {
                 if(needRememberTmp.containsKey(columData.getUnit_id()+"-"+columData.getColum_id())||
                         needRememberTmp.containsKey(columData.getUnit_id()+"-"+columData.getDimensions_id())){
@@ -88,7 +92,7 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void doRemember(List<RememberCustData> rememberCustDatas) {
-
+        logger.info("当前需要记忆的数据{}",rememberCustDatas);
         boolean removeOld = false;
         for (RememberCustData rememberCustData : rememberCustDatas) {
             if(!removeOld){

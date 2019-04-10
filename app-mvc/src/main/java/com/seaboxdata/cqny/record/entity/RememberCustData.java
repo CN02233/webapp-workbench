@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.record.entity;
 
+import com.webapp.support.json.JsonSupport;
+
 public class RememberCustData {
     private Integer id;
     private Integer user_id;
@@ -63,5 +65,9 @@ public class RememberCustData {
 
     public void setReport_id(Integer report_id) {
         this.report_id = report_id;
+    }
+
+    public String toString(){
+        return JsonSupport.objectToJson(this);
     }
 }
