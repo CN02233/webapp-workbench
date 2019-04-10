@@ -57,7 +57,7 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
                             UnitDefinedType.ONEDIMDYNAMIC.compareWith(entityType)||UnitDefinedType.MANYDIMTREE.compareWith(entityType)){
                         needRememberTmp.put(simpleColumDefined.getUnit_id()+"-"+simpleColumDefined.getColum_id(),simpleColumDefined);
                     }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(entityType)){
-
+                        needRememberTmp.put(simpleColumDefined.getUnit_id()+"-"+simpleColumDefined.getColum_id()+"-"+simpleColumDefined.getGroup_id(),simpleColumDefined);
 
                     }
                 }
@@ -116,11 +116,11 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
         rememberCustData.setUnit_id(unitEntity.get().getUnit_id());
         rememberCustData.setRemember_data(reportCustomerData.getReport_data());
 
-        if(UnitDefinedType.ONEDIMSTATIC.compareWith(entityType)||
-                UnitDefinedType.ONEDIMDYNAMIC.compareWith(entityType)){
+        if(UnitDefinedType.ONEDIMSTATIC.compareWith(entityType)){
             rememberCustData.setColum_id(new Integer(reportCustomerData.getColum_id()));
 
-        }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(entityType)){
+        }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(entityType)||
+                UnitDefinedType.ONEDIMDYNAMIC.compareWith(entityType)){
             rememberCustData.setColum_id(new Integer(reportCustomerData.getColum_id()));
             rememberCustData.setDimensions_id(new Integer(reportCustomerData.getDimensions_id()));
 

@@ -23,15 +23,11 @@ public interface IReportDefinedUnitMultDimDao {
     @Select("select * from report_defined_unit_multdim_dim where unit_id=#{unitId}")
     Page<Map<String, Object>> pagerDimList(@Param("unitId") Integer unitId, @Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize);
 
-    @Select("select count(*) from report_defined_unit_multdim_dim where unit_id=#{unitId} and dim_id=#{dimId}")
-    int countDimList(@Param("unitId") Integer unitId, @Param("dimId") Integer dimId);
-
-
     @Insert("insert into report_defined_unit_multdim " +
             "(unit_id,colum_id,dim_id,min_value,max_value ," +
-            "colum_formula,colum_formula_desc,colum_type) values " +
+            "colum_formula,colum_formula_desc,colum_type,need_remember) values " +
             "(#{unit_id},#{colum_id},#{dim_id},#{min_value},#{max_value}," +
-            "#{colum_formula},#{colum_formula_desc},#{colum_type})")
+            "#{colum_formula},#{colum_formula_desc},#{colum_type},#{need_remember})")
     void addSaveMultdim(GridColumDefined simpleColumDefined);
     @Insert("insert into report_defined_unit_multdim_col(colum_name,colum_name_cn,unit_id,colum_point,colum_desc) values " +
             "(#{colum_name},#{colum_name_cn},#{unit_id},#{colum_point},#{colum_desc})")
@@ -44,7 +40,7 @@ public interface IReportDefinedUnitMultDimDao {
     void addSaveMultdim_dim(GridColumDefined simpleColumDefined);
 
     @Update("update report_defined_unit_multdim set colum_type=#{colum_type},min_value=#{min_value},max_value=#{max_value} ," +
-            "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc}" +
+            "colum_formula=#{colum_formula},colum_formula_desc=#{colum_formula_desc},need_remember=#{need_remember}" +
             " where unit_id=#{unit_id} and colum_id=#{colum_id} and dim_id=#{dim_id}")
     void editSaveMultdim(GridColumDefined simpleColumDefined);
 
@@ -69,11 +65,11 @@ public interface IReportDefinedUnitMultDimDao {
     @Select("select * from report_unit_info where report_defined_id in (select report_defined_id from report_unit_info where unit_id=#{originId})")
     List<UnitDefined> getUnitByOrigin(String originId);
 
-    @Select("select colum_id, colum_name, colum_name_cn, group_id dim_id, group_name dim_name, unit_id, colum_type, min_value, max_value, colum_point, colum_formula, colum_formula_desc, colum_desc from report_defined_unit_onedim where unit_id = #{unitId}")
+    @Select("select colum_id, colum_name, colum_name_cn, group_id dim_id, group_name dim_name, unit_id, colum_type, min_value, max_value, colum_point, colum_formula, colum_formula_desc, colum_desc,need_remember from report_defined_unit_onedim where unit_id = #{unitId}")
     List<GridColumDefined> getOneColumByUnit(String unitId);
     @Select("<script>select a.*,aa.colum_name,aa.colum_name_cn,aa.colum_point,aa.colum_desc,'1' colum_meta_type from report_defined_unit_multdim a left join report_defined_unit_multdim_col aa on a.colum_id=aa.colum_id where a.unit_id=#{unitId}" +
-            "union select unit_id,colum_id,'','','','','','',colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type from report_defined_unit_multdim_col b where b.unit_id=#{unitId}" +
-            "union select unit_id,'',dim_id,'','','','','',dim_name,dim_name_cn,'','','3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
+            "union select unit_id,colum_id,'','','','','','','N',colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type from report_defined_unit_multdim_col b where b.unit_id=#{unitId}" +
+            "union select unit_id,'',dim_id,'','','','','','N',dim_name,dim_name_cn,'','','3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
     List<GridColumDefined> getColumByUnit(String unitId);
 
     @Select("select * from report_defined_unit_onedim where colum_id=#{columId}")

@@ -244,6 +244,12 @@
             v-model="datForm.colum_formula_desc" :disabled="true" auto-complete="off" >
           </el-input>
         </el-form-item>
+        <el-form-item label="是否记忆用户输入" prop="need_remember">
+          <el-select v-model="datForm.need_remember" style="width:100%;" placeholder="请选择">
+            <el-option  label="是" value="Y"></el-option>
+            <el-option  label="否" value="N"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-tooltip v-if="datForm.colum_type=='0'" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
@@ -348,6 +354,7 @@
           'colum_formula_desc':'',
           'colum_point':'',
           'colum_desc':'',
+          'need_remember':'N',
           'colum_id':null,
           'dim_id':null,
           'unit_id':null,
