@@ -1,5 +1,18 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送监管']">
+    <el-row class="search-row" :gutter="20">
+      <el-col class="align-left" :span="17">
+        <el-select v-model="originId" placeholder="请选择报送机构">
+          <el-option
+            v-for="item in originOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-button @click="queryByOriginId" type="primary">查询</el-button>
+      </el-col>
+    </el-row>
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
@@ -47,11 +60,11 @@
             label="操作"
             align="left"
             width="150"
-            >
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
-                >详情</el-button>
+              >详情</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -69,104 +82,136 @@
 </template>
 
 <script>
-import WorkTablePager from '@/models/public/WorkTablePager'
-import WorkMain from '@/models/public/WorkMain'
-import { required } from 'vuelidate/lib/validators'
-import Treeselect from '@riophae/vue-treeselect'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-export default {
-  name: 'OriginMain',
-  data () {
-    return {
-      reportDataList: [],
-      definedDataObjs: {},
-      tableDataUrl: 'reportStatements/listReportStatementsByUser',
-      currPageNum: 1,
-      eachPageNum: 10,
-      totalPage: 1,
-      showModalPage: false,
-      isEditModal: false,
-      dialogTitle: ''
-    }
-  },
-  validations: {// 提交前的验证
-  },
-  computed: {
-    // 初始化加载
-  },
-  components: {
-    Treeselect,
-    WorkTablePager,
-    WorkMain
-  },
-  methods: {
-    formatStatus: function (row, column) {
-      if (row.report_status === '0') {
-        return '正常'
-      }
-      if (row.report_status === '1') {
-        return '审核中'
-      }
-      if (row.report_status === '2') {
-        return '复核中'
-      }
-      if (row.report_status === '3') {
-        return '锁定'
-      }
-      if (row.report_status === '4') {
-        return '报表发布'
-      }
-      if (row.report_status === '5') {
-        return '锁定'
-      }
-      if (row.report_status === '6') {
-        return '待上传签名'
+  import WorkTablePager from '@/models/public/WorkTablePager'
+  import WorkMain from '@/models/public/WorkMain'
+  import { required } from 'vuelidate/lib/validators'
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+  export default {
+    name: 'OriginMain',
+    data () {
+      return {
+        reportDataList: [],
+        definedDataObjs: {},
+        tableDataUrl: 'reportStatements/listReportStatementsByUser',
+        currPageNum: 1,
+        eachPageNum: 10,
+        totalPage: 1,
+        showModalPage: false,
+        isEditModal: false,
+        dialogTitle: '',
+        originOptions: [],
+        originId: ''
       }
     },
-    getTableData: function (pageNum) {
-      if (pageNum && pageNum !== '') {
-        this.currPageNum = pageNum
-      } else {
-        pageNum = this.currPageNum
-      }
-      const $this = this
-      this.BaseRequest({
-        url: this.tableDataUrl,
-        method: 'get',
-        params: {currPage: pageNum, pageSize: this.eachPageNum}
-      }).then(response => {
-        if (response.dataList != null) {
-          response.dataList.forEach(definedObj => {
-            $this.definedDataObjs[definedObj.organization_id] = definedObj
+    validations: {// 提交前的验证
+    },
+    computed: {
+      // 初始化加载
+    },
+    components: {
+      Treeselect,
+      WorkTablePager,
+      WorkMain
+    },
+    methods: {
+      formatStatus: function (row, column) {
+        if (row.report_status === '0') {
+          return '正常'
+        }
+        if (row.report_status === '1') {
+          return '审核中'
+        }
+        if (row.report_status === '2') {
+          return '复核中'
+        }
+        if (row.report_status === '3') {
+          return '锁定'
+        }
+        if (row.report_status === '4') {
+          return '报表发布'
+        }
+        if (row.report_status === '5') {
+          return '锁定'
+        }
+        if (row.report_status === '6') {
+          return '待上传签名'
+        }
+      },
+      queryByOriginId: function () {
+        this.BaseRequest({
+          url: this.tableDataUrl,
+          method: 'get',
+          params: { 'currPage': 1, 'pageSize': this.eachPageNum, 'originId': this.originId }
+        }).then(response => {
+          this.reportDataList = response.dataList
+          this.totalPage = response.totalPage
+        })
+      },
+      getTableData: function (pageNum) {
+        if (pageNum && pageNum !== '') {
+          this.currPageNum = pageNum
+        } else {
+          pageNum = this.currPageNum
+        }
+        const $this = this
+        this.BaseRequest({
+          url: this.tableDataUrl,
+          method: 'get',
+          params: { 'currPage': pageNum, 'pageSize': this.eachPageNum }
+        }).then(response => {
+          if (response.dataList != null) {
+            response.dataList.forEach(definedObj => {
+              $this.definedDataObjs[definedObj.organization_id] = definedObj
+            })
+          }
+          $this.reportDataList = response.dataList
+          $this.totalPage = response.totalPage
+        })
+      },
+      refreshTableList: function (dataList) {
+        this.reportDataList = dataList
+      },
+      closeModal: function () {
+        this.showModalPage = false
+        this.isEditModal = false
+      },
+      checkInputNull () {
+        const checkResult = this.$v.$invalid
+        if (checkResult) {
+          this.$notify({
+            dangerouslyUseHTMLString: true,
+            message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、状态'
           })
         }
-        $this.reportDataList = response.dataList
-        $this.totalPage = response.totalPage
-      })
-    },
-    refreshTableList: function (dataList) {
-      this.reportDataList = dataList
-    },
-    closeModal: function () {
-      this.showModalPage = false
-      this.isEditModal = false
-    },
-    checkInputNull () {
-      const checkResult = this.$v.$invalid
-      if (checkResult) {
-        this.$notify({
-          dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、状态'
+        return checkResult
+      },
+      getOrigin: function () {
+        this.BaseRequest({
+          url: '/reportStatements/getOriginsByUserId',
+          method: 'get',
+          params: {}
+        }).then(response => {
+          this.originOptions.push({
+            value: null,
+            label: '全部'
+          })
+          for (let i = 0; i < response.length; i++) {
+            this.originOptions.push({
+              value: response[i].origin_id,
+              label: response[i].origin_name
+            })
+          }
+          console.log(response)
         })
       }
-      return checkResult
+    },
+    mounted: function () { // 初始化
+      this.reportDataList = []
+      this.getTableData(1)
+      this.getOrigin()
     }
-  },
-  mounted: function () { // 初始化
-    this.reportDataList = []
-    this.getTableData(1)
   }
-}
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>

@@ -7,7 +7,9 @@ import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface IReportStatementsDao {
@@ -126,11 +128,24 @@ public interface IReportStatementsDao {
             " #{item} " +
             "</foreach>" +
             "</script>")
-    Page<ReportCustomer> listReportStatementsByUser(@Param("currPage")int currPage, @Param("pageSize") int pageSize, @Param("originList")List finalOriginList);
+    Page<ReportCustomer> listReportStatementsByUser(@Param("currPage")int currPage, @Param("pageSize") int pageSize, @Param("originList")Set finalOriginList);
 
     @Update("update report_defined set status = #{status} where defined_id=#{definedId}")
     void changeDeindStatus(@Param("definedId") String definedId,@Param("status") int status);
 
     @Select("select so.* from sys_origin so,report_defined_origin_assign rdoa where rdoa.defined_id = #{definedId} and rdoa.origin_id = so.origin_id")
     List<Origin> getDefinedOriginsById(String definedId);
+
+    @Select("<script>SELECT\n" +
+            "\tso.origin_id,\n" +
+            "\tso.origin_name\n" +
+            "FROM\n" +
+            "\tsys_origin so\n" +
+            "WHERE\n" +
+            "\tso.origin_id IN \n" +
+            "<foreach item='item' index='index' collection='originList' open='(' separator=',' close=')'> " +
+            " #{item} " +
+            "</foreach>" +
+            "</script>")
+    List<HashMap<String,String>> getOriginsByOriginSet(@Param("originList") Set finalOriginSet);
 }
