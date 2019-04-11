@@ -3,7 +3,7 @@ package com.seaboxdata.cqny.record.service.imp;
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;

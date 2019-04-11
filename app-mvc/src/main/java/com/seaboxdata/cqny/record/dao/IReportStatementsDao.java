@@ -2,7 +2,7 @@ package com.seaboxdata.cqny.record.dao;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
+import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;

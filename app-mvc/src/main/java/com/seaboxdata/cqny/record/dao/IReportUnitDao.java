@@ -1,7 +1,7 @@
 package com.seaboxdata.cqny.record.dao;
 
 import com.github.pagehelper.Page;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 

@@ -2,7 +2,6 @@ package com.seaboxdata.cqny.record.entity;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 
 import java.util.Date;
 

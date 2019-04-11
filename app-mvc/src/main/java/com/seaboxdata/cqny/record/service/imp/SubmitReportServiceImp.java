@@ -6,7 +6,7 @@ import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;

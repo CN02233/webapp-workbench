@@ -6,7 +6,7 @@ import com.seaboxdata.cqny.record.dao.IRememberCustDataDao;
 import com.seaboxdata.cqny.record.entity.RememberCustData;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.record.dao.IReportUnitDao;
 import org.slf4j.Logger;

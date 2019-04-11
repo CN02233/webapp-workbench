@@ -3,12 +3,10 @@ package com.seaboxdata.cqny.record.dao;
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
-import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 public interface IReportCustomerDao {

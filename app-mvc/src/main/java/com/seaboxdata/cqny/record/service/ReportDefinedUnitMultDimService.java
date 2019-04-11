@@ -1,8 +1,7 @@
 package com.seaboxdata.cqny.record.service;
 
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
-import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
 

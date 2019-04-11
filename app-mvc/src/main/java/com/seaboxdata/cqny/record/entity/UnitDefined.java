@@ -1,4 +1,4 @@
-package com.seaboxdata.cqny.record.entity.onedim;
+package com.seaboxdata.cqny.record.entity;
 
 import java.util.Date;
 import java.util.List;

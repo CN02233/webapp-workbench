@@ -1,7 +1,7 @@
 package com.seaboxdata.cqny.record.dao;
 
 import com.github.pagehelper.Page;
-import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
+import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -35,9 +35,9 @@ public interface IReportApprovalDao {
             "</foreach>" +
             "</script>")
     Page<ReportCustomer> listReportApproval(@Param("currPage") Integer currPage,
-                                            @Param("pageSize") Integer pageSize,
-                                            @Param("status") String status,
-                                            @Param("originList") List originList);
+                                                      @Param("pageSize") Integer pageSize,
+                                                      @Param("status") String status,
+                                                      @Param("originList") List originList);
 
     @Update("<script>update report_customer <set>"
             +"<if test='reportStatus!=null'>"

@@ -2,7 +2,7 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
-import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitMultDimService;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.seaboxdata.cqny.record.dao.IReportUnitDao;
