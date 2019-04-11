@@ -129,4 +129,38 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
         }
         return rememberCustData;
     }
+
+    @Override
+    public void rememberCustDataByGrid(
+            ArrayList<SimpleColumDefined> simpleColumDefineds,
+            ArrayList<ReportCustomerData> columDatas,Integer rememberUser) {
+        userId.set(rememberUser);
+
+        Map<String,SimpleColumDefined> needRememberTmp = new HashMap<>();
+        if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
+            for (SimpleColumDefined simpleColumDefined : simpleColumDefineds) {
+                if(this.needOrNotRemember(simpleColumDefined)){
+                    if(unitEntity.get()==null){
+                        unitEntity.set(reportUnitDao.getReportUnit(simpleColumDefined.getUnit_id().toString()));
+                    }
+                    needRememberTmp.put(simpleColumDefined.getUnit_id()+"-"+simpleColumDefined.getColum_id()+"-"+simpleColumDefined.getGroup_id(),simpleColumDefined);
+                }
+            }
+        }
+
+        if(columDatas!=null&&columDatas.size()>0){
+            List<RememberCustData> rememberList = new ArrayList<>();
+            for (ReportCustomerData columData : columDatas) {
+                String key = columData.getUnit_id()+"-"+columData.getColum_id() + "-" + columData.getDimensions_id();
+                if(needRememberTmp.containsKey(key)){
+                    RememberCustData rememberData = null;
+                    rememberData = makeRememberData(columData);
+                    rememberList.add(rememberData);
+                }
+            }
+
+            this.doRemember(rememberList);
+
+        }
+    }
 }
