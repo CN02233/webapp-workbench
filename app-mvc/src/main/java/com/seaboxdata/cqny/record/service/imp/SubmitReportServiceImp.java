@@ -1,13 +1,14 @@
 package com.seaboxdata.cqny.record.service.imp;
 
-import com.google.common.base.Strings;
+import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
+import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
-import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
+import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
@@ -44,7 +45,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
         String reportDefinedId = submitReportEntity.getDefined_id();
         try {
             logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
-            StatementsEntity reportDefined = getReportDefined(reportDefinedId);
+            ReportDefinedEntity reportDefined = getReportDefined(reportDefinedId);
             logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
             if(reportDefined==null){
                 return;
@@ -76,8 +77,8 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param reportDefinedId
      * @return
      */
-    private StatementsEntity getReportDefined(String reportDefinedId){
-        StatementsEntity reportDefined = reportStatementsService.getReportDefinedById(new Integer(reportDefinedId));
+    private ReportDefinedEntity getReportDefined(String reportDefinedId){
+        ReportDefinedEntity reportDefined = reportStatementsService.getReportDefinedById(new Integer(reportDefinedId));
         List<UnitEntity> unitList = reportUnitService.getUnitDefinedByReportDefindId(reportDefinedId);
         if(unitList!=null){
             for (UnitEntity unitEntity : unitList) {
@@ -110,7 +111,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param allOrigin
      * @return
      */
-    private List<Integer> createReportBaseData(StatementsEntity reportDefined, List<String> allOrigin,SubmitReportRequestEntity submitReportEntity) throws ParseException {
+    private List<Integer> createReportBaseData(ReportDefinedEntity reportDefined, List<String> allOrigin, SubmitReportRequestEntity submitReportEntity) throws ParseException {
         List<Integer> reportBaseIds = new ArrayList<>();
         List<String> passAuthList = submitReportEntity.getCheck_origins();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -144,7 +145,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param reportDefined
      * @param reportIds
      */
-    private void createReportDefaultData(StatementsEntity reportDefined,List<Integer> reportIds){
+    private void createReportDefaultData(ReportDefinedEntity reportDefined, List<Integer> reportIds){
         List<UnitEntity> unitDefinds = reportDefined.getUnits();
         for (UnitEntity unitDefind : unitDefinds) {
             Integer unitTypeInt = unitDefind.getUnit_type();

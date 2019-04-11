@@ -3,7 +3,7 @@ package com.seaboxdata.cqny.reportunit.dao;
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
-import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
+import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +24,7 @@ public interface IReportStatementsDao {
             "\t(\n" +
             "\t#{ defined_id },#{ defined_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
             "\t)")
-    void addReportStatements(StatementsEntity reportDefined);
+    void addReportStatements(ReportDefinedEntity reportDefined);
 
     @Delete("delete from report_defined where defined_id = #{definedId}")
     void deleteById(@Param("definedId") String defined_id);
@@ -44,7 +44,7 @@ public interface IReportStatementsDao {
             +"</if>"
             +"create_date=sysdate() "
             +"</set>where defined_id = #{defined_id}</script>")
-    void updateReportStatements(StatementsEntity reportDefined);
+    void updateReportStatements(ReportDefinedEntity reportDefined);
 
     @Select("SELECT\n" +
             "\ta.create_date,\n" +
@@ -61,7 +61,7 @@ public interface IReportStatementsDao {
             "LEFT JOIN `user` c ON a.create_user = c.user_id\n" +
             "WHERE\n" +
             "\t1 = 1")
-    Page<StatementsEntity> listReportStatements(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
+    Page<ReportDefinedEntity> listReportStatements(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
 
     @Select("SELECT" +
@@ -79,7 +79,7 @@ public interface IReportStatementsDao {
             " LEFT JOIN `user` c ON a.create_user = c.user_id" +
             " WHERE" +
             " defined_id = #{definedId}")
-    StatementsEntity getReportDefinedById(Integer definedId);
+    ReportDefinedEntity getReportDefinedById(Integer definedId);
 
     @Insert("<script>INSERT INTO report_defined_origin_assign (defined_id,origin_id)\n" +
             "VALUES " +

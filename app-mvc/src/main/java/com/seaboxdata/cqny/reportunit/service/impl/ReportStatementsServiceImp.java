@@ -3,10 +3,10 @@ package com.seaboxdata.cqny.reportunit.service.impl;
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
 import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
+import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.reportunit.dao.IReportStatementsDao;
 import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
-import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
+import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.webapp.support.page.PageResult;
 import org.slf4j.Logger;
@@ -29,13 +29,13 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 
     @Override
     public PageResult listReportStatements(int currPage, int pageSize) {
-        Page<StatementsEntity> reportStatementsPage = reportStatementsDao.listReportStatements(currPage, pageSize);
+        Page<ReportDefinedEntity> reportStatementsPage = reportStatementsDao.listReportStatements(currPage, pageSize);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportStatementsPage);
         return pageResult;
     }
 
     @Override
-    public void addReportStatements(StatementsEntity reportDefined) {
+    public void addReportStatements(ReportDefinedEntity reportDefined) {
 
         if(reportDefined.getDefined_id()!=null){
             reportStatementsDao.updateReportStatements(reportDefined);
@@ -105,8 +105,8 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     }
 
     @Override
-    public StatementsEntity getReportDefinedById(Integer definedId) {
-        StatementsEntity reportDefined = reportStatementsDao.getReportDefinedById(definedId);
+    public ReportDefinedEntity getReportDefinedById(Integer definedId) {
+        ReportDefinedEntity reportDefined = reportStatementsDao.getReportDefinedById(definedId);
         return reportDefined;
     }
 }

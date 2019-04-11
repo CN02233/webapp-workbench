@@ -1,14 +1,15 @@
-package com.seaboxdata.cqny.reportunit.entity;
+package com.seaboxdata.cqny.record.entity;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 
 import java.util.Date;
 
 /**
  * 表report_defined
  */
-public class StatementsEntity {
+public class ReportDefinedEntity {
 
     private Integer defined_id;
     private String defined_name;

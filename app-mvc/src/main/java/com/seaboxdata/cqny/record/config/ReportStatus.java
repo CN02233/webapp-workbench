@@ -1,4 +1,4 @@
-package com.seaboxdata.cqny.record.entity;
+package com.seaboxdata.cqny.record.config;
 
 /**
  * 0：正常

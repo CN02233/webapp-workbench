@@ -1,10 +1,10 @@
 package com.seaboxdata.cqny.reportunit.controller;
 
 import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
+import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.entity.SubmitReportRequestEntity;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
-import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
+import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -67,7 +66,7 @@ public class ReportStatementsController {
     @RequestMapping("addReportStatements")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult addReportStatements(@RequestBody StatementsEntity reportDefined){
+    public JsonResult addReportStatements(@RequestBody ReportDefinedEntity reportDefined){
         User user = SessionSupport.checkoutUserFromSession();
         reportDefined.setCreate_user(user.getUser_id());
         reportStatementsService.addReportStatements(reportDefined);
