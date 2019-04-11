@@ -11,8 +11,13 @@
         <el-table-column label="项目" prop="colum_name_cn"></el-table-column>
         <el-table-column v-for="col in definedDimensions" :label="col.colum_name_cn" width="160" >
           <template slot-scope="scope">
-            <el-input v-model="scope.row[col.dim_id]"></el-input>
+            <el-tooltip class="item" effect="dark" :content="scope.row.colum_desc" placement="top">
+              <el-input v-model="scope.row[col.dim_id]" :disabled="scope.row[col.dim_id+'_colum_type']==0" >
+                <template v-if="scope.row.colum_point!=null&&scope.row.colum_point!=''" slot="append">{{scope.row.colum_point}}</template>
+              </el-input>
+            </el-tooltip>
           </template>
+
         </el-table-column>
       </el-table>
     </el-form>
@@ -81,8 +86,6 @@
             response.definedColums.forEach(x=>{
               if(x.colum_meta_type == 1){
                 let xx = Object.assign({}, x)
-                xx.colum_name = imap[xx.colum_id].colum_name
-                xx.colum_name_cn = imap[xx.colum_id].colum_name_cn
                 xx.dim_name = dmap[xx.dim_id].colum_name
                 xx.dim_name_cn = dmap[xx.dim_id].colum_name_cn
                 $t.definedColums.push(xx)
@@ -93,6 +96,11 @@
               response.columDatas.forEach(c=>{
                 if(xx.colum_id == c.colum_id){
                   xx[c.dimensions_id] =  c.report_data || ''
+                }
+              })
+              $t.definedColums.forEach(d=>{
+                if(xx.colum_id == d.colum_id){
+                  xx[d.dim_id+'_colum_type'] = d.colum_type
                 }
               })
               return xx

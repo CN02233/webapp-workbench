@@ -33,6 +33,8 @@ public interface ReportDefinedUnitMultDimService {
 
     JsonResult deleteSaveMultdim_dim(GridColumDefined maps);
 
+    void saveMultdim_col(GridColumDefined maps);
+
     void editSaveMultdim(Map<String, List<GridColumDefined>> maps);
 
     void deleteMultdim(Integer unitId, Integer columId);

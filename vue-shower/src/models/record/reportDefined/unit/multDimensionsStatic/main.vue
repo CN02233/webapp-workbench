@@ -18,7 +18,6 @@
           style="width: 100%">
           <el-table-column prop="colum_id" align="left" label="编号" width="60"></el-table-column>
           <el-table-column prop="colum_name_cn" align="left" label="输入项名"></el-table-column>
-          <el-table-column prop="colum_type" align="left" :formatter="formatterDataType" label="输入项类型"></el-table-column>
           <el-table-column prop="dim_name_cn" align="left" label="维度列表"></el-table-column>
           <el-table-column
             prop="module_url"
@@ -109,17 +108,27 @@
             :change-on-select="false"
             @active-item-change="handleItemChange"
           ></el-cascader>
-          <el-button @click="formulaColumConfirm" v-if="isFormulaEmpty">确定输入项</el-button>
+          <el-button @click="formulaColumConfirm">确定输入项</el-button>
         </el-form-item>
-        <el-form-item label="设置运算符" v-if="isFormulaEmpty">
-          <el-button @click="formulaAdd('+')">+</el-button>
-          <el-button @click="formulaAdd('-')">-</el-button>
-          <!--<el-button @click="formulaAdd('%')">%</el-button>-->
-          <el-button @click="formulaAdd('*')">*</el-button>
-          <el-button @click="formulaAdd('/')">/</el-button>
-          <el-button @click="formulaAdd('(')">(</el-button>
-          <el-button @click="formulaAdd(')')">)</el-button>
-          <el-button @click="formulaBack"><-(回退)</el-button>
+        <el-form-item label="设置运算符">
+          <el-button @click="formulaAdd('+')" size="mini">+</el-button>
+          <el-button @click="formulaAdd('-')" size="mini">-</el-button>
+          <el-button @click="formulaAdd('*')" size="mini">*</el-button>
+          <el-button @click="formulaAdd('/')" size="mini">/</el-button>
+          <el-button @click="formulaAdd('(')" size="mini">(</el-button>
+          <el-button @click="formulaAdd(')')" size="mini">)</el-button>
+          <el-button @click="formulaAdd('0')" size="mini">0</el-button>
+          <el-button @click="formulaAdd('1')" size="mini">1</el-button>
+          <el-button @click="formulaAdd('2')" size="mini">2</el-button>
+          <el-button @click="formulaAdd('3')" size="mini">3</el-button>
+          <el-button @click="formulaAdd('4')" size="mini">4</el-button>
+          <el-button @click="formulaAdd('5')" size="mini">5</el-button>
+          <el-button @click="formulaAdd('6')" size="mini">6</el-button>
+          <el-button @click="formulaAdd('7')" size="mini">7</el-button>
+          <el-button @click="formulaAdd('8')" size="mini">8</el-button>
+          <el-button @click="formulaAdd('9')" size="mini">9</el-button>
+          <el-button @click="formulaAdd('.')" size="mini">.</el-button>
+          <el-button @click="formulaBack" size="mini"><-(回退)</el-button>
         </el-form-item>
 
         <el-form-item label="公式内容" >
@@ -131,18 +140,16 @@
           </el-input>
         </el-form-item>
         <el-form-item label="公式试算" >
-          <el-row :key="formulaColumnDesc.context" v-for="formulaColumnDesc in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
-            <el-col><el-input :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
-            </el-col>
+          <el-row :key="formulaColumnDesc.context" v-for="(formulaColumnDesc,i) in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
+            <el-col><el-input v-model="formularOprationColums[formulaContext[i].columKey]" :placeholder="'请输入 '+formulaColumnDesc.context"></el-input></el-col>
           </el-row>
 
         </el-form-item>
       </el-form>
       <el-row>
-        <el-button type="danger" @click="fomularClear">重新定义公式</el-button>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
-        <el-button @click="fomularOperation" v-if="isFormulaEmpty">试算</el-button>
+        <el-button @click="fomularOperation">试算</el-button>
       </el-row>
 
     </el-dialog>
@@ -237,11 +244,17 @@
             v-model="datForm.colum_formula_desc" :disabled="true" auto-complete="off" >
           </el-input>
         </el-form-item>
+        <el-form-item label="是否记忆用户输入" prop="need_remember">
+          <el-select v-model="datForm.need_remember" style="width:100%;" placeholder="请选择">
+            <el-option  label="是" value="Y"></el-option>
+            <el-option  label="否" value="N"></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-tooltip v-if="datForm.colum_type=='0'" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
-          <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
-          <el-button type="danger" @click="fomularClear" icon="el-icon-edit">重新定义公式</el-button>
+          <el-button @click="openFormulaEditor()" icon="el-icon-edit" v-if="isFormulaEmpty">定义公式</el-button>
+          <el-button type="danger" @click="fomularClear()" icon="el-icon-edit" v-if="!isFormulaEmpty">重新定义公式</el-button>
         </el-tooltip>
         <el-button @click="isOpenDatEditor=false">取 消</el-button>
         <el-button type="primary" @click="insertDataCell()">确 定</el-button>
@@ -297,6 +310,11 @@
           'dim_id':null,
           'unit_id':null,
         },
+        addCellData:{
+          colum_type:'1',
+          min_value:null,
+          max_value:null
+        },
         isOpenFormulaEditor:false,
         isOpenDimEditor:false,
         isOpenColEditor:false,
@@ -309,7 +327,9 @@
         formulaContext:[],
         otherUnits:[],
         fomularColumnTmp :[],
+        formularOprationColums:{},
         unitMap:{},
+        otherUnitsTmp:{},
         dimIndex:-1,
         colIndex:-1,
         datField:'',
@@ -328,12 +348,13 @@
         },
         addDataForm:{
           'colum_type':'',
-          'min_value':null,
-          'max_value':null,
+          'min_value':0,
+          'max_value':9999,
           'colum_formula':'',
           'colum_formula_desc':'',
           'colum_point':'',
           'colum_desc':'',
+          'need_remember':'N',
           'colum_id':null,
           'dim_id':null,
           'unit_id':null,
@@ -405,7 +426,7 @@
           let idat = {}, idim = {}, icol = {}
           response.dataList.forEach((x,i) => {
             if(!idim[x.dim_id]){
-              $e.dimData.push({dim_id:x.dim_id, dim_name:x.dim_name, dim_name_cn:x.dim_name_cn, unit_id:$t.unitId})
+              $e.dimData.push(x)
               idim[x.dim_id] = i+1
             }
             if(!icol[x.colum_id]){
@@ -523,8 +544,12 @@
           $this.Message.success("保存成功")
           $this.getTableData(1)
           $this.addOrEditModelOpend = false
-
+          //clear
           $this.editModel.delData.length = 0
+          $this.otherUnits.forEach(u=>{
+            u.children = []
+          })
+          $this.otherUnitsTmp = {}
         }).catch(error=>{
           loading.close()
           $this.Message.success("保存失败:"+error)
@@ -583,10 +608,17 @@
         this.colForm = Object.assign({},row)
       },
       openCellAdd(i,row,field){
+        if(!this.editModel.colData[i].colum_name){
+          this.$notify({
+            dangerouslyUseHTMLString: true,
+            message: '<span style="font-size:15px;color:red;font-weight: bold">请先输入项目</span>'
+          })
+          return
+        }
         this.datField = field
         this.colIndex = i
         let o = row[field]
-        this.datForm = o.colum_type=='' ? this.copyDataForm({colum_type:'1'}) : Object.assign({},o)
+        this.datForm = o.colum_type=='' ? this.copyDataForm(this.addCellData) : Object.assign({},o)
         this.isOpenDatEditor = true
         if(this.datForm.colum_formula != '')
           this.isFormulaEmpty = false
@@ -631,12 +663,13 @@
       },
       insertColRow(){
         if(!this.validForm("cform")) return
-        this.editModel.colData[this.colIndex].colum_name = this.colForm.colum_name
-        this.editModel.colData[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
-        this.editModel.colData[this.colIndex].colum_point = this.colForm.colum_point
-        this.editModel.colData[this.colIndex].colum_desc = this.colForm.colum_desc
-        this.editModel.datas[this.colIndex].colum_name = this.colForm.colum_name
-        this.editModel.datas[this.colIndex].colum_name_cn = this.colForm.colum_name_cn
+        let $t = this
+        let keys = ['colum_name','colum_name_cn','colum_point','colum_desc']
+        keys.forEach(k=>{
+          $t.editModel.colData[$t.colIndex][k] = $t.colForm[k]
+          $t.editModel.datas[$t.colIndex][k] = $t.colForm[k]
+        })
+        $t.otherUnitsTmp[$t.colIndex] = Object.assign({}, $t.colForm) //公式用
         this.isOpenColEditor = false
       },
       insertColRowOld(){
@@ -673,13 +706,14 @@
         const $t = this
         $t.editModel.datas[$t.colIndex][$t.datField] = $t.copyDataForm($t.datForm)
         this.isOpenDatEditor = false
-        console.log('add'+JSON.stringify(this.editModel.datas))
+        this.formulaContext = []
+        this.formulaDescContext = []
       },
       copyDataForm(o){
         o = o || {}
         let addObj = Object.assign({},this.addDataForm)
         for(let n in addObj){
-          if(o[n])
+          if(o[n]||o[n]===0)
             addObj[n] = o[n]
         }
         addObj.colum_type_name = this.formatterDataType(addObj)
@@ -799,11 +833,22 @@
                   columArray.push({label:colum_name,value:colum_id})
                   $this.unitMap['c'+colum_id] = colum_name
                 })
+                //添加未保存本行项目
+                let tmpObj = this.otherUnitsTmp[this.colIndex]
+                if(tmpObj){
+                  let colum_no = '?' + this.colIndex
+                  dims.forEach(d=>{
+                    let tmp_colum_id = colum_no + '.' + d.dim_id
+                    let tmp_colum_name = tmpObj.colum_name_cn + '.' + d.colum_name_cn
+                    columArray.push({label:tmp_colum_name,value:tmp_colum_id})
+                    $this.unitMap['c'+tmp_colum_id] = tmp_colum_name
+                  })
+                }
                 this.otherUnits[i].children = columArray
               }
             })
-          }
 
+          }
         }).catch(error=>{
           loading.close()
           $this.Message.success("读取失败:"+error)
@@ -818,16 +863,16 @@
         // this.getReportColums(val)
       },
       formulaColumConfirm(){
-        debugger
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
         const unitClickId = this.fomularColumnTmp[0]
-        const unitLabel = this.unitMap['u'+unitClickId].unit_id
+        const unitLabel = this.unitMap['u'+unitClickId].unit_name
         const columLabel = this.unitMap['c'+columtClickId]
         const finalContext = unitLabel+"."+columLabel
         this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
-        this.formulaContext.push({"context":unitClickId+"."+columtClickId,"isSymbol":false})
+        this.formulaContext.push({"context":unitClickId+"_"+columtClickId,"columKey":unitLabel+'_'+columtClickId.replace(/\./g,"_"),"isSymbol":false})
         this.datForm.colum_formula_desc +=finalContext
         this.datForm.colum_formula +=("#"+unitClickId+"."+columtClickId+"#")
+        console.log(this.formulaContext)
       },
       formulaAdd(addContext){
         this.formulaDescContext.push({"context":addContext,"isSymbol":true})
@@ -839,6 +884,11 @@
         this.formulaContext.pop()
         this.formulaDescContext.pop()
         this.formulaDescContextTmp = ''
+        if(this.formulaDescContext.length == 0){
+          this.datForm.colum_formula_desc = ''
+          this.datForm.colum_formula = ''
+          return
+        }
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
           const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
@@ -854,8 +904,6 @@
       fomularConfirm(){
         this.colum_formula_array = this.formulaContext
         this.colum_formula_desc_array = this.formulaDescContext
-        // this.formulaContext = []
-        // this.formulaDescContext = []
         this.isOpenFormulaEditor = false
       },
       fomularOperation(){
@@ -898,6 +946,7 @@
         this.datForm.colum_formula = ''
         this.datForm.colum_formula_desc = ''
         this.isFormulaEmpty = true
+        this.isOpenFormulaEditor = true
       },
     },
     computed:{

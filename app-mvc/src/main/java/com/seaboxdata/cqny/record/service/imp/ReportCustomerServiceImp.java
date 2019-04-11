@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service("reportCustomerService")
 public class ReportCustomerServiceImp implements ReportCustomerService {
@@ -129,6 +126,56 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         return resultMap;
     }
 
+    public Map<String,Object> checkCustOrFomularByGridDim(ArrayList<GridColumDefined> simpleColumDefineds,
+                                                 ArrayList<ReportCustomerData> columDatas){
+
+        List<ReportCustomerData> custDataArray = new ArrayList<>();
+        List<FomularTmpEntity> fomularArray = new ArrayList();
+
+        Map<String,Object> resultMap = new HashMap<>();
+        resultMap.put("custDataArray",custDataArray);
+        resultMap.put("fomularArray",fomularArray);
+
+        Map<String,GridColumDefined> fomularsTmp = new HashMap<>();
+        if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
+            simpleColumDefineds.forEach(simpleColumDefined->{
+                Integer columType = new Integer(simpleColumDefined.getColum_type());
+                if(ColumType.FORMULA.compareWith(columType)){
+                    fomularsTmp.put(simpleColumDefined.getUnit_id()+"_"+simpleColumDefined.getColum_id()+"_"+simpleColumDefined.getDim_id(),simpleColumDefined);
+                }
+            });
+        }
+
+        if(columDatas!=null&&columDatas.size()>0){
+            columDatas.forEach(columData->{
+                Integer reportId = columData.getReport_id();
+                String unitId = columData.getUnit_id();
+                String columnId = columData.getColum_id();
+                String dimensionsId = columData.getDimensions_id();
+                //unitId+"_"+columnId: 一维静态公式刷新 unitId+"_"+dimensionsId:多维树状公式刷新
+                String key = unitId+"_"+columnId+"_"+dimensionsId;
+                if(fomularsTmp.containsKey(key)){
+
+                    FomularTmpEntity fomularTmpEntity = new FomularTmpEntity();
+                    fomularTmpEntity.setReportId(reportId);
+                    fomularTmpEntity.setUnitId(unitId);
+                    fomularTmpEntity.setColumId(columnId);
+                    fomularTmpEntity.setDimensionsId(dimensionsId);
+                    fomularTmpEntity.setReportGroupId(columData.getReport_group_id());
+
+                    String fomularScriptVal = fomularsTmp.get(key).getColum_formula();
+                    fomularTmpEntity.setFomularScript(fomularScriptVal);
+                    fomularArray.add(fomularTmpEntity);
+                } else{//无公式值刷新
+                    custDataArray.add(columData);
+                }
+            });
+        }
+        //倒序
+        Collections.reverse(fomularArray);
+
+        return resultMap;
+    }
     /**
      *
      * @param simpleColumDefineds 输入项的定义
@@ -445,14 +492,14 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     public void updateOrInsertGridUnitContext(
             ArrayList<GridColumDefined> simpleColumDefineds,
             ArrayList<ReportCustomerData> columDatas,boolean isUpdate) {
-        Map<String, Object> custOrFomular = null;//checkCustOrFomular(simpleColumDefineds, columDatas);
+        Map<String, Object> custOrFomular = checkCustOrFomularByGridDim(simpleColumDefineds, columDatas);
 
         List<ReportCustomerData> custDataArray = (List<ReportCustomerData>) custOrFomular.get("custDataArray");
         List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) custOrFomular.get("fomularArray");
 
         for (ReportCustomerData columData : custDataArray) {
             if(isUpdate){
-                reportCustomerDao.updateUnitContext(columData);
+                reportCustomerDao.updateGridUnitContext(columData);
             }else{
                 reportCustomerDao.insertUnitContext(columData);
             }
@@ -462,7 +509,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
             for (FomularTmpEntity fomularTmpEntity : fomularArray) {
                 ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
                 if(isUpdate){
-                    reportCustomerDao.updateUnitContext(comularData);
+                    reportCustomerDao.updateGridUnitContext(comularData);
                 }else{
                     reportCustomerDao.insertUnitContext(comularData);
                 }

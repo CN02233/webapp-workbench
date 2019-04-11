@@ -20,6 +20,7 @@ public class GridColumDefined {
     private String colum_meta_type;
     private String colum_point;
     private String colum_desc;
+    private String need_remember;//是否需要记忆用户输入
 
     public Integer getColum_id() {
         return colum_id;
@@ -155,5 +156,13 @@ public class GridColumDefined {
 
     public void setColum_desc(String colum_desc) {
         this.colum_desc = colum_desc;
+    }
+
+    public String getNeed_remember() {
+        return need_remember;
+    }
+
+    public void setNeed_remember(String need_remember) {
+        this.need_remember = need_remember;
     }
 }

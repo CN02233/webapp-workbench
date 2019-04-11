@@ -111,6 +111,16 @@ public class ReportDefinedUnitMultDimServiceImp implements ReportDefinedUnitMult
         return res;
     }
 
+    @Override
+    public void saveMultdim_col(GridColumDefined maps){
+        Integer colum_id = maps.getColum_id();
+        if(colum_id == null || colum_id == 0){
+            reportDefinedUnitMultDimDao.addSaveMultdim_col(maps);
+        }else{
+            reportDefinedUnitMultDimDao.editSaveMultdim_col(maps);
+        }
+    }
+
     /**
      * 保存一维动态报送单元
      * @param maps
@@ -147,11 +157,26 @@ public class ReportDefinedUnitMultDimServiceImp implements ReportDefinedUnitMult
             for(GridColumDefined mod1 : maps.get("add_col")){
                 reportDefinedUnitMultDimDao.addSaveMultdim_col(mod1);
                 String no = mod1.getColum_id_no();
+                String formulano = ".?" + no + ".";
                 if(!d || no == null || "".equals(no))
                     continue;
                 for(GridColumDefined mod11 : maps.get("add_data")){
                     if(no.equals(mod11.getColum_id_no()))
                         mod11.setColum_id(mod1.getColum_id());
+                    //更新公式
+                    String script = mod11.getColum_formula();
+                    if(script!=null && script.contains(formulano)){
+                        String expr = "." + mod1.getColum_id().toString() + ".";
+                        mod11.setColum_formula( script.replace(formulano,expr) );
+                    }
+                }
+                for(GridColumDefined mod22 : maps.get("edit_data")){
+                    //更新公式
+                    String script = mod22.getColum_formula();
+                    if(script!=null && script.contains(formulano)){
+                        String expr = "." + mod1.getColum_id().toString() + ".";
+                        mod22.setColum_formula( script.replace(formulano,expr) );
+                    }
                 }
             }
         }
