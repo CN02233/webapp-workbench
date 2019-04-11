@@ -26,4 +26,6 @@ public interface ReportStatementsService {
     void delDefinedAndOriginAssign(String definedId);
 
     void changeDeindStatus(String definedId, ReportDefinedStatus status);
+
+    List<Origin> getDefinedOriginsById(String definedId);
 }

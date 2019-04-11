@@ -1,6 +1,8 @@
 package com.seaboxdata.cqny.reportunit.controller;
 
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
+import com.seaboxdata.cqny.record.entity.SubmitReportRequestEntity;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -36,6 +39,9 @@ public class ReportStatementsController {
 
     @Autowired
     private SubmitReportService reportDefinedSubmitService;
+
+    public ReportStatementsController() {
+    }
 
     /**
      * 列表查询展示
@@ -110,6 +116,15 @@ public class ReportStatementsController {
         return jsonResult;
     }
 
+    @RequestMapping("getDefinedOriginsById")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getDefinedOriginsById(String definedId){
+        List<Origin> result=reportStatementsService.getDefinedOriginsById(definedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,result);
+        return jsonResult;
+    }
+
 
     /**
      * 删除报送报表
@@ -150,15 +165,22 @@ public class ReportStatementsController {
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String sumitReportDefined(String reportDefinedId){
-        logger.info("更新报表状态为发布中-->{}",reportDefinedId);
-        reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.SUBMITING);
+    public String sumitReportDefined(@RequestBody SubmitReportRequestEntity submitReportEntity){
+        logger.info("更新报表状态为发布中-->{}",submitReportEntity.getDefined_id());
+        reportStatementsService.changeDeindStatus(submitReportEntity.getDefined_id(), ReportDefinedStatus.SUBMITING);
 
         new Thread(() -> {
-            reportDefinedSubmitService.doSubmit(reportDefinedId);
+            try {
+                reportDefinedSubmitService.doSubmit(submitReportEntity);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.info("报表发布出现异常->{},回滚报表状态为正常",submitReportEntity.getDefined_id());
+                reportStatementsService.changeDeindStatus(submitReportEntity.getDefined_id(), ReportDefinedStatus.NORMAL);
+            }
         }).start();
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "已开始发布", null, null);
         return jsonpResponse;
     }
+
 
 }

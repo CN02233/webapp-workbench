@@ -158,7 +158,16 @@
               </el-date-picker>
             </el-col>
           </el-row>
-
+          <el-row>
+            <el-col :span="8" :offset="1">不需审批机构</el-col>
+            <el-col align="left" :span="15">
+              <el-checkbox-group v-model="submitParams.check_origins">
+                <el-checkbox-button v-for="origin in submitParams.defined_origins"
+                             :label="origin.origin_id"
+                             :key="origin.origin_id">{{origin.origin_name}}</el-checkbox-button>
+              </el-checkbox-group>
+            </el-col>
+          </el-row>
         </el-col>
       </el-row>
       <div slot="footer" class="dialog-footer">
@@ -219,7 +228,9 @@ export default {
         defined_id:'',
         defined_name:'',
         report_start_date_str:'',
-        report_end_date_str:''
+        report_end_date_str:'',
+        check_origins:[],
+        defined_origins:[]
       }
     }
   },
@@ -449,9 +460,25 @@ export default {
       this.submitModel = true
       this.submitParams.defined_id = definedData.defined_id
       this.submitParams.defined_name = definedData.defined_name
+      this.BaseRequest({
+        url:"/reportStatements/getDefinedOriginsById",
+        params:{
+          definedId:definedData.defined_id
+        }
+      }).then(response=>{
+        this.submitParams.defined_origins = response
+      });
     },
     submitReport(){
-      const defined_id = this.submitParams.defined_id
+      if(this.submitParams.report_start_date_str==null||this.submitParams.report_start_date_str==''||
+        this.submitParams.report_end_date_str==null||this.submitParams.report_end_date_str==''
+      ){
+        this.$notify({
+          dangerouslyUseHTMLString: true,
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>起始日期、结束日期'
+        })
+        return
+      }
 
       const loading = this.$loading({
         lock: true,
@@ -461,8 +488,12 @@ export default {
       });
       this.BaseRequest({
         url:"/reportStatements/sumitReportDefined",
-        params:{
-          submit_context:this.submitParams
+        method:'post',
+        data:{
+          "defined_id":this.submitParams.defined_id,
+          "report_start_date":this.submitParams.report_start_date_str,
+          "report_end_date":this.submitParams.report_end_date_str,
+          "check_origins":this.submitParams.check_origins
         }
       }).then(response=>{
         loading.close();

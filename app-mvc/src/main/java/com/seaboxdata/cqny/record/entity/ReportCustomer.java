@@ -17,6 +17,7 @@ public class ReportCustomer {
     private Date report_end_date;
     private Integer active_unit;
     private List<UnitEntity> unitEntities;
+    private String pass_auth;
 
     public Integer getReport_id() {
         return report_id;
@@ -96,5 +97,13 @@ public class ReportCustomer {
 
     public void setUnitEntities(List<UnitEntity> unitEntities) {
         this.unitEntities = unitEntities;
+    }
+
+    public String getPass_auth() {
+        return pass_auth;
+    }
+
+    public void setPass_auth(String pass_auth) {
+        this.pass_auth = pass_auth;
     }
 }
