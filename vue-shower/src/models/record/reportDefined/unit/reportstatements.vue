@@ -59,6 +59,11 @@
                 size="mini"
                 type="danger"
                 @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              <el-button v-if="scope.row.status==0"
+                size="mini"
+                type="success"
+                @click="openSubmitPrams(scope.row)">发布</el-button>
+
             </template>
           </el-table-column>
         </el-table>
@@ -116,6 +121,60 @@
         <el-button type="primary" @click="handleInsert">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!--发布设置弹窗-->
+    <el-dialog title="发布报表设置" :visible.sync="submitModel" >
+      <el-row :gutter="16">
+        <el-col :sm="20">
+          <el-row>
+            <el-col :span="8" :offset="1">报表定义编号</el-col>
+            <el-col :span="15">
+              <el-input placeholder="报表定义编号" :disabled="true" v-model="submitParams.defined_id" class="input-with-select" ></el-input>
+            </el-col>
+          </el-row>
+          <el-row>
+          <el-col :span="8" :offset="1">报表定义名称</el-col>
+            <el-col :span="15">
+              <el-input placeholder="报表定义名称" :disabled="true" v-model="submitParams.defined_name" class="input-with-select" ></el-input>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8" :offset="1">报送起始日期</el-col>
+            <el-col :span="15">
+              <el-date-picker style="width: 100%;"
+                v-model="submitParams.report_start_date_str"
+                type="date" value-format="yyyyMMdd"
+                placeholder="选择报送起始日期">
+              </el-date-picker>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8" :offset="1">报送截止日期</el-col>
+            <el-col :span="15">
+              <el-date-picker style="width: 100%;"
+                v-model="submitParams.report_end_date_str"
+                type="date" value-format="yyyyMMdd"
+                placeholder="选择报送截止日期">
+              </el-date-picker>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8" :offset="1">不需审批机构</el-col>
+            <el-col align="left" :span="15">
+              <el-checkbox-group v-model="submitParams.check_origins">
+                <el-checkbox-button v-for="origin in submitParams.defined_origins"
+                             :label="origin.origin_id"
+                             :key="origin.origin_id">{{origin.origin_name}}</el-checkbox-button>
+              </el-checkbox-group>
+            </el-col>
+          </el-row>
+        </el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeSubmitModal">取 消</el-button>
+        <el-button type="primary" @click="submitReport()">发 布</el-button>
+      </div>
+    </el-dialog>
   </WorkMain>
 </template>
 
@@ -136,6 +195,7 @@ export default {
       eachPageNum: 10,
       totalPage: 1,
       showModalPage: false,
+      submitModel: false,
       isEditModal: false,
       dialogTitle: '',
       origin_ids: [],
@@ -163,7 +223,15 @@ export default {
         label: 'label'
       },
       filterText: '',
-      treeData: []
+      treeData: [],
+      submitParams:{
+        defined_id:'',
+        defined_name:'',
+        report_start_date_str:'',
+        report_end_date_str:'',
+        check_origins:[],
+        defined_origins:[]
+      }
     }
   },
   watch: {// 监听节点搜索的内容
@@ -194,15 +262,22 @@ export default {
   },
   methods: {
     formatStatus: function (row, column) {
-      if (row.status === '100') {
-        return '编辑中'
+      if (row.status === '0') {
+        return '正常'
       }
-      if (row.status === '200') {
+      if (row.status === '1') {
+        return '失效'
+      }
+      if (row.status === '2') {
+        return '锁定'
+      }
+      if (row.status === '4') {
         return '已发布'
       }
-      if (row.status === '300') {
-        return '已使用'
+      if (row.status === '5') {
+        return '发布中'
       }
+      return '未知'
     },
     handleNodeClick (data) { // 点击树的节点进行赋值
       // console.log(data)
@@ -247,6 +322,9 @@ export default {
     closeModal: function () {
       this.showModalPage = false
       this.isEditModal = false
+    },
+    closeSubmitModal: function () {
+      this.submitModel = false
     },
     getOriginList () { // 弹出model触发、获取机构树状展示
       this.BaseRequest({
@@ -376,6 +454,51 @@ export default {
         query:{
           'definedId':definedId
         }
+      });
+    },
+    openSubmitPrams(definedData){
+      this.submitModel = true
+      this.submitParams.defined_id = definedData.defined_id
+      this.submitParams.defined_name = definedData.defined_name
+      this.BaseRequest({
+        url:"/reportStatements/getDefinedOriginsById",
+        params:{
+          definedId:definedData.defined_id
+        }
+      }).then(response=>{
+        this.submitParams.defined_origins = response
+      });
+    },
+    submitReport(){
+      if(this.submitParams.report_start_date_str==null||this.submitParams.report_start_date_str==''||
+        this.submitParams.report_end_date_str==null||this.submitParams.report_end_date_str==''
+      ){
+        this.$notify({
+          dangerouslyUseHTMLString: true,
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>起始日期、结束日期'
+        })
+        return
+      }
+
+      const loading = this.$loading({
+        lock: true,
+        text: '发布中',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.BaseRequest({
+        url:"/reportStatements/sumitReportDefined",
+        method:'post',
+        data:{
+          "defined_id":this.submitParams.defined_id,
+          "report_start_date":this.submitParams.report_start_date_str,
+          "report_end_date":this.submitParams.report_end_date_str,
+          "check_origins":this.submitParams.check_origins
+        }
+      }).then(response=>{
+        loading.close();
+        this.Message.success('发布流程已启动')
+        this.getTableData(1)
       });
     }
   },

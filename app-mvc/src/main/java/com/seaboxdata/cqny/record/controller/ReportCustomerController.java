@@ -1,10 +1,12 @@
 package com.seaboxdata.cqny.record.controller;
 
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.webapp.support.json.JsonSupport;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -28,6 +32,11 @@ public class ReportCustomerController {
 
     @Autowired
     private ReportCustomerService reportCustomerService;
+
+
+    @Autowired
+    private OriginService originService;
+
 
     /**
      * 获取当前用户权限下报送列表
@@ -42,9 +51,30 @@ public class ReportCustomerController {
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
 
-        PageResult pageResult = reportCustomerService.pagerReport(currPage, pageSize, currUserId);
+        Origin userOrigin = originService.getOriginByUser(currUserId);
+        Integer userOriginId = userOrigin.getOrigin_id();
+        List<Origin> childrenOrigin = originService.checkAllChildren(userOriginId);
+        List<Integer> originParams = new ArrayList<>();
+        originParams.add(userOriginId);
+        if(childrenOrigin!=null){
+            for (Origin origin : childrenOrigin) {
+                originParams.add(origin.getOrigin_id());
+            }
+        }
 
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,pageResult);
+        PageResult pageResult = reportCustomerService.pagerReport(currPage, pageSize, originParams);
+        childrenOrigin.add(userOrigin);
+
+        Map<String,Object> responseMap = new HashMap<>();
+        responseMap.put("currPage",pageResult.getCurrPage());
+        responseMap.put("dataList",pageResult.getDataList());
+        responseMap.put("pageSize",pageResult.getPageSize());
+        responseMap.put("totalNum",pageResult.getTotalNum());
+        responseMap.put("totalPage",pageResult.getTotalPage());
+        responseMap.put("origins",childrenOrigin);
+
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,responseMap);
         return jsonResult;
     }
 

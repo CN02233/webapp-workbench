@@ -5,6 +5,8 @@ import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
+import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
+import com.seaboxdata.cqny.record.entity.SubmitReportRequestEntity;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -40,21 +43,35 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void doSubmit(String reportDefinedId) {
-        logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
-        StatementsEntity reportDefined = getReportDefined(reportDefinedId);
-        logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
-        if(reportDefined==null){
-            return;
+    public void doSubmit(SubmitReportRequestEntity submitReportEntity) throws ParseException {
+        String reportDefinedId = submitReportEntity.getDefined_id();
+        try {
+            logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
+            StatementsEntity reportDefined = getReportDefined(reportDefinedId);
+            logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
+            if(reportDefined==null){
+                return;
+            }
+
+            logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
+            List<String> alOrigin = getAllOrigin(reportDefinedId);
+            logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
+            logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
+            List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin,submitReportEntity);
+            logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
+            logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
+            createReportDefaultData(reportDefined,reportIds);
+
+            logger.info("更新报表状态为发布完成-->{}",reportDefinedId);
+            reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.SUBMIT);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }finally {
+
         }
-        logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
-        List<String> alOrigin = getAllOrigin(reportDefinedId);
-        logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
-        logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
-        List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin);
-        logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
-        logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
-        createReportDefaultData(reportDefined,reportIds);
+
+
     }
 
     /**
@@ -96,8 +113,10 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param allOrigin
      * @return
      */
-    private List<Integer> createReportBaseData(StatementsEntity reportDefined, List<String> allOrigin){
+    private List<Integer> createReportBaseData(StatementsEntity reportDefined, List<String> allOrigin,SubmitReportRequestEntity submitReportEntity) throws ParseException {
         List<Integer> reportBaseIds = new ArrayList<>();
+        List<String> passAuthList = submitReportEntity.getCheck_origins();
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         ReportCustomer reportCustomer = new ReportCustomer();
         reportCustomer.setReport_defined_id(reportDefined.getDefined_id());
         reportCustomer.setReport_name(reportDefined.getDefined_name());
@@ -106,6 +125,14 @@ public class SubmitReportServiceImp implements SubmitReportService {
         for (String origin : allOrigin) {
             reportCustomer.setReport_origin(new Integer(origin));
             reportCustomer.setActive_unit(reportDefined.getUnits().get(0).getUnit_id());
+            reportCustomer.setReport_start_date(format.parse(submitReportEntity.getReport_start_date()));
+            reportCustomer.setReport_end_date(format.parse(submitReportEntity.getReport_end_date()));
+            if(passAuthList!=null&&passAuthList.contains(origin)){
+                reportCustomer.setPass_auth("Y");
+            }else{
+                reportCustomer.setPass_auth("N");
+            }
+
             reportCustomerService.createReportCustomer(reportCustomer);
             reportBaseIds.add(reportCustomer.getReport_id());
         }

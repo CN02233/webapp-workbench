@@ -4,13 +4,11 @@ import com.github.pagehelper.Page;
 import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.ColumType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
-import com.seaboxdata.cqny.record.entity.FomularTmpEntity;
-import com.seaboxdata.cqny.record.entity.ReportCustomer;
-import com.seaboxdata.cqny.record.entity.ReportCustomerData;
-import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
+import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.FomularService;
+import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
@@ -44,11 +42,11 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     @Autowired
     private RememberCustDataService rememberCustDataService;
 
-
     @Override
-    public PageResult pagerReport(Integer currPage, Integer pageSize, Integer userId) {
-        Page pagerData = reportCustomerDao.pageReport(currPage,pageSize,userId);
+    public PageResult pagerReport(Integer currPage, Integer pageSize,  List<Integer> originIds) {
+        Page pagerData = reportCustomerDao.pageReportByOrigins(currPage,pageSize,originIds);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pagerData);
+
         return pageResult;
 //        return null;
     }

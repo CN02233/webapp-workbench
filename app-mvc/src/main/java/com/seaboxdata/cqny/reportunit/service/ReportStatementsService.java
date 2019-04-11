@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.reportunit.service;
 
 import com.seaboxdata.cqny.record.entity.Origin;
+import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import com.webapp.support.page.PageResult;
 
@@ -23,4 +24,8 @@ public interface ReportStatementsService {
     List<String> getDefinedAndOriginAssignById(String definedId);
 
     void delDefinedAndOriginAssign(String definedId);
+
+    void changeDeindStatus(String definedId, ReportDefinedStatus status);
+
+    List<Origin> getDefinedOriginsById(String definedId);
 }

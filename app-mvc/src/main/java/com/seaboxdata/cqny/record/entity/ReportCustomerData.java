@@ -2,6 +2,9 @@ package com.seaboxdata.cqny.record.entity;
 
 import com.webapp.support.json.JsonSupport;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class ReportCustomerData {
     private Integer report_id;
     private String unit_id;
@@ -9,6 +12,11 @@ public class ReportCustomerData {
     private String colum_id;
     private String dimensions_id;
     private String report_data;
+
+    private Date report_start_date;
+    private String report_start_date_str;
+    private Date report_end_date;
+    private String report_end_date_str;
 
     public Integer getReport_id() {
         return report_id;
@@ -60,5 +68,43 @@ public class ReportCustomerData {
 
     public String toString(){
         return JsonSupport.objectToJson(this);
+    }
+
+    public Date getReport_start_date() {
+        return report_start_date;
+    }
+
+    public void setReport_start_date(Date report_start_date) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        this.report_start_date = report_start_date;
+        if(report_start_date!=null)
+            this.report_start_date_str = format.format(this.report_start_date);
+    }
+
+    public String getReport_start_date_str() {
+        return report_start_date_str;
+    }
+
+    public void setReport_start_date_str(String report_start_date_str) {
+        this.report_start_date_str = report_start_date_str;
+    }
+
+    public Date getReport_end_date() {
+        return report_end_date;
+    }
+
+    public void setReport_end_date(Date report_end_date) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        this.report_end_date = report_end_date;
+        if(report_end_date!=null)
+            this.report_end_date_str = format.format(this.report_end_date);
+    }
+
+    public String getReport_end_date_str() {
+        return report_end_date_str;
+    }
+
+    public void setReport_end_date_str(String report_end_date_str) {
+        this.report_end_date_str = report_end_date_str;
     }
 }

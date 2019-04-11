@@ -20,6 +20,16 @@ public interface IReportCustomerDao {
                                     @Param("pageSize") Integer pageSize,
                                     @Param("userId") Integer userId);
 
+    @Select("<script>" +
+            "select rc.* from report_customer rc where rc.report_origin in " +
+            "<foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> " +
+            "#{item}" +
+            "</foreach>" +
+            "</script>")
+    Page<ReportCustomer> pageReportByOrigins(@Param("currPage") Integer currPage,
+                                    @Param("pageSize") Integer pageSize,
+                                    @Param("originParams") List<Integer> originParams);
+
 
     @Select("select * from report_customer where report_id = #{reportId}")
     @Results(value={
@@ -29,9 +39,9 @@ public interface IReportCustomerDao {
     ReportCustomer checkReportCustomer(String reportId);
 
     @Insert("insert into report_customer " +
-            "(report_defined_id,report_name,report_origin,create_date,report_start_date,report_end_date,active_unit) " +
+            "(report_defined_id,report_name,report_origin,create_date,report_start_date,report_end_date,active_unit,pass_auth) " +
             "values " +
-            "(#{report_defined_id},#{report_name},#{report_origin},#{create_date},#{report_start_date},#{report_end_date},#{active_unit})")
+            "(#{report_defined_id},#{report_name},#{report_origin},#{create_date},#{report_start_date},#{report_end_date},#{active_unit},#{pass_auth})")
     @Options(useGeneratedKeys = true, keyProperty = "report_id", keyColumn = "report_id")
     void createReportCustomer(ReportCustomer reportCustomer);
 

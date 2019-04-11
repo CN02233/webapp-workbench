@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.reportunit.dao;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
 import org.apache.ibatis.annotations.*;
@@ -127,4 +128,9 @@ public interface IReportStatementsDao {
             "</script>")
     Page<ReportCustomer> listReportStatementsByUser(@Param("currPage")int currPage, @Param("pageSize") int pageSize, @Param("originList")List finalOriginList);
 
+    @Update("update report_defined set status = #{status} where defined_id=#{definedId}")
+    void changeDeindStatus(@Param("definedId") String definedId,@Param("status") int status);
+
+    @Select("select so.* from sys_origin so,report_defined_origin_assign rdoa where rdoa.defined_id = #{definedId} and rdoa.origin_id = so.origin_id")
+    List<Origin> getDefinedOriginsById(String definedId);
 }

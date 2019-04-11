@@ -2,6 +2,8 @@ package com.seaboxdata.cqny.reportunit.service.impl;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
+import com.seaboxdata.cqny.record.entity.Origin;
+import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
 import com.seaboxdata.cqny.reportunit.dao.IReportStatementsDao;
 import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
 import com.seaboxdata.cqny.reportunit.entity.StatementsEntity;
@@ -90,6 +92,16 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     @Override
     public void delDefinedAndOriginAssign(String definedId) {
         reportStatementsDao.delDefinedAndOriginAssign(definedId);
+    }
+
+    @Override
+    public void changeDeindStatus(String definedId, ReportDefinedStatus status) {
+        reportStatementsDao.changeDeindStatus(definedId,status.value());
+    }
+
+    @Override
+    public List<Origin> getDefinedOriginsById(String definedId) {
+        return reportStatementsDao.getDefinedOriginsById(definedId);
     }
 
     @Override
