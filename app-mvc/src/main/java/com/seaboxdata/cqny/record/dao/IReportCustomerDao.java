@@ -45,6 +45,16 @@ public interface IReportCustomerDao {
     @Options(useGeneratedKeys = true, keyProperty = "report_id", keyColumn = "report_id")
     void createReportCustomer(ReportCustomer reportCustomer);
 
+    @Update("update report_customer set " +
+            "report_name = #{report_name}," +
+            "report_origin = #{report_name}," +
+            "create_date = #{report_name}," +
+            "report_start_date = #{report_name}," +
+            "report_end_date = #{report_name}," +
+            "active_unit = #{report_name}," +
+            "pass_auth = #{report_name} where report_defined_id = #{report_defined_id}")
+    void updateReportCustomer(ReportCustomer reportCustomer);
+
     @Select("select " +
             "rui.create_time," +
             "rui.`status`," +

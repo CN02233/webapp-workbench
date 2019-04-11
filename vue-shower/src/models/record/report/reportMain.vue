@@ -34,8 +34,8 @@
             width="250"
           >
             <template slot-scope="scope">
-              <el-button size="mini" @click="reportFIll(scope.row.report_id)">填报</el-button>
-              <el-button size="mini" type="danger" @click="handleEdit(scope.$index, scope.row)">提交</el-button>
+              <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
+              <!--<el-button size="mini" type="danger" @click="handleEdit(scope.$index, scope.row)">提交</el-button>-->
             </template>
           </el-table-column>
         </el-table>

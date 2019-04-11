@@ -18,6 +18,8 @@ public class ReportCustomer {
     private Integer active_unit;
     private List<UnitEntity> unitEntities;
     private String pass_auth;
+    private String report_status;
+
 
     public Integer getReport_id() {
         return report_id;
@@ -105,5 +107,13 @@ public class ReportCustomer {
 
     public void setPass_auth(String pass_auth) {
         this.pass_auth = pass_auth;
+    }
+
+    public String getReport_status() {
+        return report_status;
+    }
+
+    public void setReport_status(String report_status) {
+        this.report_status = report_status;
     }
 }

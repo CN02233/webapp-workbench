@@ -8,6 +8,7 @@ package com.seaboxdata.cqny.record.entity;
  * 4：失效
  * 5：报表发布
  * 6：待上传签名
+ * 7：过期
  */
 public enum ReportStatus {
 
@@ -17,7 +18,9 @@ public enum ReportStatus {
     LOCK(3,"锁定"),
     REMOVE(4,"失效"),
     APPROVE(5,"报表发布"),
-    UP_SIGIN(6,"待上传签名");
+    UP_SIGIN(6,"待上传签名"),
+    TOO_EARLY(7,"未到填写日期"),
+    OVER_TIME(8,"过期");
 
     private Integer value;
     private String comment;
