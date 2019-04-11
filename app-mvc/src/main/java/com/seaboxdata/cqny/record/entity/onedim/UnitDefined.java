@@ -12,6 +12,15 @@ public class UnitDefined {
     private Integer create_user;
     private List colums;
 
+    //merge from UnitEntity.java,remove UnityEntity after merged
+    private Integer origin_id;
+    private String status;
+    private String create_time;
+    //辅助属性、前端显示name
+    private String origin_name;
+    private String user_name;
+    private Integer unit_order;//填报顺序
+
 
     public Integer getUnit_id() {
         return unit_id;
@@ -69,4 +78,51 @@ public class UnitDefined {
         this.colums = colums;
     }
 
+    public Integer getOrigin_id() {
+        return origin_id;
+    }
+
+    public void setOrigin_id(Integer origin_id) {
+        this.origin_id = origin_id;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getCreate_time() {
+        return create_time;
+    }
+
+    public void setCreate_time(String create_time) {
+        this.create_time = create_time;
+    }
+
+    public String getOrigin_name() {
+        return origin_name;
+    }
+
+    public void setOrigin_name(String origin_name) {
+        this.origin_name = origin_name;
+    }
+
+    public String getUser_name() {
+        return user_name;
+    }
+
+    public void setUser_name(String user_name) {
+        this.user_name = user_name;
+    }
+
+    public Integer getUnit_order() {
+        return unit_order;
+    }
+
+    public void setUnit_order(Integer unit_order) {
+        this.unit_order = unit_order;
+    }
 }

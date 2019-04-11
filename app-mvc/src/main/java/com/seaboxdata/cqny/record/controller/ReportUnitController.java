@@ -1,7 +1,7 @@
-package com.seaboxdata.cqny.reportunit.controller;
+package com.seaboxdata.cqny.record.controller;
 
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
-import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
+import com.seaboxdata.cqny.record.service.ReportUnitService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
@@ -49,7 +49,7 @@ public class ReportUnitController {
     @RequestMapping("addReportUnit")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult addReportUnit(@RequestBody UnitEntity reportUnit){
+    public JsonResult addReportUnit(@RequestBody UnitDefined reportUnit){
         User user = SessionSupport.checkoutUserFromSession();
         reportUnit.setCreate_user(user.getUser_id());
         reportUnitService.addReportUnit(reportUnit);

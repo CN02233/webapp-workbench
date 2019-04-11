@@ -1,4 +1,4 @@
-package com.seaboxdata.cqny.reportunit.service;
+package com.seaboxdata.cqny.record.service;
 
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.config.ReportDefinedStatus;

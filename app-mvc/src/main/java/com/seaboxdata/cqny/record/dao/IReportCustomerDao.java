@@ -4,7 +4,7 @@ import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;
@@ -69,7 +69,7 @@ public interface IReportCustomerDao {
             "rui.unit_order," +
             "rui.origin_id " +
             " from report_unit_info rui where rui.report_defined_id = #{report_id} order by rui.unit_order")
-    List<UnitEntity> getAllUnitEntityByReportId(String report_id);
+    List<UnitDefined> getAllUnitEntityByReportId(String report_id);
 
     @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId}")
     List<ReportCustomerData> getColumDatas(@Param("reportId") String reportId, @Param("unitId") String unitId);
@@ -93,7 +93,7 @@ public interface IReportCustomerDao {
             "rui.unit_type," +
             "rui.origin_id " +
             " from report_customer rd inner join report_unit_info rui on rd.report_id=#{reportId} and  rd.active_unit=rui.unit_id ")
-    UnitEntity getUnitByReportStep(String reportId);
+    UnitDefined getUnitByReportStep(String reportId);
 
     @Update("update report_customer set active_unit= #{nextStepUnit} where report_id = #{reportId}")
     void updateStep(@Param("reportId") String reportId,@Param("nextStepUnit") Integer nextStepUnit);

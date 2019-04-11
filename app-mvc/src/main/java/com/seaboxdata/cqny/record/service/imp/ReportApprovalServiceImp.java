@@ -1,12 +1,12 @@
-package com.seaboxdata.cqny.reportunit.service.impl;
+package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.reportunit.dao.IReportApprovalDao;
+import com.seaboxdata.cqny.record.dao.IReportApprovalDao;
 import com.seaboxdata.cqny.reportunit.entity.ReportCustomer;
-import com.seaboxdata.cqny.reportunit.service.ReportApprovalService;
+import com.seaboxdata.cqny.record.service.ReportApprovalService;
 import com.webapp.support.page.PageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
-package com.seaboxdata.cqny.reportunit.controller;
+package com.seaboxdata.cqny.record.controller;
 
 import com.seaboxdata.cqny.record.config.ReportStatus;
-import com.seaboxdata.cqny.reportunit.service.ReportApprovalService;
+import com.seaboxdata.cqny.record.service.ReportApprovalService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;

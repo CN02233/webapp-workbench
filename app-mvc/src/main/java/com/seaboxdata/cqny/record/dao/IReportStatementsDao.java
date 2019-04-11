@@ -1,4 +1,4 @@
-package com.seaboxdata.cqny.reportunit.dao;
+package com.seaboxdata.cqny.record.dao;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.Origin;

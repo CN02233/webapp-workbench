@@ -1,12 +1,12 @@
-package com.seaboxdata.cqny.reportunit.service.impl;
+package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitMultDimService;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
-import com.seaboxdata.cqny.reportunit.dao.IReportUnitDao;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
-import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
+import com.seaboxdata.cqny.record.dao.IReportUnitDao;
+import com.seaboxdata.cqny.record.service.ReportUnitService;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,13 +26,13 @@ public class ReportUnitServiceImp implements ReportUnitService {
 
     @Override
     public PageResult listReportUnit(int currPage, int pageSize) {
-        Page<UnitEntity> reportUnitPage = reportUnitDao.listReportUnit(currPage, pageSize);
+        Page<UnitDefined> reportUnitPage = reportUnitDao.listReportUnit(currPage, pageSize);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportUnitPage);
         return pageResult;
     }
 
     @Override
-    public void addReportUnit(UnitEntity reportUnit) {
+    public void addReportUnit(UnitDefined reportUnit) {
         if(reportUnit.getUnit_id()!=null){
             reportUnitDao.updateReportUnit(reportUnit);
         }else{
@@ -46,7 +46,7 @@ public class ReportUnitServiceImp implements ReportUnitService {
     }
 
     @Override
-    public UnitEntity getReportUnit(String unitId) {
+    public UnitDefined getReportUnit(String unitId) {
         return reportUnitDao.getReportUnit(unitId);
     }
 
@@ -69,8 +69,8 @@ public class ReportUnitServiceImp implements ReportUnitService {
     }
 
     @Override
-    public List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId) {
-        List<UnitEntity> unitEntities = reportUnitDao.getUnitDefinedByReportDefindId(reportDefinedId);
+    public List<UnitDefined> getUnitDefinedByReportDefindId(String reportDefinedId) {
+        List<UnitDefined> unitEntities = reportUnitDao.getUnitDefinedByReportDefindId(reportDefinedId);
         return unitEntities;
     }
 }

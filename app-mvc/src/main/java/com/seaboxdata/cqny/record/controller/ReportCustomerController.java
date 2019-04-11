@@ -4,9 +4,9 @@ import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
@@ -102,7 +102,7 @@ public class ReportCustomerController {
         Integer currOrder = 0;
         Integer getUnitOrder = 0;
         Integer activeUnitId = reportCustomer.getActive_unit();
-        for (UnitEntity unitEntity : reportCustomer.getUnitEntities()) {
+        for (UnitDefined unitEntity : reportCustomer.getUnitEntities()) {
             if(unitEntity.getUnit_id().equals(activeUnitId)){
                 currOrder = unitEntity.getUnit_order();
             }

@@ -2,7 +2,7 @@ package com.seaboxdata.cqny.record.entity;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 
 import java.util.Date;
 
@@ -23,7 +23,7 @@ public class ReportDefinedEntity {
     private String user_name;
 
     //add by SongChaoqun
-    private List<UnitEntity> units;
+    private List<UnitDefined> units;
 
     public Integer getDefined_id() {
         return defined_id;
@@ -73,11 +73,11 @@ public class ReportDefinedEntity {
         this.create_user = create_user;
     }
 
-    public List<UnitEntity> getUnits() {
+    public List<UnitDefined> getUnits() {
         return units;
     }
 
-    public void setUnits(List<UnitEntity> units) {
+    public void setUnits(List<UnitDefined> units) {
         this.units = units;
     }
 

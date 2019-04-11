@@ -1,10 +1,8 @@
 package com.seaboxdata.cqny.reportunit.service.impl;
 
 import com.AbstractTestService;
-import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
-import junit.framework.TestCase;
+import com.seaboxdata.cqny.record.service.ReportUnitService;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
 

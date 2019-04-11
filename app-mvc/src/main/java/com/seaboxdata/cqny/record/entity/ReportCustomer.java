@@ -1,6 +1,6 @@
 package com.seaboxdata.cqny.record.entity;
 
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,7 +19,7 @@ public class ReportCustomer {
     private Date report_end_date;
     private String report_end_date_str;
     private Integer active_unit;
-    private List<UnitEntity> unitEntities;
+    private List<UnitDefined> unitEntities;
     private String pass_auth;
     private String report_status;
 
@@ -102,11 +102,11 @@ public class ReportCustomer {
         this.active_unit = active_unit;
     }
 
-    public List<UnitEntity> getUnitEntities() {
+    public List<UnitDefined> getUnitEntities() {
         return unitEntities;
     }
 
-    public void setUnitEntities(List<UnitEntity> unitEntities) {
+    public void setUnitEntities(List<UnitDefined> unitEntities) {
         this.unitEntities = unitEntities;
     }
 

@@ -6,12 +6,12 @@ import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
-import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
-import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
+import com.seaboxdata.cqny.record.service.ReportStatementsService;
+import com.seaboxdata.cqny.record.service.ReportUnitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,16 +79,16 @@ public class SubmitReportServiceImp implements SubmitReportService {
      */
     private ReportDefinedEntity getReportDefined(String reportDefinedId){
         ReportDefinedEntity reportDefined = reportStatementsService.getReportDefinedById(new Integer(reportDefinedId));
-        List<UnitEntity> unitList = reportUnitService.getUnitDefinedByReportDefindId(reportDefinedId);
+        List<UnitDefined> unitList = reportUnitService.getUnitDefinedByReportDefindId(reportDefinedId);
         if(unitList!=null){
-            for (UnitEntity unitEntity : unitList) {
+            for (UnitDefined unitEntity : unitList) {
                 List columList = reportUnitService.getDefinedColums(unitEntity.getUnit_id().toString(), unitEntity.getUnit_type().toString());
                 unitEntity.setColums(columList);
             }
         }
-        unitList.sort(new Comparator<UnitEntity>() {
+        unitList.sort(new Comparator<UnitDefined>() {
             @Override
-            public int compare(UnitEntity o1, UnitEntity o2) {
+            public int compare(UnitDefined o1, UnitDefined o2) {
                 Integer o1Order = o1.getUnit_order();
                 Integer o2Order = o2.getUnit_order();
                 return o1Order-o2Order;
@@ -146,8 +146,8 @@ public class SubmitReportServiceImp implements SubmitReportService {
      * @param reportIds
      */
     private void createReportDefaultData(ReportDefinedEntity reportDefined, List<Integer> reportIds){
-        List<UnitEntity> unitDefinds = reportDefined.getUnits();
-        for (UnitEntity unitDefind : unitDefinds) {
+        List<UnitDefined> unitDefinds = reportDefined.getUnits();
+        for (UnitDefined unitDefind : unitDefinds) {
             Integer unitTypeInt = unitDefind.getUnit_type();
             if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitTypeInt)){//一维静态
                 logger.info("报表发布->{}：报送单元【{}】为【一维报送】单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());

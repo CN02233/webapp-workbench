@@ -10,9 +10,9 @@ import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
 import com.seaboxdata.cqny.record.entity.FomularTmpEntity;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.FomularService;
-import com.seaboxdata.cqny.reportunit.dao.IReportUnitDao;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.record.dao.IReportUnitDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +97,7 @@ public class FomularServiceImp implements FomularService {
         List<SimpleColumDefined> allFomularDefineds = this.checkFomularsForCustInput(reportCustomerDatas);
         Integer reportId = reportCustomerDatas.get(0).getReport_id();
         String selfUnitId = reportCustomerDatas.get(0).getUnit_id();
-        Map<Integer, UnitEntity> unitTmp = new HashMap<>();
+        Map<Integer, UnitDefined> unitTmp = new HashMap<>();
         Map<String, SimpleColumDefined> fomularsTmp = this.getFomularsTmp(allFomularDefineds);
         List<FomularTmpEntity> fomularArray = new ArrayList<>();
         for (SimpleColumDefined fomularDefined : allFomularDefineds) {
@@ -107,7 +107,7 @@ public class FomularServiceImp implements FomularService {
             }
 
             if(!unitTmp.containsKey(unitId)){
-                UnitEntity unitEntity = reportUnitDao.getReportUnit(unitId.toString());
+                UnitDefined unitEntity = reportUnitDao.getReportUnit(unitId.toString());
                 unitTmp.put(unitId,unitEntity);
             }
 
@@ -219,8 +219,8 @@ public class FomularServiceImp implements FomularService {
         return fomularsTmp;
     }
 
-    private UnitEntity checkUnit(String unitId){
-        UnitEntity unitEntity = reportUnitDao.getReportUnit(unitId);
+    private UnitDefined checkUnit(String unitId){
+        UnitDefined unitEntity = reportUnitDao.getReportUnit(unitId);
         return unitEntity;
     }
 
@@ -237,7 +237,7 @@ public class FomularServiceImp implements FomularService {
             String columOrDimensionsIdDefined = infos[1];
             String dimensionsGridId = "";
 
-            UnitEntity unitDefined = this.checkUnit(unitId);
+            UnitDefined unitDefined = this.checkUnit(unitId);
             Integer unitType = unitDefined.getUnit_type();
 
             ReportCustomerData reportCustomerData = null;

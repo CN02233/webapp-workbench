@@ -8,11 +8,11 @@ import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.FomularService;
 import com.seaboxdata.cqny.record.service.RememberCustDataService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
-import com.seaboxdata.cqny.reportunit.service.ReportUnitService;
+import com.seaboxdata.cqny.record.service.ReportUnitService;
 import com.webapp.support.page.PageResult;
 import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
@@ -261,9 +261,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         Integer currUnitId = reportCustomer.getActive_unit();
         Integer currUnitOrder = null;
         Integer nexyCurrUnitId = null;
-        List<UnitEntity> allUnit = reportCustomer.getUnitEntities();
+        List<UnitDefined> allUnit = reportCustomer.getUnitEntities();
         boolean nextCheckOut = false;
-        for (UnitEntity unitEntity : allUnit) {
+        for (UnitDefined unitEntity : allUnit) {
              if(unitEntity.getUnit_id().equals(currUnitId)){
                 nextCheckOut = true;
                  currUnitOrder = unitEntity.getUnit_order();

@@ -1,7 +1,7 @@
-package com.seaboxdata.cqny.reportunit.dao;
+package com.seaboxdata.cqny.record.dao;
 
 import com.github.pagehelper.Page;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -21,7 +21,7 @@ public interface IReportUnitDao {
             "\t(\n" +
             "\t#{ unit_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
             "\t)")
-    void addReportUnit(UnitEntity reportUnit);
+    void addReportUnit(UnitDefined reportUnit);
 
     @Delete("delete from report_unit_info where unit_id = #{unitId}")
     void deleteById(@Param("unitId") String unit_id);
@@ -41,7 +41,7 @@ public interface IReportUnitDao {
             +"</if>"
             +"create_time=sysdate() "
             +"</set>where unit_id = #{unit_id}</script>")
-    void updateReportUnit(UnitEntity reportUnit);
+    void updateReportUnit(UnitDefined reportUnit);
 
     @Select("SELECT\n" +
             "\ta.create_time,\n" +
@@ -61,7 +61,7 @@ public interface IReportUnitDao {
             "LEFT JOIN `user` c ON a.create_user = c.user_id\n" +
             "WHERE\n" +
             "\t1 = 1")
-    Page<UnitEntity> listReportUnit(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
+    Page<UnitDefined> listReportUnit(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
     @Select("SELECT " +
             "a.create_time," +
@@ -80,7 +80,7 @@ public interface IReportUnitDao {
             "LEFT JOIN `user` c ON a.create_user = c.user_id " +
             "WHERE " +
             "1 = 1 and a.unit_id = #{unit_id} ")
-    UnitEntity getReportUnit(String unit_id);
+    UnitDefined getReportUnit(String unit_id);
 
     @Select("SELECT " +
             "a.create_time," +
@@ -95,5 +95,5 @@ public interface IReportUnitDao {
             "report_unit_info a " +
             "WHERE " +
             "1 = 1 and a.report_defined_id = #{reportDefinedId} ")
-    List<UnitEntity> getUnitDefinedByReportDefindId(String reportDefinedId);
+    List<UnitDefined> getUnitDefinedByReportDefindId(String reportDefinedId);
 }

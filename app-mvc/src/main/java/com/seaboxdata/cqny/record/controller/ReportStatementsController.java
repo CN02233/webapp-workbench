@@ -1,11 +1,11 @@
-package com.seaboxdata.cqny.reportunit.controller;
+package com.seaboxdata.cqny.record.controller;
 
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.entity.SubmitReportRequestEntity;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
-import com.seaboxdata.cqny.reportunit.service.ReportStatementsService;
+import com.seaboxdata.cqny.record.service.ReportStatementsService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;

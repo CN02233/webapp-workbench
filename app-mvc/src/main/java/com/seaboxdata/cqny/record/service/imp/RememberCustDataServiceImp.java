@@ -6,9 +6,9 @@ import com.seaboxdata.cqny.record.dao.IRememberCustDataDao;
 import com.seaboxdata.cqny.record.entity.RememberCustData;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
+import com.seaboxdata.cqny.record.entity.onedim.UnitDefined;
 import com.seaboxdata.cqny.record.service.RememberCustDataService;
-import com.seaboxdata.cqny.reportunit.dao.IReportUnitDao;
-import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
+import com.seaboxdata.cqny.record.dao.IReportUnitDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class RememberCustDataServiceImp implements RememberCustDataService {
     @Autowired
     private IRememberCustDataDao rememberCustDataDao;
 
-    private ThreadLocal<UnitEntity> unitEntity = new ThreadLocal<>();
+    private ThreadLocal<UnitDefined> unitEntity = new ThreadLocal<>();
 
     private ThreadLocal<Integer> userId = new ThreadLocal<>();
 
