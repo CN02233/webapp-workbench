@@ -3,10 +3,7 @@ package com.seaboxdata.cqny.record.service.imp;
 import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
-import com.seaboxdata.cqny.record.entity.ReportCustomer;
-import com.seaboxdata.cqny.record.entity.ReportCustomerData;
-import com.seaboxdata.cqny.record.entity.ReportDefinedStatus;
-import com.seaboxdata.cqny.record.entity.SubmitReportRequestEntity;
+import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
@@ -122,6 +119,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
         reportCustomer.setReport_name(reportDefined.getDefined_name());
         reportCustomer.setReport_origin(0);
         reportCustomer.setCreate_date(new Date());
+        reportCustomer.setReport_status(ReportStatus.NORMAL.toString());
         for (String origin : allOrigin) {
             reportCustomer.setReport_origin(new Integer(origin));
             reportCustomer.setActive_unit(reportDefined.getUnits().get(0).getUnit_id());

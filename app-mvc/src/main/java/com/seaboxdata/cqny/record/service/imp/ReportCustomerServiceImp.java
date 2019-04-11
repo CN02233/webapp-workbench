@@ -44,8 +44,21 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Override
     public PageResult pagerReport(Integer currPage, Integer pageSize,  List<Integer> originIds) {
-        Page pagerData = reportCustomerDao.pageReportByOrigins(currPage,pageSize,originIds);
+        Page<ReportCustomer> pagerData = reportCustomerDao.pageReportByOrigins(currPage,pageSize,originIds);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pagerData);
+        Date currDate = new Date();
+        List<ReportCustomer> dataList = pageResult.getDataList();
+        for (ReportCustomer reportCustomer : dataList) {
+            Date startDate = reportCustomer.getReport_start_date();
+            Date endDate = reportCustomer.getReport_end_date();
+            if(currDate.compareTo(startDate)<0){//未到填报日期
+                reportCustomer.setReport_status(ReportStatus.TOO_EARLY.toString());
+            }
+            if(currDate.compareTo(endDate)>0){//已过期
+                reportCustomer.setReport_status(ReportStatus.OVER_TIME.toString());
+                reportCustomerDao.updateReportCustomer(reportCustomer);
+            }
+        }
 
         return pageResult;
 //        return null;
