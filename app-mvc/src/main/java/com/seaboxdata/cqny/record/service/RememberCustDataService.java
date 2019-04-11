@@ -16,4 +16,8 @@ public interface RememberCustDataService {
     boolean needOrNotRemember(SimpleColumDefined simpleColumDefined);
 
     void doRemember(List<RememberCustData> rememberCustDatas);
+
+    void rememberCustDataByGrid(ArrayList<SimpleColumDefined> simpleColumDefineds,
+                          ArrayList<ReportCustomerData> columDatas,
+                          Integer rememberUser);
 }

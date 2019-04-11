@@ -517,6 +517,50 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 }
             }
         }
+
+        //检查用户输入项是否被其他公式关联，并刷新关联公式的内容
+        User currUser = SessionSupport.checkoutUserFromSession();
+        new Thread(() -> {
+            logger.info("刷新关联到用户输入项的公式值");
+            List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(custDataArray);
+            logger.info("需要刷新的内容{}",needRefresDatas);
+            if(needRefresDatas!=null){
+                for (ReportCustomerData needRefresData : needRefresDatas) {
+                    reportCustomerDao.updateGridUnitContext(needRefresData);
+                }
+            }
+
+            logger.info("查看用户录入项是否需要自动记忆，如需要，将用户输入数据保存");
+            ArrayList<SimpleColumDefined> simpleColumDefineds2 = convertToSimpleArray(simpleColumDefineds);
+            rememberCustDataService.rememberCustDataByGrid(simpleColumDefineds2,
+                    columDatas,currUser.getUser_id());
+            logger.info("用户录入记忆完成");
+        }).start();
+    }
+
+    private ArrayList<SimpleColumDefined> convertToSimpleArray(ArrayList<GridColumDefined> gridColumDefineds){
+        ArrayList<SimpleColumDefined> simpleColumDefineds = new ArrayList<>();
+        for(GridColumDefined grid : gridColumDefineds){
+            if(grid.getColum_meta_type().equals("1")){
+                SimpleColumDefined simple = new SimpleColumDefined();
+                simple.setColum_type(grid.getColum_type());
+                simple.setMin_value(grid.getMin_value());
+                simple.setMax_value(grid.getMax_value());
+                simple.setColum_formula(grid.getColum_formula());
+                simple.setColum_formula_desc(grid.getColum_formula_desc());
+                simple.setColum_type(grid.getColum_type());
+                simple.setColum_point(grid.getColum_point());
+                simple.setNeed_remember(grid.getNeed_remember());
+                simple.setUnit_id(grid.getUnit_id());
+                simple.setColum_name(grid.getColum_name());
+                simple.setColum_name_cn(grid.getColum_name_cn());
+                simple.setColum_id(grid.getColum_id());
+                simple.setGroup_id(grid.getDim_id());
+                simple.setGroup_name(grid.getDim_name());
+                simpleColumDefineds.add(simple);
+            }
+        }
+        return simpleColumDefineds;
     }
 
 }
