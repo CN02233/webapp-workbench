@@ -17,12 +17,12 @@
               label="报送机构">
             </el-table-column>
           <el-table-column
-            prop="report_start_date"
+            prop="report_start_date_str"
             align="left"
             label="报送开始时间">
           </el-table-column>
           <el-table-column
-            prop="report_end_date"
+            prop="report_end_date_str"
             align="left"
             label="报送结束时间">
           </el-table-column>
@@ -35,7 +35,8 @@
           >
             <template slot-scope="scope">
               <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
-              <!--<el-button size="mini" type="danger" @click="handleEdit(scope.$index, scope.row)">提交</el-button>-->
+              <el-button size="mini" v-if="scope.row.report_status == 9" type="danger" @click="reportCommitAuth(scope.row.report_id)">提交</el-button>
+              <!--<el-button size="mini" type="danger" @click="reportCommitAuth( scope.row.report_id)">提交</el-button>-->
             </template>
           </el-table-column>
         </el-table>
@@ -95,6 +96,36 @@
         this.$router.push({
           path: "/record/report/reportFill?reportId="+reportId
         });
+      },
+      reportCommitAuth(reportId){
+        const $this = this
+        this.$confirm('提交操作将使该报送报表进入审批流程，进入审批流程后将无法修改填报数据。请确认数据正确性！', '提示', {
+          confirmButtonText: '确定提交',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(() => {
+          const loading = $this.$loading({
+            lock: true,
+            text: '提交审批',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
+          this.BaseRequest({
+            url:"/reportCust/doCommitAuth",
+            method:'get',
+            params:{
+              reportId:reportId
+            }
+          }).then(response=>{
+            loading.close();
+            $this.Message.success("提交成功")
+            $this.getTableData(1)
+          });
+        }).catch(() => {
+        });
+
+
       },
       getOriginName(rowData){
         return this.origins[rowData.report_origin].origin_name

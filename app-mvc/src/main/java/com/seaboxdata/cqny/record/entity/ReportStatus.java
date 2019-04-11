@@ -20,7 +20,8 @@ public enum ReportStatus {
     APPROVE(5,"报表发布"),
     UP_SIGIN(6,"待上传签名"),
     TOO_EARLY(7,"未到填写日期"),
-    OVER_TIME(8,"过期");
+    OVER_TIME(8,"过期"),
+    REPORT_DONE(9,"填报完成");
 
     private Integer value;
     private String comment;

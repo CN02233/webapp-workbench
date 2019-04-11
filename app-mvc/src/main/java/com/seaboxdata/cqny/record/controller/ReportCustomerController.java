@@ -1,9 +1,6 @@
 package com.seaboxdata.cqny.record.controller;
 
-import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.record.entity.ReportCustomer;
-import com.seaboxdata.cqny.record.entity.ReportCustomerData;
-import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
+import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.service.OriginService;
@@ -203,6 +200,17 @@ public class ReportCustomerController {
 
         reportCustomerService.updateOrInsertGridUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+
+        return jsonResult;
+    }
+
+
+    @RequestMapping("doCommitAuth")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult doCommitAuth(String reportId){
+        reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 
         return jsonResult;
     }

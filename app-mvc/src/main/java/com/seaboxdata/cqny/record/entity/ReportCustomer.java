@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.entity;
 
 import com.seaboxdata.cqny.reportunit.entity.UnitEntity;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -14,7 +15,9 @@ public class ReportCustomer {
     private Date create_date;
     private Integer last_modify_user;
     private Date report_start_date;
+    private String report_start_date_str;
     private Date report_end_date;
+    private String report_end_date_str;
     private Integer active_unit;
     private List<UnitEntity> unitEntities;
     private String pass_auth;
@@ -75,6 +78,9 @@ public class ReportCustomer {
 
     public void setReport_start_date(Date report_start_date) {
         this.report_start_date = report_start_date;
+        if(report_start_date!=null){
+            this.report_start_date_str = (new SimpleDateFormat("yyyy-MM-dd").format(report_start_date));
+        }
     }
 
     public Date getReport_end_date() {
@@ -83,6 +89,9 @@ public class ReportCustomer {
 
     public void setReport_end_date(Date report_end_date) {
         this.report_end_date = report_end_date;
+        if(report_end_date!=null){
+            this.report_end_date_str = (new SimpleDateFormat("yyyy-MM-dd").format(report_end_date));
+        }
     }
 
     public Integer getActive_unit() {
@@ -115,5 +124,21 @@ public class ReportCustomer {
 
     public void setReport_status(String report_status) {
         this.report_status = report_status;
+    }
+
+    public String getReport_start_date_str() {
+        return report_start_date_str;
+    }
+
+    public void setReport_start_date_str(String report_start_date_str) {
+        this.report_start_date_str = report_start_date_str;
+    }
+
+    public String getReport_end_date_str() {
+        return report_end_date_str;
+    }
+
+    public void setReport_end_date_str(String report_end_date_str) {
+        this.report_end_date_str = report_end_date_str;
     }
 }

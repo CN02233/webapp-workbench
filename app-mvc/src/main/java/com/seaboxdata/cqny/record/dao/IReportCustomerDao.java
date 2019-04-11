@@ -47,13 +47,17 @@ public interface IReportCustomerDao {
 
     @Update("update report_customer set " +
             "report_name = #{report_name}," +
-            "report_origin = #{report_name}," +
-            "create_date = #{report_name}," +
-            "report_start_date = #{report_name}," +
-            "report_end_date = #{report_name}," +
-            "active_unit = #{report_name}," +
-            "pass_auth = #{report_name} where report_defined_id = #{report_defined_id}")
+            "create_date = #{create_date}," +
+            "report_start_date = #{report_start_date}," +
+            "report_end_date = #{report_end_date}," +
+            "report_status = #{report_status}," +
+            "active_unit = #{active_unit}," +
+            "pass_auth = #{pass_auth} where report_id = #{report_id}")
     void updateReportCustomer(ReportCustomer reportCustomer);
+
+    @Update("update report_customer set "+
+            "report_status = #{status} where report_id = #{reportId}")
+    void updateReportCustomerStatus(@Param("reportId") String reportId,@Param("status") String status);
 
     @Select("select " +
             "rui.create_time," +

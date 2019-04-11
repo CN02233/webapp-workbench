@@ -1,9 +1,6 @@
 package com.seaboxdata.cqny.record.service;
 
-import com.seaboxdata.cqny.record.entity.FomularTmpEntity;
-import com.seaboxdata.cqny.record.entity.ReportCustomer;
-import com.seaboxdata.cqny.record.entity.ReportCustomerData;
-import com.seaboxdata.cqny.record.entity.ReportUnitCustomerContext;
+import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.webapp.support.page.PageResult;
@@ -33,4 +30,6 @@ public interface ReportCustomerService {
                                           ArrayList<ReportCustomerData> columDatas);
 
     Object getSimpleFomularData(FomularTmpEntity fomularTmpEntity);
+
+    void updateReportCustomerStatus(String reportId, ReportStatus reportStatus);
 }

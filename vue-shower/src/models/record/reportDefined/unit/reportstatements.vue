@@ -499,6 +499,7 @@ export default {
         loading.close();
         this.Message.success('发布流程已启动')
         this.getTableData(1)
+        this.closeSubmitModal()
       });
     }
   },

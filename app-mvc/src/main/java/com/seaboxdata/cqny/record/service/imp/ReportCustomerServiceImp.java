@@ -259,13 +259,14 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     public Integer checkNextStepUnitId(String reportId) {
         ReportCustomer reportCustomer = reportCustomerDao.checkReportCustomer(reportId);
         Integer currUnitId = reportCustomer.getActive_unit();
+        Integer currUnitOrder = null;
         Integer nexyCurrUnitId = null;
         List<UnitEntity> allUnit = reportCustomer.getUnitEntities();
         boolean nextCheckOut = false;
         for (UnitEntity unitEntity : allUnit) {
-            Integer unitOrder = unitEntity.getUnit_order();
              if(unitEntity.getUnit_id().equals(currUnitId)){
                 nextCheckOut = true;
+                 currUnitOrder = unitEntity.getUnit_order();
                 continue;
             }
             if(nextCheckOut){
@@ -274,13 +275,27 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
             }
         }
 
+        if(!nextCheckOut&&nexyCurrUnitId==null&&currUnitOrder==allUnit.size()){
+            return Integer.MAX_VALUE;
+        }
+
         return nexyCurrUnitId;
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStep(String reportId) {
         Integer nextStepUnit = this.checkNextStepUnitId(reportId);
+        if(nextStepUnit.equals(Integer.MAX_VALUE)){
+            nextStepUnit = 0;
+            this.updateReportCustomerStatus(reportId,ReportStatus.REPORT_DONE);
+        }
         reportCustomerDao.updateStep(reportId,nextStepUnit);
+    }
+
+    @Override
+    public void updateReportCustomerStatus(String reportId, ReportStatus reportStatus){
+        reportCustomerDao.updateReportCustomerStatus(reportId,reportStatus.toString());
     }
 
     @Override
