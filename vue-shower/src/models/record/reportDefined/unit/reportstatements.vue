@@ -62,7 +62,7 @@
               <el-button v-if="scope.row.status==0"
                 size="mini"
                 type="success"
-                @click="submitReport(scope.row)">发布</el-button>
+                @click="openSubmitPrams(scope.row)">发布</el-button>
 
             </template>
           </el-table-column>
@@ -121,6 +121,51 @@
         <el-button type="primary" @click="handleInsert">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!--发布设置弹窗-->
+    <el-dialog title="发布报表设置" :visible.sync="submitModel" >
+      <el-row :gutter="16">
+        <el-col :sm="20">
+          <el-row>
+            <el-col :span="8" :offset="1">报表定义编号</el-col>
+            <el-col :span="15">
+              <el-input placeholder="报表定义编号" :disabled="true" v-model="submitParams.defined_id" class="input-with-select" ></el-input>
+            </el-col>
+          </el-row>
+          <el-row>
+          <el-col :span="8" :offset="1">报表定义名称</el-col>
+            <el-col :span="15">
+              <el-input placeholder="报表定义名称" :disabled="true" v-model="submitParams.defined_name" class="input-with-select" ></el-input>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8" :offset="1">报送起始日期</el-col>
+            <el-col :span="15">
+              <el-date-picker style="width: 100%;"
+                v-model="submitParams.report_start_date_str"
+                type="date" value-format="yyyyMMdd"
+                placeholder="选择报送起始日期">
+              </el-date-picker>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8" :offset="1">报送截止日期</el-col>
+            <el-col :span="15">
+              <el-date-picker style="width: 100%;"
+                v-model="submitParams.report_end_date_str"
+                type="date" value-format="yyyyMMdd"
+                placeholder="选择报送截止日期">
+              </el-date-picker>
+            </el-col>
+          </el-row>
+
+        </el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeSubmitModal">取 消</el-button>
+        <el-button type="primary" @click="submitReport()">发 布</el-button>
+      </div>
+    </el-dialog>
   </WorkMain>
 </template>
 
@@ -141,6 +186,7 @@ export default {
       eachPageNum: 10,
       totalPage: 1,
       showModalPage: false,
+      submitModel: false,
       isEditModal: false,
       dialogTitle: '',
       origin_ids: [],
@@ -168,7 +214,13 @@ export default {
         label: 'label'
       },
       filterText: '',
-      treeData: []
+      treeData: [],
+      submitParams:{
+        defined_id:'',
+        defined_name:'',
+        report_start_date_str:'',
+        report_end_date_str:''
+      }
     }
   },
   watch: {// 监听节点搜索的内容
@@ -259,6 +311,9 @@ export default {
     closeModal: function () {
       this.showModalPage = false
       this.isEditModal = false
+    },
+    closeSubmitModal: function () {
+      this.submitModel = false
     },
     getOriginList () { // 弹出model触发、获取机构树状展示
       this.BaseRequest({
@@ -390,8 +445,13 @@ export default {
         }
       });
     },
-    submitReport(subReport){
-      const defined_id = subReport.defined_id
+    openSubmitPrams(definedData){
+      this.submitModel = true
+      this.submitParams.defined_id = definedData.defined_id
+      this.submitParams.defined_name = definedData.defined_name
+    },
+    submitReport(){
+      const defined_id = this.submitParams.defined_id
 
       const loading = this.$loading({
         lock: true,
@@ -402,7 +462,7 @@ export default {
       this.BaseRequest({
         url:"/reportStatements/sumitReportDefined",
         params:{
-          reportDefinedId:defined_id
+          submit_context:this.submitParams
         }
       }).then(response=>{
         loading.close();
