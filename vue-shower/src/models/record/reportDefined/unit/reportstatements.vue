@@ -46,16 +46,16 @@
             fixed="right"
             label="操作"
             align="left"
-            width="250"
+            width="320"
             >
             <template slot-scope="scope">
               <el-button
                 size="mini" @click="definedUnit(scope.row.defined_id)"
                 >报送单元</el-button>
-              <el-button
+              <el-button v-if="scope.row.status==0"
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-              <el-button
+              <el-button v-if="scope.row.status==0"
                 size="mini"
                 type="danger"
                 @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -63,7 +63,6 @@
                 size="mini"
                 type="success"
                 @click="openSubmitPrams(scope.row)">发布</el-button>
-
             </template>
           </el-table-column>
         </el-table>
@@ -95,13 +94,13 @@
                   show-checkbox
                   :props="defaultProps"
                   node-key = "id"
-                  ref="tree"
+                  ref="treeRef"
                   :filter-node-method="filterNode"
                   @node-click="handleNodeClick">
                 </el-tree>
             </el-col>
           </el-row>
-          <el-row>
+          <!--<el-row>
             <el-col :span="8" :offset="1">报表状态</el-col>
             <el-col :span="8" >
               <el-select v-model="formSubmitData.status" placeholder="请选择报送单元状态">
@@ -113,7 +112,7 @@
                 </el-option>
               </el-select>
             </el-col>
-          </el-row>
+          </el-row>-->
         </el-col>
       </el-row>
       <div slot="footer" class="dialog-footer">
@@ -203,7 +202,7 @@ export default {
         defined_id: null,
         defined_name: null,
         origin_name: null,
-        status: null
+        status: 0
       },
       options: [],
       statusOptions: [{
@@ -224,19 +223,19 @@ export default {
       },
       filterText: '',
       treeData: [],
-      submitParams:{
-        defined_id:'',
-        defined_name:'',
-        report_start_date_str:'',
-        report_end_date_str:'',
-        check_origins:[],
-        defined_origins:[]
+      submitParams: {
+        defined_id: '',
+        defined_name: '',
+        report_start_date_str: '',
+        report_end_date_str: '',
+        check_origins: [],
+        defined_origins: []
       }
     }
   },
   watch: {// 监听节点搜索的内容
     filterText (val) {
-      this.$refs.tree.filter(val)
+      this.$refs.treeRef.filter(val)
     }
   },
   validations: {// 提交前的验证
@@ -281,7 +280,7 @@ export default {
     },
     handleNodeClick (data) { // 点击树的节点进行赋值
       // console.log(data)
-      // console.log(this.$refs.tree.getCheckedNodes())
+      // console.log(this.$refs.treeRef.getCheckedNodes())
     },
     filterNode (value, data) { // 树节点的过滤
       if (!value) return true
@@ -316,7 +315,7 @@ export default {
       this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
-      this.$refs.tree.setCheckedKeys([])
+      this.$refs.treeRef.setCheckedKeys([])
       this.clearData()
     },
     closeModal: function () {
@@ -339,14 +338,13 @@ export default {
       })
     },
     getDefinedAndOriginAssign (definedId, thisRef) { // 获取选择的机构id
-      thisRef.$refs.tree.setCheckedKeys([])
       this.BaseRequest({
         url: '/reportStatements/getDefinedAndOriginAssignById',
         method: 'get',
         params: {'definedId': definedId}
       }).then(response => {
         if (response != null && response.length > 0) {
-          thisRef.$refs.tree.setCheckedKeys(response)
+          thisRef.$refs.treeRef.setCheckedKeys(response)
           // this.options = response
           // this.data = response
         }
@@ -354,7 +352,7 @@ export default {
     },
     getTreeNode () {
       this.origin_ids = []
-      let nodeData = this.$refs.tree.getCheckedNodes()
+      let nodeData = this.$refs.treeRef.getCheckedNodes()
       for (let i = 0; i < nodeData.length; i++) {
         this.origin_ids.push(nodeData[i].id)
       }
@@ -406,6 +404,7 @@ export default {
       this.formSubmitData.defined_id = row.defined_id
       this.formSubmitData.defined_name = row.defined_name
       this.formSubmitData.status = row.status
+      this.$refs.treeRef.setCheckedKeys([])
       this.getDefinedAndOriginAssign(row.defined_id, this)
     },
     clearData () { // 每次添加之前清空数据、
@@ -448,31 +447,31 @@ export default {
       }
       return checkResult
     },
-    definedUnit(definedId){
+    definedUnit (definedId) {
       this.$router.push({
         path: '/record/reportUnit',
-        query:{
-          'definedId':definedId
+        query: {
+          'definedId': definedId
         }
-      });
+      })
     },
-    openSubmitPrams(definedData){
+    openSubmitPrams (definedData) {
       this.submitModel = true
       this.submitParams.defined_id = definedData.defined_id
       this.submitParams.defined_name = definedData.defined_name
       this.BaseRequest({
-        url:"/reportStatements/getDefinedOriginsById",
-        params:{
-          definedId:definedData.defined_id
+        url: '/reportStatements/getDefinedOriginsById',
+        params: {
+          definedId: definedData.defined_id
         }
-      }).then(response=>{
+      }).then(response => {
         this.submitParams.defined_origins = response
-      });
+      })
     },
-    submitReport(){
-      if(this.submitParams.report_start_date_str==null||this.submitParams.report_start_date_str==''||
-        this.submitParams.report_end_date_str==null||this.submitParams.report_end_date_str==''
-      ){
+    submitReport () {
+      if (this.submitParams.report_start_date_str == null || this.submitParams.report_start_date_str == '' ||
+        this.submitParams.report_end_date_str == null || this.submitParams.report_end_date_str == ''
+      ) {
         this.$notify({
           dangerouslyUseHTMLString: true,
           message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>起始日期、结束日期'
@@ -485,22 +484,22 @@ export default {
         text: '发布中',
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
-      });
+      })
       this.BaseRequest({
-        url:"/reportStatements/sumitReportDefined",
-        method:'post',
-        data:{
-          "defined_id":this.submitParams.defined_id,
-          "report_start_date":this.submitParams.report_start_date_str,
-          "report_end_date":this.submitParams.report_end_date_str,
-          "check_origins":this.submitParams.check_origins
+        url: '/reportStatements/sumitReportDefined',
+        method: 'post',
+        data: {
+          'defined_id': this.submitParams.defined_id,
+          'report_start_date': this.submitParams.report_start_date_str,
+          'report_end_date': this.submitParams.report_end_date_str,
+          'check_origins': this.submitParams.check_origins
         }
-      }).then(response=>{
-        loading.close();
+      }).then(response => {
+        loading.close()
         this.Message.success('发布流程已启动')
         this.getTableData(1)
         this.closeSubmitModal()
-      });
+      })
     }
   },
   mounted: function () { // 初始化

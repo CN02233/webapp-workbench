@@ -69,8 +69,10 @@ public class AdministrativeController {
     @RequestMapping("delById")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
+    @Transactional
     public JsonResult deleteById( String organizationId){
         administrativeService.deleteById(organizationId);
+        administrativeService.delOrganizationAndOriginAssign(organizationId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
