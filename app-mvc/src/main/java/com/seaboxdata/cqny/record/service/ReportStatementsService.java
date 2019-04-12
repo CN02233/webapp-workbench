@@ -5,6 +5,7 @@ import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import com.webapp.support.page.PageResult;
 
+import java.util.HashMap;
 import java.util.List;
 
 public interface ReportStatementsService {
@@ -15,7 +16,7 @@ public interface ReportStatementsService {
 
     void deleteById(String unitId);
 
-    PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id);
+    PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id,String originId);
 
     ReportDefinedEntity getReportDefinedById(Integer integer);
 
@@ -28,4 +29,6 @@ public interface ReportStatementsService {
     void changeDeindStatus(String definedId, ReportDefinedStatus status);
 
     List<Origin> getDefinedOriginsById(String definedId);
+
+    List<HashMap<String,String>> getOriginsByUserId(int user_id);
 }

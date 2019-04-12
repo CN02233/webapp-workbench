@@ -58,24 +58,28 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     }
 
     @Override
-    public PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id) {
+    public PageResult listReportStatementsByUser(int currPage, int pageSize, int user_id,String originId) {
         List<String> originList=submitauthorityDao.getOriginIdListByUserId(user_id);
         //用获得的originList取得机构的所有下属机构id
-        List finalOriginList = new ArrayList();
-        for (String origin:originList) {
-            Map<String, Object> originTree = submitauthorityDao.getOriginById(origin);
-            checkOrigins(originTree,finalOriginList);
+        Set finalOriginSet = new HashSet();
+        if(originId==null){
+            for (String origin:originList) {
+                Map<String, Object> originTree = submitauthorityDao.getOriginById(origin);
+                checkOrigins(originTree,finalOriginSet);
+            }
+        }else{
+            finalOriginSet.add(originId);
         }
-        Page<ReportCustomer> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,finalOriginList);
+        Page<ReportCustomer> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,finalOriginSet);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportStatementsPage);
         return pageResult;
     }
-    private void checkOrigins(Map<String, Object> origin,List finalOriginList){
+    private void checkOrigins(Map<String, Object> origin,Set finalOriginSet){
         List<Map<String, Object>> children = (List) origin.get("childrens");
-        finalOriginList.add(origin.get("origin_id"));
+        finalOriginSet.add(origin.get("origin_id"));
         if(children!=null&&children.size()>0){
             children.forEach(child->{
-                checkOrigins(child,finalOriginList);
+                checkOrigins(child,finalOriginSet);
             });
         }
     }
@@ -102,6 +106,18 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     @Override
     public List<Origin> getDefinedOriginsById(String definedId) {
         return reportStatementsDao.getDefinedOriginsById(definedId);
+    }
+
+    public List<HashMap<String,String>> getOriginsByUserId(int user_id) {
+        List<String> originList=submitauthorityDao.getOriginIdListByUserId(user_id);
+        //用获得的originList取得机构的所有下属机构id
+        Set finalOriginSet = new HashSet();
+        for (String origin:originList) {
+            Map<String, Object> originTree = submitauthorityDao.getOriginById(origin);
+            checkOrigins(originTree,finalOriginSet);
+        }
+        List<HashMap<String,String>> resultMap = reportStatementsDao.getOriginsByOriginSet(finalOriginSet);
+        return resultMap;
     }
 
     @Override
