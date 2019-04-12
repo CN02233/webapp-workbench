@@ -8,25 +8,21 @@
           <el-table-column
             prop="report_id"
             align="left"
-            width="150"
             label="报表ID">
           </el-table-column>
           <el-table-column
             prop="report_name"
             align="left"
-            width="150"
             label="报表名称">
           </el-table-column>
           <el-table-column
             prop="active_unit"
             align="left"
-            width="150"
             label="报表步骤数">
           </el-table-column>
           <el-table-column
             prop="report_status"
             align="left"
-            width="150"
             label="状态"
             :formatter="formatStatus"
           >
@@ -34,13 +30,11 @@
           <el-table-column
             prop="create_date"
             align="left"
-            width="180"
             label="创建时间">
           </el-table-column>
           <el-table-column
             prop="user_name"
             align="left"
-            width="100"
             label="创建人">
           </el-table-column>
           <el-table-column

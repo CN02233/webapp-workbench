@@ -14,12 +14,12 @@ public interface IReportUnitDao {
             "\tunit_name,\n" +
             "\tcreate_time,\n" +
             "\tcreate_user,\n" +
-            "\torigin_id,\n" +
+            "\tunit_type,\n" +
             "\tstatus\n" +
             ")\n" +
             "VALUES\n" +
             "\t(\n" +
-            "\t#{ unit_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
+            "\t#{ unit_name },sysdate(),#{ create_user },#{ unit_type },#{ status }\n" +
             "\t)")
     void addReportUnit(UnitDefined reportUnit);
 
