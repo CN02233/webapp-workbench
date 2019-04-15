@@ -5,6 +5,7 @@
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="5">
         <el-button @click="addDefined()" type="primary">新增</el-button>
+        <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
       <el-col class="align-left" :span="7">
         <el-button @click="openDimList()" type="primary">维度列表</el-button>

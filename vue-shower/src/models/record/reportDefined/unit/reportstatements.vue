@@ -311,11 +311,13 @@ export default {
     },
     openAddModal: function () {
       this.dialogTitle = '新增报送报表'
-      this.getOriginList()
+      // this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
-      this.$refs.treeRef.setCheckedKeys([])
-      this.clearData()
+      this.$nextTick(function () {
+        this.$refs.treeRef.setCheckedKeys([])
+        this.clearData()
+      })
     },
     closeModal: function () {
       this.showModalPage = false
@@ -396,14 +398,16 @@ export default {
       })
     },
     handleEdit (index, row) { // 修改
-      this.getOriginList()
+      // this.getOriginList()
       this.dialogTitle = '修改报送报表'
       this.showModalPage = true
       this.isEditModal = true
       this.formSubmitData.defined_id = row.defined_id
       this.formSubmitData.defined_name = row.defined_name
       this.formSubmitData.status = row.status
-      this.$refs.treeRef.setCheckedKeys([])
+      this.$nextTick(function () {
+        this.$refs.treeRef.setCheckedKeys([])
+      })
       this.getDefinedAndOriginAssign(row.defined_id, this)
     },
     clearData () { // 每次添加之前清空数据、
@@ -414,7 +418,7 @@ export default {
       this.formSubmitData = {
         defined_id: null,
         defined_name: null,
-        status: null,
+        status: 0,
         origin_name: null
       }
     },
@@ -502,9 +506,11 @@ export default {
     }
   },
   mounted: function () { // 初始化
-    this.reportDataList = []
-    this.getTableData(1)
-    this.getOriginList()
+    this.$nextTick(function () {
+      this.reportDataList = []
+      this.getTableData(1)
+      this.getOriginList()
+    })
   }
 }
 </script>

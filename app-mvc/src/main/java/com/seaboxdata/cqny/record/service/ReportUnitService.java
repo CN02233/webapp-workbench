@@ -11,7 +11,7 @@ public interface ReportUnitService {
 
     void addReportUnit(UnitDefined reportUnit);
 
-    void deleteById(String unitId);
+    void deleteById(String unitId,String unitType);
 
     UnitDefined getReportUnit(String unitId);
 

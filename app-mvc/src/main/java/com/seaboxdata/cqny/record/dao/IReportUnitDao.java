@@ -26,6 +26,26 @@ public interface IReportUnitDao {
     @Delete("delete from report_unit_info where unit_id = #{unitId}")
     void deleteById(@Param("unitId") String unit_id);
 
+    @Delete("DELETE a,b\n" +
+            "FROM\n" +
+            "\treport_unit_info a \n" +
+            "INNER JOIN report_defined_unit_onedim b ON a.unit_id=b.unit_id\n" +
+            "\twhere \n" +
+            "\ta.unit_id=#{unitId}")
+    void deleteUnionsOneDimById(@Param("unitId") String unit_id);
+
+    @Delete("DELETE a,b,c,d\n" +
+            "FROM\n" +
+            "\treport_unit_info a \n" +
+            "INNER JOIN report_defined_unit_multdim b ON a.unit_id=b.unit_id\n" +
+            "INNER JOIN report_defined_unit_multdim_col c ON a.unit_id=c.unit_id\n" +
+            "INNER JOIN report_defined_unit_multdim_dim d ON a.unit_id=d.unit_id\n" +
+            "\twhere \n" +
+            "\ta.unit_id= #{unitId}")
+    void deleteUnionsMultDimById(@Param("unitId") String unit_id);
+
+
+
     @Update("<script>update report_unit_info <set>"
             +"<if test='origin_id!=null'>"
             +"origin_id=#{origin_id} ,"

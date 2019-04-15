@@ -41,8 +41,12 @@ public class ReportUnitServiceImp implements ReportUnitService {
     }
 
     @Override
-    public void deleteById(String unitId) {
-        reportUnitDao.deleteById(unitId);
+    public void deleteById(String unitId ,String unitType) {
+        if("1".equals(unitType)||"2".equals(unitType)||"4".equals(unitType)){
+            reportUnitDao.deleteUnionsOneDimById(unitId);
+        }else{
+            reportUnitDao.deleteUnionsMultDimById(unitId);
+        }
     }
 
     @Override

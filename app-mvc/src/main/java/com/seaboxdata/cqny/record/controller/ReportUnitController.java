@@ -66,8 +66,9 @@ public class ReportUnitController {
     @RequestMapping("delById")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult deleteById( String unitId){
-        reportUnitService.deleteById(unitId);
+    public JsonResult deleteById( String unitId ,String unitType ){
+        reportUnitService.deleteById(unitId,unitType);
+
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
