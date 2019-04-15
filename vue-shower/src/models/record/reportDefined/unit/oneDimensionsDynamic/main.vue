@@ -254,15 +254,15 @@
           'colum_name':'',
           'colum_name_cn':'',
           'colum_type':'1',
-          'min_value':'',
-          'max_value':'',
+          'min_value':0,
+          'max_value':9999,
           'colum_formula':'',
           'colum_formula_desc':'',
           'unit_id':'',
           'need_remember':'N',
           'group_id':null,
           'group_name':'',
-          'colum_point':'',
+          'colum_point':'元',
           'colum_desc':''
         },
         editFormData:{
