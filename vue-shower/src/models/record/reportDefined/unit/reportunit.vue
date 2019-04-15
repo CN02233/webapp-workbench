@@ -14,33 +14,28 @@
           <el-table-column
             prop="unit_name"
             align="left"
-            width="150"
             label="报送单元名称">
           </el-table-column>
           <el-table-column
             prop="status"
             align="left"
-            width="150"
             label="报送单元状态"
             :formatter="formatStatus"
           >
           </el-table-column>
-          <el-table-column
+          <!--<el-table-column
             prop="origin_name"
             align="left"
-            width="250"
             label="所属报送机构">
-          </el-table-column>
+          </el-table-column>-->
           <el-table-column
             prop="create_time"
             align="left"
-            width="180"
             label="创建时间">
           </el-table-column>
           <el-table-column
             prop="user_name"
             align="left"
-            width="100"
             label="创建人">
           </el-table-column>
           <el-table-column
@@ -82,20 +77,33 @@
               <el-input placeholder="报送单元名称" v-model="formSubmitData.unit_name" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
-          <el-row>
+          <!--<el-row>
             <el-col :span="8" :offset="1">所属报送机构</el-col>
             <el-col :span="15">
               <div id="app">
                 <treeselect v-model="formSubmitData.origin_id"  :options="options" />
               </div>
             </el-col>
-          </el-row>
+          </el-row>-->
           <el-row>
             <el-col :span="8" :offset="1">报送单元状态</el-col>
             <el-col :span="15">
               <el-select v-model="formSubmitData.status" placeholder="请选择报送单元状态">
                 <el-option
                   v-for="item in statusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="8" :offset="1">报送单元类型</el-col>
+            <el-col :span="15">
+              <el-select v-model="formSubmitData.unit_type" placeholder="请选择报送单元类型">
+                <el-option
+                  v-for="item in typeOptions"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value">
@@ -136,9 +144,9 @@ export default {
       formSubmitData: {
         unit_id: null,
         unit_name: null,
-        origin_id: null,
         origin_name: null,
-        status: null
+        status: null,
+        unit_type: null
       },
       options: [],
       statusOptions: [{
@@ -150,6 +158,19 @@ export default {
       }, {
         value: '9',
         label: '注销'
+      }],
+      typeOptions: [{
+        value: 1,
+        label: '一维静态'
+      }, {
+        value: 2,
+        label: '一维动态'
+      }, {
+        value: 3,
+        label: '多维静态'
+      }, {
+        value: 4,
+        label: '树状动态'
       }]
     }
   },
@@ -158,10 +179,10 @@ export default {
       unit_name: {
         required
       },
-      origin_id: {
+      status: {
         required
       },
-      status: {
+      unit_type: {
         required
       }
     }
@@ -176,10 +197,10 @@ export default {
   },
   methods: {
     formatStatus: function (row, column) {
-      if (row.status === '0') {
+      if (row.status === '1') {
         return '正常'
       }
-      if (row.status === '1') {
+      if (row.status === '0') {
         return '停用'
       }
       if (row.status === '9') {
@@ -213,7 +234,7 @@ export default {
     openAddModal: function () {
       this.clearData()
       this.dialogTitle = '新增报送单元'
-      this.getOriginList()
+      // this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
     },
@@ -260,13 +281,16 @@ export default {
       })
     },
     handleEdit (index, row) { // 修改
+      this.clearData()
       this.dialogTitle = '修改报送单元'
       this.showModalPage = true
       this.isEditModal = true
       this.formSubmitData.unit_id = row.unit_id
       this.formSubmitData.unit_name = row.unit_name
-      this.formSubmitData.origin_id = row.origin_id
+      // this.formSubmitData.origin_id = row.origin_id
       this.formSubmitData.status = row.status
+      console.log(row)
+      this.formSubmitData.unit_type = row.unit_type
     },
     clearData () { // 每次添加之前清空数据、
       /* //this.formSubmitData= {};
@@ -276,8 +300,8 @@ export default {
       this.formSubmitData = {
         unit_id: null,
         unit_name: null,
+        unit_type: null,
         status: null,
-        origin_id: null,
         origin_name: null
       }
     },
@@ -334,7 +358,7 @@ export default {
     this.definedId = this.$route.query.definedId
     this.unitDataList = []
     this.getTableData(1)
-    this.getOriginList()
+    // this.getOriginList()
   }
 }
 </script>

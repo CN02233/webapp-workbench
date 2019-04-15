@@ -134,8 +134,10 @@ public class ReportStatementsController {
     @RequestMapping("delById")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
+    @Transactional
     public JsonResult deleteById( String definedId){
         reportStatementsService.deleteById(definedId);
+        reportStatementsService.delDefinedAndOriginAssign(definedId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
