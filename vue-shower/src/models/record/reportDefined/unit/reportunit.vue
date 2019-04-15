@@ -315,7 +315,7 @@ export default {
         this.BaseRequest({
           url: '/reportUnit/delById',
           method: 'get',
-          params: {'unitId': row.unit_id}
+          params: {'unitId': row.unit_id, 'unitType': row.unit_type}
         }).then(() => {
           this.Message.success('删除成功')
           this.getTableData()
