@@ -1,11 +1,16 @@
 package com.seaboxdata.cqny.record.controller;
 
+import com.seaboxdata.cqny.record.entity.Origin;
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
+import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
+import com.webapp.support.session.SessionSupport;
+import com.workbench.auth.user.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +24,9 @@ public class ReportDefinedUnitOneDimController {
 
     @Autowired
     private ReportDefinedUnitOneDimService reportDefinedUnitOneDimService;
+
+    @Autowired
+    private OriginService originService;
 
     @RequestMapping("pagerOnedimList")
     @ResponseBody
@@ -68,8 +76,10 @@ public class ReportDefinedUnitOneDimController {
     @RequestMapping("getUnits")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult getUnits(String originId){
-        List<UnitDefined> unitList = reportDefinedUnitOneDimService.getUnitsByOrigin(originId);
+    public JsonResult getUnits(){
+        User user = SessionSupport.checkoutUserFromSession();
+        Origin userOrigin = originService.getOriginByUser(user.getUser_id());
+        List<UnitDefined> unitList = reportDefinedUnitOneDimService.getUnitsByOrigin(String.valueOf(userOrigin.getOrigin_id()));
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,unitList);
         return jsonResult;
     }
@@ -78,7 +88,7 @@ public class ReportDefinedUnitOneDimController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getInputColumn(String unitId){
-        List<SimpleColumDefined> colums = reportDefinedUnitOneDimService.getColumByUnit(unitId);
+        List colums = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,colums);
         return jsonResult;
     }

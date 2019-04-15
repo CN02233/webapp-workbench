@@ -60,7 +60,7 @@ public interface IReportUnitDao {
             "LEFT JOIN sys_origin b ON a.origin_id = b.origin_id\n" +
             "LEFT JOIN `user` c ON a.create_user = c.user_id\n" +
             "WHERE\n" +
-            "\t1 = 1")
+            "\t1 = 1 order by a.unit_order")
     Page<UnitDefined> listReportUnit(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
     @Select("SELECT " +

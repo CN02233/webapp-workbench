@@ -42,13 +42,12 @@
             fixed="right"
             label="操作"
             align="left"
-<<<<<<< HEAD
             width="400"
-=======
-            width="320"
->>>>>>> 77552b2cea3e90fa41be4d83b8b1c7a0439460fd
             >
             <template slot-scope="scope">
+              <el-button
+                size="mini" v-if="scope.row.status==5" @click="getTableData(1)"
+                >刷新状态</el-button>
               <el-button
                 size="mini" v-if="scope.row.status==0" @click="definedUnit(scope.row.defined_id)"
                 >报送单元</el-button>

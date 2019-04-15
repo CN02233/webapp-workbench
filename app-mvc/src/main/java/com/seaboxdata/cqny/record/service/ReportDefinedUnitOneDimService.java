@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.record.service;
 
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.webapp.support.page.PageResult;
@@ -15,7 +16,7 @@ public interface ReportDefinedUnitOneDimService {
 
     List<UnitDefined> getUnitsByOrigin(String originId);
 
-    List<SimpleColumDefined> getColumByUnit(String unitId);
+    List getColumByUnit(String unitId);
 
     void deleteOneDim(String columId);
 
