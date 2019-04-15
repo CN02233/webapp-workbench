@@ -869,7 +869,7 @@
         const columLabel = this.unitMap['c'+columtClickId]
         const finalContext = unitLabel+"."+columLabel
         this.formulaDescContext.push({"context":finalContext,"isSymbol":false})
-        this.formulaContext.push({"context":unitClickId+"_"+columtClickId,"columKey":unitLabel+'_'+columtClickId.replace(/\./g,"_"),"isSymbol":false})
+        this.formulaContext.push({"context":unitClickId+"_"+columtClickId,"columKey":unitLabel+'_'+columtClickId.toString().replace(/\./g,"_"),"isSymbol":false})
         this.datForm.colum_formula_desc +=finalContext
         this.datForm.colum_formula +=("#"+unitClickId+"."+columtClickId+"#")
         console.log(this.formulaContext)
