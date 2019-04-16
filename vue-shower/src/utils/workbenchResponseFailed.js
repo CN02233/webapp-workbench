@@ -1,7 +1,7 @@
 /**
  * Created by SongCQ on 2018/9/28.
  */
-import { MessageBox, } from 'element-ui'
+import { Message,MessageBox } from 'element-ui'
 
 
 const failedProcess = {}
@@ -49,6 +49,8 @@ failedProcess.checkWorkbenchResult = function(response,withMessage){
         return res
       }
 
+    }else{
+      Message.error(res.faild_reason)
     }
     return false
   } else {
