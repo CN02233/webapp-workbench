@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ReportUnitService {
 
-    PageResult listReportUnit(int currPage, int pageSize);
+    PageResult listReportUnit(int currPage, int pageSize,String reportDefindId);
 
     void addReportUnit(UnitDefined reportUnit);
 

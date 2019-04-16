@@ -217,7 +217,7 @@ export default {
       this.BaseRequest({
         url: this.tableDataUrl,
         method: 'get',
-        params: {currPage: pageNum, pageSize: this.eachPageNum}
+        params: {currPage: pageNum, pageSize: this.eachPageNum,definedId:this.definedId}
       }).then(response => {
         if (response.dataList != null) {
           response.dataList.forEach(unitObj => {
