@@ -35,8 +35,8 @@ public class ReportUnitController {
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String listReportUnit(int currPage, int pageSize){
-        PageResult originList = reportUnitService.listReportUnit(currPage, pageSize);
+    public String listReportUnit(int currPage, int pageSize,String definedId){
+        PageResult originList = reportUnitService.listReportUnit(currPage, pageSize,definedId);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }

@@ -25,27 +25,50 @@ public class OriginServiceImpTest extends AbstractTestService {
         System.out.println(result);
     }
 
-    @Test
+//    @Test
     public void testCreateOrigin() {
 
-        for(int parent=0;parent<3;parent++){
+        String[] orginCnName = {"重","川","钱","金融","四川","河北","河南","华北","吉林","北京","实施","施工"};
+        Random rand=new Random();
+
+        for (int root =0;root<orginCnName.length;root++){
             Origin parentOri  = new Origin();
-            parentOri.setOrigin_name("父机构"+parent);
+            String randomPre = orginCnName[root];
+
+            parentOri.setOrigin_name(randomPre+"集团公司");
             parentOri.setOrigin_status("0");
             parentOri.setParent_origin_id(0);
-
             originService.createOrigin(parentOri);
-            Integer parentId = parentOri.getOrigin_id();
-            Random childRandom = new Random();
-            int childCount = childRandom.nextInt(10);
-            for(int child=0;child<childCount;child++){
-                Origin childOri  = new Origin();
-                childOri.setParent_origin_id(parentId);
-                childOri.setOrigin_name("子机构"+parent+"-"+childCount);
-                parentOri.setOrigin_status("0");
-                originService.createOrigin(childOri);
+
+            int childLevel = new Random().nextInt(6);
+            while(childLevel<2){
+                childLevel = new Random().nextInt(6);
+            }
+
+            this.createSonOrigin(parentOri,parentOri.getOrigin_name(),1,childLevel);
+        }
+    }
+
+    private Origin createSonOrigin(Origin parentOrigin,String randomPre,Integer level,Integer maxLevel){
+        Random childRandom = new Random();
+        int childCount = childRandom.nextInt(10);
+
+        for(int child=0;child<childCount;child++){
+            Origin childOri  = new Origin();
+            childOri.setParent_origin_id(parentOrigin.getOrigin_id());
+            childOri.setOrigin_name(randomPre+"下属"+level+"-"+child+"有限责任公司");
+            childOri.setOrigin_status("0");
+            originService.createOrigin(childOri);
+            if(maxLevel.equals(level)){
+                return null;
+            }else{
+                this.createSonOrigin(childOri,randomPre,level+1,maxLevel);
             }
         }
+
+
+
+        return null;
     }
 
     @Test

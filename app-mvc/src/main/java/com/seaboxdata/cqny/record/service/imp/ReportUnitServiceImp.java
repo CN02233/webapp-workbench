@@ -25,8 +25,8 @@ public class ReportUnitServiceImp implements ReportUnitService {
     private ReportDefinedUnitMultDimService reportDefinedUnitMultDimService;
 
     @Override
-    public PageResult listReportUnit(int currPage, int pageSize) {
-        Page<UnitDefined> reportUnitPage = reportUnitDao.listReportUnit(currPage, pageSize);
+    public PageResult listReportUnit(int currPage, int pageSize,String reportDefindId) {
+        Page<UnitDefined> reportUnitPage = reportUnitDao.listReportUnit(currPage, pageSize,reportDefindId);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportUnitPage);
         return pageResult;
     }
