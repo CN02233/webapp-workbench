@@ -1,7 +1,11 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.config.UnitDefinedType;
+import com.seaboxdata.cqny.record.dao.IReportDefinedUnitMultDimDao;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
+import com.seaboxdata.cqny.record.dao.IReportUnitDao;
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
@@ -19,6 +23,12 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
 
     @Autowired
     private IReportDefinedUnitOneDimDao reportDefinedUnitOneDimDao;
+
+    @Autowired
+    private IReportDefinedUnitMultDimDao reportDefinedUnitMultDimDao;
+
+    @Autowired
+    private IReportUnitDao reportUnitDao;
 
     @Override
     public PageResult pagerOnedimList(Integer unitId, Integer currPage, Integer pageSize) {
@@ -38,8 +48,16 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
     }
 
     @Override
-    public List<SimpleColumDefined> getColumByUnit(String unitId) {
-        List<SimpleColumDefined> columList = reportDefinedUnitOneDimDao.getColumByUnit(unitId);
+    public List getColumByUnit(String unitId) {
+        UnitDefined unitEntity = reportUnitDao.getReportUnit(unitId);
+        Integer unitType = unitEntity.getUnit_type();
+
+        List columList = null;
+        if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitType))
+            columList = reportDefinedUnitMultDimDao.getColumByUnit(unitId);
+        else
+            columList = reportDefinedUnitOneDimDao.getColumByUnit(unitId);
+
         return columList;
     }
 

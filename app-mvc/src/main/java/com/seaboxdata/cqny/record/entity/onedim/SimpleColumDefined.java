@@ -20,6 +20,7 @@ public class SimpleColumDefined {
     private String colum_desc;
 
     private String need_remember;//是否需要记忆用户输入
+    private String default_value;//参数默认值设置（发布时会读取该默认值作为初始化参数值）
 
 
     public Integer getColum_id() {
@@ -148,5 +149,13 @@ public class SimpleColumDefined {
 
     public void setNeed_remember(String need_remember) {
         this.need_remember = need_remember;
+    }
+
+    public String getDefault_value() {
+        return default_value;
+    }
+
+    public void setDefault_value(String default_value) {
+        this.default_value = default_value;
     }
 }

@@ -68,6 +68,9 @@
         <el-form-item label="输入项单位" >
           <el-input v-model="formData.colum_point" auto-complete="off" ></el-input>
         </el-form-item>
+        <el-form-item v-if="formData.colum_type!='0'" label="输入项缺省值" >
+          <el-input v-model="formData.default_value" auto-complete="off" ></el-input>
+        </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
           <el-input v-model="formData.min_value" auto-complete="off" ></el-input>
         </el-form-item>
@@ -180,7 +183,8 @@
           '0':'公式'  ,
           '1':'数值'  ,
           '2':'字符串'  ,
-          '3':'日期'
+          '3':'日期',
+          '4':'常量'
         },
         addOrEditModelOpend:false,
         colum_formula_array:[],
@@ -217,6 +221,7 @@
         formulaColumnDescContext:[],
         formulaDescContextTmp:'',
         formulaContext:[],
+        unitMap:{},
         otherUnits:[],
         fomularColumnTmp :'',
         formularOprationColums:{}
@@ -429,13 +434,17 @@
         return checkResult
       },
       replaceFormulaEditor(){
+        this.formulaDescContext = []
+        this.formulaContext = []
+        // this.formulaDescContextTmp+=addContext
+        this.editFormData.colum_formula_desc = ''
+        this.editFormData.colum_formula = ''
         this.openFormulaEditor()
       },
       openFormulaEditor(){
         this.isOpenFormulaEditor = true
       },
       handleItemChange(unitArray) {
-        // console.log('active item:', val);
         this.getReportColums(unitArray[0])
         // this.getReportColums(val)
       },
@@ -449,13 +458,13 @@
         });
         $this.BaseRequest({
           url:"/unitOneDimColum/getUnits",
-          method:'get',
-          params:{unitId:''}
+          method:'get'
         }).then(response=>{
           loading.close()
           if(response){
             this.otherUnits = []
             response.forEach(unitData=>{
+              this.unitMap['u'+unitData.unit_id] = unitData
               this.otherUnits.push({'label':unitData.unit_name,'value':unitData.unit_id,'children':[]})
             })
           }
@@ -466,6 +475,7 @@
         });
       },
       getReportColums(unitId){
+
         const $this = this
         const loading = $this.$loading({
           lock: true,
@@ -473,29 +483,83 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
+        let unitType = $this.unitMap['u'+unitId] ? $this.unitMap['u'+unitId].unit_type : '1'
         $this.BaseRequest({
-          url:"/unitOneDimColum/getInputColumn",
+          url:"/unitMultDimColum/getInputColumn",
           method:'get',
-          params:{'unitId':unitId}
+          params:{'unitId':unitId,'unitType':unitType}
         }).then(response=>{
           loading.close()
-          this.otherUnits.forEach((unitData,i)=>{
-            if(unitData.value == unitId){
-              const columArray = []
-              if(response){
-                response.forEach(responseData=>{
-                  const colum_id = responseData.colum_id
-                  const colum_name = responseData.colum_name_cn
-                  const colum_key = responseData.colum_name
-                  columArray.push({label:colum_name,value:colum_id,columKey:colum_key})
+
+          if(unitType != 3){
+            this.otherUnits.forEach((unitData,i)=>{
+              if(unitData.value == unitId){
+                const columArray = []
+                if(response){
+                  response.forEach(responseData=>{
+                    let colum_id = responseData.colum_id
+                    let colum_name = responseData.colum_name_cn
+                    columArray.push({label:colum_name,value:colum_id})
+                    $this.unitMap['c'+colum_id] = colum_name
+                  })
+                  this.otherUnits[i].children = columArray
+                }
+              }
+            })
+          }
+          else{
+
+            let datas = [], dims = [], cols = []
+            response.forEach(responseData=>{
+              if(responseData.colum_meta_type=='1'){
+                datas.push(responseData)
+              }else if(responseData.colum_meta_type == '2'){
+                cols.push(responseData)
+              }else if(responseData.colum_meta_type == '3'){
+                dims.push(responseData)
+              }
+            })
+            datas.forEach(s=>{
+              cols.forEach(c=>{
+                if(c.colum_id == s.colum_id){
+                  s.colum_name = c.colum_name
+                  s.colum_name_cn = c.colum_name_cn
+                }
+              })
+              dims.forEach(d=>{
+                if(d.dim_id == s.dim_id){
+                  s.dim_name = d.colum_name
+                  s.dim_name_cn = d.colum_name_cn
+                }
+              })
+            })
+
+
+            let unitMapTmp = {}
+            this.otherUnits.forEach((unitData,i)=>{
+              if(unitData.value == unitId){
+                const columArray = []
+                datas.forEach(d=>{
+                  let colum_id = d.colum_id + '.' + d.dim_id
+                  let colum_name = d.colum_name_cn + '.' + d.dim_name_cn
+                  columArray.push({label:colum_name,value:colum_id})
+                  // $this.unitMap['c'+colum_id] = colum_name
+                  unitMapTmp['c'+colum_id] = colum_name
                 })
+
                 this.otherUnits[i].children = columArray
               }
-            }
-          })
+            })
+
+
+            Object.keys(unitMapTmp).forEach(unitMaoKey=>{
+              $this.unitMap[unitMaoKey] = unitMapTmp[unitMaoKey]
+            })
+
+          }
         }).catch(error=>{
           loading.close()
-          $this.Message.success("保存失败:"+error)
+          $this.Message.success("读取失败:"+error)
         });
       },
       formulaColumConfirm(){

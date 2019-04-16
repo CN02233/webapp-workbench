@@ -13,13 +13,11 @@
           <el-table-column
             prop="defined_name"
             align="left"
-            width="200"
             label="报表名称">
           </el-table-column>
           <el-table-column
             prop="status"
             align="left"
-            width="150"
             label="状态"
             :formatter="formatStatus"
           >
@@ -33,24 +31,25 @@
           <el-table-column
             prop="create_date"
             align="left"
-            width="200"
             label="创建时间">
           </el-table-column>
           <el-table-column
             prop="user_name"
             align="left"
-            width="150"
             label="创建人">
           </el-table-column>
           <el-table-column
             fixed="right"
             label="操作"
             align="left"
-            width="320"
+            width="400"
             >
             <template slot-scope="scope">
               <el-button
-                size="mini" @click="definedUnit(scope.row.defined_id)"
+                size="mini" v-if="scope.row.status==5" @click="getTableData(1)"
+                >刷新状态</el-button>
+              <el-button
+                size="mini" v-if="scope.row.status==0" @click="definedUnit(scope.row.defined_id)"
                 >报送单元</el-button>
               <el-button v-if="scope.row.status==0"
                 size="mini"

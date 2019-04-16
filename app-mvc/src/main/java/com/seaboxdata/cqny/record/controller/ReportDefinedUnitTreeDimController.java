@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.record.controller;
 
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
@@ -94,7 +95,7 @@ public class ReportDefinedUnitTreeDimController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getInputColumn(String unitId){
-        List<SimpleColumDefined> colums = reportDefinedUnitSimpleDimService.getColumByUnit(unitId);
+        List<GridColumDefined> colums = reportDefinedUnitSimpleDimService.getColumByUnit(unitId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,colums);
         return jsonResult;
     }

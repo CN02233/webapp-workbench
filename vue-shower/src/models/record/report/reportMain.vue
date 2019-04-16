@@ -1,5 +1,10 @@
 <template>
   <WorkMain :headerItems="['报送填报','报送填报列表']">
+    <el-row class="search-row" :gutter="20">
+      <el-col class="align-left" :span="17">
+        &nbsp;
+      </el-col>
+    </el-row>
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
@@ -28,10 +33,8 @@
           </el-table-column>
 
           <el-table-column
-            fixed="right"
             label="操作"
             align="left"
-            width="250"
           >
             <template slot-scope="scope">
               <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>

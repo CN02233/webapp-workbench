@@ -5,6 +5,7 @@
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="7">
         <el-button @click="addDefined()" type="primary">新增</el-button>
+        <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
       <el-col class="align-right" :span="17">
         <el-select v-model="group_id" placeholder="输入项组">
@@ -51,7 +52,7 @@
       <el-form :rules="editModel.rules" :model="editModel"  ref="form">
       <el-row style="margin:5px;">
         <el-col :span="24">
-          <label class="el-form-item__label" style="width:20%;">输入项名称</label>
+          <label class="el-form-item__label" style="width:20%;">输入项组名称</label>
           <div style="margin-left:20%;"><el-input v-model="editModel.groupModel.colum_name_cn"  auto-complete="off" placeholder="输入项组" ></el-input></div>
         </el-col>
       </el-row>
@@ -253,15 +254,15 @@
           'colum_name':'',
           'colum_name_cn':'',
           'colum_type':'1',
-          'min_value':'',
-          'max_value':'',
+          'min_value':0,
+          'max_value':9999,
           'colum_formula':'',
           'colum_formula_desc':'',
           'unit_id':'',
           'need_remember':'N',
           'group_id':null,
           'group_name':'',
-          'colum_point':'',
+          'colum_point':'元',
           'colum_desc':''
         },
         editFormData:{

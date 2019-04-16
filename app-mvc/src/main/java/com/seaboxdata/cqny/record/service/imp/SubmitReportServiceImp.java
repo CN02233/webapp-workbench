@@ -1,10 +1,12 @@
 package com.seaboxdata.cqny.record.service.imp;
 
+import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.*;
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
@@ -159,6 +161,11 @@ public class SubmitReportServiceImp implements SubmitReportService {
                 ArrayList<ReportCustomerData> dataList = createOneDimDynDatas(oneColumDefinedsList, reportIds);
                 logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
             }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
+                logger.info("报表发布->{}：报送单元【{}】为【多维静态】报送单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
+                ArrayList<GridColumDefined> gridColumDefinedsList = (ArrayList<GridColumDefined>) unitDefind.getColums();
+                ArrayList<ReportCustomerData> dataList = createGridDimDatas(gridColumDefinedsList,reportIds);
+
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
 
             }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
                 logger.info("报表发布->{}：报送单元【{}】为【多维树状】报送单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
@@ -169,6 +176,29 @@ public class SubmitReportServiceImp implements SubmitReportService {
                 logger.info("报表发布->{}：报送单元【{}】,生成失败，未找到对应的报送单元类型{}",unitTypeInt);
             }
         }
+    }
+
+    private ArrayList<ReportCustomerData> createGridDimDatas(ArrayList<GridColumDefined> gridColumDefinedsList, List<Integer> reportIds) {
+        ArrayList<ReportCustomerData> columDatas = new ArrayList<>();
+        if(gridColumDefinedsList!=null){
+            SimpleDateFormat format = new SimpleDateFormat("HHmmss");
+            String reportGroupId = format.format(new Date());
+
+            for (GridColumDefined columDefined : gridColumDefinedsList) {
+                for (Integer reportId : reportIds) {
+                    ReportCustomerData reportCustomerData = new ReportCustomerData();
+                    reportCustomerData.setColum_id(columDefined.getColum_id().toString());
+                    reportCustomerData.setDimensions_id(columDefined.getDim_id().toString());
+                    reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
+                    reportCustomerData.setReport_id(reportId);
+                    reportCustomerData.setReport_data("0");
+                    reportCustomerData.setReport_group_id(reportGroupId);
+                    columDatas.add(reportCustomerData);
+                }
+
+            }
+        }
+        return saveColumDatas(columDatas);
     }
 
     /**
@@ -185,7 +215,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
                     reportCustomerData.setColum_id(columDefined.getColum_id().toString());
                     reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
                     reportCustomerData.setReport_id(reportId);
-                    reportCustomerData.setReport_data("0");
+                    reportCustomerData.setReport_data(Strings.isNullOrEmpty(columDefined.getDefault_value())?"0":columDefined.getDefault_value());
                     columDatas.add(reportCustomerData);
                 }
 
