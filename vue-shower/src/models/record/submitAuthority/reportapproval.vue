@@ -21,6 +21,11 @@
             label="报表步骤数">
           </el-table-column>
           <el-table-column
+            prop="report_origin"
+            align="left" :formatter="formattOriginName"
+            label="填报机构">
+          </el-table-column>
+          <el-table-column
             prop="report_status"
             align="left"
             label="状态"
@@ -80,11 +85,12 @@ import { required } from 'vuelidate/lib/validators'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 export default {
-  name: 'OriginMain',
+  name: 'ReportApproval',
   data () {
     return {
       reportDataList: [],
       definedDataObjs: {},
+      origins: {},
       tableDataUrl: 'reportApproval/listReportApproval',
       currPageNum: 1,
       eachPageNum: 10,
@@ -128,7 +134,6 @@ export default {
             $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         } */
-        console.log(response)
         $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
       })
@@ -159,6 +164,31 @@ export default {
         this.Message.success('审批成功')
         this.getTableData()
       })
+    },
+    getOriginList () {
+      this.BaseRequest({
+        url: 'submitAU/listAllSubmitauthority',
+        method: 'get'
+      }).then(response => {
+        if (response != null && response.length > 0) {
+          const originTmp = new Object()
+
+          function getChildOrigin(originList){
+            originList.forEach(origin=>{
+              originTmp[origin.id] = origin.label
+              if(origin.children){
+                getChildOrigin(origin.children)
+              }
+            })
+          }
+          getChildOrigin(response)
+
+          this.origins = originTmp
+        }
+      })
+    },
+    formattOriginName(reportData){
+      return this.origins[reportData.report_origin]
     },
     checkInputNull () {
       const checkResult = this.$v.$invalid

@@ -81,7 +81,6 @@ public class RoleMenuManageController {
 
     @RequestMapping("saveMenusForRole")
     @ResponseBody
-    @JsonpCallback
     @CrossOrigin(allowCredentials="true")
     public String  saveMenusForRole(Integer user_role_id,String menus){
         roleMenuManageService.saveMenusForRole(user_role_id, (List<Integer>) JsonSupport.jsonToObect(menus,ArrayList.class));

@@ -90,11 +90,13 @@
               if(responseData.faild_reason === 'FORWARD_CAS'){
                 let forwardUrl = responseData.resultData
                 window.location = forwardUrl
-
+              }else{
+                $this.Message.success("登出成功")
+                $this.$router.push({'path':'/'})
               }
             }else{
-              $this.Message.success("登出成功")
-              $this.$router.push({'path':'/'})
+              $this.Message.error(responseData.result)
+
             }
           })
         })

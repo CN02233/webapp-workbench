@@ -117,7 +117,7 @@ import WorkTablePager from '@/models/public/WorkTablePager'
 import WorkMain from '@/models/public/WorkMain'
 import { required } from 'vuelidate/lib/validators'
 export default {
-  name: 'OriginMain',
+  name: 'SubmitAUmanager',
   data () {
     return {
       originDataList: [],
