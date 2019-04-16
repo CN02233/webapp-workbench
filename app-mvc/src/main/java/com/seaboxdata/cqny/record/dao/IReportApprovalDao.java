@@ -46,5 +46,5 @@ public interface IReportApprovalDao {
             +"report_status=#{reportStatus}"
             +"</if>"
             +"</set>where report_id = #{reportId}</script>")
-    void ReportUpdateStatus(@Param("reportId") String reportId, @Param("reportStatus")String reportStatus);
+    void reportUpdateStatus(@Param("reportId") String reportId, @Param("reportStatus")String reportStatus);
 }

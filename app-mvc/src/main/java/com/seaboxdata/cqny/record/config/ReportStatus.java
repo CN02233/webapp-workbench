@@ -39,10 +39,7 @@ public enum ReportStatus {
 
     }
 
-    public static void main(String[] args) {
-        String s=ReportStatus.UP_SIGIN.getComment();
-        System.out.println(ReportStatus.UP_SIGIN);
-    }
+
     private String getComment() {
         return this.comment;
     }

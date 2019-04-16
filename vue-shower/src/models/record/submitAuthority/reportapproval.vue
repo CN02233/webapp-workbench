@@ -174,7 +174,6 @@ export default {
   mounted: function () { // 初始化
     this.reportDataList = []
     this.getTableData(1)
-    this.getOriginList()
   }
 }
 </script>
