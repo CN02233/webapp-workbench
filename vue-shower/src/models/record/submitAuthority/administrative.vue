@@ -231,7 +231,9 @@ export default {
       })
     },
     getDefinedAndOriginAssign (organizationId, thisRef) { // 获取选择的机构id 进行勾选渲染
-      thisRef.$refs.tree.setCheckedKeys([])
+      this.$nextTick(function () {
+        thisRef.$refs.tree.setCheckedKeys([])
+      })
       this.BaseRequest({
         url: '/administrative/getOrganizationAndOriginAssignById',
         method: 'get',
