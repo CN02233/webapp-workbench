@@ -221,7 +221,7 @@ export default {
     subRoleMenus () {
       this.BaseRequest({
         url: 'sys/roleMenu/saveMenusForRole',
-        method: 'post',
+        method: 'get',
         params: {'user_role_id': this.edit_role_id, 'menus': JSON.stringify(this.menuCheckedForRole)}
       }).then(() => {
         this.Message.success('保存成功')
