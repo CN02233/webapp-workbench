@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface IReportApprovalDao {
@@ -39,7 +39,7 @@ public interface IReportApprovalDao {
     Page<ReportCustomer> listReportApproval(@Param("currPage") Integer currPage,
                                                       @Param("pageSize") Integer pageSize,
                                                       @Param("status") String status,
-                                                      @Param("originList") List originList);
+                                                      @Param("originList") Set originList);
 
     @Update("<script>update report_customer <set>"
             +"<if test='reportStatus!=null'>"
