@@ -62,7 +62,7 @@
             width="150"
           >
             <template slot-scope="scope">
-              <el-button
+              <el-button @click="reportShow(scope.row.report_id)"
                 size="mini"
               >详情</el-button>
             </template>
@@ -204,6 +204,11 @@
           }
           console.log(response)
         })
+      },
+      reportShow(reportId){
+        this.$router.push({
+          path: "/record/report/reportFill?reportId="+reportId+"&isView=Y"
+        });
       }
     },
     mounted: function () { // 初始化

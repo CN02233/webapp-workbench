@@ -114,7 +114,7 @@ public class ReportCustomerController {
 
         }
         if(getUnitOrder>currOrder){
-            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "该步骤还未填写", null,null);
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "该步骤还未填写", "该步骤还未填写",null);
             return jsonResult;
 
         }
