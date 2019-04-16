@@ -12,6 +12,7 @@ public class ReportCustomer {
     private Integer report_defined_id;
     private String report_name;
     private Integer report_origin;
+    private String report_origin_name;
 
     @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date create_date;
@@ -155,5 +156,13 @@ public class ReportCustomer {
 
     public void setUser_name(String user_name) {
         this.user_name = user_name;
+    }
+
+    public String getReport_origin_name() {
+        return report_origin_name;
+    }
+
+    public void setReport_origin_name(String report_origin_name) {
+        this.report_origin_name = report_origin_name;
     }
 }

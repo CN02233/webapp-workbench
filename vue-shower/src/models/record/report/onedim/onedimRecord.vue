@@ -6,7 +6,7 @@
         <el-col :span="23">
           <el-tooltip class="item" effect="dark" :content="definedColum.colum_desc" placement="top">
             <el-input v-model="columDatas[definedColum.unit_id+'_'+definedColum.colum_id].report_data"
-                      :disabled="definedColum.colum_type==0" style="width:50%;float: left;" >
+                      :disabled="definedColum.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
               <template v-if="definedColum.colum_point!=null&&definedColum.colum_point!=''" slot="append">{{definedColum.colum_point}}</template>
             </el-input>
           </el-tooltip>
@@ -17,9 +17,9 @@
       </el-form-item>
     </el-form>
 
-    <el-button @click="saveUnitContext(false)" type="info">保存</el-button>
+    <el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>
     <!--<el-button type="primary">上一步</el-button>-->
-    <el-button v-if="lastStep=='true'" @click="nextStep" type="success">下一步</el-button>
+    <el-button v-if="isView!='Y'" @click="nextStep" type="success">下一步</el-button>
   </div>
 </template>
 
@@ -38,6 +38,7 @@
         unitId:"",
         unitType:"",
         lastStep:false,
+        isView:'N',
         definedColums:[],
         columDatas:{}
       }
@@ -50,11 +51,6 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
-        console.log({
-          reportId:this.reportId,
-          unitId:this.unitId,
-          unitType:this.unitType
-        })
         this.BaseRequest({
           url:"/reportCust/getUnitContext",
           params:{
@@ -181,6 +177,7 @@
       this.unitId = this.$route.query.unitId
       this.unitType = this.$route.query.unitType
       this.lastStep = this.$route.query.lastStep
+      this.isView = this.$route.query.isView
       this.getUnitContext()
     }
   }

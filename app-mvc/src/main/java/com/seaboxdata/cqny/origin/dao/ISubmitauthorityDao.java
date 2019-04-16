@@ -13,26 +13,26 @@ import java.util.Map;
 @Repository
 public interface ISubmitauthorityDao {
 
-    @Select("SELECT\n" +
-            "\torigin_id id,\n" +
-            "\torigin_name label,\n" +
-            "\tparent_origin_id parentId\n" +
-            "\n" +
-            "FROM\n" +
-            "\tsys_origin where origin_status!=3 ")
+    @Select("SELECT  " +
+            " origin_id id,  " +
+            " origin_name label,  " +
+            " parent_origin_id parentId  " +
+            "  " +
+            "FROM  " +
+            " sys_origin where origin_status!=3 ")
     List<EntityTree> listAllSubmitauthority();
 
-    @Insert("INSERT INTO sys_origin (\n" +
-            "\torigin_name,\n" +
-            "\tparent_origin_id,\n" +
-            "\torigin_status,\n" +
-            "\tcreate_date,\n" +
-            "\tcreate_user\n" +
-            ")\n" +
-            "VALUES\n" +
-            "\t(\n" +
-            "\t#{ origin_name },#{ parent_origin_id },#{ origin_status },sysdate(),#{ create_user }\n" +
-            "\t)")
+    @Insert("INSERT INTO sys_origin (  " +
+            " origin_name,  " +
+            " parent_origin_id,  " +
+            " origin_status,  " +
+            " create_date,  " +
+            " create_user  " +
+            ")  " +
+            "VALUES  " +
+            " (  " +
+            " #{ origin_name },#{ parent_origin_id },#{ origin_status },sysdate(),#{ create_user }  " +
+            " )")
     void addSubmitauthority(Submitauthority submitauthority);
 
     @Update("<script>update sys_origin <set>" +
@@ -88,18 +88,18 @@ public interface ISubmitauthorityDao {
      * @param userId
      * @return
      */
-    @Select("SELECT\n" +
-            "\tooa.origin_id\n" +
-            "FROM\n" +
-            "\torganization_origin_assign ooa\n" +
-            "WHERE\n" +
-            "\tooa.organization_id IN (\n" +
-            "\t\tSELECT\n" +
-            "\t\t\tuos.organization_id\n" +
-            "\t\tFROM\n" +
-            "\t\t\tuser_organizations_assign uos\n" +
-            "\t\tWHERE\n" +
-            "\t\t\tuos.user_id = #{userId}\n" +
-            "\t)")
+    @Select("SELECT  " +
+            " ooa.origin_id  " +
+            "FROM  " +
+            " organization_origin_assign ooa  " +
+            "WHERE  " +
+            " ooa.organization_id IN (  " +
+            "  SELECT  " +
+            "   uos.organization_id  " +
+            "  FROM  " +
+            "   user_organizations_assign uos  " +
+            "  WHERE  " +
+            "   uos.user_id = #{userId}  " +
+            " )")
     List<String> getOriginIdListByUserId(@Param("userId") Integer userId);
 }

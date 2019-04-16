@@ -29,6 +29,7 @@
     data() {
       return {
         reportId:"",
+        isView:'N',
         activeStepNum:1,
         lastStepNum:1,
         currUnitId:'',
@@ -81,7 +82,7 @@
                 }
                 const lastStep = (this.currUnitId===active_unit)
                 this.$router.push({
-                  path: unitAddress+"?reportId="+this.reportId+"&unitId="+unitId+"&unitType="+unitType+"&lastStep="+lastStep
+                  path: unitAddress+"?reportId="+this.reportId+"&unitId="+unitId+"&unitType="+unitType+"&lastStep="+lastStep+"&isView="+this.isView
                 });
 
               }
@@ -91,8 +92,14 @@
       },
       stepClick(clickObj,unitNum){
         const active_unit = this.unitEntities[unitNum].unit_id
+        if(this.isView=='Y'){
+          this.selectActiveStep(active_unit)
+          return
+        }
+
         if(unitNum<=this.lastStepNum){
           if(unitNum==this.activeStepNum){
+
             //do nothing.....
           }else{
             this.selectActiveStep(active_unit)
@@ -114,6 +121,9 @@
 
     mounted() {
       this.reportId = this.$route.query.reportId
+      if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
+        this.isView = this.$route.query.isView
+      }
       this.checkUnitStep()
     }
   }

@@ -8,20 +8,20 @@
     <el-form ref="form" label-width="40%">
       <div v-for="(group,ig) in definedGroup">
         <div style="text-align:left;margin-bottom: 22px;margin-left:20%;">
-          <el-input v-model="group.report_data" class="group" style="width:150px;"></el-input>
+          <el-input :disabled="isView=='Y'" v-model="group.report_data" class="group" style="width:150px;"></el-input>
         </div>
         <el-form-item v-for="col in group.children" :label="col.colum_name_cn">
           <el-tooltip class="item" effect="dark" :content="col.colum_desc" placement="top">
-          <el-input v-model="col.report_data" :disabled="col.colum_type==0" style="width:50%;float: left;" >
+          <el-input v-model="col.report_data" :disabled="col.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
             <template v-if="col.colum_point!=null&&col.colum_point!=''" slot="append">{{col.colum_point}}</template>
           </el-input>
           </el-tooltip>
         </el-form-item>
       </div>
     </el-form>
-    <el-button @click="saveUnitContext(false)" type="info">保存</el-button>
+    <el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>
     <!--<el-button type="primary">上一步</el-button>-->
-    <el-button v-if="lastStep=='true'" @click="nextStep" type="success">下一步</el-button>
+    <el-button v-if="lastStep=='true'&&isView!='Y'" @click="nextStep" type="success">下一步</el-button>
   </div>
 
 </template>
@@ -38,6 +38,7 @@
     data() {
       return {
         reportId:"",
+        isView:'N',
         unitId:"",
         unitType:"",
         lastStep:false,
@@ -248,6 +249,7 @@
       this.unitType = this.$route.query.unitType
       this.unitType = this.$route.query.unitType
       this.lastStep = this.$route.query.lastStep
+      this.isView = this.$route.query.isView
       this.getUnitContext()
     }
   }
