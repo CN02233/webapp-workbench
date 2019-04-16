@@ -293,7 +293,7 @@ export default {
       if (checkResult) {
         this.$notify({
           dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>机构名称、报送机构'
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>机构名称'
         })
       }
       return checkResult

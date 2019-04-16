@@ -13,9 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service("reportApproval")
 public class ReportApprovalServiceImp implements ReportApprovalService {
@@ -29,30 +27,38 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     @Override
     public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize) {
-        List finalOriginList = getOrigins(userId);
-        Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(1, 10, reportStatus, finalOriginList);
+        Set finalOriginSet = getOrigins(userId);
+        if(finalOriginSet==null){
+            return null;
+        }
+        Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(1, 10, reportStatus, finalOriginSet);
         logger.debug("approveList :{}",approveList);
         PageResult pageResult = PageResult.pageHelperList2PageResult(approveList);
         return pageResult;
+
     }
 
-    private void checkOrigins(Map<String, Object> origin,List finalOriginList){
+    private void checkOrigins(Map<String, Object> origin,Set finalOriginSet){
         List<Map<String, Object>> children = (List) origin.get("childrens");
-        finalOriginList.add(origin.get("origin_id"));
+        finalOriginSet.add(origin.get("origin_id"));
         if(children!=null&&children.size()>0){
             children.forEach(child->{
-                checkOrigins(child,finalOriginList);
+                checkOrigins(child,finalOriginSet);
             });
         }
     }
 
-    private List getOrigins(int user_id) {
+    private Set getOrigins(int user_id) {
         Origin origin;
         origin = submitauthorityDao.getOriginByUserId(user_id);
-        Map<String, Object> originTree = submitauthorityDao.getOriginById(origin.getOrigin_id().toString());
-        List finalOriginList = new ArrayList();
-        checkOrigins(originTree,finalOriginList);
-        return finalOriginList;
+        if (origin==null){
+            return null;
+        }else{
+            Map<String, Object> originTree = submitauthorityDao.getOriginById(origin.getOrigin_id().toString());
+            Set finalOriginSet = new HashSet();
+            checkOrigins(originTree,finalOriginSet);
+            return finalOriginSet;
+        }
     }
 
     @Override

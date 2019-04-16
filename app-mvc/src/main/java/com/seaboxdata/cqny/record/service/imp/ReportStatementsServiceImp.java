@@ -70,6 +70,9 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
         }else{
             finalOriginSet.add(originId);
         }
+        if(finalOriginSet.size()==0){
+            return null;
+        }
         Page<ReportCustomer> reportStatementsPage = reportStatementsDao.listReportStatementsByUser(currPage, pageSize,finalOriginSet);
         PageResult pageResult = PageResult.pageHelperList2PageResult(reportStatementsPage);
         return pageResult;
@@ -115,6 +118,9 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
         for (String origin:originList) {
             Map<String, Object> originTree = submitauthorityDao.getOriginById(origin);
             checkOrigins(originTree,finalOriginSet);
+        }
+        if(finalOriginSet.size()==0){
+            return null;
         }
         List<HashMap<String,String>> resultMap = reportStatementsDao.getOriginsByOriginSet(finalOriginSet);
         return resultMap;

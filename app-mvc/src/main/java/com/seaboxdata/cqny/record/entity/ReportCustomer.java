@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.record.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -10,10 +12,14 @@ public class ReportCustomer {
     private Integer report_defined_id;
     private String report_name;
     private Integer report_origin;
+
+    @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date create_date;
     private Integer last_modify_user;
     private Date report_start_date;
     private String report_start_date_str;
+
+    @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date report_end_date;
     private String report_end_date_str;
     private Integer active_unit;
