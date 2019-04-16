@@ -69,7 +69,7 @@ public class ReportApprovalController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult ReportApprovalOperator( String reportId,String reportStatus){
-        reportApprovalService.ReportApprovalOperator(reportId,reportStatus);
+        reportApprovalService.reportApprovalOperator(reportId,reportStatus);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }
@@ -86,8 +86,8 @@ public class ReportApprovalController {
     @RequestMapping("ReportReviewOperator")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult ReportReviewOperator( String reportId,String reportStatus){
-        reportApprovalService.ReportReviewOperator(reportId,reportStatus);
+    public JsonResult reportReviewOperator( String reportId,String reportStatus){
+        reportApprovalService.reportReviewOperator(reportId,reportStatus);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
         return jsonResult;
     }

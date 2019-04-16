@@ -7,7 +7,7 @@ public interface ReportApprovalService {
 
     PageResult listReportApproval(String reportStatus,int user_id,int currPage, int pageSize);
 
-    void ReportReviewOperator(String reportId, String reportStatus);
+    void reportReviewOperator(String reportId, String reportStatus);
 
-    void ReportApprovalOperator(String reportId, String reportStatus);
+    void reportApprovalOperator(String reportId, String reportStatus);
 }

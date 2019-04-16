@@ -181,7 +181,7 @@ export default {
       const $this = this
       this.BaseRequest({
         url: 'sys/roleMenu/getMenuByRole',
-        method: 'GET',
+        method: 'get',
         params: {'user_role_id': row.user_role_id}
       }).then((response) => {
         $this.menuCheckedForRole = []
@@ -199,7 +199,7 @@ export default {
       if (this.formData.user_role_id !== null) {
         this.BaseRequest({
           url: 'sys/role/updateSaveRole',
-          method: 'POST',
+          method: 'post',
           data: this.formData
         }).then(() => {
           this.Message.success('保存成功')
@@ -221,8 +221,8 @@ export default {
     subRoleMenus () {
       this.BaseRequest({
         url: 'sys/roleMenu/saveMenusForRole',
-        method: 'get',
-        params: {'user_role_id': this.edit_role_id, 'menus': JSON.stringify(this.menuCheckedForRole)}
+        method: 'post',
+        data: {'user_role_id': ''+this.edit_role_id, 'menus': this.menuCheckedForRole}
       }).then(() => {
         this.Message.success('保存成功')
         this.closeRoleMenus()

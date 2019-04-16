@@ -10,14 +10,12 @@ import com.workbench.auth.role.service.RoleMenuManageService;
 import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -82,8 +80,14 @@ public class RoleMenuManageController {
     @RequestMapping("saveMenusForRole")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String  saveMenusForRole(Integer user_role_id,String menus){
-        roleMenuManageService.saveMenusForRole(user_role_id, (List<Integer>) JsonSupport.jsonToObect(menus,ArrayList.class));
+    public String  saveMenusForRole(@RequestBody HashMap<String,Object> saveParams){
+        String user_role_id = (String) saveParams.get("user_role_id");
+        List<Double> menusDb = (List<Double>) saveParams.get("menus");
+        List<Integer> menus = new ArrayList<>();
+        for (Double aDouble : menusDb) {
+            menus.add(aDouble.intValue());
+        }
+        roleMenuManageService.saveMenusForRole(new Integer(user_role_id), menus);
 
         String jsonpResult = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "保存成功", null, null);
 

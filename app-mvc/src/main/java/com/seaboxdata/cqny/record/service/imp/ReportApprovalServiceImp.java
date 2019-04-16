@@ -31,7 +31,7 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
         if(finalOriginSet==null){
             return null;
         }
-        Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(1, 10, reportStatus, finalOriginSet);
+        Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(currPage, pageSize, reportStatus, finalOriginSet);
         logger.debug("approveList :{}",approveList);
         PageResult pageResult = PageResult.pageHelperList2PageResult(approveList);
         return pageResult;
@@ -62,25 +62,25 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
     }
 
     @Override
-    public void ReportReviewOperator(String reportId, String reportStatus) {
+    public void reportReviewOperator(String reportId, String reportStatus) {
         if(reportStatus.equals("pass")){
-            reportApprovalDao.ReportUpdateStatus(reportId, ReportStatus.APPROVE.toString());
+            reportApprovalDao.reportUpdateStatus(reportId, ReportStatus.APPROVE.toString());
         }
         if(reportStatus.equals("reject")){
-            reportApprovalDao.ReportUpdateStatus(reportId,ReportStatus.SUBMIT.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.SUBMIT.toString());
         }
         if(reportStatus.equals("refill")){
-            reportApprovalDao.ReportUpdateStatus(reportId,ReportStatus.NORMAL.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.NORMAL.toString());
         }
     }
 
     @Override
-    public void ReportApprovalOperator(String reportId, String reportStatus) {
+    public void reportApprovalOperator(String reportId, String reportStatus) {
         if(reportStatus.equals("pass")){
-            reportApprovalDao.ReportUpdateStatus(reportId,ReportStatus.REVIEW.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.REVIEW.toString());
         }
         if(reportStatus.equals("reject")){
-            reportApprovalDao.ReportUpdateStatus(reportId,ReportStatus.NORMAL.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.NORMAL.toString());
         }
     }
 
