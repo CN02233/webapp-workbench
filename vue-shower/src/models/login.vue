@@ -6,14 +6,13 @@
           <!--<h3 class="title">欢迎！</h3>-->
           <el-form-item  prop="user_name">
             <el-input  name="user_name" type="text" v-model="loginForm.user_name" autoComplete="on"
-                       placeholder="user_name"/>
+                       placeholder="请输入用户名"/>
           </el-form-item>
           <el-form-item  prop="user_pwd">
-            <el-input name="user_pwd" :type="pwdType" @keyup.enter.native="handleLogin" v-model="loginForm.user_pwd"
-                      autoComplete="on"
-                      placeholder="user_pwd"></el-input>
+            <el-input placeholder="请输入密码" v-model="loginForm.user_pwd" show-password></el-input>
             <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
           </el-form-item>
+
           <el-form-item>
             <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">
               <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
@@ -35,9 +34,10 @@
   data() {
     return {
         loginForm: {
-            user_name: 'admin',
-            user_pwd: 'admin'
+            user_name: '',
+            user_pwd: ''
         },
+        resetPwd:false,
         loading: false,
         loadingLogin:{
           'loading-login':true
@@ -63,6 +63,9 @@
         })
         .then(response=>{
             if('LOGIN_SUCCESS'==response){
+              $this.forwardToHome()
+            }else if('PWD_EXPIRED'==response){
+              $this.resetPwd = true
               $this.forwardToHome()
             }
         })
@@ -100,8 +103,12 @@
             freeLoading()
           }
         }else{
-          freeLoading()
-          this.forwardToHome()
+          if(res.resultData=='PWD_EXPIRED'){
+            console.log("重定向到修改密码页面")
+          }else{
+            freeLoading()
+            this.forwardToHome()
+          }
         }
       })
       .catch(error=>{

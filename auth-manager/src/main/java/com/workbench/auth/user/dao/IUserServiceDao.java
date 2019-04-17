@@ -24,9 +24,10 @@ public interface IUserServiceDao {
     @Options(useCache = false)
     User checkUserByIdAndPwd();
 
-    @Select("")//to be continue
+    @Select(query_user_columns + " FROM "+TABLE_NAME+" " +
+            "WHERE user_name=#{username} and user_pwd = #{password}")
     @Options(useCache = false)
-    User checkUserByNmAndPwd();
+    User checkUserByNmAndPwd(@Param("username") String username,@Param("password") String password);
 
     @Select(query_user_columns + " FROM "+TABLE_NAME+" " +
             "WHERE user_name=#{username}")
@@ -51,8 +52,8 @@ public interface IUserServiceDao {
     Page<User> listUsersForPage(@Param("currPage") int currPage, @Param("pageSize") int pageSize
             ,@Param("user_id") int user_id,@Param("user_name") String user_name,@Param("user_type")int user_type);
 
-    @Insert("INSERT INTO "+TABLE_NAME+" (user_id,user_name,user_type,reg_date,user_status,last_login_time) " +
-            " VALUE (#{user_id},#{user_name},#{user_type},now(),#{user_status},#{last_login_time})")
+    @Insert("INSERT INTO "+TABLE_NAME+" (user_id,user_name,user_type,reg_date,user_status,last_login_time,user_pwd) " +
+            " VALUE (#{user_id},#{user_name},#{user_type},now(),#{user_status},#{last_login_time},#{user_pwd})")
     @Options(useCache = false)
     void saveNewUser(User user);
 

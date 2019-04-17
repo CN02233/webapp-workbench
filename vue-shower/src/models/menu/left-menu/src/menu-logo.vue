@@ -25,9 +25,10 @@
 <style rel="stylesheet/scss" lang="scss" scoped>
   .menu-logo{
     text-align: left;
-    font-size:16px;
+    font-size:20px;
     font-weight: bold;
-    color:#ffffff;
+    /*color:#ffffff;*/
+    color:black;
   }
 
   .logo-pic{
@@ -35,15 +36,15 @@
     /*background:url('/nlp/static/image/logo.png') no-repeat 0 13px;*/
     background-size: 26px 26px;
     width:40px;
-    height:54px;
+    height:70px;
     float: left;
   }
 
   .logo-content{
     float: right;
     width:calc(100% - 42px);
-    height: 54px;
-    line-height:54px;
+    height: 65px;
+    line-height:65px;
   }
 
 </style>

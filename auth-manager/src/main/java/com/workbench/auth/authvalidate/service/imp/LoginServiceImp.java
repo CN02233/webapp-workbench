@@ -1,8 +1,10 @@
 package com.workbench.auth.authvalidate.service.imp;
 
 import com.google.common.base.MoreObjects;
+import com.webapp.support.encryption.MD5;
 import com.workbench.auth.authvalidate.service.LoginService;
 import com.workbench.auth.authvalidate.bean.LoginResult;
+import com.workbench.auth.user.entity.UserStatus;
 import com.workbench.auth.user.service.UserService;
 import com.workbench.auth.user.entity.User;
 import org.slf4j.Logger;
@@ -40,8 +42,21 @@ public class LoginServiceImp implements LoginService{
     private LoginResult loginCheck(User checkResult){
         LoginResult loginResult = new LoginResult();
         if(checkResult!=null){
-            loginResult.setResult_code(LoginResult.LOGIN_RESULT.SUCCESS);
-            loginResult.setValidate_result("验证通过");
+            String userStatus = checkResult.getUser_status();
+            Integer statusInt = new Integer(userStatus);
+            if(UserStatus.LOCK.equal(statusInt)){
+                loginResult.setResult_code(LoginResult.LOGIN_RESULT.LOCK);
+                loginResult.setValidate_result("用户被锁定");
+            }else if(UserStatus.PWD_EXPIRED.equal(statusInt)){
+                loginResult.setResult_code(LoginResult.LOGIN_RESULT.PWD_EXPIRED);
+                loginResult.setValidate_result("用户密码过期");
+            }
+            else{
+                loginResult.setResult_code(LoginResult.LOGIN_RESULT.SUCCESS);
+                loginResult.setValidate_result("验证通过");
+            }
+
+
         }else{
             loginResult.setResult_code(LoginResult.LOGIN_RESULT.VALIDATE_FAIL);
             loginResult.setValidate_result("用户名或密码错误");

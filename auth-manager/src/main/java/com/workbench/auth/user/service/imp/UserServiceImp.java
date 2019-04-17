@@ -3,11 +3,14 @@ package com.workbench.auth.user.service.imp;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
+import com.webapp.support.encryption.MD5;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.page.PageResult;
 import com.workbench.auth.menu.entity.Menu;
 import com.workbench.auth.user.entity.User;
+import com.workbench.auth.user.entity.UserStatus;
 import com.workbench.auth.user.service.UserService;
 import com.workbench.auth.user.dao.IUserServiceDao;
 import org.slf4j.Logger;
@@ -28,11 +31,15 @@ public class UserServiceImp implements UserService {
 
     private static Logger logger = LoggerFactory.getLogger(UserServiceImp.class);
 
+    private String DEFAULT_PWD = "111111";
+
     @Autowired
     private IUserServiceDao userServiceDao;
 
     public User checkUser(String userNm, String password) {
-        User resultUser = userServiceDao.checkUserByUserNm(userNm);
+        String md5Password = MD5.getMD5Value(password);
+
+        User resultUser = userServiceDao.checkUserByNmAndPwd(userNm,md5Password);
         logger.debug("check user result {}",resultUser);
         return resultUser;
     }
@@ -56,8 +63,13 @@ public class UserServiceImp implements UserService {
         builder.append(format.format(Calendar.getInstance().getTime()));
         builder.append(new Random().nextInt(50));
         int user_id = new Integer(builder.toString());
+
         user_id = user_id<<(new Random().nextInt(5));
         user.setUser_id(user_id);
+        if(Strings.isNullOrEmpty(user.getUser_pwd())){
+            user.setUser_pwd(MD5.getMD5Value(DEFAULT_PWD));
+        }
+        user.setUser_status(String.valueOf(UserStatus.NORMAL.getStatus()));
         logger.debug("save user info {}",user);
         userServiceDao.saveNewUser(user);
         return user;

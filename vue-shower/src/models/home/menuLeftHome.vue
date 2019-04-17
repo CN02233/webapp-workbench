@@ -1,47 +1,39 @@
 
 <template>
-    <el-container class="home" >
-
-      <el-header style="text-align: right; font-size: 12px">
-        <div class="work-menu-group">
-          <WorkLeftMenuGroup :sysName="sysName" ></WorkLeftMenuGroup>
-        </div>
-        <div class="personal-infos">
-          <div  @click="logout" class="logout-icon" >
-            <icon class="fa-icon" name="logout2"></icon>
-            <div class="logout-font">退出</div>
+    <div class="home" >
+      <div class="container-header">
+        <el-header style="text-align: right; font-size: 12px">
+          <div class="work-menu-group">
+            <WorkLeftMenuGroup :sysName="sysName" ></WorkLeftMenuGroup>
           </div>
-          <div class="login-user">
-            <el-tooltip class="item" effect="dark"
-                        placement="bottom-start">
-              <div slot="content">{{loginUserInfo.user_name}}</div>
-              <el-row class="loginUserInfoRow">
-                <div class="login-user-infomation">
-                  当前登录用户：{{loginUserInfo.user_name}}
-                </div>
-              </el-row>
-            </el-tooltip>
+          <div class="personal-infos">
+            <div @click="logout" class="login-user-name">退出</div>
           </div>
+        </el-header>
+      </div>
 
+
+      <div class="container-root">
+        <div class="container-root-menu">
+          <el-menu :collapse="isCollapse" class="menu-style">
+            <el-menu-item v-on:click.native="collapseMenu">
+              <i :class="isCollapse?'el-icon-d-arrow-right':'el-icon-d-arrow-left'"></i><span v-if="!isCollapse">&nbsp;收起菜单</span>
+            </el-menu-item>
+
+
+            <WorkLeftMenu v-for="menuObj in menuList" :key="menuObj.id" :menuData="menuObj"></WorkLeftMenu>
+          </el-menu>
         </div>
 
-      </el-header>
+        <div :class="isCollapse?'container-root-context-collapse':'container-root-context'">
+          <router-view></router-view>
+        </div>
 
-        <el-container>
-            <el-aside width="225px" class="menu">
-                <el-menu
-                  background-color="#2e3d50"
-                  text-color="#ffffff"
-                  active-text-color="#3f8aff">
-                    <WorkLeftMenu v-for="menuObj in menuList" :key="menuObj.id" :menuData="menuObj"></WorkLeftMenu>
-                </el-menu>
-            </el-aside>
 
-            <el-main >
-                <router-view></router-view>
-            </el-main>
-        </el-container>
-    </el-container>
+
+
+      </div>
+    </div>
 </template>
 
 <script>
@@ -63,7 +55,9 @@
       }
     },
     data() {
-      return {}
+      return {
+        isCollapse:true
+      }
     },
     components: {
       WorkLeftMenuGroup,
@@ -102,6 +96,10 @@
         })
 
 
+      },
+      collapseMenu(){
+        console.log("collapseMenu is running.....")
+        this.isCollapse = !this.isCollapse
       }
     },
     mounted:function(){
@@ -112,6 +110,21 @@
   };
 </script>
 
+
+<style lang="css">
+  .menu-style:not(.el-menu--collapse){
+    background-color:#EBF2FE;
+    text-color:"#ffffff";
+    active-text-color:"#3f8aff";
+    height:95%;
+    width: 200px;
+  }
+
+  .el-menu--collapse{
+    background-color:#EBF2FE;
+    height:95%;
+  }
+</style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
 
@@ -148,8 +161,10 @@
   }
 
   .home{
-    width:100%;
-    height:100%;
+    width:calc(100% - 40px);
+    height:calc(100% - 40px);
+    padding:20px;
+    background-color: #3CD2E6 !important;
   }
 
   .work-menu-group{
@@ -162,20 +177,54 @@
     width:280px;
     height:100%;
     float:left;
-    color:white;
-    text-align: left;
+    color:black;
+    text-align: right;
   }
 
   .menu{
     background-color: rgb(238, 241, 246);
   }
 
-  .el-header {
-    /*background-color: #2b5ca9;*/
-    color: #333;
-    height:54px !important;
-    background-image: url("/static/image/header_backgroud.png");
-    /*background-image: url("/nlp/static/image/header_backgroud.png");*/
+  .container-header {
+    width:100%;
+    color: black;
+    background-color: #EBF2FE;
+    height:65px !important;
+    box-shadow:    0px 0px 0px 0px #ffffff,
+    0px 0px 0px 0px #3bee17,
+    0px 0px 0px 0px #2279ee,
+    0px 10px 10px 0px #00ffff;
+    float:left;
+  }
+
+  .container-root{
+    width:100%;
+    height:calc(100% - 68px);
+    background-color: #ffffff;
+    margin-top:3px;
+    box-shadow:    0px 0px 0px 0px #ffffff,
+    0px 3px 10px 0px #00ffff,
+    0px 3px 10px 0px #00ffff,
+    0px 3px 10px 0px #00ffff;
+    float:left;
+  }
+
+  .container-root-menu{
+    height:100%;
+    float:left;
+    background-color: #EBF2FE;
+  }
+
+  .container-root-context-collapse{
+    width:calc(100% - 90px);
+    height:100%;
+    float:left;
+  }
+
+  .container-root-context{
+    width:calc(100% - 220px);
+    height:100%;
+    float:left;
   }
 
   .el-aside {
@@ -192,37 +241,20 @@
     padding:18px 0 0 0;
   }
 
-  .logout-font{
-    float: right;
-    font-size: 14px;
-    line-height: 54px;
-  }
-
-  .login-user{
-    float: right;
-    margin:0 44px 0 0;
-    width:178px;
-    height:54px;
-    line-height: 54px;
-    font-size: 14px;
-    color:#ffffff;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-
-  }
-
-  .login-user-infomation{
-    width:178px;
-    height:54px;
-    line-height: 54px;
-    font-size: 14px;
-    color:#ffffff;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  }
-
-  .logout-icon{
-    float: right;
+  .login-user-name{
+    width:120px;
+    height:40px;
+    line-height: 40px;
+    border-radius: 15px;
+    background-color: #00f2a4;
+    margin-top:13px;
+    color:white;
+    font-size: 18px;
+    text-align: center;
+    font-weight: bolder;
+    padding:0px;
     cursor: pointer;
-    width:58px;
+    float:right;
   }
 
   .loginUserInfoRow{

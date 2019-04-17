@@ -50,7 +50,7 @@ failedProcess.checkWorkbenchResult = function(response,withMessage){
       }
 
     }else{
-      Message.error(res.faild_reason)
+      Message.error(res.result_msg)
     }
     return false
   } else {

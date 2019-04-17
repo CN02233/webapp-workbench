@@ -30,6 +30,8 @@ public class LoginResult {
         PASSWORD_WRONG,
         USERNM_NOT_FOUND,
         VALIDATE_FAIL,
-        USERNM_NOT_NULL
+        USERNM_NOT_NULL,
+        LOCK,
+        PWD_EXPIRED;
     }
 }

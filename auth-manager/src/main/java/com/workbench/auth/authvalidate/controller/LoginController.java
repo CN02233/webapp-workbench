@@ -8,6 +8,7 @@ import com.workbench.auth.authvalidate.service.LoginService;
 import com.workbench.auth.authvalidate.bean.LoginResult;
 import com.workbench.auth.user.entity.User;
 import com.workbench.auth.user.service.UserService;
+import com.workbench.exception.runtime.UserNotFoundException;
 import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,17 +51,27 @@ public class LoginController extends AbstractLoginController{
         }else{
             LoginResult loginResult = loginService.validate(user_name, user_pwd);
             if(loginResult.getResult_code()!=LoginResult.LOGIN_RESULT.SUCCESS){
+                if(LoginResult.LOGIN_RESULT.PWD_EXPIRED.equals(loginResult.getResult_code())){
+                    this.addUserToSession(user_name);
+                    return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登陆成功,密码过期需要修改",
+                            null, LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
+                }
+
                 return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD, loginResult.getValidate_result(),
-                        LoginResult.LOGIN_RESULT.USERNM_NOT_FOUND.toString(), null);
+                        loginResult.getResult_code().toString(), null);
             }
-            User user = userService.getUserByUserNm(user_name);
-            if(user==null){
-                return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD, "当前登录/操作的用户不存在",
-                        LoginResult.LOGIN_RESULT.USERNM_NOT_FOUND.toString(), null);
-            }else
-                SessionSupport.addUserToSession(userService.getUserByUserNm(user_name));
+
         }
+        this.addUserToSession(user_name);
         return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登录成功",null, "LOGIN_SUCCESS");
+    }
+
+    private void addUserToSession(String user_name) {
+        User user = userService.getUserByUserNm(user_name);
+        if(user==null){
+           throw new UserNotFoundException(new StringBuilder().append("用户").append(user_name).append("未找到").toString());
+        }else
+            SessionSupport.addUserToSession(userService.getUserByUserNm(user_name));
     }
 
     @RequestMapping(value="loginRest",method = {RequestMethod.GET,RequestMethod.POST})

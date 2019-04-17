@@ -14,6 +14,7 @@ import java.util.List;
 public class User {
     private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private int user_id;
+    private String user_pwd;
     private String user_name;
     private int user_type;
     private Date reg_date;
@@ -90,5 +91,13 @@ public class User {
                 .add("last_login_time",getLast_login_time()).toString();
 
 //        return "User [user_id=" + this.user_id + ", user_nm=" + this.user_nm + ", user_real_nm=" + this.user_real_nm + ", user_pwd=" + this.user_pwd + ", active_ind=" + this.active_ind + ", superior_id=" + this.superior_id + ", sign_in_ip=" + this.sign_in_ip + ", user_group_id=" + this.user_group_id + ", group_name=" + this.group_name + ", role_id=" + this.role_id + ", create_id=" + this.create_id + ", create_name=" + this.create_name + ", create_ts=" + this.create_ts + ", str_create_time=" + this.str_create_time + ", update_id=" + this.update_id + ", update_name=" + this.update_name + ", update_ts=" + this.update_ts + ", str_update_time=" + this.str_update_time + ", menuList=" + this.menuList + ", roleList=" + this.roleList + "]";
+    }
+
+    public String getUser_pwd() {
+        return user_pwd;
+    }
+
+    public void setUser_pwd(String user_pwd) {
+        this.user_pwd = user_pwd;
     }
 }
