@@ -1,12 +1,16 @@
 <template>
   <div class="menu-logo">
-    <div class="logo-pic"></div>
-    <div class="logo-content">{{sysName}}</div>
+    <div class="logo-img logo"></div>
+    <!--<div class="logo-content">{{sysName}}</div>-->
+    <div class="logo-content"></div>
 
   </div>
 </template>
 
 <script>
+  import '@/styles/logo.css'
+
+
   export default {
     name: 'WorkLeftLogo',
     components: {},
@@ -31,20 +35,16 @@
     color:black;
   }
 
-  .logo-pic{
-    /*background:url('/static/image/logo.png') no-repeat 0 13px;*/
-    /*background:url('/nlp/static/image/logo.png') no-repeat 0 13px;*/
-    background-size: 26px 26px;
-    width:40px;
-    height:70px;
+  .logo{
     float: left;
   }
 
   .logo-content{
-    float: right;
-    width:calc(100% - 42px);
+    float: left;
+    /*width:calc(100% - 42px);*/
     height: 65px;
     line-height:65px;
+    margin-left:20px;
   }
 
 </style>

@@ -190,10 +190,10 @@
     color: black;
     background-color: #EBF2FE;
     height:65px !important;
-    box-shadow:    0px 0px 0px 0px #ffffff,
+    box-shadow:    0px 0px 0px 0px black,
     0px 0px 0px 0px #3bee17,
     0px 0px 0px 0px #2279ee,
-    0px 10px 10px 0px #00ffff;
+    0px 10px 10px 0px black;
     float:left;
   }
 
@@ -202,10 +202,10 @@
     height:calc(100% - 68px);
     background-color: #ffffff;
     margin-top:3px;
-    box-shadow:    0px 0px 0px 0px #ffffff,
-    0px 3px 10px 0px #00ffff,
-    0px 3px 10px 0px #00ffff,
-    0px 3px 10px 0px #00ffff;
+    box-shadow:    0px 0px 0px 0px blueviolet,
+    0px 3px 10px 0px blueviolet,
+    0px 3px 10px 0px blueviolet,
+    0px 3px 10px 0px blueviolet;
     float:left;
   }
 
@@ -213,6 +213,10 @@
     height:100%;
     float:left;
     background-color: #EBF2FE;
+    box-shadow:    0px 0px 0px 0px blueviolet,
+    0px 0px 0px 0px blueviolet,
+    0px 0px 10px 0px blueviolet,
+    0px 0px 0px 0px blueviolet;
   }
 
   .container-root-context-collapse{
