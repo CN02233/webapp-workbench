@@ -6,8 +6,19 @@
           <div class="work-menu-group">
             <WorkLeftMenuGroup :sysName="sysName" ></WorkLeftMenuGroup>
           </div>
-          <div class="personal-infos">
+          <div class="header-options">
             <!--<icon name="home"></icon>-->
+            <div class="personal-infos">
+              <div class="personal-pic">
+                <icon  name="humenpic"></icon>
+              </div>
+              <div class="personal-name">
+                欢迎<br/>
+                {{loginUserInfo.user_name}}
+              </div>
+
+            </div>
+
             <div @click="logout" class="icon-mount">
               <el-tooltip class="item" effect="dark" content="退出系统" placement="bottom-end">
                 <icon  name="logoutallfill"></icon>
@@ -205,6 +216,10 @@
     height:100%;
   }
 
+  .el-header{
+    height:100% !important;
+  }
+
   .work-left-menu-header{
     width:calc(100% - 300px);
     height:100%;
@@ -240,7 +255,7 @@
     float: left;
   }
 
-  .personal-infos{
+  .header-options{
     width:50%;
     height:100%;
     float:right;
@@ -255,7 +270,8 @@
   .container-header {
     width:100%;
     color: black;
-    background-color: #EBF2FE;
+    /*background-color: #EBF2FE;*/
+    background-color: #4B83BB;
     height:65px !important;
     box-shadow:    0px 0px 0px 0px black,
     0px 0px 0px 0px #3bee17,
@@ -287,13 +303,13 @@
   }
 
   .container-root-context-collapse{
-    width:calc(100% - 90px);
+    width:calc(100% - 65px);
     height:100%;
     float:left;
   }
 
   .container-root-context{
-    width:calc(100% - 220px);
+    width:calc(100% - 201px);
     height:100%;
     float:left;
   }
@@ -306,21 +322,52 @@
     background-color: #ffffff;
   }
 
+  .personal-infos{
+    width:200px;
+    height:100%;
+    background-color: #4B83BB;
+    float: right;
+  }
+
+  .personal-pic{
+    width:80px;
+    height:100%;
+    float: left;
+    text-align: left;
+  }
+
+  .personal-name{
+    color:white;
+    width:120px;
+    height:100%;
+    float: right;
+    padding:10px 0 0 0 ;
+    text-align: left;
+  }
+
   .icon-mount{
     float: right;
+    height:100%;
+    border-right: 1px solid white;
+
+  }
+
+  .icon-mount:hover{
+    background-color: #8D0063;
+    box-shadow: 0px 5px 20px black;
+    cursor: pointer;
   }
 
   .fa-icon {
     width:40px;
     height:40px;
-    margin:10px 10px 0 10px;
-    cursor: pointer;
+    margin:15px 15px 0 15px;
   }
 
   .fa-icon-changescreen{
     width:42px;
     height:42px;
-    margin:8px 10px 0 10px;
+    margin:12px 10px 0 10px;
   }
 
   .login-user-name{

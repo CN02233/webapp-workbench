@@ -1,8 +1,10 @@
 <template>
   <div class="menu-logo">
-    <div class="logo-img logo"></div>
-    <!--<div class="logo-content">{{sysName}}</div>-->
-    <div class="logo-content"></div>
+    <div class="logo">
+      <icon name="logo"></icon>
+
+    </div>
+    <div class="logo-content">{{sysName}}</div>
 
   </div>
 </template>
@@ -31,8 +33,14 @@
     text-align: left;
     font-size:20px;
     font-weight: bold;
-    /*color:#ffffff;*/
-    color:black;
+    color:#ffffff;
+    /*color:black;*/
+  }
+
+  .fa-icon {
+    width:40px;
+    height:40px;
+    margin:15px 10px 0 10px;
   }
 
   .logo{
@@ -43,7 +51,7 @@
     float: left;
     /*width:calc(100% - 42px);*/
     height: 65px;
-    line-height:65px;
+    line-height:70px;
     margin-left:20px;
   }
 
