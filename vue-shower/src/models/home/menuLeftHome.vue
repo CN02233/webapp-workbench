@@ -168,8 +168,6 @@
       const $this = this
       document.onkeydown = function(e) {
         let key = window.event.keyCode;
-        console.log(key)
-        console.log($this.fullScreen)
         if (key== 122 ) {//屏蔽F11快捷键
           return false
         }

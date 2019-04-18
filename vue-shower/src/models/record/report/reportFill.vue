@@ -136,15 +136,19 @@
     padding:30px 0 0 0 ;
   }
   .fill-steps{
-    width:150px;
+    width:200px;
     height:70%;
-    position:absolute;
-    z-index: 10086;
+    padding:50px 0 0 100px;
+    float: left;
+    /*position:absolute;*/
+    /*z-index: 10086;*/
   }
   .fill-context{
-    width:calc(100% - 150px);
+    width:calc(100% - 300px);
     height:90%;
-    margin:0 0 0 150px;
+    margin:0 0 0 0px;
+    float: right;
+
     overflow: auto;
   }
   .el-step{
