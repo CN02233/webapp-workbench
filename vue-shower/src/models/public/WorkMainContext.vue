@@ -16,6 +16,6 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   .work-main-context{
-    height:calc(100% - 14px);
+    height:calc(100% - 40px);
   }
 </style>

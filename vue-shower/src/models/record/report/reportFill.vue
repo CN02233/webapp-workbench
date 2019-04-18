@@ -143,7 +143,7 @@
   }
   .fill-context{
     width:calc(100% - 150px);
-    height:70%;
+    height:90%;
     margin:0 0 0 150px;
     overflow: auto;
   }

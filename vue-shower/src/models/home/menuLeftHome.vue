@@ -7,7 +7,28 @@
             <WorkLeftMenuGroup :sysName="sysName" ></WorkLeftMenuGroup>
           </div>
           <div class="personal-infos">
-            <div @click="logout" class="login-user-name">退出</div>
+            <!--<icon name="home"></icon>-->
+            <div @click="logout" class="icon-mount">
+              <el-tooltip class="item" effect="dark" content="退出系统" placement="bottom-end">
+                <icon  name="logoutallfill"></icon>
+              </el-tooltip>
+            </div>
+            <div @click="gotoWelcome" class="icon-mount">
+              <el-tooltip class="item" effect="dark" content="主页" placement="bottom-end">
+                <icon name="homeallfill"></icon>
+              </el-tooltip>
+            </div>
+            <div v-if="!fullScreen" @click="changeScreen" class="icon-mount">
+              <el-tooltip class="item" effect="dark" content="全屏" placement="bottom-end">
+                <icon name="fullscreen" class="fa-icon-changescreen"></icon>
+              </el-tooltip>
+            </div>
+            <div v-if="fullScreen" @click="changeScreen" class="icon-mount">
+              <el-tooltip class="item" effect="dark" content="退出全屏" placement="bottom-end">
+                <icon name="outfullscreen" class="fa-icon-changescreen"></icon>
+              </el-tooltip>
+            </div>
+
           </div>
         </el-header>
       </div>
@@ -56,7 +77,8 @@
     },
     data() {
       return {
-        isCollapse:true
+        isCollapse:true,
+        fullScreen:false
       }
     },
     components: {
@@ -97,6 +119,43 @@
 
 
       },
+      gotoWelcome(){
+        this.$router.push({'path':'/'})
+      },
+      changeScreen(){
+        let isFullScreen = document.fullscreenElement || document.mozFullScreenElement||document.webkitFullscreenElement
+
+        this.fullScreen = !isFullScreen
+        const element = document.documentElement
+        if(this.fullScreen){//全屏
+          if (element.requestFullscreen) {
+            element.requestFullscreen();
+          } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+          } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+          } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+          }
+        }else{
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      },
+      exitHandler(){
+        console.log("ehere")
+        if (!document.webkitIsFullScreen &&!document.mozFullScreen &&!document.msFullscreenElement) {
+          this.fullScreen = false
+          console.log("mmmmmmm")
+        }else{
+          console.log("yyyyy")
+        }
+      },
       collapseMenu(){
         console.log("collapseMenu is running.....")
         this.isCollapse = !this.isCollapse
@@ -105,6 +164,21 @@
     mounted:function(){
       if(this.$route.fullPath=='/home'){
         this.$router.push({"path":"welcome"})
+      }
+      const $this = this
+      document.onkeydown = function(e) {
+        let key = window.event.keyCode;
+        console.log(key)
+        console.log($this.fullScreen)
+        if (key== 122 ) {//屏蔽F11快捷键
+          return false
+        }
+      }
+      if (document.addEventListener) {
+        document.addEventListener('webkitfullscreenchange', this.exitHandler, false);
+        document.addEventListener('mozfullscreenchange', this.exitHandler, false);
+        document.addEventListener('fullscreenchange', this.exitHandler, false);
+        document.addEventListener('MSFullscreenChange', this.exitHandler, false);
       }
     }
   };
@@ -155,11 +229,6 @@
     color:#ffffff;
   }
 
-  .fa-icon {
-    width: 18px;
-    height: 18px;
-  }
-
   .home{
     width:calc(100% - 40px);
     height:calc(100% - 40px);
@@ -168,15 +237,15 @@
   }
 
   .work-menu-group{
-    width:calc(100% - 300px);
+    width:50%;
     height:100%;
     float: left;
   }
 
   .personal-infos{
-    width:280px;
+    width:50%;
     height:100%;
-    float:left;
+    float:right;
     color:black;
     text-align: right;
   }
@@ -239,10 +308,21 @@
     background-color: #ffffff;
   }
 
+  .icon-mount{
+    float: right;
+  }
+
   .fa-icon {
-    width:30px;
-    height:20px;
-    padding:18px 0 0 0;
+    width:40px;
+    height:40px;
+    margin:10px 10px 0 10px;
+    cursor: pointer;
+  }
+
+  .fa-icon-changescreen{
+    width:42px;
+    height:42px;
+    margin:8px 10px 0 10px;
   }
 
   .login-user-name{
