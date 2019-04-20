@@ -1,6 +1,6 @@
 package com.seaboxdata.cqny.record.service;
 
-import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
+import com.seaboxdata.cqny.record.entity.CopyReportDefinedTmp;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.webapp.support.page.PageResult;
@@ -33,4 +33,8 @@ public interface ReportDefinedUnitOneDimService {
     void deleteOneDimDynamic(Integer unitId, String group_id);
 
     PageResult pagerMultdimListStatic(Integer currPage, Integer pageSize, Integer unitId, Map<String,Object> map);
+
+    List<CopyReportDefinedTmp> copyOneDims(Map<Integer, UnitDefined> fromAndToUnits);
+
+    List<CopyReportDefinedTmp> copyDymDims(Map<Integer, UnitDefined> fromAndToUnits);
 }

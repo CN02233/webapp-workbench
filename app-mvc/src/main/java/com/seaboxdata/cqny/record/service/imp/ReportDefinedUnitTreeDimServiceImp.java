@@ -1,8 +1,9 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
-import com.seaboxdata.cqny.record.dao.IReportDefinedUnitTreeDimDao;
+import com.seaboxdata.cqny.record.entity.CopyReportDefinedTmp;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitTreeDimService;
@@ -14,13 +15,11 @@ import java.util.List;
 import java.util.Map;
 
 @Service("reportDefinedUnitTreeDimService")
-public class ReportDefinedUnitTreeDimServiceImp implements ReportDefinedUnitTreeDimService {
+public class ReportDefinedUnitTreeDimServiceImp extends AbstractDimService implements ReportDefinedUnitTreeDimService {
 
     @Autowired
     private IReportDefinedUnitOneDimDao reportDefinedUnitOneDimDao;
 
-    @Autowired
-    private IReportDefinedUnitTreeDimDao reportDefinedUnitTreeDimDao;
 
     @Override
     public PageResult pagerTreedimList(Integer unitId, Integer currPage, Integer pageSize) {
@@ -63,4 +62,11 @@ public class ReportDefinedUnitTreeDimServiceImp implements ReportDefinedUnitTree
     public List<SimpleColumDefined> getColumByUnit(String unitId) {
         return null;
     }
+
+    @Override
+    public List<CopyReportDefinedTmp> copyDims(Map<Integer, UnitDefined> fromAndToUnits){
+        return this.copySimpleDim(fromAndToUnits, UnitDefinedType.MANYDIMTREE.getValue());
+    }
+
+
 }

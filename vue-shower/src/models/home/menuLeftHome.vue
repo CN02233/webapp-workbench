@@ -88,7 +88,7 @@
     },
     data() {
       return {
-        isCollapse:true,
+        isCollapse:false,
         fullScreen:false
       }
     },
@@ -196,15 +196,15 @@
 
 <style lang="css">
   .menu-style:not(.el-menu--collapse){
-    background-color:#EBF2FE;
+    background-color:#3E3958;
     text-color:"#ffffff";
-    active-text-color:"#3f8aff";
+    /*active-text-color:"#3f8aff";*/
     height:95%;
     width: 200px;
   }
 
   .el-menu--collapse{
-    background-color:#EBF2FE;
+    background-color:#3E3958;
     height:95%;
   }
 </style>
@@ -229,7 +229,7 @@
   }
 
   .el-menu{
-    /*background-color: #2b5ca9 !important;*/
+    background-color: #3E3958 !important;
     text-align: left;
   }
 
@@ -243,9 +243,9 @@
   }
 
   .home{
-    width:calc(100% - 40px);
-    height:calc(100% - 40px);
-    padding:20px;
+    width:100%;
+    height:100%;
+    /*padding:20px;*/
     background-color: #3CD2E6 !important;
   }
 
@@ -271,18 +271,18 @@
     width:100%;
     color: black;
     /*background-color: #EBF2FE;*/
-    background-color: #4B83BB;
-    height:65px !important;
-    box-shadow:    0px 0px 0px 0px black,
-    0px 0px 0px 0px #3bee17,
-    0px 0px 0px 0px #2279ee,
-    0px 10px 10px 0px black;
+    background-color: #4B39E4;
+    height:40px !important;
+    /*box-shadow:    0px 0px 0px 0px black,*/
+    /*0px 0px 0px 0px #3bee17,*/
+    /*0px 0px 0px 0px #2279ee,*/
+    /*0px 10px 10px 0px black;*/
     float:left;
   }
 
   .container-root{
     width:100%;
-    height:calc(100% - 68px);
+    height:calc(100% - 43px);
     background-color: #ffffff;
     margin-top:3px;
     box-shadow:    0px 0px 0px 0px blueviolet,
@@ -295,7 +295,7 @@
   .container-root-menu{
     height:100%;
     float:left;
-    background-color: #EBF2FE;
+    background-color: #3E3958;
     box-shadow:    0px 0px 0px 0px blueviolet,
     0px 0px 0px 0px blueviolet,
     0px 0px 10px 0px blueviolet,
@@ -359,21 +359,21 @@
   }
 
   .fa-icon {
-    width:40px;
-    height:40px;
-    margin:15px 15px 0 15px;
+    width:25px;
+    height:25px;
+    margin:10px 15px 0 15px;
   }
 
   .fa-icon-changescreen{
-    width:42px;
-    height:42px;
-    margin:12px 10px 0 10px;
+    width:25px;
+    height:25px;
+    margin:10px 10px 0 10px;
   }
 
   .login-user-name{
     width:120px;
-    height:40px;
-    line-height: 40px;
+    height:25px;
+    line-height: 25px;
     border-radius: 15px;
     background-color: #00f2a4;
     margin-top:13px;

@@ -299,6 +299,85 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
+    public Map<ReportStatus, Integer> getReportInfos(Integer userOriginId) {
+        List<ReportCustomer> reportList = reportCustomerDao.getAllReportInfoByOrigin(userOriginId);
+
+        Map<ReportStatus,Integer> reportStatusCountMap = new HashMap<>();
+
+        ReportStatus[] reportStatusArray = ReportStatus.values();
+        for (ReportStatus status : reportStatusArray) {
+            reportStatusCountMap.put(status,0);
+        }
+
+        if(reportList!=null){
+            for (ReportCustomer reportCustomer : reportList) {
+                String reportStatus = reportCustomer.getReport_status();
+                ReportStatus statusEnum = ReportStatus.getReportStatus(reportStatus);
+                Integer countVal = reportStatusCountMap.get(statusEnum);
+                reportStatusCountMap.put(statusEnum,countVal+1);
+            }
+        }
+
+        return reportStatusCountMap;
+    }
+
+    @Override
+    public PageResult getChildrenReportInfos(Integer currPage, Integer pageSize, List<Integer> origins ) {
+        List<ReportCustomer> allReportsInfo = reportCustomerDao.getAllReportInfoByOrigins(origins);
+
+        Map<String,HashMap<String,Object>> reportOriginStatsCountMap = new HashMap<>();
+        Map<String,HashMap<String,Object>> responseMap = new HashMap<>();
+
+        HashMap<String,Object> reportStatusCountMap = new HashMap<>();
+
+        ReportStatus[] reportStatusArray = ReportStatus.values();
+        for (ReportStatus status : reportStatusArray) {
+            reportStatusCountMap.put(status.toString(),new Integer(0));
+        }
+
+        Integer startIndex = (currPage-1)*pageSize;
+        Integer endIndex = startIndex+(pageSize-1);
+
+        if(allReportsInfo!=null){
+            int tmpCount = 0;
+            for (ReportCustomer reportCustomer : allReportsInfo) {
+                String reportOrigin = reportCustomer.getReport_origin_name();
+                if(!reportOriginStatsCountMap.containsKey(reportOrigin)){
+                    reportOriginStatsCountMap.put(reportOrigin, (HashMap<String, Object>) reportStatusCountMap.clone());
+                    if(tmpCount>=startIndex&&tmpCount<=endIndex){
+                        responseMap.put(reportOrigin,reportOriginStatsCountMap.get(reportOrigin));
+                    }
+                    tmpCount++;
+
+                }
+
+
+                HashMap<String, Object> reportStatusCountMapClone = reportOriginStatsCountMap.get(reportOrigin);
+
+                String reportStatus = reportCustomer.getReport_status();
+                ReportStatus statusEnum = ReportStatus.getReportStatus(reportStatus);
+                Integer countVal = (Integer) reportStatusCountMapClone.get(statusEnum.toString());
+                reportStatusCountMapClone.put(statusEnum.toString(),countVal+1);
+            }
+        }
+
+        PageResult pagerResult = new PageResult();
+        pagerResult.setCurrPage(currPage);
+        pagerResult.setPageSize(pageSize);
+        float pageTotal = (float)reportOriginStatsCountMap.size()/pageSize;
+        pagerResult.setTotalPage(new Double(Math.ceil(pageTotal)).intValue());
+        pagerResult.setTotalNum(reportOriginStatsCountMap.size());
+        List<Map<String,Object>> resultList = new ArrayList<>();
+        for (String originName : responseMap.keySet()) {
+            responseMap.get(originName).put("origin_name",originName);
+            resultList.add(responseMap.get(originName));
+        }
+        pagerResult.setDataList(resultList);
+
+        return pagerResult;
+    }
+
+    @Override
     public Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
 
         Map<String,List<String>> dataTmp = new HashMap<>();

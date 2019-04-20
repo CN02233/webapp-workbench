@@ -1,15 +1,11 @@
 <template>
   <WorkMain :headerItems="['报送填报','报送填报列表']">
-    <el-row class="search-row" :gutter="20">
-      <el-col class="align-left" :span="17">
-        &nbsp;
-      </el-col>
-    </el-row>
     <el-row class="table-row">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
-          style="width: 100%">
+          row-style="height:20px"
+          style="width: 100%;">
           <el-table-column
             prop="report_name"
             align="left"
@@ -141,6 +137,35 @@
   }
 </script>
 
-<style scoped>
+<style rel="stylesheet/scss" lang="scss" scoped>
+  @import "@/styles/table-page.scss";
 
+  /*.el-row{*/
+    /*margin-top:20px;*/
+  /*}*/
+
+  $seachRowHeight : 50px;
+  $pagerRowHeight : 50px;
+  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
+  .search-row{
+    height:$seachRowHeight;
+  }
+
+  .table-row{
+    width:99%;
+    height:$tableRowHeight;
+    overflow: auto;
+  }
+
+  .pager-row{
+    height:$pagerRowHeight;
+  }
+
+  .role-transfer{
+    text-align: left;
+  }
+
+  .table-row table tbody tr{
+    height:10px;
+  }
 </style>

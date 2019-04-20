@@ -29,7 +29,7 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   .el-breadcrumb{
-    padding:25px 0 25px 10px;
+    padding:15px 0 15px 10px;
     background-color: #F5F5F5;
     margin:0 0 0 10px;
 

@@ -13,9 +13,11 @@ import com.workbench.auth.user.entity.User;
 import com.workbench.exception.runtime.NotLoginException;
 import com.workbench.spring.aop.params.LoginFilterLevel;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,8 @@ public class SystemLogAspect {
             return joinPoint.proceed();
         }catch(Exception e){
             e.printStackTrace();
+            Signature signature =  joinPoint.getSignature();
+            Class returnType = ((MethodSignature) signature).getReturnType();
 
             if(e instanceof NotLoginException){
                 if(jsonpConfig.isUseJsonp()){
@@ -68,6 +72,9 @@ public class SystemLogAspect {
                             JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD, "用户未登录", "USER_NOT_LOGIN", null));
                     return jsonpCallBackStr;
                 }else{
+                    if(returnType==JsonResult.class){
+                        return JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "用户未登录", "USER_NOT_LOGIN", null);
+                    }
                     return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD, "用户未登录", "USER_NOT_LOGIN", null);
                 }
 
@@ -78,6 +85,9 @@ public class SystemLogAspect {
 
                 return jsonpCallBackStr;
             }else{
+                if(returnType==JsonResult.class){
+                    return JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "系统异常", "异常原因:" + e.toString(), null);
+                }
                 return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD, "系统异常", "异常原因:" + e.toString(), null);
             }
 

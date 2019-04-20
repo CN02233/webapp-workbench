@@ -26,6 +26,7 @@ public interface IReportStatementsDao {
             "\t(\n" +
             "\t#{ defined_id },#{ defined_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
             "\t)")
+    @Options(useGeneratedKeys = true, keyProperty = "defined_id", keyColumn = "defined_id")
     void addReportStatements(ReportDefinedEntity reportDefined);
 
     @Delete("delete from report_defined where defined_id = #{definedId}")

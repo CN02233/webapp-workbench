@@ -38,9 +38,9 @@
   }
 
   .fa-icon {
-    width:40px;
-    height:40px;
-    margin:15px 10px 0 10px;
+    width:25px;
+    height:25px;
+    margin:10px 15px 0 15px;
   }
 
   .logo{
@@ -50,9 +50,10 @@
   .logo-content{
     float: left;
     /*width:calc(100% - 42px);*/
-    height: 65px;
-    line-height:70px;
+    height: 45px;
+    line-height:45px;
     margin-left:20px;
+    text-shadow: 2px 3px 7px black;
   }
 
 </style>

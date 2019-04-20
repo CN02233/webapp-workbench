@@ -126,4 +126,14 @@ public interface IReportCustomerDao {
             "s unit_id=#{unitId} and colum_id = #{dimVal}")
     Object sumColumForColums(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("dimVal") String dimVal);
 
+    @Select("select rc.* from report_customer rc where rc.report_origin = #{userOriginId} ")
+    List<ReportCustomer> getAllReportInfoByOrigin(int userOriginId);
+
+    @Select("<script>" +
+            "select rc.*,so.origin_name as report_origin_name from report_customer rc inner join sys_origin so on rc.report_origin in " +
+            "<foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> " +
+            "#{item}" +
+            "</foreach> and rc.report_origin=so.origin_id" +
+            "</script>")
+    List<ReportCustomer> getAllReportInfoByOrigins(@Param("originParams") List<Integer> originParams);
 }

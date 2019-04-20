@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.record.service;
 
+import com.seaboxdata.cqny.record.entity.CopyReportDefinedTmp;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.webapp.support.page.PageResult;
@@ -23,4 +24,6 @@ public interface ReportDefinedUnitTreeDimService {
     List<Map> getGroupByUnit(String unitId);
 
     List<SimpleColumDefined> getColumByUnit(String unitId);
+
+    List<CopyReportDefinedTmp> copyDims(Map<Integer, UnitDefined> fromAndToUnits);
 }

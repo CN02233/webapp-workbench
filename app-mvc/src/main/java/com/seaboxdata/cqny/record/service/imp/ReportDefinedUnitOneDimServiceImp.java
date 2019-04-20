@@ -5,7 +5,7 @@ import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitMultDimDao;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
 import com.seaboxdata.cqny.record.dao.IReportUnitDao;
-import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
+import com.seaboxdata.cqny.record.entity.CopyReportDefinedTmp;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
@@ -13,13 +13,10 @@ import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service("reportDefinedUnitOneDimService")
-public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDimService {
+public class ReportDefinedUnitOneDimServiceImp extends AbstractDimService implements ReportDefinedUnitOneDimService {
 
     @Autowired
     private IReportDefinedUnitOneDimDao reportDefinedUnitOneDimDao;
@@ -169,5 +166,15 @@ public class ReportDefinedUnitOneDimServiceImp implements ReportDefinedUnitOneDi
         Page<Map<String, Object>> pageData = reportDefinedUnitOneDimDao.pagerMultdimListStatic(currPage, pageSize, unitId, map);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pageData);
         return pageResult;
+    }
+
+    @Override
+    public List<CopyReportDefinedTmp> copyOneDims(Map<Integer, UnitDefined> fromAndToUnits){
+        return this.copySimpleDim(fromAndToUnits,UnitDefinedType.ONEDIMSTATIC.getValue());
+    }
+
+    @Override
+    public List<CopyReportDefinedTmp> copyDymDims(Map<Integer, UnitDefined> fromAndToUnits){
+        return this.copySimpleDim(fromAndToUnits,UnitDefinedType.ONEDIMDYNAMIC.getValue());
     }
 }

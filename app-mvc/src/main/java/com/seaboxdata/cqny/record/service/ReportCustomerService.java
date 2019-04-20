@@ -33,4 +33,8 @@ public interface ReportCustomerService {
     Object getSimpleFomularData(FomularTmpEntity fomularTmpEntity);
 
     void updateReportCustomerStatus(String reportId, ReportStatus reportStatus);
+
+    Map<ReportStatus, Integer> getReportInfos(Integer userOriginId);
+
+    PageResult getChildrenReportInfos(Integer currPage, Integer pageSize, List<Integer> origins );
 }

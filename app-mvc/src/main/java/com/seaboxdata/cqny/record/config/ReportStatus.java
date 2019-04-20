@@ -34,13 +34,43 @@ public enum ReportStatus {
     private ReportStatus(int value){
         this.value = value;
     }
-    public String toString(){
-        return this.value.toString();
 
+    public String getValue(){
+        return this.value.toString();
+    }
+
+    public boolean compareTo(String status){
+        if(status.equals(this.value)){
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean compareTo(int status){
+        if(status == this.value){
+            return true;
+        }
+
+        return false;
     }
 
 
     private String getComment() {
         return this.comment;
+    }
+
+    public static synchronized ReportStatus getReportStatus(String statusStr){
+        return getReportStatus(new Integer(statusStr));
+    }
+
+    public static synchronized ReportStatus getReportStatus(Integer statusInt){
+        ReportStatus[] allValues = ReportStatus.values();
+        for (ReportStatus status : allValues) {
+            if(status.value.equals(statusInt)){
+                return status;
+            }
+        }
+        return null;
     }
 }

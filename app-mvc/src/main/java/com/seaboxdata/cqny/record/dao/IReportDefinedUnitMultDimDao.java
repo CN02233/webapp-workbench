@@ -93,4 +93,11 @@ public interface IReportDefinedUnitMultDimDao {
             ") x group by colum_id order by colum_id</script>")
     Page<Map<String, Object>> pagerMultdimListStatic(@Param("currPage") Integer currPage, @Param("pageSize") Integer pageSize, @Param("unitId") Integer unitId, @Param("map") Map<String, Object> map);
 
+
+    @Select("select " +
+            "rdum.*,rdumc.colum_name,rdumc.colum_name_cn," +
+            "rdumd.dim_name,rdumd.dim_name_cn "+
+            " from report_defined_unit_multdim rdum ,report_defined_unit_multdim_col rdumc ,report_defined_unit_multdim_dim rdumd" +
+            " where rdum.unit_id = #{unit_id} and rdum.colum_id=rdumc.colum_id and rdum.dim_id = rdumd.dim_id ")
+    List<GridColumDefined> getMultDefindByUnit(String unitId);
 }

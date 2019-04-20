@@ -1,7 +1,9 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitMultDimDao;
+import com.seaboxdata.cqny.record.entity.CopyReportDefinedTmp;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.ReportDefinedUnitMultDimService;
@@ -10,11 +12,12 @@ import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @Service("reportDefinedUnitMultDimService")
-public class ReportDefinedUnitMultDimServiceImp implements ReportDefinedUnitMultDimService {
+public class ReportDefinedUnitMultDimServiceImp extends AbstractDimService implements ReportDefinedUnitMultDimService {
 
     @Autowired
     private IReportDefinedUnitMultDimDao reportDefinedUnitMultDimDao;
@@ -46,6 +49,12 @@ public class ReportDefinedUnitMultDimServiceImp implements ReportDefinedUnitMult
             columList = reportDefinedUnitMultDimDao.getColumByUnit(unitId);
         else
             columList = reportDefinedUnitMultDimDao.getOneColumByUnit(unitId);
+        return columList;
+    }
+
+    @Override
+    public List<GridColumDefined> getMultDefindByUnit(String unitId){
+        List<GridColumDefined> columList = reportDefinedUnitMultDimDao.getMultDefindByUnit(unitId);
         return columList;
     }
 
@@ -224,5 +233,41 @@ public class ReportDefinedUnitMultDimServiceImp implements ReportDefinedUnitMult
         Page<Map<String, Object>> pageData = reportDefinedUnitMultDimDao.pagerMultdimListStatic(currPage, pageSize, unitId, map);
         PageResult pageResult = PageResult.pageHelperList2PageResult(pageData);
         return pageResult;
+    }
+
+    @Override
+    public List<CopyReportDefinedTmp> copyDims(Map<Integer, UnitDefined> fromAndToUnits) {
+        List<CopyReportDefinedTmp> copyReportDefinedTmps = new ArrayList<>();
+
+        if(fromAndToUnits!=null) {
+            for (Integer fromUnitId : fromAndToUnits.keySet()) {
+                UnitDefined toUnit = fromAndToUnits.get(fromUnitId);
+                if(UnitDefinedType.MANYDIMSTATIC.compareWith(toUnit.getUnit_type())){
+                    List<GridColumDefined> gridColumDefineds = reportDefinedUnitMultDimDao.getMultDefindByUnit(fromUnitId.toString());
+                    if(gridColumDefineds!=null){
+                        CopyReportDefinedTmp copyReportDefinedTmp = new CopyReportDefinedTmp();
+                        copyReportDefinedTmp.setFromUnit(fromUnitId);
+                        copyReportDefinedTmp.setToUnit(toUnit.getUnit_id());
+
+                        for (GridColumDefined gridColumDefined : gridColumDefineds) {
+                            Integer fromColumId = gridColumDefined.getColum_id().intValue();
+                            Integer fromDimId = gridColumDefined.getDim_id().intValue();
+                            gridColumDefined.setColum_id(null);
+                            gridColumDefined.setDim_id(null);
+                            gridColumDefined.setUnit_id(toUnit.getUnit_id());
+                            this.saveMultdim_col(gridColumDefined);
+                            this.addSaveMultdim_dim(gridColumDefined);
+                            reportDefinedUnitMultDimDao.addSaveMultdim(gridColumDefined);
+
+                            copyReportDefinedTmp.getFromAndToColumId().put(fromColumId,gridColumDefined.getColum_id());
+                            copyReportDefinedTmp.getFromAndToDimId().put(fromDimId,gridColumDefined.getDim_id());
+                            copyReportDefinedTmps.add(copyReportDefinedTmp);
+                        }
+                    }
+                }
+            }
+        }
+
+        return copyReportDefinedTmps;
     }
 }

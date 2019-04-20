@@ -31,4 +31,6 @@ public interface ReportStatementsService {
     List<Origin> getDefinedOriginsById(String definedId);
 
     List<HashMap<String,String>> getOriginsByUserId(int user_id);
+
+    void copyReportDefined(String definedId);
 }

@@ -11,7 +11,9 @@ import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service("reportUnit")
 public class ReportUnitServiceImp implements ReportUnitService {
@@ -76,5 +78,23 @@ public class ReportUnitServiceImp implements ReportUnitService {
     public List<UnitDefined> getUnitDefinedByReportDefindId(String reportDefinedId) {
         List<UnitDefined> unitEntities = reportUnitDao.getUnitDefinedByReportDefindId(reportDefinedId);
         return unitEntities;
+    }
+
+
+    public Map<Integer, UnitDefined> copyReportUnit(Integer fromDefindId, Integer toDefindId){
+        List<UnitDefined> unitList = reportUnitDao.getUnitDefinedByReportDefindId(fromDefindId.toString());
+        Map<Integer, UnitDefined> toUnitIds = new HashMap<>();
+        if(unitList!=null){
+            for (UnitDefined unitDefined : unitList) {
+                Integer fromUnitId = unitDefined.getUnit_id().intValue();
+
+                unitDefined.setReport_defined_id(toDefindId);
+                unitDefined.setUnit_id(null);
+
+                reportUnitDao.addReportUnit(unitDefined);
+                toUnitIds.put(fromUnitId,unitDefined);
+            }
+        }
+        return toUnitIds;
     }
 }

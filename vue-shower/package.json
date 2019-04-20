@@ -16,11 +16,13 @@
     "@handsontable/vue": "^3.1.0",
     "@riophae/vue-treeselect": "0.0.38",
     "axios": "^0.18.0",
+    "echarts": "^4.2.1",
     "element-ui": "^2.7.2",
     "handsontable": "^6.2.2",
     "js-cookie": "^2.2.0",
     "vue": "^2.5.16",
     "vue-awesome": "^3.1.0",
+    "vue-echarts": "^4.0.1",
     "vue-router": "^3.0.1",
     "vuelidate": "^0.7.4"
   },

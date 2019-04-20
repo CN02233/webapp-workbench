@@ -10,7 +10,11 @@ import Vuelidate from 'vuelidate'
 import App from './App.vue'
 import '@/icons'
 import Icon from 'vue-awesome/components/Icon'
+import ECharts from 'vue-echarts'
+import 'echarts/lib/chart/pie'
+
 Vue.component('icon', Icon)
+Vue.component('echart', ECharts)
 
 
 import "@/styles/index.scss"

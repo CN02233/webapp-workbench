@@ -76,6 +76,41 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("getReportInfos")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getReportInfos(){
+        User currUser = SessionSupport.checkoutUserFromSession();
+        int currUserId = currUser.getUser_id();
+        Origin userOrigin = originService.getOriginByUser(currUserId);
+        Integer userOriginId = userOrigin.getOrigin_id();
+        Map<ReportStatus, Integer> reportInfos = reportCustomerService.getReportInfos(userOriginId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,reportInfos);
+        return jsonResult;
+    }
+
+    @RequestMapping("getChildrenReportInfos")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getChildrenReportInfos(Integer currPage, Integer pageSize){
+        User currUser = SessionSupport.checkoutUserFromSession();
+        int currUserId = currUser.getUser_id();
+
+        Origin userOrigin = originService.getOriginByUser(currUserId);
+        Integer userOriginId = userOrigin.getOrigin_id();
+        List<Origin> childrenOrigin = originService.checkAllChildren(userOriginId);
+        List<Integer> originParams = new ArrayList<>();
+        if(childrenOrigin!=null){
+            for (Origin origin : childrenOrigin) {
+                originParams.add(origin.getOrigin_id());
+            }
+        }
+
+        PageResult reportInfos = reportCustomerService.getChildrenReportInfos(currPage, pageSize,originParams);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,reportInfos);
+        return jsonResult;
+    }
+
     /**
      * 获取当前报表填报的所在步骤
      * @param reportId

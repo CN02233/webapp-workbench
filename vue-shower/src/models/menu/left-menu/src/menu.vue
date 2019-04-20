@@ -1,12 +1,12 @@
 <template>
-    <el-submenu ref="subMenu"
+    <el-submenu  ref="subMenu"
                 v-if="menuData.children!=null&&menuData.children.length>0"
                 :key="menuData.id"
                 :index="'M'+menuData.id">
       <template slot="title">
         <i :class="menuIcon[menuData.name]"></i>
         <!--<icon name="record-checked"></icon>-->
-        <span slot="title">{{menuData.name}}</span>
+        <span class="title-style" slot="title">{{menuData.name}}</span>
       </template>
       <WorkTopMenu class="sub-menu" v-for="menuObj in menuData.children" :key="'C-'+menuObj.id" :menuData="menuObj"></WorkTopMenu>
     </el-submenu >
@@ -14,7 +14,7 @@
                   v-else
                   @click="menuClick(menuData.url)"
                   :index="'M'+menuData.id">
-      <i :class="menuIcon[menuData.name]"></i>{{menuData.name}}
+      <i :class="menuIcon[menuData.name]"></i><span class="title-style">{{menuData.name}}</span>
     </el-menu-item>
 
   <!--</el-menu>-->
@@ -70,6 +70,14 @@
   }
 </script>
 
-<style type="text/css">
+<style rel="stylesheet/scss" lang="scss" scoped>
+  .el-menu-item ,.title-style{
+    color: #b1b4c3;
+  }
+  .sub-menu{
+    background-color: #3E3958 !important;
+  }
+
+
 
 </style>

@@ -199,4 +199,11 @@ public class ReportStatementsController {
         return jsonpResponse;
     }
 
+    public JsonResult copyReportDefind(String reportDefinedId){
+
+        JsonResult responseJsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
+
+        return responseJsonResult;
+    }
+
 }
