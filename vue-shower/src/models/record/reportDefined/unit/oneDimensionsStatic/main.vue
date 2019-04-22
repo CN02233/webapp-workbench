@@ -227,19 +227,6 @@
         formularOprationColums:{}
       }
     },
-    validations:{
-      formData:{
-        colum_name:{
-          required
-        },
-        colum_name_cn:{
-          required
-        },
-        colum_type:{
-          required
-        }
-      }
-    },
     methods: {
       getTableData:function(pageNum){
         if(pageNum&&pageNum!=''){

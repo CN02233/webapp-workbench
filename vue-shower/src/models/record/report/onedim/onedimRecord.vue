@@ -1,19 +1,15 @@
 <template>
   <div>
     <el-form ref="form"  label-width="40%">
-      <el-form-item  v-for="definedColum in definedColums" :label="definedColum.colum_name_cn">
-
+      <el-form-item  v-for="dataColum in dataObject" :label="dataColum.colum_name_cn">
         <el-col :span="23">
-          <el-tooltip class="item" effect="dark" :content="definedColum.colum_desc" placement="top">
-            <el-input v-model="columDatas[definedColum.unit_id+'_'+definedColum.colum_id].report_data"
-                      :disabled="definedColum.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
-              <template v-if="definedColum.colum_point!=null&&definedColum.colum_point!=''" slot="append">{{definedColum.colum_point}}</template>
+          <el-tooltip class="item" effect="dark" :content="dataColum.colum_desc" placement="top">
+            <el-input v-model="dataColum.report_data"
+                      :disabled="dataColum.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
+              <template v-if="dataColum.colum_point!=null&&dataColum.colum_point!=''" slot="append">{{dataColum.colum_point}}</template>
             </el-input>
           </el-tooltip>
-
         </el-col>
-
-
       </el-form-item>
     </el-form>
 
@@ -40,7 +36,8 @@
         lastStep:false,
         isView:'N',
         definedColums:[],
-        columDatas:{}
+        columDatas:{},
+        dataObject:[]
       }
     },
     methods:{
@@ -62,11 +59,25 @@
           loading.close();
           if(response){
             this.definedColums = response.definedColums
+            const defindObj = {}
+            this.definedColums.forEach(definedColum=>{
+              const defindColumId = definedColum.colum_id
+              defindObj['C'+defindColumId] = definedColum
+            })
+
             if(response.columDatas){
               response.columDatas.forEach(columData=>{
                 const columKey = columData.unit_id + "_"+columData.colum_id
                 this.columDatas[columKey] = columData
+                // if(!this.dataObject[columData.unit_id]){
+                //   this.dataObject[columData.unit_id] = {}
+                // }
+                columData.colum_name_cn = defindObj['C'+columData.colum_id].colum_name_cn
+                columData.colum_desc = defindObj['C'+columData.colum_id].colum_desc
+                columData.colum_point = defindObj['C'+columData.colum_id].colum_point
+                columData.colum_type = defindObj['C'+columData.colum_id].colum_type
               })
+              this.dataObject = response.columDatas
             }
           }
         }).catch(error=>{
@@ -90,7 +101,7 @@
           method:'post',
           data:{
             definedColums:this.definedColums,
-            columDatas:Object.values(this.columDatas)
+            columDatas:this.dataObject
           }
         }).then(response=>{
           valloading.close();
@@ -124,7 +135,7 @@
               method:'post',
               data:{
                 definedColums:this.definedColums,
-                columDatas:Object.values(this.columDatas)
+                columDatas:this.dataObject
               }
             }).then(response=>{
               loading.close();

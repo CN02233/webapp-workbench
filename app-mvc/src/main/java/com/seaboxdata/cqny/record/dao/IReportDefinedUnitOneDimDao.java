@@ -68,4 +68,7 @@ public interface IReportDefinedUnitOneDimDao {
 
     @Select("select * from report_defined_unit_onedim where colum_formula like CONCAT('%','${fomularParamName}','%' )")
     List<SimpleColumDefined> checkSimpleDefinedFomulars(@Param("fomularParamName") String fomularParamName);
+
+    @Update("update report_defined_unit_onedim set group_id = #{rootGroupId} where unit_id=#{toUnitId} and group_id is not null")
+    void updateDymGroupId(@Param("toUnitId") Integer toUnitId,@Param("rootGroupId") Integer rootGroupId);
 }

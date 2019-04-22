@@ -44,7 +44,7 @@
     </WorkTablePager>
 
   </WorkMain>
-</template>
+</template>1
 
 <script>
   import WorkTablePager from "@/models/public/WorkTablePager"

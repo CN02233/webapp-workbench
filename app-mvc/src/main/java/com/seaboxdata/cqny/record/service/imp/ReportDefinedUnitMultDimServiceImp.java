@@ -255,14 +255,21 @@ public class ReportDefinedUnitMultDimServiceImp extends AbstractDimService imple
                             gridColumDefined.setColum_id(null);
                             gridColumDefined.setDim_id(null);
                             gridColumDefined.setUnit_id(toUnit.getUnit_id());
-                            this.saveMultdim_col(gridColumDefined);
-                            this.addSaveMultdim_dim(gridColumDefined);
+                            if(!copyReportDefinedTmp.getFromAndToColumId().containsKey(fromColumId)){
+                                this.saveMultdim_col(gridColumDefined);
+                                copyReportDefinedTmp.getFromAndToColumId().put(fromColumId,gridColumDefined.getColum_id());
+                            }else{
+                                gridColumDefined.setColum_id(copyReportDefinedTmp.getFromAndToColumId().get(fromColumId));
+                            }
+                            if(!copyReportDefinedTmp.getFromAndToDimId().containsKey(fromDimId)){
+                                this.addSaveMultdim_dim(gridColumDefined);
+                                copyReportDefinedTmp.getFromAndToDimId().put(fromDimId,gridColumDefined.getDim_id());
+                            }else{
+                                gridColumDefined.setDim_id(copyReportDefinedTmp.getFromAndToDimId().get(fromDimId));
+                            }
                             reportDefinedUnitMultDimDao.addSaveMultdim(gridColumDefined);
-
-                            copyReportDefinedTmp.getFromAndToColumId().put(fromColumId,gridColumDefined.getColum_id());
-                            copyReportDefinedTmp.getFromAndToDimId().put(fromDimId,gridColumDefined.getDim_id());
-                            copyReportDefinedTmps.add(copyReportDefinedTmp);
                         }
+                        copyReportDefinedTmps.add(copyReportDefinedTmp);
                     }
                 }
             }

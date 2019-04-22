@@ -1,6 +1,8 @@
 package com.seaboxdata.cqny.record.service.imp;
 
+import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.ColumType;
+import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;
 import com.seaboxdata.cqny.record.entity.CopyReportDefinedTmp;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
@@ -8,6 +10,7 @@ import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -32,12 +35,27 @@ public class AbstractDimService {
                 copyReportDefinedTmp.setToUnit(toUnitId);
 
                 List<SimpleColumDefined> colums = reportDefinedUnitOneDimDao.getColumByUnit(fromUnitId.toString());
+
+                Map<SimpleColumDefined,Integer> parentIdTmp = new HashMap<>();
                 if(colums!=null){
+                    Integer rootGroupId = null;
+
                     for (SimpleColumDefined colum : colums) {
                         Integer fromColumId = colum.getColum_id().intValue();
                         colum.setColum_id(null);
                         colum.setUnit_id(toUnitId);
+
                         reportDefinedUnitOneDimDao.addSaveOnedim(colum);
+
+                        if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(targetUnitType)){
+                            if(colum.getGroup_id()==null){
+                                rootGroupId = colum.getColum_id();
+                            }
+                        }
+
+                        if(colum.getParent_id()!=null){
+                            parentIdTmp.put(colum,colum.getParent_id());
+                        }
 
                         copyReportDefinedTmp.getFromAndToColumId().put(fromColumId,colum.getColum_id());
 
@@ -48,6 +66,24 @@ public class AbstractDimService {
                         else{
                             copyReportDefinedTmp.getIsFomular().add(Boolean.FALSE);
                         }
+                    }
+
+                    //更新上级columid
+                    if(parentIdTmp!=null&&parentIdTmp.size()>0){
+                        for (SimpleColumDefined toColum : parentIdTmp.keySet()) {
+                            Integer parentColumId = parentIdTmp.get(toColum);
+                            if(parentColumId.intValue()>0){
+                                Integer newParentId = copyReportDefinedTmp.getFromAndToColumId().get(parentColumId);
+                                toColum.setParent_id(newParentId);
+                                reportDefinedUnitOneDimDao.editSaveOnedim(toColum);
+                            }
+
+                        }
+                    }
+
+                    //更新动态一维groupid
+                    if(rootGroupId!=null){
+                        reportDefinedUnitOneDimDao.updateDymGroupId(toUnitId,rootGroupId);
                     }
                 }
 
