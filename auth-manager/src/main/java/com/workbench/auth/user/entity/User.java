@@ -16,6 +16,7 @@ public class User {
     private int user_id;
     private String user_pwd;
     private String user_name;
+    private String user_name_cn;
     private int user_type;
     private Date reg_date;
     private String user_status;
@@ -99,5 +100,13 @@ public class User {
 
     public void setUser_pwd(String user_pwd) {
         this.user_pwd = user_pwd;
+    }
+
+    public String getUser_name_cn() {
+        return user_name_cn;
+    }
+
+    public void setUser_name_cn(String user_name_cn) {
+        this.user_name_cn = user_name_cn;
     }
 }

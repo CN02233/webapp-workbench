@@ -1,5 +1,7 @@
 <template>
-    <div class="login-container" >
+
+  <div class="login-container" >
+    <vue-particle-line>
       <div v-bind:class="loadingLogin" >
         <el-form class="login-form" autoComplete="on" ref="loginForm" label-position="left">
           <h3 class="title">重庆天然气交易中心报送系统</h3>
@@ -21,8 +23,10 @@
           </el-form-item>
         </el-form>
       </div>
+    </vue-particle-line>
 
-    </div>
+
+  </div>
 </template>
 
 <script>
@@ -170,12 +174,13 @@
         width: 100%;
         background-color: $bg;
         .login-form {
-            position: absolute;
-            left: 0;
-            right: 0;
-            width: 520px;
-            padding: 35px 35px 15px 35px;
-            margin: 120px auto;
+          position: absolute;
+          z-index: 10086;
+          left: 0;
+          right: 0;
+          width: 520px;
+          padding: 35px 35px 15px 35px;
+          margin: 120px auto;
         }
         .tips {
             font-size: 14px;
@@ -215,7 +220,6 @@
             user-select: none;
         }
     }
-
   .loading-login{
     visibility:hidden;
   }

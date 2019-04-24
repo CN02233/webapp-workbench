@@ -23,6 +23,7 @@
     "vue": "^2.5.16",
     "vue-awesome": "^3.1.0",
     "vue-echarts": "^4.0.1",
+    "vue-particle-line": "^0.1.4",
     "vue-router": "^3.0.1",
     "vuelidate": "^0.7.4"
   },

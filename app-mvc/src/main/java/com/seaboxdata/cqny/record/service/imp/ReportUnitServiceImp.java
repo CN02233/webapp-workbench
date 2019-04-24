@@ -10,6 +10,7 @@ import com.seaboxdata.cqny.record.service.ReportUnitService;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,12 +61,19 @@ public class ReportUnitServiceImp implements ReportUnitService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(String unitId ,String unitType) {
+        UnitDefined reportDefindUnit = reportUnitDao.getReportUnit(unitId);
+
         if("1".equals(unitType)||"2".equals(unitType)||"4".equals(unitType)){
             reportUnitDao.deleteUnionsOneDimById(unitId);
         }else{
             reportUnitDao.deleteUnionsMultDimById(unitId);
         }
+
+        List<UnitDefined> allUnitDefinds = reportUnitDao.getUnitDefinedByReportDefindId(String.valueOf(reportDefindUnit.getReport_defined_id()));
+
+        this.refresUnitOrder(allUnitDefinds);
     }
 
     @Override

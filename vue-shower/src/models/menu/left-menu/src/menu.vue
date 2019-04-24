@@ -4,17 +4,22 @@
                 :key="menuData.id"
                 :index="'M'+menuData.id">
       <template slot="title">
-        <i :class="menuIcon[menuData.name]"></i>
+        <div class="sprit-menu" v-bind:class="[spritBaseClass,spritBaseClass+'_'+menuIndex]"></div>
+        <!--<i :class="menuIcon[menuData.name]"></i>-->
         <!--<icon name="record-checked"></icon>-->
         <span class="title-style" slot="title">{{menuData.name}}</span>
       </template>
-      <WorkTopMenu class="sub-menu" v-for="menuObj in menuData.children" :key="'C-'+menuObj.id" :menuData="menuObj"></WorkTopMenu>
+      <WorkTopMenu class="sub-menu" v-for="(menuObj,childIndex) in menuData.children"
+                   :key="'C-'+menuObj.id" :menuData="menuObj"
+                   :menuIndex="menuIndex+'_'+(childIndex+1)" :spritBaseClass="spritBaseClass"></WorkTopMenu>
     </el-submenu >
     <el-menu-item class="what-heppend"
                   v-else
                   @click="menuClick(menuData.url)"
                   :index="'M'+menuData.id">
-      <i :class="menuIcon[menuData.name]"></i><span class="title-style">{{menuData.name}}</span>
+      <div class="sprit-menu" v-bind:class="[spritBaseClass,spritBaseClass+'_'+menuIndex]"></div>
+      <!--<i :class="menuIcon[menuData.name]"></i>-->
+      <span class="title-style">{{menuData.name}}</span>
     </el-menu-item>
 
   <!--</el-menu>-->
@@ -46,6 +51,12 @@
     props:{
       menuData:{
         type: Object
+      },
+      menuIndex:{
+        type:Number
+      },
+      spritBaseClass:{
+        type:String
       }
     },
     methods: {
@@ -76,6 +87,10 @@
   }
   .sub-menu{
     background-color: #3E3958 !important;
+  }
+
+  .what-heppend{
+    float: left;
   }
 
 

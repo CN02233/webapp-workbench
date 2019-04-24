@@ -31,8 +31,13 @@
             </div>
             <div v-if="fullScreen" @click="changeScreen" class="icon-mount">
               <el-tooltip class="item" effect="dark" content="退出全屏" placement="bottom-end">
-                <icon name="outfullscreen" class="fa-icon-changescreen"></icon>
+                <div class="fullscreen-icon-quit"></div>
               </el-tooltip>
+            </div>
+
+            <div class="icon-mount">
+              <div class="login-user">当前登陆用户:{{loginUserInfo.user_name_cn}}</div>
+              <div class="login-user-img"></div>
             </div>
 
           </div>
@@ -44,11 +49,12 @@
         <div class="container-root-menu">
           <el-menu :collapse="isCollapse" class="menu-style">
             <el-menu-item v-on:click.native="collapseMenu">
-              <i :class="isCollapse?'el-icon-d-arrow-right':'el-icon-d-arrow-left'"></i><span v-if="!isCollapse">&nbsp;收起菜单</span>
+              <div class="sprit-menu" v-bind:class="{'coll-menu':!isCollapse,'open-menu':isCollapse}"></div><span class="title-style">收起菜单</span>
             </el-menu-item>
-
-
-            <WorkLeftMenu v-for="menuObj in menuList" :key="menuObj.id" :menuData="menuObj"></WorkLeftMenu>
+            <WorkLeftMenu v-for="(menuObj,menuIndex) in menuList"
+                          :key="menuObj.id"
+                          :menuData="menuObj"
+                          :menuIndex="menuIndex+1" :spritBaseClass="'sprit-menu'+(menuIndex+1)"></WorkLeftMenu>
           </el-menu>
         </div>
 
@@ -198,9 +204,16 @@
     width: 200px;
   }
 
-  .el-menu--collapse{
+  .el-menu--collapse:not(.el-menu--collapse){
     background-color:#3E3958;
     height:95%;
+  }
+
+  .menu-title-cust{
+    float: left;
+    height:28px;
+    color:#b1b4c3;
+    margin:0 0 0 10px;
   }
 </style>
 
@@ -226,6 +239,7 @@
   .el-menu{
     background-color: #3E3958 !important;
     text-align: left;
+    border:0px solid black !important;
   }
 
   .el-aside {
@@ -269,19 +283,14 @@
     background: -o-linear-gradient(right, #1a78f3, #4892f3); /* Opera 11.1 - 12.0 */
     background: -moz-linear-gradient(right, #1a78f3, #4892f3); /* Firefox 3.6 - 15 */
     background: linear-gradient(to right, #1a78f3, #4892f3); /* 标准的语法 */
-    height:40px !important;
+    height:45px !important;
     float:left;
   }
 
   .container-root{
     width:100%;
-    height:calc(100% - 43px);
+    height:calc(100% - 48px);
     background-color: #ffffff;
-    margin-top:3px;
-    box-shadow:    0px 0px 0px 0px blueviolet,
-    0px 3px 10px 0px blueviolet,
-    0px 3px 10px 0px blueviolet,
-    0px 3px 10px 0px blueviolet;
     float:left;
   }
 
@@ -289,10 +298,6 @@
     height:100%;
     float:left;
     background-color: #3E3958;
-    box-shadow:    0px 0px 0px 0px blueviolet,
-    0px 0px 0px 0px blueviolet,
-    0px 0px 10px 0px blueviolet,
-    0px 0px 0px 0px blueviolet;
   }
 
   .container-root-context-collapse{
@@ -328,22 +333,36 @@
 
   .icon-mount{
     float: right;
-    height:calc(100% - 20px);
-    margin:10px 0 10px 0;
+    height:calc(100% - 16px);
+    margin:8px 0 8px 0;
+    padding:2px 15px 0 15px;
     border-left: 1px dashed #1f69c8;
     text-align: center;
   }
 
-  .icon-mount:hover{
+  .icon-mount:last-child{
+    border: 0 solid black;
+  }
+
+  .icon-mount:not(:last-child):hover{
     /*background-color: #8D0063;*/
     /*box-shadow: 0px 5px 20px black;*/
     cursor: pointer;
   }
 
+  .login-user{
+    font-size: 13px;
+    /*font-weight: bold;*/
+    color:white;
+    float: right;
+    line-height: 25px;
+    margin:0 0 0 10px;
+  }
+
   .fa-icon {
     width:25px;
     height:25px;
-    margin:0px 15px 0 15px;
+    margin:0px 40px 0 15px;
   }
 
   .fa-icon-changescreen{

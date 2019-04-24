@@ -16,7 +16,7 @@ import java.util.Map;
 @Repository
 public interface IUserServiceDao {
 
-    String query_user_columns = "SELECT user_id,user_name,user_type,reg_date,user_status,last_login_time";
+    String query_user_columns = "SELECT user_id,user_name,user_name_cn,user_type,reg_date,user_status,last_login_time";
 
     String TABLE_NAME= "user";
 

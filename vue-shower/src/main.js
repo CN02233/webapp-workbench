@@ -12,9 +12,13 @@ import '@/icons'
 import Icon from 'vue-awesome/components/Icon'
 import ECharts from 'vue-echarts'
 import 'echarts/lib/chart/pie'
+import vueParticleLine from 'vue-particle-line'
+import 'vue-particle-line/dist/vue-particle-line.css'
 
 Vue.component('icon', Icon)
 Vue.component('echart', ECharts)
+Vue.use(vueParticleLine)
+
 
 
 import "@/styles/index.scss"
