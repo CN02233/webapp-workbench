@@ -29,9 +29,9 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   .el-breadcrumb{
-    padding:15px 0 15px 10px;
+    padding:15px 0 15px 20px;
     background-color: #F5F5F5;
-    margin:0 0 0 10px;
+    margin:0 0 0 5px;
 
   }
   .el-breadcrumb-item{

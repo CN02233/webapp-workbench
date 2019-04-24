@@ -4,15 +4,17 @@
     <div v-for="(groupDatas,groupKey) in definedColumsGroup">
       <el-row v-if="Object.keys(groupDatas.elColumDefineds).length>1">
         <el-col align="left" :span="24">
-          <el-button v-if="isView!='Y'" @click="addRootNode(groupKey)">添加{{groupDatas.rootTreeNodeName}}</el-button>
+          <el-button type="success" size="small" v-if="isView!='Y'" @click="addRootNode(groupKey)">添加{{groupDatas.rootTreeNodeName}}</el-button>
         </el-col>
       </el-row>
 
       <el-row >
         <el-col class="tree_title" v-for="(elColumDefined,key) in groupDatas.elColumDefineds"
                 :span="Object.keys(groupDatas.elColumDefineds).length>1?groupDatas.colSpan:4">
-          {{elColumDefined.colum_name_cn}}
-          {{elColumDefined.colum_point!=null&&elColumDefined.colum_point!=''?'('+elColumDefined.colum_point+')':''}}
+          <el-tooltip class="item" effect="dark" :content="elColumDefined.colum_point!=null?'单位:'+elColumDefined.colum_point:''" placement="top-start">
+            <span>{{elColumDefined.colum_name_cn}}</span>
+          </el-tooltip>
+
         </el-col>
         <el-col align="center" class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1&&isView!='Y'" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
           操作
@@ -23,14 +25,14 @@
         <el-col  align="left" class="tree_colum"
                  :span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"
                  v-for="elColData in elColDatas">
-          <el-input v-if="elColData!=null" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>
+          <el-input size="mini" v-if="elColData!=null" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>
           <span v-else> -- </span>
         </el-col>
         <!--{{groupDatas.columNameLink[]}}-->
         <el-col align="center" v-if="groupDatas.elRowDatas.length>1&&isView!='Y'" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
-          <el-button @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
+          <el-button size="mini" @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
           <!--<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>-->
-          <el-button @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
+          <el-button size="mini" @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
         </el-col>
       </el-row>
     </div>
@@ -695,13 +697,15 @@
 
 <style scoped>
   .tree_title{
-    padding:10px 5px 10px 5px;
+    padding:5px 5px 5px 5px;
     background: #8cc5ff;
     border:1px solid white;
+    font-size: 12px;
   }
 
   .tree_colum{
     padding:5px 2px 5px 2px;
+    font-size: 12px;
     /*text-align: left;*/
   }
 

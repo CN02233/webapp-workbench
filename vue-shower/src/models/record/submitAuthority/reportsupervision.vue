@@ -1,7 +1,7 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送监管']">
     <el-row class="search-row" :gutter="20">
-      <el-col class="align-left" :span="17">
+      <el-col class="align-left table-button-group" :span="17">
         <el-select v-model="originId" placeholder="请选择报送机构">
           <el-option
             v-for="item in originOptions"
@@ -13,10 +13,12 @@
         <el-button @click="queryByOriginId" type="primary">查询</el-button>
       </el-col>
     </el-row>
-    <el-row class="table-row">
+    <el-row class="table-page-root">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
+          header-row-class-name="table-header-style"
+          row-class-name="mini-font-size" stripe
           style="width: 100%">
           <el-table-column
             prop="report_id"
@@ -219,26 +221,12 @@
   }
 </script>
 
+<style lang="css">
+  .mini-font-size{
+    font-size: 12px !important;
+  }
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
-
-  .el-row{
-    margin-top:20px;
-  }
-
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
-  .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    height:$tableRowHeight;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
-  }
 </style>

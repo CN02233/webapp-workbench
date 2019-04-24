@@ -52,10 +52,10 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
             Date startDate = reportCustomer.getReport_start_date();
             Date endDate = reportCustomer.getReport_end_date();
             if(currDate.compareTo(startDate)<0){//未到填报日期
-                reportCustomer.setReport_status(ReportStatus.TOO_EARLY.toString());
+                reportCustomer.setReport_status(ReportStatus.TOO_EARLY.getValue());
             }
             if(currDate.compareTo(endDate)>0){//已过期
-                reportCustomer.setReport_status(ReportStatus.OVER_TIME.toString());
+                reportCustomer.setReport_status(ReportStatus.OVER_TIME.getValue());
                 reportCustomerDao.updateReportCustomer(reportCustomer);
             }
         }
@@ -275,8 +275,10 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
             }
         }
 
-        if(!nextCheckOut&&nexyCurrUnitId==null&&currUnitOrder==allUnit.size()){
-            return Integer.MAX_VALUE;
+        if(nexyCurrUnitId==null){
+            if(currUnitOrder.equals(allUnit.size())){
+                return Integer.MAX_VALUE;
+            }
         }
 
         return nexyCurrUnitId;
@@ -295,7 +297,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Override
     public void updateReportCustomerStatus(String reportId, ReportStatus reportStatus){
-        reportCustomerDao.updateReportCustomerStatus(reportId,reportStatus.toString());
+        reportCustomerDao.updateReportCustomerStatus(reportId,reportStatus.getValue());
     }
 
     @Override
@@ -323,6 +325,17 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Override
     public PageResult getChildrenReportInfos(Integer currPage, Integer pageSize, List<Integer> origins ) {
+        if(origins!=null&&origins.size()>0){
+
+        }else {
+            PageResult pagerResult = new PageResult();
+            pagerResult.setCurrPage(currPage);
+            pagerResult.setPageSize(pageSize);
+            List<Map<String,Object>> resultList = new ArrayList<>();
+            pagerResult.setDataList(resultList);
+            return pagerResult;
+        }
+
         List<ReportCustomer> allReportsInfo = reportCustomerDao.getAllReportInfoByOrigins(origins);
 
         Map<String,HashMap<String,Object>> reportOriginStatsCountMap = new HashMap<>();

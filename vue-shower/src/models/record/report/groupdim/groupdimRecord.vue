@@ -1,15 +1,13 @@
 <template>
   <div>
-    <el-row>
-      <el-col align="left" :span="24">
-        <el-button @click="addGroup">复制组</el-button>
-      </el-col>
-    </el-row>
     <el-form ref="form" label-width="40%">
       <div v-for="(group,ig) in definedGroup">
-        <div style="text-align:left;margin-bottom: 22px;margin-left:20%;">
-          <el-input :disabled="isView=='Y'" v-model="group.report_data" class="group" style="width:150px;"></el-input>
-        </div>
+        <div v-if="ig>0" style="border-top:1px dashed #d0d0d0;margin:0 60px 10px 60px;"></div>
+
+        <el-form-item label="管道负荷率名称">
+          <el-input style="width:50%;float: left;" :disabled="isView=='Y'" v-model="group.report_data" class="group" ></el-input>
+
+        </el-form-item>
         <el-form-item v-for="col in group.children" :label="col.colum_name_cn">
           <el-tooltip class="item" effect="dark" :content="col.colum_desc" placement="top">
           <el-input v-model="col.report_data" :disabled="col.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
@@ -19,9 +17,7 @@
         </el-form-item>
       </div>
     </el-form>
-    <el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>
-    <!--<el-button type="primary">上一步</el-button>-->
-    <el-button v-if="lastStep=='true'&&isView!='Y'" @click="nextStep" type="success">下一步</el-button>
+    <el-button type="warning" @click="addGroup">新增管道</el-button>
   </div>
 
 </template>
@@ -255,7 +251,15 @@
   }
 </script>
 
+<style lang="css">
+  .el-form-item__label{
+    font-size:12px !important;
+  }
+</style>
+
 <style scoped>
-.group{}
+  .el-form-item{
+    margin:0 0 10px 0;
+  }
 </style>
 

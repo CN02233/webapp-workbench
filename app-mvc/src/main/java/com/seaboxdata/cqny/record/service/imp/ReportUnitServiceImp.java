@@ -35,10 +35,27 @@ public class ReportUnitServiceImp implements ReportUnitService {
 
     @Override
     public void addReportUnit(UnitDefined reportUnit) {
+        List<UnitDefined> allUnitDefinds = reportUnitDao.getUnitDefinedByReportDefindId(String.valueOf(reportUnit.getReport_defined_id()));
+        int unitDefindSize = 0;
+        if(allUnitDefinds!=null){
+            unitDefindSize = allUnitDefinds.size();
+        }
         if(reportUnit.getUnit_id()!=null){
             reportUnitDao.updateReportUnit(reportUnit);
         }else{
+            reportUnit.setUnit_order(unitDefindSize+1);
             reportUnitDao.addReportUnit(reportUnit);
+        }
+    }
+
+    private void refresUnitOrder(List<UnitDefined> allUnitDefinds){
+        if(allUnitDefinds!=null){
+            int orderNumber = 1;
+            for (UnitDefined allUnitDefind : allUnitDefinds) {
+                allUnitDefind.setUnit_order(orderNumber);
+                reportUnitDao.updateReportUnit(allUnitDefind);
+                orderNumber++;
+            }
         }
     }
 

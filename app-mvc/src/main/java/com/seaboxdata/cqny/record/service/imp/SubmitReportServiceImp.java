@@ -122,7 +122,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
         reportCustomer.setReport_name(reportDefined.getDefined_name());
         reportCustomer.setReport_origin(0);
         reportCustomer.setCreate_date(new Date());
-        reportCustomer.setReport_status(ReportStatus.NORMAL.toString());
+        reportCustomer.setReport_status(ReportStatus.NORMAL.getValue());
         for (String origin : allOrigin) {
             reportCustomer.setReport_origin(new Integer(origin));
             reportCustomer.setActive_unit(reportDefined.getUnits().get(0).getUnit_id());

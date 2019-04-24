@@ -117,6 +117,6 @@ public interface IReportUnitDao {
             "FROM " +
             "report_unit_info a " +
             "WHERE " +
-            "1 = 1 and a.report_defined_id = #{reportDefinedId} ")
+            "1 = 1 and a.report_defined_id = #{reportDefinedId} order by a.unit_order")
     List<UnitDefined> getUnitDefinedByReportDefindId(String reportDefinedId);
 }

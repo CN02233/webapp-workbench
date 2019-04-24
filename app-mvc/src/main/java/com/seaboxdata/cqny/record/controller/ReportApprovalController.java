@@ -36,7 +36,7 @@ public class ReportApprovalController {
     @CrossOrigin(allowCredentials="true")
     public String listReportApproval(int currPage, int pageSize){
         User user = SessionSupport.checkoutUserFromSession();
-        PageResult originList = reportApprovalService.listReportApproval(ReportStatus.SUBMIT.toString(),user.getUser_id(),currPage, pageSize);
+        PageResult originList = reportApprovalService.listReportApproval(ReportStatus.SUBMIT.getValue(),user.getUser_id(),currPage, pageSize);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }
@@ -52,7 +52,7 @@ public class ReportApprovalController {
     @CrossOrigin(allowCredentials="true")
     public String listReportReview(int currPage, int pageSize){
         User user = SessionSupport.checkoutUserFromSession();
-        PageResult originList = reportApprovalService.listReportApproval(ReportStatus.REVIEW.toString(),user.getUser_id(),currPage, pageSize);
+        PageResult originList = reportApprovalService.listReportApproval(ReportStatus.REVIEW.getValue(),user.getUser_id(),currPage, pageSize);
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }

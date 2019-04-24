@@ -8,30 +8,25 @@
           </div>
           <div class="header-options">
             <!--<icon name="home"></icon>-->
-            <div class="personal-infos">
-              <div class="personal-pic">
-                <icon  name="humenpic"></icon>
-              </div>
-              <div class="personal-name">
-                欢迎<br/>
-                {{loginUserInfo.user_name}}
-              </div>
-
-            </div>
 
             <div @click="logout" class="icon-mount">
               <el-tooltip class="item" effect="dark" content="退出系统" placement="bottom-end">
-                <icon  name="logoutallfill"></icon>
+                <div class="logout-icon"></div>
               </el-tooltip>
             </div>
             <div @click="gotoWelcome" class="icon-mount">
               <el-tooltip class="item" effect="dark" content="主页" placement="bottom-end">
-                <icon name="homeallfill"></icon>
+                <div class="home-icon"></div>
               </el-tooltip>
             </div>
+            <!--<div @click="gotoWelcome" class="icon-mount">-->
+              <!--<el-tooltip class="item" effect="dark" content="主页" placement="bottom-end">-->
+                <!--<icon name="homeallfill"></icon>-->
+              <!--</el-tooltip>-->
+            <!--</div>-->
             <div v-if="!fullScreen" @click="changeScreen" class="icon-mount">
               <el-tooltip class="item" effect="dark" content="全屏" placement="bottom-end">
-                <icon name="fullscreen" class="fa-icon-changescreen"></icon>
+                <div class="fullscreen-icon"></div>
               </el-tooltip>
             </div>
             <div v-if="fullScreen" @click="changeScreen" class="icon-mount">
@@ -270,13 +265,11 @@
   .container-header {
     width:100%;
     color: black;
-    /*background-color: #EBF2FE;*/
-    background-color: #4B39E4;
+    background: -webkit-linear-gradient(left, #1a78f3, #4892f3); /* Safari 5.1 - 6.0 */
+    background: -o-linear-gradient(right, #1a78f3, #4892f3); /* Opera 11.1 - 12.0 */
+    background: -moz-linear-gradient(right, #1a78f3, #4892f3); /* Firefox 3.6 - 15 */
+    background: linear-gradient(to right, #1a78f3, #4892f3); /* 标准的语法 */
     height:40px !important;
-    /*box-shadow:    0px 0px 0px 0px black,*/
-    /*0px 0px 0px 0px #3bee17,*/
-    /*0px 0px 0px 0px #2279ee,*/
-    /*0px 10px 10px 0px black;*/
     float:left;
   }
 
@@ -306,12 +299,14 @@
     width:calc(100% - 65px);
     height:100%;
     float:left;
+    background-color: #F6F6F6;
   }
 
   .container-root-context{
     width:calc(100% - 201px);
     height:100%;
     float:left;
+    /*background-color: #F6F6F6;*/
   }
 
   .el-aside {
@@ -320,20 +315,6 @@
 
   .el-container{
     background-color: #ffffff;
-  }
-
-  .personal-infos{
-    width:200px;
-    height:100%;
-    background-color: #4B83BB;
-    float: right;
-  }
-
-  .personal-pic{
-    width:80px;
-    height:100%;
-    float: left;
-    text-align: left;
   }
 
   .personal-name{
@@ -347,27 +328,28 @@
 
   .icon-mount{
     float: right;
-    height:100%;
-    border-right: 1px solid white;
-
+    height:calc(100% - 20px);
+    margin:10px 0 10px 0;
+    border-left: 1px dashed #1f69c8;
+    text-align: center;
   }
 
   .icon-mount:hover{
-    background-color: #8D0063;
-    box-shadow: 0px 5px 20px black;
+    /*background-color: #8D0063;*/
+    /*box-shadow: 0px 5px 20px black;*/
     cursor: pointer;
   }
 
   .fa-icon {
     width:25px;
     height:25px;
-    margin:10px 15px 0 15px;
+    margin:0px 15px 0 15px;
   }
 
   .fa-icon-changescreen{
     width:25px;
     height:25px;
-    margin:10px 10px 0 10px;
+    margin:0px 15px 0 15px;
   }
 
   .login-user-name{

@@ -32,6 +32,7 @@ public class LoginResult {
         VALIDATE_FAIL,
         USERNM_NOT_NULL,
         LOCK,
+        STATUS_FAIL,
         PWD_EXPIRED;
     }
 }

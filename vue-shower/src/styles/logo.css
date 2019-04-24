@@ -6,3 +6,33 @@
   height:60px;
   float: left;
 }
+
+
+.home-icon{
+  background: url("home.png") no-repeat 0px 0px;
+  background-size: 25px 25px;
+  width:25px;
+  height:25px;
+  float: right;
+  margin:0 10px 0 10px;
+}
+
+
+.logout-icon{
+  background: url("logout.png") no-repeat 0px 0px;
+  background-size: 25px 25px;
+  width:25px;
+  height:25px;
+  float: right;
+  margin:0 10px 0 10px;
+}
+
+.fullscreen-icon{
+  background: url("fullscreen.png") no-repeat 0px 0px;
+  background-size: 25px 25px;
+  width:25px;
+  height:25px;
+  float: right;
+  margin:0 10px 0 10px;
+}
+

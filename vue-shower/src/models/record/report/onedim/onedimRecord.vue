@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-form ref="form"  label-width="40%">
-      <el-form-item  v-for="dataColum in dataObject" :label="dataColum.colum_name_cn">
+      <el-form-item size="mini" v-for="dataColum in dataObject" :label="dataColum.colum_name_cn">
         <el-col :span="23">
           <el-tooltip class="item" effect="dark" :content="dataColum.colum_desc" placement="top">
             <el-input v-model="dataColum.report_data"
@@ -13,9 +13,9 @@
       </el-form-item>
     </el-form>
 
-    <el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>
-    <!--<el-button type="primary">上一步</el-button>-->
-    <el-button v-if="isView!='Y'" @click="nextStep" type="success">下一步</el-button>
+    <!--<el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>-->
+    <!--&lt;!&ndash;<el-button type="primary">上一步</el-button>&ndash;&gt;-->
+    <!--<el-button v-if="isView!='Y'" @click="nextStep" type="success">下一步</el-button>-->
   </div>
 </template>
 
@@ -194,6 +194,18 @@
   }
 </script>
 
-<style scoped>
+<style lang="css">
+  .el-form-item__label{
+    font-size:12px !important;
+  }
+</style>
 
+<style scoped>
+  .el-form{
+    margin:0 0 30px 0;
+  }
+
+  .el-form-item{
+    margin:0 0 10px 0;
+  }
 </style>

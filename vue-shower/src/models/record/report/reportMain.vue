@@ -1,9 +1,11 @@
 <template>
   <WorkMain :headerItems="['报送填报','报送填报列表']">
-    <el-row class="table-row">
+    <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
+          header-row-class-name="table-header-style"
+          row-class-name="mini-font-size" stripe
           row-style="height:20px"
           style="width: 100%;">
           <el-table-column
@@ -35,7 +37,7 @@
             <template slot-scope="scope">
               <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
               <!--<el-button size="mini" v-if="scope.row.report_status == 9" type="danger" @click="reportCommitAuth(scope.row.report_id)">提交</el-button>-->
-              <el-button size="mini" type="danger" @click="reportCommitAuth( scope.row.report_id)">提交</el-button>
+              <!--<el-button size="mini" v-if="scope.row.report_status == 0" type="danger"  @click="reportCommitAuth( scope.row.report_id)">提交</el-button>-->
             </template>
           </el-table-column>
         </el-table>
@@ -137,35 +139,12 @@
   }
 </script>
 
+<style lang="css">
+  .mini-font-size{
+    font-size: 12px !important;
+  }
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
-
-  /*.el-row{*/
-    /*margin-top:20px;*/
-  /*}*/
-
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
-  .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    width:99%;
-    height:$tableRowHeight;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
-  }
-
-  .role-transfer{
-    text-align: left;
-  }
-
-  .table-row table tbody tr{
-    height:10px;
-  }
 </style>

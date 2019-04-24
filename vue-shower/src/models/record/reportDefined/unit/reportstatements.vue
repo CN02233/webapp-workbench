@@ -1,14 +1,16 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送报表']">
     <el-row class="search-row" :gutter="20">
-      <el-col class="align-left" :span="17">
+      <el-col class="align-left table-button-group" :span="17">
         <el-button @click="openAddModal" type="primary">新增</el-button>
       </el-col>
     </el-row>
-    <el-row class="table-row">
+    <el-row class="table-page-root">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
+          header-row-class-name="table-header-style"
+          row-class-name="mini-font-size" stripe
           style="width: 100%">
           <el-table-column
             prop="defined_name"
@@ -19,6 +21,7 @@
             prop="status"
             align="left"
             label="状态"
+            width="100"
             :formatter="formatStatus"
           >
           </el-table-column>
@@ -73,16 +76,16 @@
                     :pageCount="totalPage">
     </WorkTablePager>
     <!-- 新增、编辑 弹窗-->
-    <el-dialog :title="dialogTitle" :visible.sync="showModalPage" >
+    <el-dialog class="table-options-modal" :title="dialogTitle" :visible.sync="showModalPage" >
       <el-row :gutter="16">
         <el-col :sm="20">
-          <el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">报表名称</el-col>
             <el-col :span="15">
-              <el-input placeholder="报送单元名称" v-model="formSubmitData.defined_name" class="input-with-select" ></el-input>
+              <el-input size="small" placeholder="报送单元名称" v-model="formSubmitData.defined_name" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">所属报送机构</el-col>
             <el-col :span="15">
                <!-- <treeselect   multiple v-model="formSubmitData.origin_id"  :options="options" />-->
@@ -121,22 +124,22 @@
     </el-dialog>
 
     <!--发布设置弹窗-->
-    <el-dialog title="发布报表设置" :visible.sync="submitModel" >
+    <el-dialog class="table-options-modal" title="发布报表设置" :visible.sync="submitModel" >
       <el-row :gutter="16">
         <el-col :sm="20">
-          <el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">报表定义编号</el-col>
             <el-col :span="15">
               <el-input placeholder="报表定义编号" :disabled="true" v-model="submitParams.defined_id" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row class="table-options-modal-item">
           <el-col :span="8" :offset="1">报表定义名称</el-col>
             <el-col :span="15">
               <el-input placeholder="报表定义名称" :disabled="true" v-model="submitParams.defined_name" class="input-with-select" ></el-input>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">报送起始日期</el-col>
             <el-col :span="15">
               <el-date-picker style="width: 100%;"
@@ -146,7 +149,7 @@
               </el-date-picker>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">报送截止日期</el-col>
             <el-col :span="15">
               <el-date-picker style="width: 100%;"
@@ -156,7 +159,7 @@
               </el-date-picker>
             </el-col>
           </el-row>
-          <el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需审批机构</el-col>
             <el-col align="left" :span="15">
               <el-checkbox-group v-model="submitParams.check_origins">
@@ -515,26 +518,12 @@ export default {
 }
 </script>
 
+<style lang="css">
+  .mini-font-size{
+    font-size: 12px !important;
+  }
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
-
-  .el-row{
-    margin-top:20px;
-  }
-
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
-  .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    height:$tableRowHeight;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
-  }
 </style>

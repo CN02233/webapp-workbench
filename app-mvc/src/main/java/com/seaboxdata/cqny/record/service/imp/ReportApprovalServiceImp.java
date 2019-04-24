@@ -56,6 +56,7 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
         }else{
             Map<String, Object> originTree = submitauthorityDao.getOriginById(origin.getOrigin_id().toString());
             Set finalOriginSet = new HashSet();
+            finalOriginSet.add(origin.getOrigin_id());
             checkOrigins(originTree,finalOriginSet);
             return finalOriginSet;
         }
@@ -64,23 +65,23 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
     @Override
     public void reportReviewOperator(String reportId, String reportStatus) {
         if(reportStatus.equals("pass")){
-            reportApprovalDao.reportUpdateStatus(reportId, ReportStatus.APPROVE.toString());
+            reportApprovalDao.reportUpdateStatus(reportId, ReportStatus.APPROVE.getValue());
         }
         if(reportStatus.equals("reject")){
-            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.SUBMIT.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.SUBMIT.getValue());
         }
         if(reportStatus.equals("refill")){
-            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.NORMAL.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.NORMAL.getValue());
         }
     }
 
     @Override
     public void reportApprovalOperator(String reportId, String reportStatus) {
         if(reportStatus.equals("pass")){
-            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.REVIEW.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.REVIEW.getValue());
         }
         if(reportStatus.equals("reject")){
-            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.NORMAL.toString());
+            reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.NORMAL.getValue());
         }
     }
 

@@ -29,7 +29,7 @@ public interface IReportApprovalDao {
             "where \n" +
             " rc.report_status = #{status}\n" +
             "\tand\n" +
-            " rc.pass_auth = 'Y'\n" +
+            " rc.pass_auth = 'N'\n" +
             "\tand\n" +
             " rc.report_origin IN " +
             "<foreach item='item' index='index' collection='originList' open='(' separator=',' close=')'> " +

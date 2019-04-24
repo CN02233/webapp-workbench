@@ -654,6 +654,26 @@
   }
 </script>
 
-<style scoped>
+<style rel="stylesheet/scss" lang="scss" scoped>
+  @import "@/styles/table-page.scss";
 
+  .el-row{
+    margin-top:20px;
+  }
+
+  $seachRowHeight : 50px;
+  $pagerRowHeight : 50px;
+  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
+  .search-row{
+    height:$seachRowHeight;
+  }
+
+  .table-row{
+    height:$tableRowHeight;
+    overflow: auto;
+  }
+
+  .pager-row{
+    height:$pagerRowHeight;
+  }
 </style>

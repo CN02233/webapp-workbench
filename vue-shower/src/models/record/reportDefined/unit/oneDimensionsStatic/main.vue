@@ -227,6 +227,20 @@
         formularOprationColums:{}
       }
     },
+    validations:{
+      formData:{
+        colum_name:{
+          required
+        },
+        colum_name_cn:{
+          required
+        },
+        colum_point:{
+          required
+        }
+      }
+
+    },
     methods: {
       getTableData:function(pageNum){
         if(pageNum&&pageNum!=''){
@@ -675,6 +689,26 @@
   }
 </script>
 
-<style scoped>
+<style rel="stylesheet/scss" lang="scss" scoped>
+  @import "@/styles/table-page.scss";
 
+  .el-row{
+    margin-top:20px;
+  }
+
+  $seachRowHeight : 50px;
+  $pagerRowHeight : 50px;
+  $tableRowHeight : calc(100% - 110px);
+  .search-row{
+    height:$seachRowHeight;
+  }
+
+  .table-row{
+    height:calc(100% - 110px);;
+    overflow: auto;
+  }
+
+  .pager-row{
+    height:$pagerRowHeight;
+  }
 </style>

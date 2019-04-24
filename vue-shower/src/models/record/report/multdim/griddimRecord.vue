@@ -3,7 +3,8 @@
     <el-form ref="form"  label-width="40%">
       <el-table
         :data="definedCells"
-        tooltip-effect="dark"
+        tooltip-effect="dark" size="mini"
+        row-class-name="mini-font-size"
         border
         stripe
         style="width: 100%">
@@ -12,7 +13,7 @@
         <el-table-column v-for="col in definedDimensions" :label="col.colum_name_cn" width="160" >
           <template slot-scope="scope">
             <el-tooltip class="item" effect="dark" :content="scope.row.colum_desc" placement="top">
-              <el-input v-model="scope.row[col.dim_id]" :disabled="scope.row[col.dim_id+'_colum_type']==0||isView=='Y'" >
+              <el-input size="mini" v-model="scope.row[col.dim_id]" :disabled="scope.row[col.dim_id+'_colum_type']==0||isView=='Y'" >
                 <template v-if="scope.row.colum_point!=null&&scope.row.colum_point!=''" slot="append">{{scope.row.colum_point}}</template>
               </el-input>
             </el-tooltip>
@@ -21,10 +22,6 @@
         </el-table-column>
       </el-table>
     </el-form>
-    <br/>
-    <el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>
-    <!--<el-button type="primary">上一步</el-button>-->
-    <el-button v-if="lastStep=='true'&&isView!='Y'" @click="nextStep" type="success">下一步</el-button>
   </div>
 </template>
 
@@ -252,5 +249,7 @@
 </script>
 
 <style scoped>
-
+  .mini-font-size{
+    font-size:12px;
+  }
 </style>

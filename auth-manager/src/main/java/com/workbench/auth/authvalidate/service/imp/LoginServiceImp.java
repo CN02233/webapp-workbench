@@ -1,6 +1,7 @@
 package com.workbench.auth.authvalidate.service.imp;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.webapp.support.encryption.MD5;
 import com.workbench.auth.authvalidate.service.LoginService;
 import com.workbench.auth.authvalidate.bean.LoginResult;
@@ -43,6 +44,11 @@ public class LoginServiceImp implements LoginService{
         LoginResult loginResult = new LoginResult();
         if(checkResult!=null){
             String userStatus = checkResult.getUser_status();
+            if(Strings.isNullOrEmpty(userStatus)){
+                loginResult.setResult_code(LoginResult.LOGIN_RESULT.STATUS_FAIL);
+                loginResult.setValidate_result("用户状态异常");
+                return loginResult;
+            }
             Integer statusInt = new Integer(userStatus);
             if(UserStatus.LOCK.equal(statusInt)){
                 loginResult.setResult_code(LoginResult.LOGIN_RESULT.LOCK);

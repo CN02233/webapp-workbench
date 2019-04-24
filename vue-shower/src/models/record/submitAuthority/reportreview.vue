@@ -1,9 +1,11 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送复核']">
-    <el-row class="table-row">
+    <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
+          header-row-class-name="table-header-style"
+          row-class-name="mini-font-size" stripe
           style="width: 100%">
           <el-table-column
             prop="report_id"
@@ -64,8 +66,8 @@
                     :pageCount="totalPage">
     </WorkTablePager>
     <!-- 新增、编辑 弹窗-->
-    <el-dialog :title="dialogTitle" :visible.sync="showModalPage" >
-      <el-row :gutter="16">
+    <el-dialog class="table-options-modal":title="dialogTitle" :visible.sync="showModalPage" >
+      <el-row class="table-options-modal-item" :gutter="16">
         <el-col :sm="12">
         </el-col>
       </el-row>
