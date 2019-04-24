@@ -125,7 +125,7 @@ public interface IReportStatementsDao {
             "FROM\n" +
             "\treport_customer rc inner join sys_origin so on rc.report_origin=so.origin_id" +
             " LEFT JOIN report_defined rd on rc.report_defined_id=rd.defined_id \n" +
-            "and \n" +
+            "where 1=1 and \n" +
             " rc.report_origin IN " +
             "<foreach item='item' index='index' collection='originList' open='(' separator=',' close=')'> " +
             " #{item} " +
