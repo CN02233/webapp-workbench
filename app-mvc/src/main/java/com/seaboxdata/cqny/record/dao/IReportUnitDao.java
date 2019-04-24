@@ -32,7 +32,7 @@ public interface IReportUnitDao {
     @Delete("DELETE a,b " +
             "FROM " +
             " report_unit_info a  " +
-            "INNER JOIN report_defined_unit_onedim b ON a.unit_id=b.unit_id " +
+            "LEFT JOIN report_defined_unit_onedim b ON a.unit_id=b.unit_id " +
             " where  " +
             " a.unit_id=#{unitId}")
     void deleteUnionsOneDimById(@Param("unitId") String unit_id);
@@ -40,9 +40,9 @@ public interface IReportUnitDao {
     @Delete("DELETE a,b,c,d " +
             "FROM " +
             " report_unit_info a  " +
-            "INNER JOIN report_defined_unit_multdim b ON a.unit_id=b.unit_id " +
-            "INNER JOIN report_defined_unit_multdim_col c ON a.unit_id=c.unit_id " +
-            "INNER JOIN report_defined_unit_multdim_dim d ON a.unit_id=d.unit_id " +
+            "LEFT JOIN report_defined_unit_multdim b ON a.unit_id=b.unit_id " +
+            "LEFT JOIN report_defined_unit_multdim_col c ON a.unit_id=c.unit_id " +
+            "LEFT JOIN report_defined_unit_multdim_dim d ON a.unit_id=d.unit_id " +
             " where  " +
             " a.unit_id= #{unitId}")
     void deleteUnionsMultDimById(@Param("unitId") String unit_id);
