@@ -4,7 +4,7 @@
     <vue-particle-line>
       <div v-bind:class="loadingLogin" >
         <el-form class="login-form" autoComplete="on" ref="loginForm" label-position="left">
-          <h3 class="title">重庆天然气交易中心报送系统</h3>
+          <h3 class="title">天然气输配价格监管系统</h3>
           <!--<h3 class="title">欢迎！</h3>-->
           <el-form-item  prop="user_name">
             <el-input  name="user_name" type="text" v-model="loginForm.user_name" autoComplete="on"
@@ -178,7 +178,7 @@
           z-index: 10086;
           left: 0;
           right: 0;
-          width: 520px;
+          width: 300px;
           padding: 35px 35px 15px 35px;
           margin: 120px auto;
         }
@@ -203,8 +203,8 @@
             }
         }
         .title {
-            font-size: 26px;
-            font-weight: 400;
+            font-size: 20px;
+            font-weight: 100;
             color: $light_gray;
             margin: 0px auto 40px auto;
             text-align: center;

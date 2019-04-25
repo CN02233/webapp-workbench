@@ -27,6 +27,8 @@ public class ReportCustomer {
     private List<UnitDefined> unitEntities;
     private String pass_auth;
     private String report_status;
+    private Date report_data_start;
+    private Date report_data_end;
 
     //merge from record.reportunit.ReportCustomer
     private String user_name;
@@ -164,5 +166,21 @@ public class ReportCustomer {
 
     public void setReport_origin_name(String report_origin_name) {
         this.report_origin_name = report_origin_name;
+    }
+
+    public Date getReport_data_start() {
+        return report_data_start;
+    }
+
+    public void setReport_data_start(Date report_data_start) {
+        this.report_data_start = report_data_start;
+    }
+
+    public Date getReport_data_end() {
+        return report_data_end;
+    }
+
+    public void setReport_data_end(Date report_data_end) {
+        this.report_data_end = report_data_end;
     }
 }

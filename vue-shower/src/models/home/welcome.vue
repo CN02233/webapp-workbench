@@ -64,15 +64,17 @@
           selfReportInfo:{},
           childrenReportInfo:[],
           pieOptions : {
+            color:[ '#5f97ff', '#998ff3','#94cf87', '#ffe582', '#9aeedc'],
             series: [
               {
                 name:'访问来源',
                 type:'pie',
-                // radius: ['50%', '70%'],
-                // avoidLabelOverlap: false,
+                radius: ['50%', '70%'],
+                avoidLabelOverlap: false,
                 label: {
                   normal: {
-                    show: false
+                    show: false,
+                    position: 'center'
                   },
                   emphasis: {
                     show: true,

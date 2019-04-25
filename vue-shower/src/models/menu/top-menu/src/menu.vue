@@ -52,7 +52,7 @@
   }
 </script>
 
-<style type="text/css">
+<style rel="stylesheet/scss" lang="scss" scoped>
 
   .el-menu{
     padding:2px 0 2px 0;

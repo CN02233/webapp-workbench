@@ -240,6 +240,7 @@
     background-color: #3E3958 !important;
     text-align: left;
     border:0px solid black !important;
+    padding:0 !important;
   }
 
   .el-aside {

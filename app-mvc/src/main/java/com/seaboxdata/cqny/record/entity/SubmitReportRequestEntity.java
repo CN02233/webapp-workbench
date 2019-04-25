@@ -8,6 +8,9 @@ public class SubmitReportRequestEntity {
     private String report_end_date;
     private List<String> check_origins;
 
+    private String report_data_start;
+    private String report_data_end;
+
     public String getDefined_id() {
         return defined_id;
     }
@@ -38,5 +41,21 @@ public class SubmitReportRequestEntity {
 
     public void setCheck_origins(List<String> check_origins) {
         this.check_origins = check_origins;
+    }
+
+    public String getReport_data_start() {
+        return report_data_start;
+    }
+
+    public void setReport_data_start(String report_data_start) {
+        this.report_data_start = report_data_start;
+    }
+
+    public String getReport_data_end() {
+        return report_data_end;
+    }
+
+    public void setReport_data_end(String report_data_end) {
+        this.report_data_end = report_data_end;
     }
 }

@@ -4,10 +4,10 @@
 
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="7">
-        <el-button @click="addDefined()" type="primary">新增</el-button>
+        <el-button v-if="isView=='N'" @click="addDefined()" type="primary">新增</el-button>
         <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
-      <el-col class="align-right" :span="17">
+      <el-col v-if="isView=='N'" class="align-right" :span="17">
         <el-select v-model="group_id" placeholder="输入项组">
           <el-option selected label="请选择输入项组" value=""></el-option>
           <el-option v-for="x in groupnameData" :key="x.group_id" :label="x.group_name" :value="x.group_id"></el-option>
@@ -31,10 +31,13 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <!--<el-button type="text" @click="viewDefined()" size="small">查看</el-button>-->
-              <el-button type="text" @click="editDefined(scope.row.group_id,scope.row.group_name)" size="small">编辑</el-button>
-              <el-button type="text" @click="deleteDefined(scope.row.group_id)" size="small">删除</el-button>
-              <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">清空</el-button>-->
+              <div v-if="isView=='N'">
+                <el-button type="text" @click="editDefined(scope.row.group_id,scope.row.group_name)" size="small">编辑</el-button>
+                <el-button type="text" @click="deleteDefined(scope.row.group_id)" size="small">删除</el-button>
+              </div>
+              <div v-if="isView=='Y'">
+                <el-button type="text" @click="viewDefined(scope.row.group_id,scope.row.group_name)" size="small">查看</el-button>
+              </div>
             </template>
           </el-table-column>
 
@@ -50,7 +53,7 @@
     <!--新增输入项弹窗--><!--:rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}"-->
     <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" width="80%" >
       <el-form :rules="editModel.rules" :model="editModel"  ref="form">
-      <el-row style="margin:5px;">
+      <el-row v-if="isView=='N'" style="margin:5px;">
         <el-col :span="24">
           <label class="el-form-item__label" style="width:20%;">输入项组名称</label>
           <div style="margin-left:20%;"><el-input v-model="editModel.groupModel.colum_name_cn"  auto-complete="off" placeholder="输入项组" ></el-input></div>
@@ -69,21 +72,21 @@
             <el-table-column  label="输入项名称" align="center" width="150">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_name'" :rules='editModel.rules.colum_name'>
-                  <el-input v-model="scope.row.colum_name"></el-input>
+                  <el-input :disabled="isView=='Y'" v-model="scope.row.colum_name"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="输入项中文名称" width="250">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_name_cn'" :rules='editModel.rules.colum_name_cn'>
-                  <el-input v-model="scope.row.colum_name_cn"></el-input>
+                  <el-input :disabled="isView=='Y'" v-model="scope.row.colum_name_cn"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="输入项数据类型" width="120">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_type'" :rules='editModel.rules.colum_type'>
-                  <el-select v-model="scope.row.colum_type" style="width:100%;" placeholder="请选择数据类型">
+                  <el-select :disabled="isView=='Y'" v-model="scope.row.colum_type" style="width:100%;" placeholder="请选择数据类型">
                   <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
                 </el-select>
                 </el-form-item>
@@ -92,21 +95,21 @@
             <el-table-column label="最小值" width="90">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.min_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
-                  <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.min_value"></el-input>
+                  <el-input :disabled="isView=='Y'" v-if="scope.row.colum_type=='1'" v-model="scope.row.min_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="最大值" width="90">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.max_value'" :rules="scope.row.colum_type=='1'?{required:true,message:'必填字段'}:{required:false}" >
-                  <el-input v-if="scope.row.colum_type=='1'" v-model="scope.row.max_value"></el-input>
+                  <el-input :disabled="isView=='Y'" v-if="scope.row.colum_type=='1'" v-model="scope.row.max_value"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="是否记忆用户输入" width="100">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.need_remember'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段',validator: validateFormula}:{required:false}">
-                  <el-select v-model="scope.row.need_remember" style="width:100%;" placeholder="请选择">
+                  <el-select :disabled="isView=='Y'" v-model="scope.row.need_remember" style="width:100%;" placeholder="请选择">
                     <el-option  label="是" value="Y"></el-option>
                     <el-option  label="否" value="N"></el-option>
                   </el-select>
@@ -118,7 +121,7 @@
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_formula_desc'" :rules="scope.row.colum_type=='0'?{required:true,message:'必填字段',validator: validateFormula}:{required:false}">
                   <el-popover v-if="scope.row.colum_type=='0'" placement="top-start" width="200" trigger="hover" :content="scope.row.colum_formula_desc">
                   </el-popover>
-                  <el-input v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="readonly" effect="gray" auto-complete="off" >
+                  <el-input :disabled="isView=='Y'" v-if="scope.row.colum_type=='0'" v-model="scope.row.colum_formula_desc" readonly="readonly" effect="gray" auto-complete="off" >
                     <el-button slot="append" icon="el-icon-edit-outline" @click="openFormulaEditor(scope.$index,scope.row)"></el-button>
                   </el-input>
                 </el-form-item>
@@ -127,18 +130,18 @@
             <el-table-column label="输入项单位" width="100">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_point'">
-                  <el-input v-model="scope.row.colum_point"></el-input>
+                  <el-input :disabled="isView=='Y'" v-model="scope.row.colum_point"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
             <el-table-column label="输入项备注" width="150">
               <template slot-scope="scope">
                 <el-form-item :prop="'tableData.' + scope.$index + '.colum_desc'">
-                  <el-input v-model="scope.row.colum_desc"></el-input>
+                  <el-input :disabled="isView=='Y'" v-model="scope.row.colum_desc"></el-input>
                 </el-form-item>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="70" fixed="right">
+            <el-table-column v-if="isView=='N'" label="操作" width="70" fixed="right">
               <template slot-scope="scope">
                 <el-button type="danger" @click="deleteRow(scope.$index, scope.row)" size="small">删除</el-button>
               </template>
@@ -148,7 +151,7 @@
         </el-col>
       </el-row>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" v-if="isView=='N'"  class="dialog-footer">
         <div style="display: inline;width:30%;float:left;text-align:left;">
           <el-button type="primary" @click="insertRow">新增行</el-button>
         </div>
@@ -159,7 +162,7 @@
 
     <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
       <el-form class="modal-form" label-position="right" label-width="100px" >
-        <el-form-item label="选择输入项" >
+        <el-form-item v-if="isView=='N'" label="选择输入项" >
           <el-cascader
             ref="unitSelectRef"
             :options="otherUnits"
@@ -189,7 +192,7 @@
             v-model="editModel.selectRow.colum_formula_desc">
           </el-input>
         </el-form-item>
-        <el-form-item label="公式试算" >
+        <el-form-item v-if="isView=='N'" label="公式试算" >
           <el-row :key="formulaColumnDesc.context" v-for="(formulaColumnDesc,i) in formulaDescContext" v-if="!formulaColumnDesc.isSymbol">
             <el-col><el-input v-model="formularOprationColums[formulaContext[i].columKey]" :placeholder="'请输入 '+formulaColumnDesc.context"></el-input>
             </el-col>
@@ -197,11 +200,14 @@
 
         </el-form-item>
       </el-form>
-      <el-row>
+      <el-row v-if="isView=='N'">
         <el-button type="danger" @click="fomularClear">重新定义公式</el-button>
         <el-button @click="isOpenFormulaEditor = false">取消</el-button>
         <el-button @click="fomularConfirm">确定</el-button>
         <el-button @click="fomularOperation" v-if="isFormulaEmpty">试算</el-button>
+      </el-row>
+      <el-row v-if="isView=='Y'">
+        <el-button @click="isOpenFormulaEditor = false">关闭</el-button>
       </el-row>
 
     </el-dialog>
@@ -240,6 +246,7 @@
         totalPage:1,
         unitId:'',
         group_id:'',
+        isView:'N',//Y 只读模式 N 非自读模式
         columDataType:{
           '0':'公式'  ,
           '1':'数值'  ,
@@ -352,8 +359,8 @@
         this.editModel.groupModel.colum_name_cn = ''
         this.clearEditModel()
       },
-      viewDefined(){
-
+      viewDefined(group_id, group_name){
+        this.editDefined(group_id, group_name)
       },
       editDefined(group_id, group_name){
         const loading = this.$loading({
@@ -753,6 +760,7 @@
     mounted:function(){
       this.unitId = this.$route.query.unitId
       this.addFormData.unit_id = this.$route.query.unitId
+      this.isView = this.$route.query.isView
       this.getTableData(1)
       this.getUnits()
       this.getGroupname()

@@ -46,17 +46,25 @@
             width="230"
             >
             <template slot-scope="scope">
-              <el-button
-                size="mini"
-                @click="definedUnit(scope.row.unit_id,scope.row.unit_type)"
+              <div v-if="isView=='N'">
+                <el-button
+                  size="mini"
+                  @click="definedUnit(scope.row.unit_id,scope.row.unit_type)"
                 >录入项</el-button>
-              <el-button
-                size="mini"
-                @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-              <el-button
-                size="mini"
-                type="danger"
-                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                <el-button
+                  size="mini"
+                  @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+                <el-button
+                  size="mini"
+                  type="danger"
+                  @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              </div>
+              <div v-if="isView=='Y'">
+                <el-button
+                  size="mini"
+                  @click="definedUnit(scope.row.unit_id,scope.row.unit_type)"
+                >查看录入项</el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -129,10 +137,11 @@ import { required } from 'vuelidate/lib/validators'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 export default {
-  name: 'OriginMain',
+  name: 'ReportUnit',
   data () {
     return {
       definedId: '',
+      isView:'N',//Y:只读 N:非自读 可编辑
       unitDataList: [],
       unitDataObjs: {},
       tableDataUrl: 'reportUnit/listReportUnit',
@@ -352,13 +361,17 @@ export default {
       this.$router.push({
         path: editUrl,
         query: {
-          'unitId': unitId
+          'unitId': unitId,
+          'isView':this.isView
         }
       })
     }
   },
   mounted: function () { // 初始化
     this.definedId = this.$route.query.definedId
+    if(this.$route.query.isView){
+      this.isView = this.$route.query.isView
+    }
     this.unitDataList = []
     this.getTableData(1)
     // this.getOriginList()

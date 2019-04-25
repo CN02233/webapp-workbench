@@ -2,7 +2,7 @@
   <div>
 
     <div v-for="(groupDatas,groupKey) in definedColumsGroup">
-      <el-row v-if="Object.keys(groupDatas.elColumDefineds).length>1">
+      <el-row v-if="(Object.keys(groupDatas.elColumDefineds).length>1)&&isView!='Y'">
         <el-col align="left" :span="24">
           <el-button type="success" size="small" v-if="isView!='Y'" @click="addRootNode(groupKey)">添加{{groupDatas.rootTreeNodeName}}</el-button>
         </el-col>
@@ -16,7 +16,7 @@
           </el-tooltip>
 
         </el-col>
-        <el-col align="center" class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1&&isView!='Y'" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
+        <el-col align="center" class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
           操作
         </el-col>
       </el-row>
@@ -36,10 +36,7 @@
         </el-col>
       </el-row>
     </div>
-    
-    <el-button v-if="isView!='Y'" @click="saveUnitContext(false)" type="info">保存</el-button>
-    <!--<el-button type="primary">上一步</el-button>-->
-    <el-button v-if="lastStep=='true'&&isView!='Y'" @click="nextStep" type="success">下一步</el-button>
+
   </div>
 
 </template>
@@ -64,6 +61,7 @@
       return {
         reportId:"",
         unitId:"",
+        isView:'N',
         unitType:"",
         lastStep:false,
         colSpan:0,
@@ -688,6 +686,7 @@
     mounted:function(){
       this.reportId = this.$route.query.reportId
       this.unitId = this.$route.query.unitId
+      this.isView = this.$route.query.isView
       this.unitType = this.$route.query.unitType
       this.lastStep = this.$route.query.lastStep
       this.getUnitContext()

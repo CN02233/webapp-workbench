@@ -3,16 +3,17 @@
   <WorkMain :headerItems="['报送管理','报送设置','报送定义列表','一维静态报送单元']">
 
     <el-row class="search-row" :gutter="20">
-      <el-col class="align-left" :span="17">
-        <el-button @click="addColum()" type="primary">新增</el-button>
+      <el-col class="align-left table-button-group" :span="17">
+        <el-button v-if="isView=='N'" @click="addColum()" type="primary">新增</el-button>
         <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
     </el-row>
 
-    <el-row class="table-row">
+    <el-row class="table-page-root">
       <el-col :span="24">
         <el-table
           :data="unitColums"
+          row-class-name="mini-font-size" stripe
           style="width: 100%">
           <el-table-column
             prop="colum_id"
@@ -35,9 +36,14 @@
             align="center"
             label="操作">
             <template slot-scope="scope">
-              <!--<el-button type="text" @click="viewDefined()" size="small">查看</el-button>-->
-              <el-button type="text" @click="editDefined(scope.row.colum_id)" size="small">编辑</el-button>
-              <el-button type="text" @click="deleteDefined(scope.row.colum_id)" size="small">删除</el-button>
+              <div v-if="isView=='N'">
+                <el-button type="text" @click="editDefined(scope.row.colum_id)" size="small">编辑</el-button>
+                <el-button type="text" @click="deleteDefined(scope.row.colum_id)" size="small">删除</el-button>
+              </div>
+              <div v-if="isView=='Y'">
+                <el-button type="text" @click="viewDefined(scope.row.colum_id)" size="small">查看</el-button>
+              </div>
+
               <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">查看</el-button>-->
             </template>
           </el-table-column>
@@ -52,39 +58,39 @@
     </WorkTablePager>
 
     <!--新增输入项弹窗-->
-    <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" >
+    <el-dialog :title="isView=='Y'?'查看输入项':(isEditModal?'编辑输入项':'新增输入项')" :visible.sync="addOrEditModelOpend" >
       <el-form ref="editForm" class="modal-form" label-position="left" label-width="30%" :model="formData">
         <el-form-item label="输入项名称" >
-          <el-input v-model="formData.colum_name"  auto-complete="off" ></el-input>
+          <el-input v-model="formData.colum_name"  :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="输入项中文名称" >
-          <el-input v-model="formData.colum_name_cn" auto-complete="off" ></el-input>
+          <el-input v-model="formData.colum_name_cn" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="输入项数据类型" >
-          <el-select v-model="formData.colum_type" style="width:100%;" placeholder="请选择数据类型">
+          <el-select v-model="formData.colum_type" :disabled="isView=='Y'" style="width:100%;" placeholder="请选择数据类型">
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="输入项单位" >
-          <el-input v-model="formData.colum_point" auto-complete="off" ></el-input>
+          <el-input v-model="formData.colum_point" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type!='0'" label="输入项缺省值" >
-          <el-input v-model="formData.default_value" auto-complete="off" ></el-input>
+          <el-input v-model="formData.default_value" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
-          <el-input v-model="formData.min_value" auto-complete="off" ></el-input>
+          <el-input v-model="formData.min_value" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
-          <el-input v-model="formData.max_value" auto-complete="off" ></el-input>
+          <el-input v-model="formData.max_value" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type!='0'" label="是否需要记忆" >
-          <el-select v-model="formData.need_remember" style="width:100%;" placeholder="请选择">
+          <el-select v-model="formData.need_remember" :disabled="isView=='Y'" style="width:100%;" placeholder="请选择">
             <el-option  label="是" value="Y"></el-option>
             <el-option  label="否" value="N"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="输入项备注" >
-          <el-input v-model="formData.colum_desc" auto-complete="off" ></el-input>
+          <el-input v-model="formData.colum_desc" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='0'" label="公式" >
           <el-input
@@ -94,7 +100,7 @@
           </el-input>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" v-if="isView=='N'" class="dialog-footer">
         <el-tooltip v-if="formData.colum_type=='0'&&!isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
           <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
         </el-tooltip>
@@ -179,6 +185,7 @@
         eachPageNum:10,
         totalPage:1,
         unitId:'',
+        isView:'N',//Y 只读模式 N 非自读模式
         columDataType:{
           '0':'公式'  ,
           '1':'数值'  ,
@@ -263,8 +270,8 @@
         this.addOrEditModelOpend = true
         this.isEditModal = false
       },
-      viewDefined(){
-
+      viewDefined(columnId){
+        this.editDefined(columnId)
       },
       editDefined(columnId){
         ///record/reportDefined/oneDimensionsStatic/edit
@@ -683,32 +690,19 @@
     mounted:function(){
       this.unitId = this.$route.query.unitId
       this.addFormData.unit_id = this.$route.query.unitId
+      this.isView = this.$route.query.isView
       this.getTableData(1)
       this.getUnits()
     }
   }
 </script>
 
+<style lang="css">
+  .mini-font-size{
+    font-size: 12px !important;
+  }
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
-
-  .el-row{
-    margin-top:20px;
-  }
-
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - 110px);
-  .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    height:calc(100% - 110px);;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
-  }
 </style>

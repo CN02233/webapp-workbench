@@ -54,6 +54,9 @@
               <el-button
                 size="mini" v-if="scope.row.status==0" @click="definedUnit(scope.row.defined_id)"
                 >报送单元</el-button>
+              <el-button
+                size="mini" v-if="scope.row.status==4" @click="viewDefinedUnit(scope.row.defined_id)"
+              >报送单元查看</el-button>
               <el-button v-if="scope.row.status==0"
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -160,6 +163,26 @@
             </el-col>
           </el-row>
           <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">填报区间开始日期</el-col>
+            <el-col :span="15">
+              <el-date-picker style="width: 100%;"
+                              v-model="submitParams.report_data_start_str"
+                              type="date" value-format="yyyyMMdd"
+                              placeholder="选择填报区间开始日期">
+              </el-date-picker>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">填报区间截止日期</el-col>
+            <el-col :span="15">
+              <el-date-picker style="width: 100%;"
+                              v-model="submitParams.report_data_end_str"
+                              type="date" value-format="yyyyMMdd"
+                              placeholder="选择填报区间截止日期">
+              </el-date-picker>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需审批机构</el-col>
             <el-col align="left" :span="15">
               <el-checkbox-group v-model="submitParams.check_origins">
@@ -186,7 +209,7 @@ import { required } from 'vuelidate/lib/validators'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 export default {
-  name: 'OriginMain',
+  name: 'ReportDefind',
   data () {
     return {
       reportDataList: [],
@@ -230,6 +253,8 @@ export default {
         defined_name: '',
         report_start_date_str: '',
         report_end_date_str: '',
+        report_data_start_str: '',
+        report_data_end_str: '',
         check_origins: [],
         defined_origins: []
       }
@@ -457,7 +482,17 @@ export default {
       this.$router.push({
         path: '/record/reportUnit',
         query: {
-          'definedId': definedId
+          'definedId': definedId,
+          'isView': 'N'
+        }
+      })
+    },
+    viewDefinedUnit (definedId) {
+      this.$router.push({
+        path: '/record/reportUnit',
+        query: {
+          'definedId': definedId,
+          'isView': 'Y'
         }
       })
     },
@@ -476,11 +511,13 @@ export default {
     },
     submitReport () {
       if (this.submitParams.report_start_date_str == null || this.submitParams.report_start_date_str == '' ||
-        this.submitParams.report_end_date_str == null || this.submitParams.report_end_date_str == ''
+        this.submitParams.report_end_date_str == null || this.submitParams.report_end_date_str == ''||
+        this.submitParams.report_data_start_str == null ||this.submitParams.report_data_start_str == ''||
+        this.submitParams.report_data_end_str == null ||this.submitParams.report_data_end_str == ''
       ) {
         this.$notify({
           dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>起始日期、结束日期'
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>起始日期、结束日期、填报区间起始日期、填报区间截止日期'
         })
         return
       }
@@ -498,6 +535,8 @@ export default {
           'defined_id': this.submitParams.defined_id,
           'report_start_date': this.submitParams.report_start_date_str,
           'report_end_date': this.submitParams.report_end_date_str,
+          'report_data_start': this.submitParams.report_data_start_str,
+          'report_data_end': this.submitParams.report_data_end_str,
           'check_origins': this.submitParams.check_origins
         }
       }).then(response => {

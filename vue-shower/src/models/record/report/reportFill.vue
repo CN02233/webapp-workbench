@@ -11,7 +11,7 @@
         <div class="fill-context-child">
           <router-view ref="fillContext" @refreshReportFill="checkUnitStep" :key="$route.fullPath"></router-view>
         </div>
-        <div class="fill-context-options">
+        <div v-if="isView!='Y'" class="fill-context-options">
           <!--当前步骤是最后一步显示提交，已点下一步的步骤不显示下一步只显示保存-->
 
           <el-button v-if="isView!='Y'" @click="saveContext" type="info">保存</el-button>

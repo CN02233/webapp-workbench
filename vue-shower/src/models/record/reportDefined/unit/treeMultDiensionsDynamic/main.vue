@@ -41,8 +41,13 @@
             label="操作">
             <template slot-scope="scope">
               <!--<el-button type="text" @click="viewDefined()" size="small">查看</el-button>-->
-              <el-button type="text" @click="editDefined(scope.row.colum_id)" size="small">编辑</el-button>
-              <el-button type="text" @click="deleteDefined(scope.row.colum_id)" size="small">删除</el-button>
+              <div v-if="isView=='N'">
+                <el-button type="text" @click="editDefined(scope.row.colum_id)" size="small">编辑</el-button>
+                <el-button type="text" @click="deleteDefined(scope.row.colum_id)" size="small">删除</el-button>
+              </div>
+              <div v-if="isView=='Y'">
+                <el-button type="text" @click="editDefined(scope.row.colum_id)" size="small">查看</el-button>
+              </div>
               <!--<el-button type="text" @click="openEditModal(scope.row)" size="small">查看</el-button>-->
             </template>
           </el-table-column>
@@ -60,36 +65,36 @@
     <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" >
       <el-form ref="editForm" class="modal-form" label-position="left" label-width="30%" :model="formData">
         <el-form-item label="输入单元名称" >
-          <el-input v-model="formData.group_name" :disabled="group_name!=''"  auto-complete="off" ></el-input>
+          <el-input v-model="formData.group_name" :disabled="group_name!=''||isView=='Y'"  auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="上级维度" >
-          <el-select :disabled="isEditModal&&formData.parent_id==0" v-model="formData.parent_id"  :value="formData.parent_id" style="width:100%;" placeholder="请选择数据类型">
+          <el-select :disabled="(isEditModal&&formData.parent_id==0)||isView=='Y'" v-model="formData.parent_id"  :value="formData.parent_id" style="width:100%;" placeholder="请选择数据类型">
             <el-option key="0" label="无上级" :value="0"></el-option>
             <el-option :key="unitColum.colum_id" v-for="unitColum in unitColums" :label="unitColum.colum_name_cn" :value="unitColum.colum_id"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="维度名称" >
-          <el-input v-model="formData.colum_name" placeholder="输入项代号 例:realBalance"  auto-complete="off" ></el-input>
+          <el-input  :disabled="isView=='Y'"  v-model="formData.colum_name" placeholder="输入项代号 例:realBalance"  auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="维度中文名称" >
-          <el-input v-model="formData.colum_name_cn" placeholder="维度中文示意 例:实际收入" auto-complete="off" ></el-input>
+          <el-input  :disabled="isView=='Y'"  v-model="formData.colum_name_cn" placeholder="维度中文示意 例:实际收入" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item label="输入项数据类型" >
-          <el-select v-model="formData.colum_type" style="width:100%;" placeholder="请选择数据类型">
+          <el-select :disabled="isView=='Y'"  v-model="formData.colum_type" style="width:100%;" placeholder="请选择数据类型">
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="单位" >
-          <el-input v-model="formData.colum_point" auto-complete="off" ></el-input>
+          <el-input :disabled="isView=='Y'"  v-model="formData.colum_point" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
-          <el-input v-model="formData.min_value" auto-complete="off" ></el-input>
+          <el-input :disabled="isView=='Y'"  v-model="formData.min_value" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
-          <el-input v-model="formData.max_value" auto-complete="off" ></el-input>
+          <el-input :disabled="isView=='Y'"  v-model="formData.max_value" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type!='0'" label="是否需要记忆" >
-          <el-select v-model="formData.need_remember" style="width:100%;" placeholder="请选择">
+          <el-select :disabled="isView=='Y'"  v-model="formData.need_remember" style="width:100%;" placeholder="请选择">
             <el-option  label="是" value="Y"></el-option>
             <el-option  label="否" value="N"></el-option>
           </el-select>
@@ -103,14 +108,21 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-tooltip v-if="formData.colum_type=='0'&&!isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
-          <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
-        </el-tooltip>
-        <el-tooltip v-if="formData.colum_type=='0'&&isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
-          <el-button @click="replaceFormulaEditor()" icon="el-icon-edit">重新定义公式</el-button>
-        </el-tooltip>
-        <el-button @click="addOrEditModelOpend=false">取 消</el-button>
-        <el-button type="primary" @click="columSave()">确 定</el-button>
+        <div v-if="isView=='N'">
+          <el-tooltip v-if="formData.colum_type=='0'&&!isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
+            <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
+          </el-tooltip>
+          <el-tooltip v-if="formData.colum_type=='0'&&isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
+            <el-button @click="replaceFormulaEditor()" icon="el-icon-edit">重新定义公式</el-button>
+          </el-tooltip>
+          <el-button @click="addOrEditModelOpend=false">取 消</el-button>
+          <el-button type="primary" @click="columSave()">确 定</el-button>
+        </div>
+        <div v-if="isView=='Y'">
+          <el-button @click="addOrEditModelOpend=false">关 闭</el-button>
+
+        </div>
+
       </div>
     </el-dialog>
 
@@ -188,6 +200,7 @@
         eachPageNum:10,
         totalPage:1,
         unitId:'',
+        isView:'N',//Y 只读模式 N 非自读模式
         columDataType:{
           '0':'公式'  ,
           '1':'数值'  ,
@@ -648,6 +661,7 @@
     mounted:function(){
       this.unitId = this.$route.query.unitId
       this.addFormData.unit_id = this.$route.query.unitId
+      this.isView = this.$route.query.isView
       this.getTableData(1)
       this.getUnits()
     }
