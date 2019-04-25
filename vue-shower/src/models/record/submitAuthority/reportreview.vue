@@ -23,6 +23,11 @@
             label="报表步骤数">
           </el-table-column>
           <el-table-column
+            prop="report_origin"
+            align="left" :formatter="formattOriginName"
+            label="填报机构">
+          </el-table-column>
+          <el-table-column
             prop="report_status"
             align="left"
             label="状态"
@@ -91,6 +96,7 @@ export default {
     return {
       reportDataList: [],
       definedDataObjs: {},
+      origins: {},
       tableDataUrl: 'reportApproval/listReportReview',
       currPageNum: 1,
       eachPageNum: 10,
@@ -136,6 +142,7 @@ export default {
           } */
         $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
+
       })
     },
     refreshTableList: function (dataList) {
@@ -184,6 +191,39 @@ export default {
         })
       }
       return checkResult
+    },
+    getOriginList () {
+      const loading = this.$loading({
+        lock: true,
+        text: '获取机构列表中.......',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
+      this.BaseRequest({
+        url: 'submitAU/listAllSubmitauthority',
+        method: 'get'
+      }).then(response => {
+        loading.close();
+        if (response != null && response.length > 0) {
+          const originTmp = new Object()
+
+          function getChildOrigin(originList){
+            originList.forEach(origin=>{
+              originTmp[origin.id] = origin.label
+              if(origin.children){
+                getChildOrigin(origin.children)
+              }
+            })
+          }
+          getChildOrigin(response)
+
+          this.origins = originTmp
+        }
+      })
+    },
+
+    formattOriginName(reportData){
+      return this.origins[reportData.report_origin]
     }
   },
   mounted: function () { // 初始化

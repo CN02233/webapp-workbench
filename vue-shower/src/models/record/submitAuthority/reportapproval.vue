@@ -126,6 +126,12 @@ export default {
         pageNum = this.currPageNum
       }
       const $this = this
+      const loading = this.$loading({
+        lock: true,
+        text: '获取数据中.......',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.BaseRequest({
         url: this.tableDataUrl,
         method: 'get',
@@ -136,6 +142,7 @@ export default {
             $this.definedDataObjs[definedObj.organization_id] = definedObj
           })
         } */
+        loading.close();
         $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
       })
@@ -148,30 +155,51 @@ export default {
       this.isEditModal = false
     },
     handlePass (index, row) { // 通过
+      const loading = this.$loading({
+        lock: true,
+        text: '审批中.......',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.BaseRequest({
         url: '/reportApproval/ReportApprovalOperator',
         method: 'get',
         params: {'reportId': row.report_id, 'reportStatus': 'pass'}
       }).then(() => {
+        loading.close();
         this.Message.success('审批成功')
         this.getTableData()
       })
     },
     handleReject (index, row) { // 驳回
+      const loading = this.$loading({
+        lock: true,
+        text: '审批中.......',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.BaseRequest({
         url: '/reportApproval/ReportApprovalOperator',
         method: 'get',
         params: {'reportId': row.report_id, 'reportStatus': 'reject'}
       }).then(() => {
+        loading.close();
         this.Message.success('审批成功')
         this.getTableData()
       })
     },
     getOriginList () {
+      const loading = this.$loading({
+        lock: true,
+        text: '获取机构列表中.......',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      });
       this.BaseRequest({
         url: 'submitAU/listAllSubmitauthority',
         method: 'get'
       }).then(response => {
+        loading.close();
         if (response != null && response.length > 0) {
           const originTmp = new Object()
 

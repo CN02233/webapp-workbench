@@ -20,6 +20,12 @@
               label="报送机构">
             </el-table-column>
           <el-table-column
+            prop="report_status"
+            align="left" width="100"
+            :formatter="getReportStatus"
+            label="报送状态">
+          </el-table-column>
+          <el-table-column
             prop="report_start_date_str"
             align="left"
             label="报送开始时间">
@@ -65,7 +71,19 @@
         origins: {},
         currPageNum: 1,
         eachPageNum: 10,
-        totalPage: 1
+        totalPage: 1,
+        status_cn:{
+           '0' : '正常',
+           '1':'审批中',
+           '2':'复核中',
+           '3':'锁定',
+           '4':'失效',
+           '5':'报表发布',
+           '6':'待上传签名',
+           '7':'未到填写日期',
+           '8':'过期',
+           '9':'填报完成'
+        }
       }
     },
     components: {
@@ -136,6 +154,9 @@
       },
       getOriginName(rowData){
         return this.origins[rowData.report_origin].origin_name
+      },
+      getReportStatus(rowData){
+        return this.status_cn[rowData.report_status]
       }
     },
     mounted: function () { // 初始化

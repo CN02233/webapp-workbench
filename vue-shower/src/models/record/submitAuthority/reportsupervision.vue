@@ -23,45 +23,36 @@
           <el-table-column
             prop="report_id"
             align="left"
-            width="150"
+            width="100"
             label="报表ID">
           </el-table-column>
           <el-table-column
             prop="report_name"
             align="left"
-            width="150"
             label="报表名称">
           </el-table-column>
           <el-table-column
-            prop="active_unit"
+            prop="report_origin_name"
             align="left"
-            width="150"
-            label="报表步骤数">
+            label="填报单位">
           </el-table-column>
           <el-table-column
             prop="report_status"
             align="left"
-            width="150"
+            width="100"
             label="状态"
             :formatter="formatStatus">
           </el-table-column>
           <el-table-column
             prop="report_end_date"
             align="left"
-            width="180"
             label="最后保存日期">
-          </el-table-column>
-          <el-table-column
-            prop="last_modify_user"
-            align="left"
-            width="100"
-            label="最后填报人">
           </el-table-column>
           <el-table-column
             fixed="right"
             label="操作"
             align="left"
-            width="150"
+            width="100"
           >
             <template slot-scope="scope">
               <el-button @click="reportShow(scope.row.report_id)"
@@ -131,21 +122,28 @@
           return '锁定'
         }
         if (row.report_status === '4') {
-          return '报表发布'
+          return '失效'
         }
         if (row.report_status === '5') {
-          return '锁定'
+          return '填报结束'
         }
         if (row.report_status === '6') {
           return '待上传签名'
         }
       },
       queryByOriginId: function () {
+        const loading = this.$loading({
+          lock: true,
+          text: '获取机构数据中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
         this.BaseRequest({
           url: this.tableDataUrl,
           method: 'get',
           params: { 'currPage': 1, 'pageSize': this.eachPageNum, 'originId': this.originId }
         }).then(response => {
+          loading.close();
           this.reportDataList = response.dataList
           this.totalPage = response.totalPage
         })
@@ -157,11 +155,18 @@
           pageNum = this.currPageNum
         }
         const $this = this
+        const loading = this.$loading({
+          lock: true,
+          text: '获取数据中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
         this.BaseRequest({
           url: this.tableDataUrl,
           method: 'get',
           params: { 'currPage': pageNum, 'pageSize': this.eachPageNum }
         }).then(response => {
+          loading.close();
           if (response.dataList != null) {
             response.dataList.forEach(definedObj => {
               $this.definedDataObjs[definedObj.organization_id] = definedObj
