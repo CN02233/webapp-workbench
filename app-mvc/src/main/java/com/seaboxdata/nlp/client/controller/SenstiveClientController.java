@@ -30,7 +30,7 @@ public class SenstiveClientController extends AbstractClientController{
     Logger logger = LoggerFactory.getLogger(SemanticAnalysisClientController.class);
 
 //    private final static String jieBasetPythonHost = "http://192.168.1.124:8001";
-    private final static String jieBasetPythonHost = "http://10.10.10.41:8001";
+    private final static String jieBasetPythonHost = "http://172.26.52.230:8001";
 
     private HttpClientSupport httpClientSupport = HttpClientSupport.getInstance(jieBasetPythonHost);
 
