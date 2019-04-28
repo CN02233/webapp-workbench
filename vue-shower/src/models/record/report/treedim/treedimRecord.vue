@@ -87,12 +87,16 @@
     },
     methods:{
       getUnitContext(){
-        const loading = this.$loading({
-          lock: true,
-          text: '获取填报单元信息中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+
+        let loading = null
+        if(this.saveFlag=='N') {
+          loading = this.$loading({
+            lock: true,
+            text: '获取填报单元信息中.......',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          })
+        }
         this.BaseRequest({
           url:"/reportCust/getUnitContext",
           params:{
@@ -101,7 +105,9 @@
             unitType:this.unitType
           }
         }).then(response=>{
-          loading.close();
+          if(loading){
+            loading.close();
+          }
           if(response){
             console.log("response running....")
             this.definedColums = response.definedColums
@@ -178,6 +184,18 @@
             })
 
             this.definedColumsGroup = treeDatasGroup
+
+            if(!this.hasMounted){
+              this.hasMounted = true
+              if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
+                this.$emit("refreshSaveLoading",this.unitId,"保存中....")
+                this.doSaveUnitContext()
+              }else if(this.saveFlag=='S'){
+
+              }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
+                this.doValidateUnitContext()
+              }
+            }
             //
             // this.definedColumsTotal = response.definedColums.length
             // this.colSpan = Math.floor(24/(this.definedColumsTotal+1))
@@ -185,11 +203,60 @@
             // const groupResult = this.groupDatas(response.columDatas)
             // this.elRowDatas = this.makeElRows(groupResult)
           }
+
+
         }).catch(error=>{
             this.Message.success(error)
             loading.close()
           }
         );
+      },
+      doSaveUnitContext(){
+        const $this = this
+
+        const saveColums = new Array()
+
+        const groupIds = Object.keys(this.definedColumsGroup)
+        groupIds.forEach(groupId=>{
+          const saveObjTmp={}
+          const saveColumDatasTmp = []
+          const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
+          console.log(elRowDatas)
+          elRowDatas.forEach((elRowData,rowNum)=>{
+            elRowData.forEach(elColumCol=>{
+              if(elColumCol!=null){
+                elColumCol.colum_id = rowNum
+                saveColumDatasTmp.push(elColumCol)
+              }
+            })
+          })
+          saveObjTmp.groupId = groupId
+          saveObjTmp.columDatas = saveColumDatasTmp
+          saveObjTmp.definedColums = this.definedColumsGroup[groupId].definedColums
+          saveColums.push(saveObjTmp)
+        })
+
+        const loading = this.$loading({
+          lock: true,
+          text: '保存报送信息中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url:"/treeReportCust/saveTreeData",
+          method:'post',
+          data:saveColums
+        }).then(response=>{
+          loading.close();
+          this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+        });
+      },
+      doValidateUnitContext(){
+        this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+        if(false){
+          this.$emit("refreshSaveLoading",this.unitId,"")
+        }
       },
       saveUnitContext(needUpdateStep){
         const $this = this
@@ -236,76 +303,6 @@
           }
         });
 
-        //重写colum_id 每一行的行号作为column_id
-        // this.elRowDatas.forEach((elRowData,rowNum)=>{
-        //   elRowData.forEach(elColumCol=>{
-        //     if(elColumCol!=null){
-        //       elColumCol.colum_id = rowNum
-        //       saveColums.push(elColumCol)
-        //     }
-        //   })
-        // })
-        //
-        //
-        // // validateSimpleUnitContext
-        // const valloading = this.$loading({
-        //   lock: true,
-        //   text: '数据校验中.......',
-        //   spinner: 'el-icon-loading',
-        //   background: 'rgba(0, 0, 0, 0.7)'
-        // });
-        // this.BaseRequest({
-        //   url:"/reportCust/validateSimpleUnitByDimensions",
-        //   method:'post',
-        //   data:{
-        //     definedColums:this.definedColums,
-        //     columDatas:saveColums
-        //   }
-        // }).then(response=>{
-        //   valloading.close();
-        //   let validateFailed = false
-        //   if(response!=null){
-        //     const validateFailedKeys = Object.keys(response)
-        //     let failtMes = ""
-        //     if(validateFailedKeys!=null&&validateFailedKeys.length>0){
-        //       validateFailed = true
-        //       validateFailedKeys.forEach(validateFailedKey=>{
-        //         const failedReason = response[validateFailedKey]
-        //         failtMes+=(validateFailedKey+":"+failedReason+"<br><br>")
-        //       })
-        //
-        //       this.$notify({
-        //         dangerouslyUseHTMLString: true,
-        //         message: '<span style="font-size:15px;color:red;font-weight: bold">'+failtMes+'</span>'
-        //       })
-        //     }
-        //   }
-        //
-        //   if(!validateFailed){
-        //     const loading = this.$loading({
-        //       lock: true,
-        //       text: '保存报送信息中.......',
-        //       spinner: 'el-icon-loading',
-        //       background: 'rgba(0, 0, 0, 0.7)'
-        //     });
-        //     this.BaseRequest({
-        //       url:"/reportCust/overrideSimpleUnitContext",
-        //       method:'post',
-        //       data:{
-        //         definedColums:this.definedColums,
-        //         columDatas:saveColums
-        //       }
-        //     }).then(response=>{
-        //       loading.close();
-        //       $this.Message.success("保存成功")
-        //       if(needUpdateStep){
-        //         $this.updateStep()
-        //       }else{
-        //         $this.getUnitContext()
-        //       }
-        //     });
-        //   }
-        // });
       },
       updateStep(){
         const loading = this.$loading({
@@ -328,8 +325,16 @@
           this.$emit("refreshReportFill")
         });
       },
+      checkStepAndSave(saveLink){
+        console.log(saveLink.unit_id)
+        console.log("data is "+JSON.stringify(this.definedColumsGroup))
+        this.$emit("checkStepAndSave",saveLink.nextUnit)
+      },
       nextStep(){
-        this.saveUnitContext(true)
+        console.log('next step is running....'+this.unitId)
+        console.log("data is "+JSON.stringify(this.definedColumsGroup))
+
+        // this.saveUnitContext(true)
       },
       treeColumsDefined(definedColums, startParentId,level){
         const columTreeArray = []
@@ -681,6 +686,9 @@
           }
         }
         this.definedColumsGroup[groupId].elRowDatas.splice(delRowNum,(endRowNum-delRowNum))
+      },
+      setSaveFlag(saveFlag){
+        this.saveFlag = saveFlag
       }
     },
     mounted:function(){
@@ -690,6 +698,25 @@
       this.unitType = this.$route.query.unitType
       this.lastStep = this.$route.query.lastStep
       this.getUnitContext()
+
+
+    },
+    activated(){
+      this.saveFlag = this.$route.params.saveFlag
+      if(this.hasMounted){
+        if(this.saveFlag!=null&&this.saveFlag!=undefined){
+          if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
+            this.$emit("refreshSaveLoading",this.unitId,"保存中....")
+            this.doSaveUnitContext()
+          }else if(this.saveFlag=='S'){
+
+          }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
+            this.doValidateUnitContext()
+          }
+        }
+      }
+
+
     }
   }
 </script>

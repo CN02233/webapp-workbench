@@ -4,7 +4,6 @@ import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.entity.UnitDefined;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.webapp.support.json.JsonSupport;
@@ -133,26 +132,26 @@ public class ReportCustomerController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult getUnitContext(String reportId, String unitId, String unitType){
-        ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
-        Integer currOrder = 0;
-        Integer getUnitOrder = 0;
-        Integer activeUnitId = reportCustomer.getActive_unit();
-        for (UnitDefined unitEntity : reportCustomer.getUnitEntities()) {
-            if(unitEntity.getUnit_id().equals(activeUnitId)){
-                currOrder = unitEntity.getUnit_order();
-            }
-
-            if(unitEntity.getUnit_id().toString().equals(unitId)){
-                getUnitOrder = unitEntity.getUnit_order();
-            }
-
-
-        }
-        if(getUnitOrder!=null&&currOrder!=null&&getUnitOrder>currOrder){
-            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "该步骤还未填写", "该步骤还未填写",null);
-            return jsonResult;
-
-        }
+//        ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
+//        Integer currOrder = 0;
+//        Integer getUnitOrder = 0;
+//        Integer activeUnitId = reportCustomer.getActive_unit();
+//        for (UnitDefined unitEntity : reportCustomer.getUnitEntities()) {
+//            if(unitEntity.getUnit_id().equals(activeUnitId)){
+//                currOrder = unitEntity.getUnit_order();
+//            }
+//
+//            if(unitEntity.getUnit_id().toString().equals(unitId)){
+//                getUnitOrder = unitEntity.getUnit_order();
+//            }
+//
+//
+//        }
+//        if(getUnitOrder!=null&&currOrder!=null&&getUnitOrder>currOrder){
+//            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "该步骤还未填写", "该步骤还未填写",null);
+//            return jsonResult;
+//
+//        }
         ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,unitContext);
 
@@ -164,19 +163,10 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult saveSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
 
-        reportCustomerService.updateOrInsertSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas(),true);
-//        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
-
-        return jsonResult;
-    }
-
-    @RequestMapping("overrideSimpleUnitContext")
-    @ResponseBody
-    @CrossOrigin(allowCredentials="true")
-    public JsonResult overrideSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
-
-        reportCustomerService.overrideSimpleUnitContext(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
+        reportCustomerService.updateOrInsertSimpleUnitContext(
+                saveSimpleUnitContext.getDefinedColums(),
+                saveSimpleUnitContext.getColumDatas(),
+                true);
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
 
@@ -207,6 +197,19 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("validateGridUnit")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult validateGridUnit(@RequestBody SaveGridUnitContext saveGridUnitContext){
+
+        Map<String, String> validateResult = reportCustomerService.validateGridUnit(saveGridUnitContext.getDefinedColums(),
+                saveGridUnitContext.getColumDatas());
+//        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "校验完成", null,validateResult);
+
+        return jsonResult;
+    }
+
     @RequestMapping("updateStep")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
@@ -225,7 +228,6 @@ public class ReportCustomerController {
     public JsonResult saveGroupUnitContext(@RequestBody SaveSimpleUnitContext saveUnitContext){
         reportCustomerService.updateOrInsertGroupUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
-
         return jsonResult;
     }
 
@@ -236,6 +238,16 @@ public class ReportCustomerController {
 
         reportCustomerService.updateOrInsertGridUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+
+        return jsonResult;
+    }
+
+    @RequestMapping("refreshFomular")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult refreshFomular(String reportDefinedId,String reportId){
+        reportCustomerService.refreshFomular(reportDefinedId,reportId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "刷新成功", null,null);
 
         return jsonResult;
     }
@@ -254,6 +266,11 @@ public class ReportCustomerController {
     class SaveSimpleUnitContext{
         private ArrayList<ReportCustomerData> columDatas;
         private ArrayList<SimpleColumDefined> definedColums;
+        private String saveType;
+
+        SaveSimpleUnitContext(String saveType) {
+            this.saveType = saveType;
+        }
 
         public ArrayList<ReportCustomerData> getColumDatas() {
             return columDatas;
@@ -269,6 +286,14 @@ public class ReportCustomerController {
 
         public void setDefinedColums(ArrayList<SimpleColumDefined> definedColums) {
             this.definedColums = definedColums;
+        }
+
+        public String getSaveType() {
+            return saveType;
+        }
+
+        public void setSaveType(String saveType) {
+            this.saveType = saveType;
         }
     }
     class SaveGridUnitContext{

@@ -259,7 +259,7 @@ export default {
       }).then(response => {
         if (response != null && response.length > 0) {
           this.data = []
-          console.log(response)
+          // console.log(response)
           this.options = response
           this.data = response
         }

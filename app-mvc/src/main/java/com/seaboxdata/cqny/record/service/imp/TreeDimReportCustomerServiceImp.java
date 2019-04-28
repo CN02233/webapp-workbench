@@ -86,22 +86,22 @@ public class TreeDimReportCustomerServiceImp implements TreeDimReportCustomerSer
             }
         }
 
-        User currUser = SessionSupport.checkoutUserFromSession();
-        new Thread(() -> {
-            logger.info("刷新关联到用户输入项的公式值");
-            List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(checkRefreshFomular);
-            logger.info("需要刷新的内容{}",needRefresDatas);
-
-            for (TreeUnitContext treeUnitContext : treeUnitContexts) {
-
-                logger.info("查看用户录入项是否需要自动记忆，如需要，将用户输入数据保存");
-                rememberCustDataService.rememberCustData(treeUnitContext.getDefinedColums(),
-                        treeUnitContext.getColumDatas(),currUser.getUser_id());
-                logger.info("用户录入记忆完成");
-            }
-
-
-        }).start();
+//        User currUser = SessionSupport.checkoutUserFromSession();
+//        new Thread(() -> {
+//            logger.info("刷新关联到用户输入项的公式值");
+//            List<ReportCustomerData> needRefresDatas = fomularService.refreshFomularForCustInput(checkRefreshFomular);
+//            logger.info("需要刷新的内容{}",needRefresDatas);
+//
+//            for (TreeUnitContext treeUnitContext : treeUnitContexts) {
+//
+//                logger.info("查看用户录入项是否需要自动记忆，如需要，将用户输入数据保存");
+//                rememberCustDataService.rememberCustData(treeUnitContext.getDefinedColums(),
+//                        treeUnitContext.getColumDatas(),currUser.getUser_id());
+//                logger.info("用户录入记忆完成");
+//            }
+//
+//
+//        }).start();
 
 
 

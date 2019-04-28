@@ -1,14 +1,14 @@
 <template>
   <div>
     <el-form ref="form"  label-width="40%">
-      <el-form-item size="mini" v-for="dataColum in dataObject" :label="dataColum.colum_name_cn">
+      <el-form-item size="mini" v-for="dataColum in dataObject" :label="dataColum.colum_name_cn" :error="dataColum.validate_error">
         <el-col :span="23">
-          <el-tooltip class="item" effect="dark" :content="dataColum.colum_desc" placement="top">
-            <el-input v-model="dataColum.report_data"
-                      :disabled="dataColum.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
-              <template v-if="dataColum.colum_point!=null&&dataColum.colum_point!=''" slot="append">{{dataColum.colum_point}}</template>
-            </el-input>
-          </el-tooltip>
+            <el-tooltip class="item" effect="dark" :content="dataColum.colum_desc" placement="top">
+              <el-input v-model="dataColum.report_data"
+                        :disabled="dataColum.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
+                <template v-if="dataColum.colum_point!=null&&dataColum.colum_point!=''" slot="append">{{dataColum.colum_point}}</template>
+              </el-input>
+            </el-tooltip>
         </el-col>
       </el-form-item>
     </el-form>
@@ -35,19 +35,25 @@
         unitType:"",
         lastStep:false,
         isView:'N',
+        saveFlag:'N',//载入页面后是否保存当前页面数据 Y:保存 N：不做任何动作仅仅载入 S:提交 V：校验
         definedColums:[],
         columDatas:{},
-        dataObject:[]
+        dataObject:[],
+        hasMounted:false
       }
     },
     methods:{
       getUnitContext(){
-        const loading = this.$loading({
-          lock: true,
-          text: '获取填报单元信息中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+
+        let loading = null
+        if(this.saveFlag=='N') {
+          loading = this.$loading({
+            lock: true,
+            text: '获取填报单元信息中.......',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          })
+        }
         this.BaseRequest({
           url:"/reportCust/getUnitContext",
           params:{
@@ -56,7 +62,9 @@
             unitType:this.unitType
           }
         }).then(response=>{
-          loading.close();
+          if(loading){
+            loading.close();
+          }
           if(response){
             this.definedColums = response.definedColums
             const defindObj = {}
@@ -79,12 +87,87 @@
               })
               this.dataObject = response.columDatas
             }
+
+            if(!this.hasMounted){
+              console.log(this.unitId+"--ajax后校验")
+              if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
+                this.$emit("refreshSaveLoading",this.unitId,"保存中....")
+                this.doSaveUnitContext()
+              }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
+                this.doValidateUnitContext()
+              }
+              this.hasMounted = true
+            }
+
           }
         }).catch(error=>{
             this.Message.success(error)
             loading.close()
           }
         );
+      },
+      doSaveUnitContext(){
+        const loading = this.$loading({
+          lock: true,
+          text: '保存报送信息中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url:"/reportCust/saveSimpleUnitContext",
+          method:'post',
+          data:{
+            definedColums:this.definedColums,
+            columDatas:this.dataObject
+          }
+        }).then(response=>{
+          loading.close();
+          this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+        });
+      },
+
+      doValidateUnitContext(){
+        const valloading = this.$loading({
+          lock: true,
+          text: '数据校验中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url:"/reportCust/validateSimpleUnitContext",
+          method:'post',
+          data:{
+            definedColums:this.definedColums,
+            columDatas:this.dataObject
+          }
+        }).then(response=>{
+          valloading.close();
+          let validateFailed = false
+          let failtMes = ""
+          if(response!=null){
+            const validateFailedKeys = Object.keys(response)
+            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
+              validateFailed = true
+            }
+          }else{
+            response = {}
+          }
+
+          this.dataObject.forEach(columData=>{
+            if(response[columData.colum_id]){
+              columData.validate_error = response[columData.colum_id]
+            }else{
+              columData.validate_error = null
+            }
+          })
+
+          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          if(validateFailed){
+            this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+          }
+        });
+
       },
       saveUnitContext(needUpdateStep){
         const $this = this
@@ -180,16 +263,44 @@
         });
       },
       nextStep(){
-        this.saveUnitContext(true)
+        console.log('next step is running....'+this.unitId)
+        console.log("data is "+JSON.stringify(this.dataObject))
+        // this.saveUnitContext(true)
+      },
+      checkStepAndSave(saveLink){
+        console.log(saveLink.unit_id)
+        this.$emit("checkStepAndSave",saveLink.nextUnit)
+      },
+      setSaveFlag(saveFlag){
+        this.saveFlag = saveFlag
       }
     },
     mounted:function(){
       this.reportId = this.$route.query.reportId
       this.unitId = this.$route.query.unitId
       this.unitType = this.$route.query.unitType
-      this.lastStep = this.$route.query.lastStep
       this.isView = this.$route.query.isView
+      this.saveFlag = this.$route.params.saveFlag
       this.getUnitContext()
+    },
+    activated(){
+      this.saveFlag = this.$route.params.saveFlag
+      if(this.hasMounted){
+        const dataTMp = this.dataObject[0].report_data//由于存在keepalive dataObject更新了页面也不会重新加载 手动修改一个值 再恢复达到页面重载的目的
+        this.dataObject[0].report_data = ""
+        this.dataObject[0].report_data = dataTMp
+        if(this.saveFlag!=null&&this.saveFlag!=undefined){
+          if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
+            this.$emit("refreshSaveLoading",this.unitId,"保存中....")
+            this.doSaveUnitContext()
+          }else if(this.saveFlag=='S'){
+
+          }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
+            this.doValidateUnitContext()
+          }
+        }
+      }
+
     }
   }
 </script>
@@ -206,6 +317,6 @@
   }
 
   .el-form-item{
-    margin:0 0 10px 0;
+    margin:0 0 15px 0;
   }
 </style>

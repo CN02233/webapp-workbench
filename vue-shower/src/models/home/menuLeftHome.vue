@@ -299,13 +299,14 @@
     height:100%;
     float:left;
     background-color: #3E3958;
+    overflow: auto;
   }
 
   .container-root-context-collapse{
     width:calc(100% - 65px);
     height:100%;
     float:left;
-    background-color: #F6F6F6;
+    /*background-color: #F6F6F6;*/
   }
 
   .container-root-context{

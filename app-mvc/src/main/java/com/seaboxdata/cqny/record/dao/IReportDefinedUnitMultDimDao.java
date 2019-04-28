@@ -71,6 +71,29 @@ public interface IReportDefinedUnitMultDimDao {
             "union select unit_id,'',dim_id,'','','','','','N',dim_name,dim_name_cn,'','','3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
     List<GridColumDefined> getColumByUnit(String unitId);
 
+    @Select(
+        "SELECT " +
+        "rdum.colum_id ," +
+        "rdum.dim_id ," +
+        "rdumc.colum_name ," +
+        "rdumc.colum_name_cn ," +
+        "rdumd.dim_name ," +
+        "rdumd.dim_name_cn ," +
+        "rdum.unit_id ," +
+        "rdum.colum_type ," +
+        "rdum.min_value ," +
+        "rdum.max_value ," +
+        "rdum.colum_formula ," +
+        "rdum.colum_formula_desc ," +
+        "rdumc.colum_point ," +
+        "rdumc.colum_desc ," +
+        "rdum.need_remember " +
+        "FROM " +
+        "report_defined_unit_multdim rdum,report_defined_unit_multdim_col rdumc," +
+        "report_defined_unit_multdim_dim rdumd where rdum.unit_id=#{unitId} and" +
+        " rdum.colum_id = rdumc.colum_id and rdum.dim_id = rdumd.dim_id")
+    List<GridColumDefined> getGridColumDefindsByUNit(String unitId);
+
     @Select("select * from report_defined_unit_onedim where colum_id=#{columId}")
     GridColumDefined getOnedimColumn(@Param("columId") String columId);
 

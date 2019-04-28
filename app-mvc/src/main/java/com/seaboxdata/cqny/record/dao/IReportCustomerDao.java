@@ -139,4 +139,7 @@ public interface IReportCustomerDao {
             "</foreach> and rc.report_origin=so.origin_id" +
             "</script>")
     List<ReportCustomer> getAllReportInfoByOrigins(@Param("originParams") List<Integer> originParams);
+
+    @Select("select * from report_customer_data where report_id=#{reportId}")
+    List<ReportCustomerData> getAllCustInputData(String reportId);
 }

@@ -14,7 +14,9 @@ public interface ReportCustomerService {
     PageResult pagerReport( Integer currPage, Integer pageSize, List<Integer> originIds);
     ReportUnitCustomerContext getUnitContext(String reportId, String unitId, String unitType);
     void createReportCustomer(ReportCustomer reportCustomer);
-    void updateOrInsertSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas,boolean isUpdate);
+    void updateOrInsertSimpleUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds,
+                                         ArrayList<ReportCustomerData> columDatas,
+                                         boolean isUpdate);
 
     ReportCustomer checkReportCustomer(String reportId);
 
@@ -24,6 +26,7 @@ public interface ReportCustomerService {
 
     Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
     Map<String,String> validateSimpleUnitByDimensions(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
+    Map<String,String> validateGridUnit(ArrayList<GridColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
     void overrideSimpleUnitContext(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas);
     void updateOrInsertGroupUnitContext(ArrayList<SimpleColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas,boolean isUpdate);
     void updateOrInsertGridUnitContext(ArrayList<GridColumDefined> simpleColumDefineds, ArrayList<ReportCustomerData> columDatas, boolean isUpdate);
@@ -37,4 +40,6 @@ public interface ReportCustomerService {
     Map<ReportStatus, Integer> getReportInfos(Integer userOriginId);
 
     PageResult getChildrenReportInfos(Integer currPage, Integer pageSize, List<Integer> origins );
+
+    void refreshFomular(String reportDefindId,String reportId);
 }

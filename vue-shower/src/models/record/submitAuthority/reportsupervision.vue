@@ -209,7 +209,7 @@
               label: response[i].origin_name
             })
           }
-          console.log(response)
+          // console.log(response)
         })
       },
       reportShow(reportId){

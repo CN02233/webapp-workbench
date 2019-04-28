@@ -232,7 +232,7 @@
     },
     data() {
       var validateFormula = (rule, value, callback) => {
-        console.log(value)
+        // console.log(value)
         if (value === '') {
           callback(new Error('必填字段'));
         }else{
