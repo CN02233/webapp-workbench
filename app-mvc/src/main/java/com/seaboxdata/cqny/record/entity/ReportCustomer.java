@@ -27,8 +27,11 @@ public class ReportCustomer {
     private List<UnitDefined> unitEntities;
     private String pass_auth;
     private String report_status;
+
     private Date report_data_start;
+    private String report_data_start_str;
     private Date report_data_end;
+    private String report_data_end_str;
 
     //merge from record.reportunit.ReportCustomer
     private String user_name;
@@ -174,6 +177,10 @@ public class ReportCustomer {
 
     public void setReport_data_start(Date report_data_start) {
         this.report_data_start = report_data_start;
+        if(report_data_start!=null){
+            this.report_data_start_str = (new SimpleDateFormat("yyyy-MM-dd").format(report_data_start));
+        }
+
     }
 
     public Date getReport_data_end() {
@@ -182,5 +189,24 @@ public class ReportCustomer {
 
     public void setReport_data_end(Date report_data_end) {
         this.report_data_end = report_data_end;
+        if(report_data_end!=null){
+            this.report_data_end_str = (new SimpleDateFormat("yyyy-MM-dd").format(report_data_end));
+        }
+    }
+
+    public String getReport_data_start_str() {
+        return report_data_start_str;
+    }
+
+    public void setReport_data_start_str(String report_data_start_str) {
+        this.report_data_start_str = report_data_start_str;
+    }
+
+    public String getReport_data_end_str() {
+        return report_data_end_str;
+    }
+
+    public void setReport_data_end_str(String report_data_end_str) {
+        this.report_data_end_str = report_data_end_str;
     }
 }

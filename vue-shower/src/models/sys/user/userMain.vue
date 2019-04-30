@@ -61,6 +61,22 @@
           <el-input v-model="formData.user_name" auto-complete="off" ></el-input>
         </el-form-item>
 
+        <el-form-item :size="small" label="用户类型" >
+          <el-select v-model="formData.user_type" style="width:100%;" placeholder="请选择用户类型">
+            <el-option label="填报人" value='1'></el-option>
+            <el-option label="审核人" value='0'></el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item :size="small" label="用户状态" >
+          <el-select v-model="formData.user_status" style="width:100%;" placeholder="请选择用户状态">
+            <el-option label="正常" value='0'></el-option>
+            <el-option label="锁定" value='1'></el-option>
+            <el-option label="密码过期" value="3"></el-option>
+            <el-option label="停用" value='4'></el-option>
+          </el-select>
+        </el-form-item>
+
         <el-form-item :size="small" label="所属机构" >
           <treeselect v-model="formData.origin_id"  :options="options" />
         </el-form-item>
@@ -117,14 +133,22 @@
         formData: {
           user_id:null,
           user_name: null,
+          user_type: null,
+          user_status: null,
           origin_id: null,
         },
-        options: []
+        options:[]
       }
     },
     validations: {
       formData: {
         user_name: {
+          required
+        },
+        user_type: {
+          required
+        },
+        user_status: {
           required
         },
         origin_id: {
@@ -203,6 +227,8 @@
         this.formData = {
           user_id: null,
           user_name: null,
+          user_status: null,
+          user_type: null,
           origin_id: null
         }
       },
@@ -210,9 +236,10 @@
         this.clearData()
         this.showModalPage = true
         this.isEditModal = true
-        console.log(row)
         this.formData.user_name = row.user_name
         this.formData.user_id = row.user_id
+        this.formData.user_status = row.user_status
+        this.formData.user_type = row.user_type
         // set options value
         this.BaseRequest({
           url: 'origin/getOriginByUser',
@@ -231,7 +258,10 @@
           this.BaseRequest({
             url: 'sys/user/updateSaveUser',
             method: 'POST',
-            data: {'user_name': this.formData.user_name, 'user_id': this.formData.user_id, 'user_type': this.userType}
+            data: {'user_name': this.formData.user_name,
+              'user_id': this.formData.user_id,
+              'user_type': this.formData.user_type,
+              'user_status': this.formData.user_status}
           }).then(() => {
             this.Message.success('保存成功')
             // add user——origin relation
@@ -243,7 +273,10 @@
           this.BaseRequest({
             url: 'sys/user/saveNewUser',
             method: 'get',
-            params: {'user_name': this.formData.user_name, 'user_type': this.userType}
+            params: {'user_name': this.formData.user_name,
+              'user_id': this.formData.user_id,
+              'user_type': this.formData.user_type,
+              'user_status': this.formData.user_status}
           }).then((response) => {
             this.Message.success('保存成功')
             // add user——origin relation

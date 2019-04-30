@@ -170,6 +170,11 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 
     }
 
+    @Override
+    public void updateReportDefined(ReportDefinedEntity reportDefined) {
+        reportStatementsDao.updateReportStatements(reportDefined);
+    }
+
     private void groupCopyUnit(List<CopyReportDefinedTmp> copyReportDefinedTmps,
                                Map<Integer,Map<String,String>> groupResult){
         for (CopyReportDefinedTmp copyReportDefinedTmp : copyReportDefinedTmps) {

@@ -11,6 +11,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
+    name:"root",
     path: '/',
     // redirect: 'casLogin'
     redirect: 'login'

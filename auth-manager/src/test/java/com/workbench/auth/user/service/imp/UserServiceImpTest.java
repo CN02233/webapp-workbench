@@ -2,6 +2,7 @@ package com.workbench.auth.user.service.imp;
 
 import com.AbstractTestService;
 import com.github.pagehelper.Page;
+import com.webapp.support.encryption.MD5;
 import com.webapp.support.jsonp.JsonpSupport;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import javax.annotation.Resource;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class UserServiceImpTest extends AbstractTestService {
     public void checkUser() throws Exception {
 
     }
+
 
     @Test
     public void listAllUser() throws Exception {
@@ -48,7 +51,7 @@ public class UserServiceImpTest extends AbstractTestService {
             User user = new User();
             user.setUser_name("Test"+i);
             user.setUser_status("1");
-            user.setUser_type(1);
+            user.setUser_type("1");
             userService.createUser(user);
             saveuserList.add(user);
         }
@@ -64,7 +67,7 @@ public class UserServiceImpTest extends AbstractTestService {
         User user = new User();
         user.setUser_id(1);
         user.setUser_name("scq-n2");
-        user.setUser_type(1);
+        user.setUser_type("1");
         user.setUser_status("1");
 
         userService.updateUser(user);

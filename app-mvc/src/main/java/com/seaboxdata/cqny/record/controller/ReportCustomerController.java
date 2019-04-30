@@ -128,6 +128,16 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("getReportBaseInfo")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getReportBaseInfo(String reportId,String reportDefinedId){
+        Map<String,Object> reportBaseInfo = reportCustomerService.getReportBaseInfo(reportId,reportDefinedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(
+                JsonResult.RESULT.SUCCESS, "获取欧成功", null,reportBaseInfo);
+        return jsonResult;
+    }
+
     @RequestMapping("getUnitContext")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
@@ -257,7 +267,12 @@ public class ReportCustomerController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult doCommitAuth(String reportId){
-        reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
+        ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
+        if("Y".equals(reportCustomer.getPass_auth())){
+            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.APPROVE);
+        }else{
+            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
+        }
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 
         return jsonResult;

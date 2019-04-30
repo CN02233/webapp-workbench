@@ -27,10 +27,14 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     @Override
     public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize) {
-        Set finalOriginSet = getOrigins(userId);
-        if(finalOriginSet==null){
-            return null;
-        }
+//        Set finalOriginSet = getOrigins(userId);
+//        if(finalOriginSet==null){
+//            return null;
+//        }
+        Origin origin = submitauthorityDao.getOriginByUserId(userId);
+        Set finalOriginSet = new HashSet();
+        finalOriginSet.add(origin.getOrigin_id());
+
         Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(currPage, pageSize, reportStatus, finalOriginSet);
         logger.debug("approveList :{}",approveList);
         PageResult pageResult = PageResult.pageHelperList2PageResult(approveList);

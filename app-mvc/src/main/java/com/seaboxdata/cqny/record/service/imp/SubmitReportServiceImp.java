@@ -52,6 +52,10 @@ public class SubmitReportServiceImp implements SubmitReportService {
             if(reportDefined==null){
                 return;
             }
+            SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+            reportDefined.setReport_start_date(format.parse(submitReportEntity.getReport_start_date()));
+            reportDefined.setReport_end_date(format.parse(submitReportEntity.getReport_end_date()));
+            reportStatementsService.updateReportDefined(reportDefined);
 
             logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
             List<String> alOrigin = getAllOrigin(reportDefinedId);

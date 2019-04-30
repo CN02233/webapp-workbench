@@ -12,7 +12,7 @@ public class ReportDefinedEntity {
 
     private Integer defined_id;
     private String defined_name;
-    @JsonFormat( pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+    @JsonFormat( pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date create_date;
     private Integer origin_id;
     private String status;
@@ -20,6 +20,12 @@ public class ReportDefinedEntity {
     //辅助属性、前端显示name
     private String origin_name;
     private String user_name;
+
+    @JsonFormat( pattern = "yyyy-MM-dd",timezone = "GMT+8")
+    private Date report_start_date;
+
+    @JsonFormat( pattern = "yyyy-MM-dd",timezone = "GMT+8")
+    private Date report_end_date;
 
     //add by SongChaoqun
     private List<UnitDefined> units;
@@ -94,5 +100,21 @@ public class ReportDefinedEntity {
 
     public void setUser_name(String user_name) {
         this.user_name = user_name;
+    }
+
+    public Date getReport_start_date() {
+        return report_start_date;
+    }
+
+    public void setReport_start_date(Date report_start_date) {
+        this.report_start_date = report_start_date;
+    }
+
+    public Date getReport_end_date() {
+        return report_end_date;
+    }
+
+    public void setReport_end_date(Date report_end_date) {
+        this.report_end_date = report_end_date;
     }
 }

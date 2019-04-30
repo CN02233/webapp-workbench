@@ -17,7 +17,7 @@ public class User {
     private String user_pwd;
     private String user_name;
     private String user_name_cn;
-    private int user_type;
+    private String user_type;
     private Date reg_date;
     private String user_status;
     private Date last_login_time;
@@ -42,11 +42,11 @@ public class User {
         this.user_name = user_name;
     }
 
-    public int getUser_type() {
+    public String getUser_type() {
         return user_type;
     }
 
-    public void setUser_type(int user_type) {
+    public void setUser_type(String user_type) {
         this.user_type = user_type;
     }
 

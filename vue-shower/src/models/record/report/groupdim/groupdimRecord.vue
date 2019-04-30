@@ -69,7 +69,8 @@
         }).then(response=>{
           if(loading){
             loading.close();
-          }          this.definedGroup = []
+          }
+          this.definedGroup = []
           this.definedColums = []
           this.baseGroup = []
           let report_id = null
@@ -144,6 +145,17 @@
         //   spinner: 'el-icon-loading',
         //   background: 'rgba(0, 0, 0, 0.7)'
         // });
+        const $this = this
+        $this.definedGroup.forEach(g=>{
+          let key0 = g.unit_id + '_' + g.colum_id + '_' + g.dimensions_id
+          if($this.columDatas[key0])
+            $this.columDatas[key0].report_data = g.report_data
+          g.children.forEach(x=>{
+            let key1 = x.unit_id+'_'+x.colum_id + '_' + g.dimensions_id
+            if($this.columDatas[key1])
+              $this.columDatas[key1].report_data = x.report_data
+          })
+        })
         this.BaseRequest({
           url:"/reportCust/saveGroupUnitContext",
           method:'post',
@@ -363,6 +375,7 @@
       this.saveFlag = this.$route.params.saveFlag
       if(this.hasMounted){
         console.log(this.unitId+"--缓存校验")
+        debugger
         const columDataTmp = this.definedGroup
         this.definedGroup = null
         this.definedGroup = columDataTmp

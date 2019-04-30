@@ -107,17 +107,17 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
         Map<String,SimpleColumDefined> fomularsTmp = new HashMap<>();
         if(simpleColumDefineds!=null&&simpleColumDefineds.size()>0){
-            simpleColumDefineds.forEach(simpleColumDefined->{
+            for (SimpleColumDefined simpleColumDefined : simpleColumDefineds) {
                 Integer columType = new Integer(simpleColumDefined.getColum_type());
                 if(ColumType.FORMULA.compareWith(columType)){
                     fomularsTmp.put(simpleColumDefined.getUnit_id()+"_"+simpleColumDefined.getColum_id(),simpleColumDefined);
                 }
-            });
+            }
         }
 
 
         if(columDatas!=null&&columDatas.size()>0){
-            columDatas.forEach(columData->{
+            for (ReportCustomerData columData : columDatas) {
                 Integer reportId = columData.getReport_id();
                 String unitId = columData.getUnit_id();
                 String columnId = columData.getColum_id();
@@ -140,7 +140,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 } else{//无公式值刷新
                     custDataArray.add(columData);
                 }
-            });
+            }
         }
 
         return resultMap;
@@ -478,6 +478,38 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> getReportBaseInfo(String reportId,String reportDefinedId) {
+        List<ReportCustomer> allReportCustomer = new ArrayList<>();
+        if(reportDefinedId!=null){
+            allReportCustomer = reportCustomerDao.getReportBaseInfoByDefinedId(reportDefinedId);
+        }else{
+            allReportCustomer = reportCustomerDao.getReportBaseInfo(reportId);
+
+        }
+        Map<String,Object> baseInfoMap = new HashMap<>();
+        List<String> passOriginNames = new ArrayList<>();
+        int count=0;
+        for (ReportCustomer reportCustomer : allReportCustomer) {
+            String reportStartDate = reportCustomer.getReport_start_date_str();
+            String reportEndDate = reportCustomer.getReport_end_date_str();
+            String reportDataStart = reportCustomer.getReport_data_start_str();
+            String reportDataEnd = reportCustomer.getReport_data_end_str();
+            if(count==0){
+                baseInfoMap.put("reportStartDate",reportStartDate);
+                baseInfoMap.put("reportEndDate",reportEndDate);
+                baseInfoMap.put("reportDataStart",reportDataStart);
+                baseInfoMap.put("reportDataEnd",reportDataEnd);
+            }
+            count++;
+            if("Y".equals(reportCustomer.getPass_auth())){
+                passOriginNames.add(reportCustomer.getReport_origin_name());
+            }
+        }
+        baseInfoMap.put("passOriginNames",passOriginNames);
+        return baseInfoMap;
     }
 
     @Override

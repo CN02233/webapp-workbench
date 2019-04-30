@@ -37,6 +37,16 @@
             label="创建时间">
           </el-table-column>
           <el-table-column
+            prop="report_start_date"
+            align="left"
+            label="报送起始日期">
+          </el-table-column>
+          <el-table-column
+            prop="report_end_date"
+            align="left"
+            label="报送截止日期">
+          </el-table-column>
+          <el-table-column
             prop="user_name"
             align="left"
             label="创建人">
@@ -57,6 +67,9 @@
               <el-button
                 size="mini" v-if="scope.row.status==4" @click="viewDefinedUnit(scope.row.defined_id)"
               >报送单元查看</el-button>
+              <el-button
+                size="mini" v-if="scope.row.status==4" @click="viewSubDefined(scope.row.defined_id)"
+              >查看</el-button>
               <el-button v-if="scope.row.status==0"
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -199,6 +212,53 @@
         <el-button type="primary" @click="submitReport()">发 布</el-button>
       </div>
     </el-dialog>
+
+    <!--reportDataStart: '',-->
+    <!--reportDataEnd: '',-->
+    <!--reportDataStart: '',-->
+    <!--reportDataEnd: '',-->
+    <!--passOriginNames: [],-->
+    <el-dialog class="table-options-modal" title="已发布报表设置查看" :visible.sync="submitedModel" >
+      <el-row :gutter="16">
+        <el-col :sm="20">
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">报送起始日期</el-col>
+            <el-col :span="15">
+              <el-input :disabled="true" v-model="submitedParams.reportStartDate"></el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">报送截止日期</el-col>
+            <el-col :span="15">
+              <el-input :disabled="true" v-model="submitedParams.reportEndDate"></el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">填报区间开始日期</el-col>
+            <el-col :span="15">
+              <el-input :disabled="true" v-model="submitedParams.reportDataStart"></el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">填报区间截止日期</el-col>
+            <el-col :span="15">
+              <el-input :disabled="true" v-model="submitedParams.reportDataEnd"></el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">不需审批机构</el-col>
+            <el-col align="left" :span="15">
+              <el-tag v-for="originName in submitedParams.passOriginNames">{{originName}}</el-tag>
+
+            </el-col>
+          </el-row>
+        </el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="submitedModel = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
   </WorkMain>
 </template>
 
@@ -220,6 +280,7 @@ export default {
       totalPage: 1,
       showModalPage: false,
       submitModel: false,
+      submitedModel: false,
       isEditModal: false,
       dialogTitle: '',
       origin_ids: [],
@@ -257,6 +318,13 @@ export default {
         report_data_end_str: '',
         check_origins: [],
         defined_origins: []
+      },
+      submitedParams:{
+        reportStartDate: '',
+        reportEndDate: '',
+        reportDataStart: '',
+        reportDataEnd: '',
+        passOriginNames: [],
       }
     }
   },
@@ -494,6 +562,18 @@ export default {
           'definedId': definedId,
           'isView': 'Y'
         }
+      })
+    },
+    viewSubDefined(reportDefinedId){
+      this.submitedModel = true
+      //reportDefinedId
+      this.BaseRequest({
+        url: '/reportCust/getReportBaseInfo',
+        params: {
+          reportDefinedId: reportDefinedId
+        }
+      }).then(response => {
+        this.submitedParams = response
       })
     },
     openSubmitPrams (definedData) {

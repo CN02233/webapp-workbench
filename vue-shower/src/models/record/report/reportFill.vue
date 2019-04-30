@@ -38,6 +38,7 @@
   import WorkMain from "@/models/public/WorkMain"
 
   export default {
+    inject:['reload'],
     name: "ReportFill",
     describe:"报送填报主页面",
     components: {
@@ -293,26 +294,20 @@
               this.BaseRequest({
                 url:"/reportCust/refreshFomular",
                 params:{
-                  reportDefinedId:this.reportDefinedId
+                  reportDefinedId:this.reportDefinedId,
+                  reportId:this.reportId,
                 }
               }).then(response=>{
                 loading.close();
                 if(saveFlag=='S-V'){
                   this.reportCommitAuth()
-
-                }else{
-                  this.$router.push({
-                    name: "reportFill",
-                    query:{
-                      "reportId":this.reportId,
-                      "refresh":Math.random()
-                    }
-                  });
+                }
+                else{
+                  // this.$router.go(0);
+                  $this.reload()
                 }
               });
             }
-
-
           }
         }
       },
@@ -367,11 +362,15 @@
     },
 
     mounted() {
+      console.log("mounted is running......")
       this.reportId = this.$route.query.reportId
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
       }
       this.checkUnitStep()
+    },
+    activated() {
+      console.log("activate is runnig......")
     }
   }
 </script>

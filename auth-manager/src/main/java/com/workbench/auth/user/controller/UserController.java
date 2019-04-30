@@ -33,7 +33,7 @@ public class UserController {
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String getUserByPage(int currPage, int pageSize,User user, int userType){
+    public String getUserByPage(int currPage, int pageSize,User user, String userType){
         user.setUser_type(userType);
         Page<User> userPageList = userService.listUsersForPage(currPage, pageSize,user);
         PageResult pageResult = PageResult.pageHelperList2PageResult(userPageList);

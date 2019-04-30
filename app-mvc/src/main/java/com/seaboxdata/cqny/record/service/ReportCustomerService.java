@@ -42,4 +42,6 @@ public interface ReportCustomerService {
     PageResult getChildrenReportInfos(Integer currPage, Integer pageSize, List<Integer> origins );
 
     void refreshFomular(String reportDefindId,String reportId);
+
+    Map<String, Object> getReportBaseInfo(String reportId,String reportDefinedId);
 }

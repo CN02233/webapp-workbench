@@ -6,7 +6,25 @@
 
 <script>
   export default {
-    name: 'App'
+    name: 'App',
+    provide(){
+      return {
+        reload : this.reload
+      }
+    },
+    data(){
+      return {
+        isRouteAlive :true
+      }
+    },
+    methods:{
+      reload(){
+        this.isRouteAlive = false
+        this.$nextTick(function(){
+          this.isRouteAlive = true
+        })
+      }
+    }
   }
 </script>
 <style>

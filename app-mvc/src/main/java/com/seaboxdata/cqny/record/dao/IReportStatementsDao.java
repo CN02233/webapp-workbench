@@ -45,6 +45,12 @@ public interface IReportStatementsDao {
             +"<if test='create_user!=null'>"
             +"create_user=#{create_user} ,"
             +"</if>"
+            +"<if test='report_start_date!=null'>"
+            +"report_start_date=#{report_start_date} ,"
+            +"</if>"
+            +"<if test='report_end_date!=null'>"
+            +"report_end_date=#{report_end_date} ,"
+            +"</if>"
             +"create_date=sysdate() "
             +"</set>where defined_id = #{defined_id}</script>")
     void updateReportStatements(ReportDefinedEntity reportDefined);
@@ -57,6 +63,8 @@ public interface IReportStatementsDao {
             "\tb.origin_name,\n" +
             "\tc.user_name,\n" +
             "\tb.create_user,\n" +
+            "\ta.report_start_date,\n" +
+            "\ta.report_end_date,\n" +
             "\ta.origin_id\n" +
             "FROM\n" +
             "\treport_defined a\n" +

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface IReportCustomerDao {
 
@@ -140,6 +141,15 @@ public interface IReportCustomerDao {
             "</script>")
     List<ReportCustomer> getAllReportInfoByOrigins(@Param("originParams") List<Integer> originParams);
 
-    @Select("select * from report_customer_data where report_id=#{reportId}")
-    List<ReportCustomerData> getAllCustInputData(String reportId);
+    @Select("select distinct rc.*,so.origin_name as report_origin_name from " +
+            "report_customer rc left join " +
+            " (select report_defined_id from " +
+            " report_customer where report_id = #{reportId}) rct  on rc.report_defined_id =rct.report_defined_id " +
+            " inner join sys_origin so on rc.report_origin=so.origin_id")
+    List<ReportCustomer> getReportBaseInfo(String reportId);
+
+    @Select("select distinct rc.*,so.origin_name as report_origin_name from " +
+            "report_customer rc " +
+            " inner join sys_origin so on  rc.report_defined_id =#{reportDefinedId} and rc.report_origin=so.origin_id")
+    List<ReportCustomer> getReportBaseInfoByDefinedId(String reportDefinedId);
 }

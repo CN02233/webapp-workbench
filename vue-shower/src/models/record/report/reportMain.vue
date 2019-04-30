@@ -35,14 +35,20 @@
             align="left"
             label="报送结束时间">
           </el-table-column>
+          <el-table-column
+            prop="report_start_date_str"
+            :formatter="fomartterReportDataDate"
+            align="left"
+            label="报表期间">
+          </el-table-column>
 
           <el-table-column
             label="操作"
             align="left"
           >
             <template slot-scope="scope">
-              <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
-              <el-button size="mini" v-if="scope.row.report_status != 0" @click="viewReportFill(scope.row.report_id)">查看</el-button>
+              <el-button size="mini" v-if="scope.row.report_status == 0 &&loginUserType=='1'" @click="reportFIll(scope.row.report_id)">填报</el-button>
+              <el-button size="mini" v-if="scope.row.report_status != 0||loginUserType=='0'" @click="viewReportFill(scope.row.report_id)">查看</el-button>
               <!--<el-button size="mini" v-if="scope.row.report_status == 9" type="danger" @click="reportCommitAuth(scope.row.report_id)">提交</el-button>-->
               <!--<el-button size="mini" v-if="scope.row.report_status == 0" type="danger"  @click="reportCommitAuth( scope.row.report_id)">提交</el-button>-->
             </template>
@@ -72,6 +78,7 @@
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1,
+        loginUserType:'',
         status_cn:{
            '0' : '正常',
            '1':'审批中',
@@ -110,6 +117,17 @@
           // $this.origins = response.origins
           $this.totalPage = response.totalPage
 
+        })
+      },
+      checkUserType(){
+        this.BaseRequest({
+          url:'/sys/login/checkLoginUser',
+          method:"get"
+        }).then(loginUserInfo=>{
+          // console.log(JSON.stringify(loginUserInfo))
+          if(loginUserInfo!=null){
+            this.loginUserType = loginUserInfo.user_type
+          }
         })
       },
       reportFIll(reportId){
@@ -157,11 +175,15 @@
       },
       getReportStatus(rowData){
         return this.status_cn[rowData.report_status]
+      },
+      fomartterReportDataDate(rowData){
+        return rowData.report_data_start_str+'~'+rowData.report_data_end_str
       }
     },
     mounted: function () { // 初始化
       this.reportDataList = []
       this.getTableData(1)
+      this.checkUserType()
     }
   }
 </script>
