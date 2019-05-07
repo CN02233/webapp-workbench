@@ -96,18 +96,25 @@ public class ReportCustomerController {
         int currUserId = currUser.getUser_id();
 
         Origin userOrigin = originService.getOriginByUser(currUserId);
-        Integer userOriginId = userOrigin.getOrigin_id();
-        List<Origin> childrenOrigin = originService.checkAllChildren(userOriginId);
-        List<Integer> originParams = new ArrayList<>();
-        if(childrenOrigin!=null){
-            for (Origin origin : childrenOrigin) {
-                originParams.add(origin.getOrigin_id());
+        if(userOrigin!=null){
+            Integer userOriginId = userOrigin.getOrigin_id();
+            List<Origin> childrenOrigin = originService.checkAllChildren(userOriginId);
+            List<Integer> originParams = new ArrayList<>();
+            if(childrenOrigin!=null){
+                for (Origin origin : childrenOrigin) {
+                    originParams.add(origin.getOrigin_id());
+                }
             }
+
+            PageResult reportInfos = reportCustomerService.getChildrenReportInfos(currPage, pageSize,originParams);
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,reportInfos);
+            return jsonResult;
+
+        }else{
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,null);
+            return jsonResult;
         }
 
-        PageResult reportInfos = reportCustomerService.getChildrenReportInfos(currPage, pageSize,originParams);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,reportInfos);
-        return jsonResult;
     }
 
     /**
@@ -271,7 +278,9 @@ public class ReportCustomerController {
         if("Y".equals(reportCustomer.getPass_auth())){
             reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.APPROVE);
         }else{
-            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
+//            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
+            //modify by SongChaoqun 20190506 审批直接到复核 不走上级审批流程
+            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REVIEW);
         }
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 

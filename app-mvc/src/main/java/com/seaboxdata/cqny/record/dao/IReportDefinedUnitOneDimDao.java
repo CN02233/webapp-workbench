@@ -28,7 +28,7 @@ public interface IReportDefinedUnitOneDimDao {
     @Select("select * from report_unit_info")
     List<UnitDefined> getUnitByOrigin(String originId);
 
-    @Select("select * from report_defined_unit_onedim where unit_id = #{unitId}")
+    @Select("select * from report_defined_unit_onedim where unit_id = #{unitId} order by colum_order")
     List<SimpleColumDefined> getColumByUnit(String unitId);
 
     @Delete("delete from report_defined_unit_onedim where colum_id=#{columnId}")

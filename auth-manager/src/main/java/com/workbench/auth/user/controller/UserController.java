@@ -33,9 +33,9 @@ public class UserController {
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")
-    public String getUserByPage(int currPage, int pageSize,User user, String userType){
+    public String getUserByPage(int currPage, int pageSize,User user, String userType,String originId){
         user.setUser_type(userType);
-        Page<User> userPageList = userService.listUsersForPage(currPage, pageSize,user);
+        Page<User> userPageList = userService.listUsersForPage(currPage, pageSize,user,originId);
         PageResult pageResult = PageResult.pageHelperList2PageResult(userPageList);
         String jsonResult = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, pageResult);
         return jsonResult;

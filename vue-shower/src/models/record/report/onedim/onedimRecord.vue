@@ -23,18 +23,29 @@
   import WorkMain from "@/models/public/WorkMain"
 
   export default {
-    name: "onedimRecord",
+    name: "OnedimRecord",
     describe:"一维报表填报单元",
     components: {
       WorkMain
     },
+    props:{
+      reportId:{
+        type:String
+      },
+      unitId:{
+        type:Number
+      },
+      unitType:{
+        type:Number
+      },
+      isView:{
+        type:String
+      }
+
+    },
     data() {
       return {
-        reportId:"",
-        unitId:"",
-        unitType:"",
         lastStep:false,
-        isView:'N',
         saveFlag:'N',//载入页面后是否保存当前页面数据 Y:保存 N：不做任何动作仅仅载入 S:提交 V：校验
         definedColums:[],
         columDatas:{},
@@ -44,7 +55,6 @@
     },
     methods:{
       getUnitContext(){
-
         let loading = null
         if(this.saveFlag=='N') {
           loading = this.$loading({
@@ -106,13 +116,10 @@
           }
         );
       },
-      doSaveUnitContext(){
-        const loading = this.$loading({
-          lock: true,
-          text: '保存报送信息中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+      doSomething(){
+
+      },
+      doSaveUnitContext(processName){
         this.BaseRequest({
           url:"/reportCust/saveSimpleUnitContext",
           method:'post',
@@ -121,19 +128,15 @@
             columDatas:this.dataObject
           }
         }).then(response=>{
-          loading.close();
-          this.$emit("refreshSaveLoading",this.unitId,"保存成功")
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          this.$emit("saveReportsCallBack",this.unitId,processName)
+        }).catch(error => {
+          this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
       },
 
-      doValidateUnitContext(){
-        const valloading = this.$loading({
-          lock: true,
-          text: '数据校验中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+      doValidateUnitContext(processName){
         this.BaseRequest({
           url:"/reportCust/validateSimpleUnitContext",
           method:'post',
@@ -142,7 +145,6 @@
             columDatas:this.dataObject
           }
         }).then(response=>{
-          valloading.close();
           let validateFailed = false
           let failtMes = ""
           if(response!=null){
@@ -162,145 +164,30 @@
             }
           })
 
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          let failedMessage = null
           if(validateFailed){
-            this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            failedMessage = "有输入错误"
           }
-        });
+          const dataTmp = this.dataObject
+          this.dataObject = null
+          this.dataObject = dataTmp
+          this.$emit("validateReportsCallBack",this.unitId,processName,failedMessage)
 
-      },
-      saveUnitContext(needUpdateStep){
-        const $this = this
-
-        // validateSimpleUnitContext
-        const valloading = this.$loading({
-          lock: true,
-          text: '数据校验中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
-        this.BaseRequest({
-          url:"/reportCust/validateSimpleUnitContext",
-          method:'post',
-          data:{
-            definedColums:this.definedColums,
-            columDatas:this.dataObject
-          }
-        }).then(response=>{
-          valloading.close();
-          let validateFailed = false
-          if(response!=null){
-            const validateFailedKeys = Object.keys(response)
-            let failtMes = ""
-            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
-              validateFailed = true
-              validateFailedKeys.forEach(validateFailedKey=>{
-                const failedReason = response[validateFailedKey]
-                failtMes+=(validateFailedKey+":"+failedReason+"<br><br>")
-              })
-
-              this.$notify({
-                dangerouslyUseHTMLString: true,
-                message: '<span style="font-size:15px;color:red;font-weight: bold">'+failtMes+'</span>'
-              })
-            }
-          }
-
-          if(!validateFailed){
-            const loading = this.$loading({
-              lock: true,
-              text: '保存报送信息中.......',
-              spinner: 'el-icon-loading',
-              background: 'rgba(0, 0, 0, 0.7)'
-            });
-            this.BaseRequest({
-              url:"/reportCust/saveSimpleUnitContext",
-              method:'post',
-              data:{
-                definedColums:this.definedColums,
-                columDatas:this.dataObject
-              }
-            }).then(response=>{
-              loading.close();
-              $this.Message.success("保存成功")
-              if(needUpdateStep){
-                $this.updateStep()
-              }else{
-                $this.getUnitContext()
-              }
-            });
-          }
-        });
-
-
-
-      },
-      updateStep(){
-        const loading = this.$loading({
-          lock: true,
-          text: '更新报送步骤.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
-        const $this = this
-        this.BaseRequest({
-          url:"/reportCust/updateStep",
-          method:'get',
-          params:{
-            reportId:this.reportId
-          }
-        }).then(response=>{
-          loading.close();
-          $this.Message.success("更新成功")
-
-          this.$emit("refreshReportFill")
-          // this.$router.push({
-          //   path: '/record/report/reportFill',
-          //   query:{
-          //     'reportId':this.reportId
-          //   }
-          // });
         });
       },
-      nextStep(){
-        console.log('next step is running....'+this.unitId)
-        console.log("data is "+JSON.stringify(this.dataObject))
-        // this.saveUnitContext(true)
-      },
-      checkStepAndSave(saveLink){
-        console.log(saveLink.unit_id)
-        this.$emit("checkStepAndSave",saveLink.nextUnit)
+      doSubmitContext(){
+        this.doSaveUnitContext(true)
       },
       setSaveFlag(saveFlag){
         this.saveFlag = saveFlag
       }
     },
     mounted:function(){
-      this.reportId = this.$route.query.reportId
-      this.unitId = this.$route.query.unitId
-      this.unitType = this.$route.query.unitType
-      this.isView = this.$route.query.isView
-      this.saveFlag = this.$route.params.saveFlag
       this.getUnitContext()
     },
     activated(){
-      this.saveFlag = this.$route.params.saveFlag
-      if(this.hasMounted){
-        const dataTMp = this.dataObject[0].report_data//由于存在keepalive dataObject更新了页面也不会重新加载 手动修改一个值 再恢复达到页面重载的目的
-        this.dataObject[0].report_data = ""
-        this.dataObject[0].report_data = dataTMp
-        if(this.saveFlag!=null&&this.saveFlag!=undefined){
-          if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
-            this.$emit("refreshSaveLoading",this.unitId,"保存中....")
-            this.doSaveUnitContext()
-          }else if(this.saveFlag=='S'){
-
-          }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
-            this.doValidateUnitContext()
-          }
-        }
-      }
-
     }
   }
 </script>

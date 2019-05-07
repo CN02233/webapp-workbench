@@ -18,6 +18,8 @@ public class ReportCustomerData {
     private Date report_end_date;
     private String report_end_date_str;
 
+    private Integer colum_order;
+
     public Integer getReport_id() {
         return report_id;
     }
@@ -106,5 +108,13 @@ public class ReportCustomerData {
 
     public void setReport_end_date_str(String report_end_date_str) {
         this.report_end_date_str = report_end_date_str;
+    }
+
+    public Integer getColum_order() {
+        return colum_order;
+    }
+
+    public void setColum_order(Integer colum_order) {
+        this.colum_order = colum_order;
     }
 }

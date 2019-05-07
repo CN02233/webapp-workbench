@@ -4,7 +4,7 @@
       <div v-for="(group,ig) in definedGroup">
         <div v-if="ig>0" style="border-top:1px dashed #d0d0d0;margin:0 60px 10px 60px;"></div>
 
-        <el-form-item size="mini"  label="管道负荷率名称">
+        <el-form-item size="mini"  :label="group.colum_name">
           <el-input style="width:50%;float: left;" :disabled="isView=='Y'" v-model="group.report_data" class="group" ></el-input>
 
         </el-form-item>
@@ -26,17 +26,28 @@
   import WorkMain from "@/models/public/WorkMain"
 
   export default {
-    name: "groupdimRecord",
+    name: "GroupdimRecord",
     describe:"一维动态报表填报单元",
     components: {
       WorkMain
     },
+    props:{
+      reportId:{
+        type:String
+      },
+      unitId:{
+        type:Number
+      },
+      unitType:{
+        type:Number
+      },
+      isView:{
+        type:String
+      }
+
+    },
     data() {
       return {
-        reportId:"",
-        isView:'N',
-        unitId:"",
-        unitType:"",
         lastStep:false,
         definedGroup:[],
         definedColums:[],
@@ -138,7 +149,7 @@
           }
         );
       },
-      doSaveUnitContext(){
+      doSaveUnitContext(processName){
         // const loading = this.$loading({
         //   lock: true,
         //   text: '保存报送信息中.......',
@@ -165,12 +176,14 @@
           }
         }).then(response=>{
           // loading.close();
-          this.$emit("refreshSaveLoading",this.unitId,"保存成功")
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
-
+          // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          this.$emit("saveReportsCallBack",this.unitId,processName)
+        }).catch(error => {
+          this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
       },
-      doValidateUnitContext(){
+      doValidateUnitContext(processName){
         const $this = this
         $this.definedGroup.forEach(g=>{
           let key0 = g.unit_id + '_' + g.colum_id + '_' + g.dimensions_id
@@ -221,10 +234,17 @@
             })
           })
 
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          let failedMessage = null
           if(validateFailed){
-            this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            failedMessage = "有输入错误"
+
           }
+          const dataTmp = this.definedGroup
+          this.definedGroup = null
+          this.definedGroup = dataTmp
+          this.$emit("validateReportsCallBack",this.unitId,processName,failedMessage)
         });
       },
       saveUnitContext(needUpdateStep){
@@ -363,12 +383,6 @@
       }
     },
     mounted:function(){
-      this.reportId = this.$route.query.reportId
-      this.unitId = this.$route.query.unitId
-      this.unitType = this.$route.query.unitType
-      this.unitType = this.$route.query.unitType
-      this.lastStep = this.$route.query.lastStep
-      this.isView = this.$route.query.isView
       this.getUnitContext()
     },
     activated(){

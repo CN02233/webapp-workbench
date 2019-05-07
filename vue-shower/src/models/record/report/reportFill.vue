@@ -2,28 +2,36 @@
   <WorkMain :headerItems="['报送管理','报表管理','报表填写']">
     <div class="fill-root">
       <div class="fill-steps">
-        <el-steps direction="vertical" :active="activeStepNum">
-          <el-step @click.native="e => stepClick(e, unitNum) " v-for="(unitEntity,unitNum) in unitEntities" :title="unitEntity.unit_name"></el-step>
+        <el-steps process-status="finish"	direction="vertical" :active="activeStepNum">
+          <el-step :status="validateResult[unitEntity.unit_id]" @click.native="e => stepClick(e, unitNum) "
+                   v-for="(unitEntity,unitNum) in unitEntities"
+                   :title="unitEntity.unit_name"></el-step>
         </el-steps>
       </div>
       <div class="fill-context">
-        <div class="fill-context-child">
-          <keep-alive>
-            <router-view ref="fillContext"
-                         @checkStepAndSave="checkStepAndSave"
-                         @refreshSaveLoading="refreshSaveLoading"
-                         @refreshReportFill="checkUnitStep" :key="$route.fullPath"></router-view>
-          </keep-alive>
+        <div class="fill-context-children">
+          <ReportContextRoot :ref="'reportContextRef'+unitEntity.unit_id"
+            :reportId="reportId"
+            :unitEntity="unitEntity"
+            :isView="isView"
+            @saveReportsCallBack="saveReportsCallBack"
+            @validateReportsCallBack="validateReportsCallBack"
+            @submitReportsCallBack="submitReportsCallBack"
+            class="fill-context-child"
+            v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
+            v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
+          ></ReportContextRoot>
         </div>
+        <!--<div v-if="isView!='Y'" class="fill-context-options">-->
         <div v-if="isView!='Y'" class="fill-context-options">
           <!--当前步骤是最后一步显示提交，已点下一步的步骤不显示下一步只显示保存-->
 
-          <el-button v-if="isView!='Y'" @click="saveContext" type="danger">保存</el-button>
-          <el-button v-if="isView!='Y'" @click="validateContext" type="success">校验</el-button>
-          <el-button v-if="isView!='Y'" @click="submitContext" type="warning">提交</el-button>
-          <!--<el-button type="primary">上一步</el-button>-->
-          <!--<el-button v-if="nextStepBtnType=='NEXT'&&isView!='Y'" @click="nextStep" type="success">下一步</el-button>-->
-          <!--<el-button v-if="nextStepBtnType=='SUBMIT'&&isView!='Y'" @click="reportCommitAuth" type="success">提交</el-button>-->
+          <!--<el-button  @click="saveContext" type="danger">保存</el-button>-->
+          <el-button  @click="doSaveContext" type="danger">保存</el-button>
+          <!--<el-button  @click="validateContext" type="success">校验</el-button>-->
+          <el-button  @click="doValidateContext" type="success">校验</el-button>
+          <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
+          <el-button  @click="doSubmitContext('SAVE')" type="warning">提交</el-button>
         </div>
 
       </div>
@@ -36,13 +44,15 @@
 
 <script>
   import WorkMain from "@/models/public/WorkMain"
+  import ReportContextRoot from "@/models/record/report/reportContextRoot"
 
   export default {
     inject:['reload'],
     name: "ReportFill",
     describe:"报送填报主页面",
     components: {
-      WorkMain
+      WorkMain,
+      ReportContextRoot
     },
     data() {
       return {
@@ -50,16 +60,14 @@
         reportDefinedId:"",
         isView:'N',
         activeStepNum:1,
-        lastStepNum:1,
         currUnitId:'',
-        afterToDoUnitId:'',
-        nextStepBtnType:'NONE',//NEXT下一步 SUBMIT提交 NONE 不显示
         reportCust:{},
         unitEntities:[],
         unitEntityLink:{},
-        saveLoadingContext:'',
-        saveMessageTmp:null,
-        hasCheckedStep:{}
+        doSomethinLoading:null,
+        doneCount:0,
+        doneExcetionMessage:null,
+        validateResult:{}
       }
     },
     methods:{
@@ -76,244 +84,229 @@
             reportId:this.reportId
           }
         }).then(response=>{
-          loading.close();
           if(response){
             this.reportCust = response
             const active_unit = response.active_unit
             this.unitEntities = response.unitEntities
-            this.selectActiveStep(active_unit,true,'N')
+            if(this.unitEntities!=null&&this.unitEntities.length>0){
+              this.currUnitId = this.unitEntities[0].unit_id
+              this.reportDefinedId = this.unitEntities[0].report_defined_id
+            }
+            // this.selectActiveStep(active_unit,true,'N')
 
           }
         });
-      },
-      selectActiveStep(active_unit,isRefresh,saveFlag){
-        if(this.unitEntities){
-          const saveLink = {}
-          let preUnitTmp = null
-          let preUnitId = null
-          this.unitEntities.forEach((unitEntity,eachNum)=>{
-            const unitId = unitEntity.unit_id
-            if(!this.reportDefinedId){
-              this.reportDefinedId = unitEntity.report_defined_id
-            }
-            if(preUnitTmp==null){
-              saveLink.unit_id = unitId
-              const nextObj = {}
-              preUnitTmp = nextObj
-              saveLink.nextUnit = nextObj
-            }else{
-              preUnitTmp.unit_id = unitId
-              const nextObj = {}
-              preUnitTmp.nextUnit = nextObj
-              preUnitTmp = nextObj
-            }
-
-            if(preUnitId){
-              this.unitEntityLink[preUnitId].nextUnit = unitEntity.unit_id
-            }
-            preUnitId = unitEntity.unit_id
-            this.unitEntityLink[unitEntity.unit_id] = {"unit_name":unitEntity.unit_name}
-
-            const unitType = unitEntity.unit_type
-            //当前步骤是最后一步显示提交，已点下一步的步骤不显示下一步只显示保存
-            if(active_unit===unitId){//当前步骤为选择的步骤
-              const unitOrder = unitEntity.unit_order //获取当前单元排序
-              this.activeStepNum = eachNum
-              if(isRefresh){
-                this.lastStepNum = eachNum
-              }
-              this.currUnitId = active_unit
-              if(unitOrder == this.unitEntities.length){
-                this.nextStepBtnType = 'SUBMIT'
-              }else{
-                if(this.lastStepNum==eachNum){
-                  this.nextStepBtnType = 'NEXT'
-                }else{
-                  this.nextStepBtnType = 'NONE'
-                }
-              }
-              let unitAddress = ""
-              if(unitId){
-                if(unitType=='1'){
-                  unitAddress = 'oneDimensionsStaticRecord'
-                }else if(unitType=='2'){
-                  unitAddress = 'oneDimensionsDynamicRecord'
-                }else if(unitType=='3'){//多维静态
-                  unitAddress = 'multDimensionsStaticRecord'
-                }else if(unitType=='4'){//多维树状
-                  unitAddress = 'treeDimensionsDynRecord'
-                }
-                this.hasCheckedStep[unitId]=""
-
-                this.$router.push({
-                  name: unitAddress,
-                  query:{
-                    "reportId":this.reportId,
-                    "unitId":unitId,
-                    "unitType":unitType,
-                    "isView":this.isView
-                  },
-                  params: {
-                    "saveFlag": saveFlag
-                  }
-                });
-
-              }
-            }
-          })
-        }
       },
       //2019 04 26修改 应客户要求，去掉步骤逻辑，用户可随意点选任意填报步骤。
       stepClick(clickObj,unitNum){
         const active_unit = this.unitEntities[unitNum].unit_id
-        this.selectActiveStep(active_unit,true,'N')
-      },
-      getStepIcon(unitNum){
-        if(unitNum<this.lastStepNum){
-            return 'el-icon-success'
-        }else if(unitNum>this.lastStepNum){
-          return ''
-        }else{
-          return 'el-icon-edit'
-        }
+        this.currUnitId = active_unit
+        this.activeStepNum = unitNum
+        // this.selectActiveStep(active_unit,true,'N')
       },
       //2019 04 26修改 应客户要求，去掉步骤逻辑，用户可随意点选任意填报步骤。
       //保存逻辑修改为只保存用户填写信息，不刷新公式信息，另外需要保存所有步骤的信息（用户填写步骤1 后切换到步骤3 步骤1没有点保存按钮 步骤3点了 需要将1的也保存）
-      saveContext(){//保存
-        this.saveLoadingContext = ""
-        if(this.saveMessageTmp){
-          this.saveMessageTmp.close()
-          this.saveMessageTmp = null
-        }
-        this.afterToDoUnitId = this.currUnitId
-
-        this.checkStepAndSave(null,'Y')
-        // this.$refs.fillContext.saveUnitContext(false)
+      doSaveContext(){
+        this.validateResult = {}
+        this.doneCount=0
+        this.doneExcetionMessage = null
+        this.doSomethinLoading = this.$loading({
+          lock: true,
+          text: '保存中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        this.unitEntities.forEach(unitEntity=>{
+          const unitId = unitEntity.unit_id
+          const reportContextRef = this.$refs['reportContextRef'+unitId][0]
+          reportContextRef.doSaveContext()
+        })
       },
-      validateContext(){
-        this.saveLoadingContext = ""
-        if(this.saveMessageTmp){
-          this.saveMessageTmp.close()
-          this.saveMessageTmp = null
-        }
-        this.afterToDoUnitId = this.currUnitId
-        this.checkStepAndSave(null,'V')
-
+      doValidateContext(){
+        this.doneCount=0
+        this.doneExcetionMessage = null
+        this.doSomethinLoading = this.$loading({
+          lock: true,
+          text: '校验中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        this.unitEntities.forEach(unitEntity=>{
+          const unitId = unitEntity.unit_id
+          const reportContextRef = this.$refs['reportContextRef'+unitId][0]
+          reportContextRef.doValidateUnitContext()
+        })
       },
-      submitContext(){
-        this.saveLoadingContext = ""
-        if(this.saveMessageTmp){
-          this.saveMessageTmp.close()
-          this.saveMessageTmp = null
-        }
-        this.afterToDoUnitId = this.currUnitId
-        this.$confirm('提交操作将使该报送报表进入审批流程，进入审批流程后将无法修改填报数据。请确认数据正确性！', '提示', {
-          confirmButtonText: '确定提交',
-          cancelButtonText: '取消',
-          dangerouslyUseHTMLString:true,
-          type: 'warning'
-        }).then(() => {
-          this.checkStepAndSave(null,'S')
-        }).catch(() => {
+      doRefreshFomular(needSubmit){
+        this.doSomethinLoading = this.$loading({
+          lock: true,
+          text: '刷新公式中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        this.BaseRequest({
+          url:"/reportCust/refreshFomular",
+          params:{
+            reportDefinedId:this.reportDefinedId,
+            reportId:this.reportId,
+          }
+        }).then(response=>{
+          this.doSomethinLoading.close();
+          this.$notify({
+            title: '公式刷新完毕',
+            type: 'success',
+            message: "动态计算项已按照您的填写更新"
+          });
+          if(needSubmit){
+            this.reportCommitAuth()
+          }
+        }).catch(error=>{
+          this.doSomethinLoading.close();
+          this.$notify({
+            title: '公式刷新失败',
+            type: 'error',
+            message: error
+          });
         });
-
-
       },
-      /**
-       * @param savedUnitId 待执行单元id
-       * @param saveFlag 保存标志 Y保存 V校验 S提交
-       */
-      checkStepAndSave(savedUnitId,saveFlag){//上一个被保存的unitid
-        if(saveFlag!=null&&saveFlag=='S'){
-          saveFlag = "S-Y"
+      doSubmitContext(processName){
+        this.validateResult = {}
+        this.doneCount=0
+        this.doneExcetionMessage = null
+        const $this = this
+        function doSubmit(){
+          $this.doSomethinLoading = $this.$loading({
+            lock: true,
+            text: '提交中.......',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          })
+          $this.unitEntities.forEach(unitEntity=>{
+            const unitId = unitEntity.unit_id
+            const reportContextRef = $this.$refs['reportContextRef'+unitId][0]
+            reportContextRef.doSubmitContext(processName)
+          })
         }
 
-        let nextUnitId = null
-        //unitId为空，第一个
-        if(!savedUnitId)
-          nextUnitId = this.unitEntities[0].unit_id
-        else
-          nextUnitId = this.unitEntityLink[savedUnitId].nextUnit
-
-        if(nextUnitId){//判断是否存在下一个不存在则已经全部保存完
-          //判断该unit是否被点击过，没被点击过的肯定没有修改 跳过
-          if(saveFlag=='Y'||saveFlag=='S-Y'){
-            if(this.hasCheckedStep[nextUnitId]!=null) {//点击过
-              if(nextUnitId==this.currUnitId){//判断该unit是否为当前正在显示的unit 如果是，直接调用子组件保存方法
-                this.$refs.fillContext.setSaveFlag(saveFlag)
-                this.$refs.fillContext.doSaveUnitContext()
-              }else{//非当前显示unit 跳转到该unit 保存该unit内容
-                this.selectActiveStep(nextUnitId,false,saveFlag)
-              }
-            }else{//没有点击过
-              this.refreshSaveLoading(nextUnitId,"保存中....")
-              this.refreshSaveLoading(nextUnitId,"保存成功")
-              this.checkStepAndSave(nextUnitId,saveFlag)
-            }
-          }else if(saveFlag=='V'||saveFlag=='S-V'){
-            if(nextUnitId==this.currUnitId){//判断该unit是否为当前正在显示的unit 如果是，直接调用子组件保存方法
-              this.$refs.fillContext.setSaveFlag(saveFlag)
-              this.$refs.fillContext.doValidateUnitContext()
-            }else{//非当前显示unit 跳转到该unit 保存该unit内容
-              this.selectActiveStep(nextUnitId,false,saveFlag)
-            }
-          }else{
-
-          }
-
+        if(processName=='VALIDATE'){
+          doSubmit()
         }else{
-          if(saveFlag=='S-Y'){
-            saveFlag = 'S-V'
-            this.saveLoadingContext = ""
-            if(this.saveMessageTmp){
-              this.saveMessageTmp.close()
-              this.saveMessageTmp = null
-            }
-            this.checkStepAndSave(null,saveFlag)
-            return
+          this.$confirm('提交操作将使该报送报表进入审批流程，进入审批流程后将无法修改填报数据。请确认数据正确性！', '提示', {
+            confirmButtonText: '确定提交',
+            cancelButtonText: '取消',
+            dangerouslyUseHTMLString:true,
+            type: 'warning'
+          }).then(() => {
+            doSubmit()
+          }).catch(() => {
+
+          });
+        }
+
+      },
+      saveReportsCallBack(unitId,saveException){
+        this.doneCount = this.doneCount+1
+        if(saveException){
+          if(this.doneExcetionMessage){
+            this.doneExcetionMessage = this.doneExcetionMessage+saveException
+          }else{
+            this.doneExcetionMessage = saveException
           }
-
-          const $this = this
-          this.selectActiveStep(this.afterToDoUnitId,false,"N")
-          setTimeout(function(){
-            if($this.saveMessageTmp){
-              $this.saveMessageTmp.close()
-            }
-          },10000)
-          if(saveFlag=='V'||saveFlag=='S-V'){//校验完成后刷新公式
-            // refreshFomular
-            if(this.saveLoadingContext!=null&&this.saveLoadingContext!=''&&this.saveLoadingContext.length>0){
-
-            }else{
-              const loading = this.$loading({
-                lock: true,
-                text: '校验成功,刷新公式值.......',
-                spinner: 'el-icon-loading',
-                background: 'rgba(0, 0, 0, 0.7)'
-              });
-              this.BaseRequest({
-                url:"/reportCust/refreshFomular",
-                params:{
-                  reportDefinedId:this.reportDefinedId,
-                  reportId:this.reportId,
-                }
-              }).then(response=>{
-                loading.close();
-                if(saveFlag=='S-V'){
-                  this.reportCommitAuth()
-                }
-                else{
-                  // this.$router.go(0);
-                  $this.reload()
-                }
-              });
-            }
+        }
+        if(this.doneCount==this.unitEntities.length){
+          this.doSomethinLoading.close()
+          this.doSomethinLoading = null
+          this.doneCount=0
+          if(this.doneExcetionMessage){
+            this.$notify({
+              title: '保存异常',
+              type: 'error',
+              message: this.doneExcetionMessage
+            });
+          }else{
+            this.$notify({
+              title: '保存成功',
+              type: 'success',
+              message: "您已成功保存报表信息"
+            });
           }
         }
       },
+      validateReportsCallBack(unitId,unitName,saveException){
+        this.doneCount = this.doneCount+1
+        console.log("unit "+unitId+"   "+saveException)
+        if(saveException){
+          this.validateResult[unitId] = "error"
+          saveException = unitName+":"+saveException
+          if(this.doneExcetionMessage){
+            this.doneExcetionMessage = this.doneExcetionMessage+saveException
+          }else{
+            this.doneExcetionMessage = saveException
+          }
+        }else{
+          this.validateResult[unitId] = "success"
+        }
+        if(this.doneCount==this.unitEntities.length){
+          this.doSomethinLoading.close()
+          this.doSomethinLoading = null
+          this.doneCount=0
+          if(this.doneExcetionMessage){
+            this.$notify({
+              title: '校验失败',
+              type: 'error',
+              message: this.doneExcetionMessage
+            });
+            const unitEntitiesTmp = this.unitEntities
+            this.unitEntities = null
+            this.unitEntities = unitEntitiesTmp
+          }else{
+            this.$notify({
+              title: '校验成功',
+              type: 'success',
+              message: "所有输入项均校验通过"
+            });
+            this.doRefreshFomular()
+          }
+        }
+      },
+      submitReportsCallBack(unitId,unitName,saveException,processName){
+        this.doneCount = this.doneCount+1
+        if(saveException){
+          saveException = unitName+":"+saveException
+          if(this.doneExcetionMessage){
+            this.doneExcetionMessage = this.doneExcetionMessage+saveException
+          }else{
+            this.doneExcetionMessage = saveException
+          }
+        }
+        if(this.doneCount==this.unitEntities.length){
+          this.doSomethinLoading.close()
+          this.doSomethinLoading = null
+          this.doneCount=0
+          let processTitle = "保存"
+          if(processName=='VALIDATE'){
+            processTitle="校验"
+          }
+          if(this.doneExcetionMessage){
+            this.$notify({
+              title: processTitle+'失败',
+              type: 'error',
+              message: this.doneExcetionMessage
+            });
+          }else{
+            this.$notify({
+              title: processTitle+'成功',
+              type: 'success',
+              message: "所有输入项均校验通过"
+            });
+            if(processName=="SAVE"){
+              this.doSubmitContext("VALIDATE")
+            }else if(processName=="VALIDATE"){
+              this.doRefreshFomular("YES")
+            }
 
-      nextStep(){//下一步
-        this.$refs.fillContext.nextStep()
+          }
+        }
       },
       reportCommitAuth(){
         const reportId = this.reportId
@@ -331,38 +324,20 @@
             reportId:reportId
           }
         }).then(response=>{
-          loading.close();
-          $this.Message.success("提交成功")
+          loading.close()
+          this.$notify({
+            title: '提交成功',
+            type: 'success',
+            message: "您的报表已提交审批，请等待上级审批"
+          });
           this.$router.push({
             path: "/record/report/reportMain"
           });
         });
-      },
-      refreshSaveLoading(unitId,refreshText){
-        if(this.saveLoadingContext!=null&&this.saveLoadingContext.length>0){
-          this.saveLoadingContext = this.saveLoadingContext+"<br/><br/>"+this.unitEntityLink[unitId].unit_name+":"+refreshText
-        }else{
-          this.saveLoadingContext = this.unitEntityLink[unitId].unit_name+":"+refreshText
-        }
-        // this.saveMessageTmp.close()
-        if(this.saveMessageTmp){
-          this.saveMessageTmp.message = this.saveLoadingContext
-        }else{
-          this.saveMessageTmp = this.$message({
-            dangerouslyUseHTMLString: true,
-            message: this.saveLoadingContext,
-            type: 'aaa',
-            duration:0,
-            showClose:true
-          });
-        }
-
-
       }
     },
 
     mounted() {
-      console.log("mounted is running......")
       this.reportId = this.$route.query.reportId
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
@@ -370,7 +345,6 @@
       this.checkUnitStep()
     },
     activated() {
-      console.log("activate is runnig......")
     }
   }
 </script>
@@ -404,11 +378,19 @@
     overflow: auto;
   }
 
-  .fill-context-child{
+  .fill-context-children{
     width: 100%;
     height:calc(100% - 50px);
     float: left;
+  }
+
+  .fill-context-child{
+    width: 100%;
     overflow: auto;
+  }
+
+  .fill-context-hide{
+    display: none;
   }
 
   .fill-context-options{

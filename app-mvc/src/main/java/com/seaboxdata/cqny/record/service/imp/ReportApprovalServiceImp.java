@@ -21,19 +21,19 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     @Autowired
     private IReportApprovalDao reportApprovalDao;
-
     @Autowired
     private ISubmitauthorityDao submitauthorityDao;
 
     @Override
     public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize) {
-//        Set finalOriginSet = getOrigins(userId);
-//        if(finalOriginSet==null){
-//            return null;
-//        }
-        Origin origin = submitauthorityDao.getOriginByUserId(userId);
         Set finalOriginSet = new HashSet();
-        finalOriginSet.add(origin.getOrigin_id());
+
+        if(ReportStatus.REVIEW.compareTo(reportStatus)){
+            finalOriginSet = getOrigins(userId);
+        }else{
+            Origin origin = submitauthorityDao.getOriginByUserId(userId);
+            finalOriginSet.add(origin.getOrigin_id());
+        }
 
         Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(currPage, pageSize, reportStatus, finalOriginSet);
         logger.debug("approveList :{}",approveList);
@@ -50,6 +50,10 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
                 checkOrigins(child,finalOriginSet);
             });
         }
+    }
+
+    public Set getChildrenOriginsTree(int user_id){
+        return this.getOrigins(user_id);
     }
 
     private Set getOrigins(int user_id) {

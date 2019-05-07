@@ -3,9 +3,13 @@
  */
 import { Message,MessageBox } from 'element-ui'
 
+import router from "@/router"
+
 
 const failedProcess = {}
 let hasOpenLogoutMessageBox = false
+
+
 
 failedProcess.checkWorkbenchResultOutMessage = function(response){
   return this.checkWorkbenchResult(response,false)
@@ -19,6 +23,8 @@ failedProcess.checkWorkbenchResult = function(response,withMessage){
 
   }
 
+  const $this = this
+
   if (res.result !== 'SUCCESS') {
     if (res.faild_reason === 'USER_NOT_LOGIN') {
       if(withMessage==null||withMessage==true){
@@ -29,15 +35,9 @@ failedProcess.checkWorkbenchResult = function(response,withMessage){
             cancelButtonText: '取消',
             type: 'warning'
           }).then(() => {
-            window.location = "/"
-            // console.log(this.$router)
-            // this.$router.push({
-            //   name: "root"
-            // });
+            // window.location = "/"
+            router.push("/login");
             hasOpenLogoutMessageBox = false
-            // store.dispatch('FedLogOut').then(() => {
-            //   location.reload()// 为了重新实例化vue-router对象 避免bug
-            // })
           })
         }
 

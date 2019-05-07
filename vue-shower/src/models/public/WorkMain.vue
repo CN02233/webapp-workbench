@@ -1,7 +1,7 @@
 <template>
   <div class="work-main">
-    <WorkMainHeader :headerItems="headerItems"></WorkMainHeader>
-    <WorkMainContext>
+    <WorkMainHeader :class="headerClass" :headerItems="headerItems" :noNeedHome="noNeedHome"></WorkMainHeader>
+    <WorkMainContext :class="contextClass">
       <slot></slot>
     </WorkMainContext>
   </div>
@@ -19,6 +19,15 @@
     props:{
       headerItems:{
         type:Array
+      },
+      noNeedHome:{
+        type:Boolean
+      },
+      headerClass:{
+        type:String
+      },
+      contextClass:{
+        type:String
       }
     },
     data() {

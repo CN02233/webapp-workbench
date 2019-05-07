@@ -40,8 +40,8 @@ public class UserServiceImpTest extends AbstractTestService {
     @Test
     public void listUsersForPage(){
         User user = new User();
-        user.setUser_name("sc");
-        Page<User> result = userService.listUsersForPage(1, 8,user);
+//        user.setUser_name("sc");
+        Page<User> result = userService.listUsersForPage(1, 8,user,"5001001");
     }
 
     @Test

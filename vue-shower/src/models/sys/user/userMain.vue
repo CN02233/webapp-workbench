@@ -2,14 +2,25 @@
   <WorkMain :headerItems="['用户管理','用户列表']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
+        <el-cascader filterable placeholder="请选择待查询机构"
+                     :clearable="true"
+                     :show-all-levels="false"
+                     v-model="seachOriginId"
+                     change-on-select
+                     :options="options">
+        </el-cascader>
+        <el-input placeholder="请输入待查询用户名" style="width:180px"  v-model="seachUserId"></el-input>
+        <el-button @click="getTableData(1)" type="success">查询</el-button>
         <el-button @click="openAddModal" type="primary">新增</el-button>
       </el-col>
     </el-row>
 
-    <el-row class="table-row">
+    <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
           :data="userDataList"
+          header-row-class-name="table-header-style"
+          row-class-name="mini-font-size" stripe
           style="width: 100%">
           <el-table-column
             prop="user_id"
@@ -22,15 +33,20 @@
             label="用户名称">
           </el-table-column>
           <el-table-column
-            prop="reg_date"
+            prop="user_name_cn"
             align="left"
-            label="首次登入日期">
+            label="用户中文名">
           </el-table-column>
           <el-table-column
-            prop="last_login_time"
+            prop="reg_date"
             align="left"
-            label="最后登入日期">
+            label="注册日期">
           </el-table-column>
+          <!--<el-table-column-->
+            <!--prop="last_login_time"-->
+            <!--align="left"-->
+            <!--label="最后登入日期">-->
+          <!--</el-table-column>-->
           <el-table-column
             label="操作"
             align="center">
@@ -78,7 +94,7 @@
         </el-form-item>
 
         <el-form-item :size="small" label="所属机构" >
-          <treeselect v-model="formData.origin_id"  :options="options" />
+          <!--<treeselect v-model="formData.origin_id"  :options="options" />-->
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -121,6 +137,8 @@
         userDataList: [],
         originList: [],
         userType: 1,
+        seachUserId: null,
+        seachOriginId: null,
         tableDataUrl: 'sys/user/listUserPage',
         currPageNum: 1,
         totalPage: 1,
@@ -138,6 +156,7 @@
           origin_id: null,
         },
         options:[]
+
       }
     },
     validations: {
@@ -176,10 +195,17 @@
           pageNum = this.currPageNum
         }
         const $this = this
+        let seachOriginId = null
+        if(this.seachOriginId!=null&&this.seachOriginId.length>0){
+          seachOriginId = this.seachOriginId[this.seachOriginId.length-1]
+        }
+        if(this.seachUserId==null||this.seachUserId==''){
+          this.seachUserId = ""
+        }
         this.BaseRequest({
           url: this.tableDataUrl,
           method: 'get',
-          params: {currPage: pageNum, pageSize: 10, userType: this.userType}
+          params: {currPage: pageNum, pageSize: 10, user_name: this.seachUserId,originId:seachOriginId}
         }).then(reponse => {
           $this.totalPage = reponse.totalPage
           $this.refreshTableList(reponse.dataList)
@@ -191,9 +217,18 @@
           method: 'get'
         }).then(response => {
           if (response != null && response.length > 0) {
-            this.data = []
             this.options = response
-            this.data = response
+
+            function idToValue(origins){
+              origins.forEach(option=>{
+                option['value'] = option.id
+                if(option.children){
+                  idToValue(option.children)
+                }
+              })
+            }
+            idToValue(this.options)
+
           }
         })
       },
@@ -360,27 +395,16 @@
   }
 </script>
 
+<style lang="css">
+  .mini-font-size{
+    font-size: 12px !important;
+  }
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
 
-  .el-row{
-    margin-top:20px;
-  }
-
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
   .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    width:99%;
-    height:$tableRowHeight;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
+    margin:5px 0 0 0;
   }
 </style>

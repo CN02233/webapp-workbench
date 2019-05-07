@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.record.config;
 
+import com.seaboxdata.cqny.record.entity.UnitDefined;
+
 public enum UnitDefinedType {
 
     ONEDIMSTATIC(1),//一维静态
@@ -26,5 +28,15 @@ public enum UnitDefinedType {
             return true;
         }
         return false;
+    }
+
+    public static UnitDefinedType getTypeByValue(Integer checkValue){
+        UnitDefinedType[] allType = UnitDefinedType.values();
+        for (UnitDefinedType unitDefinedType : allType) {
+            if(unitDefinedType.compareWith(checkValue)){
+                return unitDefinedType;
+            }
+        }
+        return null;
     }
 }

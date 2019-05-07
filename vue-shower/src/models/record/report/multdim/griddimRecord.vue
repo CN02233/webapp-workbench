@@ -38,17 +38,27 @@
   import WorkMain from "@/models/public/WorkMain"
 
   export default {
-    name: "griddimRecord",
+    name: "GriddimRecord",
     describe:"多维静态报表填报单元",
     components: {
       WorkMain
     },
+    props:{
+      reportId:{
+        type:String
+      },
+      unitId:{
+        type:Number
+      },
+      unitType:{
+        type:Number
+      },
+      isView:{
+        type:String
+      }
+    },
     data() {
       return {
-        reportId:"",
-        unitId:"",
-        unitType:"",
-        isView:'N',
         lastStep:false,
         definedIndexs:[],
         definedDimensions:[],
@@ -143,13 +153,7 @@
           }
         );
       },
-      doSaveUnitContext(){
-        const loading = this.$loading({
-          lock: true,
-          text: '保存报送信息中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
+      doSaveUnitContext(processName){
         this.BaseRequest({
           url:"/reportCust/saveGridUnitContext",
           method:'post',
@@ -158,12 +162,14 @@
             columDatas:Object.values(this.columDatas)
           }
         }).then(response=>{
-          loading.close();
-          this.$emit("refreshSaveLoading",this.unitId,"保存成功")
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          this.$emit("saveReportsCallBack",this.unitId,processName)
+        }).catch(error => {
+          this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
       },
-      doValidateUnitContext(){
+      doValidateUnitContext(processName){
         const $this = this
         let validDatas = this.getValidContext()
         // validateSimpleUnitContext
@@ -229,11 +235,18 @@
             }
           }
 
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          let failedMessage = null
           if(validateFailed){
-            this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
-          }
+            // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            failedMessage = "有输入错误"
 
+          }
+          const dataTmp = this.definedCells
+          this.definedCells = null
+          this.definedCells = dataTmp
+
+          this.$emit("validateReportsCallBack",this.unitId,processName,failedMessage)
         });
       },
       saveUnitContext(needUpdateStep){
@@ -369,10 +382,6 @@
       }
     },
     mounted:function(){
-      this.reportId = this.$route.query.reportId
-      this.unitId = this.$route.query.unitId
-      this.unitType = this.$route.query.unitType
-      this.isView = this.$route.query.isView
       this.getUnitContext()
     },
     activated(){

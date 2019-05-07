@@ -57,6 +57,20 @@ public interface IReportCustomerDao {
             "pass_auth = #{pass_auth} where report_id = #{report_id}")
     void updateReportCustomer(ReportCustomer reportCustomer);
 
+    @Update("<script>" +
+            "update report_customer_data set report_data = #{dataValue} where report_id=#{reportId} and unit_id=#{unitId} " +
+            " <if test=\"columId != null\"> and colum_id = #{columId} </if> " +
+            " <if test=\"dimId != null\"> and dimensions_id = #{dimId} </if> " +
+            " <if test=\"reportGroupId != null\"> and report_group_id = #{reportGroupId} </if> "+
+            "</script>")
+    void updateReportCustomerData(
+            @Param("reportId") String reportId,
+            @Param("unitId") String unitId,
+            @Param("columId") String columId,
+            @Param("dimId") String dimId,
+            @Param("reportGroupId") String reportGroupId,
+            @Param("dataValue") Object dataValue);
+
     @Update("update report_customer set "+
             "report_status = #{status} where report_id = #{reportId}")
     void updateReportCustomerStatus(@Param("reportId") String reportId,@Param("status") String status);
@@ -73,7 +87,7 @@ public interface IReportCustomerDao {
             " from report_unit_info rui where rui.report_defined_id = #{report_id} order by rui.unit_order")
     List<UnitDefined> getAllUnitEntityByReportId(String report_id);
 
-    @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId}")
+    @Select("select * from report_customer_data where report_id=#{reportId} and unit_id=#{unitId} order by unit_id,colum_order")
     List<ReportCustomerData> getColumDatas(@Param("reportId") String reportId, @Param("unitId") String unitId);
 
     @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id}")
@@ -103,8 +117,8 @@ public interface IReportCustomerDao {
     @Delete("delete from report_customer_data where unit_id=#{unit_id}")
     void removeUnitContextData(String unit_id);
 
-    @Insert("insert into report_customer_data (report_id,unit_id,report_group_id,colum_id,dimensions_id,report_data) " +
-            "values (#{report_id},#{unit_id},#{report_group_id},#{colum_id},#{dimensions_id},#{report_data})")
+    @Insert("insert into report_customer_data (report_id,unit_id,report_group_id,colum_id,dimensions_id,report_data,colum_order) " +
+            "values (#{report_id},#{unit_id},#{report_group_id},#{colum_id},#{dimensions_id},#{report_data},#{colum_order})")
     void insertUnitContext(ReportCustomerData columData);
 
     @Select("select * from report_customer_data where " +
@@ -118,6 +132,20 @@ public interface IReportCustomerDao {
             @Param("reportId") String reportId,
             @Param("unitId") String unitId
             ,@Param("dimensionsId") String dimensionsId);
+
+    @Select("select * from report_customer_data where " +
+            "report_id=#{reportId} and unit_id=#{unitId} and dimensions_id=#{dimensionsId}")
+    List<ReportCustomerData> getSimpleReportCustomerDatasByDimId(
+            @Param("reportId") String reportId,
+            @Param("unitId") String unitId
+            ,@Param("dimensionsId") String dimensionsId);
+
+    @Select("select * from report_customer_data where " +
+            "report_id=#{reportId} and unit_id=#{unitId} and colum_id=#{columId}")
+    List<ReportCustomerData> getSimpleReportCustomerDatasByColId(
+            @Param("reportId") String reportId,
+            @Param("unitId") String unitId
+            ,@Param("columId") String columId);
 
     @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id} and dimensions_id=#{dimensions_id}")
     void updateGridUnitContext(ReportCustomerData columDatas);

@@ -199,7 +199,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
                     reportCustomerData.setDimensions_id(columDefined.getDim_id().toString());
                     reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
                     reportCustomerData.setReport_id(reportId);
-                    reportCustomerData.setReport_data("0");
+                    reportCustomerData.setReport_data(columDefined.getDefault_value()!=null?columDefined.getDefault_value():"0");
                     reportCustomerData.setReport_group_id(reportGroupId);
                     columDatas.add(reportCustomerData);
                 }
@@ -224,6 +224,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
                     reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
                     reportCustomerData.setReport_id(reportId);
                     reportCustomerData.setReport_data(Strings.isNullOrEmpty(columDefined.getDefault_value())?"0":columDefined.getDefault_value());
+                    reportCustomerData.setColum_order(columDefined.getColum_order());
                     columDatas.add(reportCustomerData);
                 }
 
@@ -247,7 +248,8 @@ public class SubmitReportServiceImp implements SubmitReportService {
                     }
                     reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
                     if(groupId!=null){
-                        reportCustomerData.setReport_data("0");
+                        String defaultValue = columDefined.getDefault_value();
+                        reportCustomerData.setReport_data(Strings.isNullOrEmpty(defaultValue)?"0":defaultValue);
                     }else{
                         reportCustomerData.setReport_data(columDefined.getColum_name_cn());
                     }

@@ -54,9 +54,9 @@
               <el-button
                 size="mini"
                 @click="handlePass(scope.$index, scope.row)">通过</el-button>
-              <el-button
-                size="mini"
-                @click="handleReject(scope.$index, scope.row)">驳回</el-button>
+              <!--<el-button-->
+                <!--size="mini"-->
+                <!--@click="handleReject(scope.$index, scope.row)">驳回</el-button>-->
               <el-button
                 size="mini"
                 @click="handleRefill(scope.$index, scope.row)">返回重填</el-button>

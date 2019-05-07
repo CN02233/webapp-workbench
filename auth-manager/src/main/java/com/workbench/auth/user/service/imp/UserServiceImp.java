@@ -50,9 +50,12 @@ public class UserServiceImp implements UserService {
         return allUser;
     }
 
-    public Page<User> listUsersForPage(int currPage,int pageSize,User user){
+    public Page<User> listUsersForPage(int currPage,int pageSize,User user,String originId){
 
-        Page<User> allUser = userServiceDao.listUsersForPage(currPage,pageSize,user.getUser_id(),user.getUser_name(),user.getUser_type());
+        Page<User> allUser = userServiceDao.listUsersForPage(
+                currPage,pageSize,
+                user.getUser_id(),user.getUser_name(),
+                user.getUser_type(),originId);
 
         return allUser;
     }

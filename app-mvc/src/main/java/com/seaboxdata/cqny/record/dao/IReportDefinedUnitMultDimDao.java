@@ -66,9 +66,9 @@ public interface IReportDefinedUnitMultDimDao {
 
     @Select("select distinct colum_id, colum_name, colum_name_cn, group_id dim_id, group_name dim_name, unit_id, colum_type, min_value, max_value, colum_point, colum_formula, colum_formula_desc, colum_desc,need_remember from report_defined_unit_onedim where unit_id = #{unitId}")
     List<GridColumDefined> getOneColumByUnit(String unitId);
-    @Select("<script>select distinct a.*,aa.colum_name,aa.colum_name_cn,aa.colum_point,aa.colum_desc,'1' colum_meta_type from report_defined_unit_multdim a left join report_defined_unit_multdim_col aa on a.colum_id=aa.colum_id where a.unit_id=#{unitId}" +
-            "union select unit_id,colum_id,'','','','','','','N',colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type from report_defined_unit_multdim_col b where b.unit_id=#{unitId}" +
-            "union select unit_id,'',dim_id,'','','','','','N',dim_name,dim_name_cn,'','','3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
+    @Select("<script>select a.*,aa.colum_name,aa.colum_name_cn,aa.colum_point,aa.colum_desc,'1' colum_meta_type from report_defined_unit_multdim a left join report_defined_unit_multdim_col aa on a.colum_id=aa.colum_id where a.unit_id=#{unitId}" +
+            "union select unit_id,colum_id,'','','','','','','N','','',colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type from report_defined_unit_multdim_col b where b.unit_id=#{unitId}" +
+            "union select unit_id,'',dim_id,'','','','','','N','','',dim_name,dim_name_cn,'','','3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
     List<GridColumDefined> getColumByUnit(String unitId);
 
     @Select(

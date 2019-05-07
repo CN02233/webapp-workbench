@@ -40,7 +40,7 @@ public enum ReportStatus {
     }
 
     public boolean compareTo(String status){
-        if(status.equals(this.value)){
+        if(status.equals(this.value.toString())){
             return true;
         }
 

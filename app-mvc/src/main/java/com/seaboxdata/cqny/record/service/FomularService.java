@@ -17,4 +17,6 @@ public interface FomularService {
 
     List<ReportCustomerData> refreshFomularForCustInput(List<ReportCustomerData> reportCustomerDatas);
 
+    void refreshFomularDatas(String reportDefinedId,String reportId);
+
 }

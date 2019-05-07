@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/' }">
+      <el-breadcrumb-item v-if="noNeedHome!=null&&!noNeedHome" :to="{ path: '/' }">
       <span style="height:16px !important;">
         首页
       </span>
@@ -18,6 +18,9 @@
     props:{
       headerItems:{
         type:Array
+      },
+      noNeedHome:{
+        type:Boolean
       }
     },
     data() {

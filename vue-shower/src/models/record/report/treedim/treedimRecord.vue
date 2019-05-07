@@ -50,19 +50,30 @@
   import ColumContext from "@/models/record/report/treedim/treeDimShowerContext"
 
   export default {
-    name: "treedimRecord",
+    name: "TreedimRecord",
     describe:"树状报表填报单元",
     components: {
       WorkMain,
       ColumTitles,
       ColumContext
     },
+    props:{
+      reportId:{
+        type:String
+      },
+      unitId:{
+        type:Number
+      },
+      unitType:{
+        type:Number
+      },
+      isView:{
+        type:String
+      }
+
+    },
     data() {
       return {
-        reportId:"",
-        unitId:"",
-        isView:'N',
-        unitType:"",
         lastStep:false,
         colSpan:0,
         definedColumsGroup:{
@@ -109,7 +120,6 @@
             loading.close();
           }
           if(response){
-            console.log("response running....")
             this.definedColums = response.definedColums
 
             //分组
@@ -211,7 +221,7 @@
           }
         );
       },
-      doSaveUnitContext(){
+      doSaveUnitContext(processName){
         const $this = this
 
         const saveColums = new Array()
@@ -236,27 +246,25 @@
           saveColums.push(saveObjTmp)
         })
 
-        const loading = this.$loading({
-          lock: true,
-          text: '保存报送信息中.......',
-          spinner: 'el-icon-loading',
-          background: 'rgba(0, 0, 0, 0.7)'
-        });
         this.BaseRequest({
           url:"/treeReportCust/saveTreeData",
           method:'post',
           data:saveColums
         }).then(response=>{
-          loading.close();
-          this.$emit("refreshSaveLoading",this.unitId,"保存成功")
-          this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          this.$emit("saveReportsCallBack",this.unitId,processName)
+        }).catch(error => {
+          this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
       },
       doValidateUnitContext(){
-        this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+        let failedMessage = null
         if(false){
-          this.$emit("refreshSaveLoading",this.unitId,"")
+          // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+          failedMessage = "有输入错误"
         }
+        this.$emit("validateReportsCallBack",this.unitId,failedMessage)
       },
       saveUnitContext(needUpdateStep){
         const $this = this
@@ -692,11 +700,6 @@
       }
     },
     mounted:function(){
-      this.reportId = this.$route.query.reportId
-      this.unitId = this.$route.query.unitId
-      this.isView = this.$route.query.isView
-      this.unitType = this.$route.query.unitType
-      this.lastStep = this.$route.query.lastStep
       this.getUnitContext()
 
 

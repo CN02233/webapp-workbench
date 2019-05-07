@@ -16,7 +16,7 @@ public interface UserService {
 
     List<User> listAllUser();
 
-    Page<User> listUsersForPage(int currPage, int pageSize,User user);
+    Page<User> listUsersForPage(int currPage, int pageSize,User user,String originId);
 
     User createUser(User user);
 

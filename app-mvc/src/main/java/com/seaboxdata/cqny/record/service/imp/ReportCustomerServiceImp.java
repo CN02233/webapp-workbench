@@ -76,7 +76,8 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
      */
     public ReportUnitCustomerContext getUnitContext(String reportId, String unitId, String unitType){
         List definedColums = reportDefinedUnitService.getDefinedColums(unitId, unitType);
-        List columDatas = reportCustomerDao.getColumDatas(reportId,unitId);
+        List<ReportCustomerData> columDatas = reportCustomerDao.getColumDatas(reportId,unitId);
+
         ReportUnitCustomerContext reportUnitCustomerContext = new ReportUnitCustomerContext();
         reportUnitCustomerContext.setDefinedColums(definedColums);
         reportUnitCustomerContext.setColumDatas(columDatas);
@@ -408,77 +409,81 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
-    public void refreshFomular(String reportDefindId,String reportId) {
-        List<UnitDefined> reportUnits = reportCustomerDao.getAllUnitEntityByReportId(reportDefindId);
-        for (UnitDefined reportUnit : reportUnits) {
-            Integer unitTypeInt = reportUnit.getUnit_type();
-            ArrayList<ReportCustomerData> reportCustomerDatas = (ArrayList<ReportCustomerData>) reportCustomerDao.getColumDatas(reportId, reportUnit.getUnit_id().toString());
-
-            if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitTypeInt)){//一维静态
-                ArrayList<SimpleColumDefined> reportColums = (ArrayList<SimpleColumDefined>) reportDefinedUnitOneDimDao.getColumByUnit(String.valueOf(reportUnit.getUnit_id()));
-                Map<String, Object> checkResult = checkCustOrFomular(reportColums, reportCustomerDatas);
-                List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
-                if(fomularArray!=null&&fomularArray.size()>0){
-                    for (FomularTmpEntity fomularTmpEntity : fomularArray) {
-                        ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
-                        reportCustomerDao.updateUnitContext(comularData);
-                    }
-                }
-            }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
-                ArrayList<SimpleColumDefined> reportColums =
-                        (ArrayList<SimpleColumDefined>) reportDefinedUnitOneDimDao.getColumByUnit(String.valueOf(reportUnit.getUnit_id()));
-                Map<String, Object> checkResult = checkCustOrFomular(reportColums, reportCustomerDatas);
-                List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
-                if(fomularArray!=null&&fomularArray.size()>0){
-                    for (FomularTmpEntity fomularTmpEntity : fomularArray) {
-                        ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
-                        reportCustomerDao.updateGridUnitContext(comularData);
-                    }
-                }
-
-            }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
-                ArrayList<GridColumDefined> reportColums =
-                        (ArrayList<GridColumDefined>) reportDefinedUnitMultDimDao.getGridColumDefindsByUNit(String.valueOf(reportUnit.getUnit_id()));
-                Map<String, Object> checkResult = checkCustOrFomularByGridDim(reportColums, reportCustomerDatas);
-                List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
-                if(fomularArray!=null&&fomularArray.size()>0){
-                    for (FomularTmpEntity fomularTmpEntity : fomularArray) {
-                        ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
-                        reportCustomerDao.updateGridUnitContext(comularData);
-                    }
-                }
-
-            }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
-                if(reportCustomerDatas!=null){
-                    ArrayList<SimpleColumDefined> reportDefindColums =
-                            (ArrayList<SimpleColumDefined>) reportDefinedUnitOneDimDao.getColumByUnit(String.valueOf(reportUnit.getUnit_id()));
-
-                    Map<String,TreeUnitContext> reportGroupMapTmp = new HashMap();
-                    for (ReportCustomerData reportCustomerData : reportCustomerDatas) {
-                        if(reportGroupMapTmp.containsKey(reportCustomerData.getReport_group_id())){
-                            TreeUnitContext treeUnitContext = reportGroupMapTmp.get(reportCustomerData.getReport_group_id());
-                            treeUnitContext.getColumDatas().add(reportCustomerData);
-                        }
-                    }
-
-                    for (String groupId : reportGroupMapTmp.keySet()) {
-                        TreeUnitContext treeUnitContext = reportGroupMapTmp.get(groupId);
-                        ArrayList<ReportCustomerData> reportColums = treeUnitContext.getColumDatas();
-                        Map<String, Object> checkResult = checkCustOrFomular(reportDefindColums, reportColums);
-                        List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
-                        if(fomularArray!=null&&fomularArray.size()>0){
-                            for (FomularTmpEntity fomularTmpEntity : fomularArray) {
-                                ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
-                                reportCustomerDao.insertUnitContext(comularData);
-                            }
-                        }
-                    }
-                }
-            }else{
-
-            }
-        }
+    public void refreshFomular(String reportDefindId,String reportId){
+        fomularService.refreshFomularDatas(reportDefindId,reportId);
     }
+
+//    public void refreshFomular(String reportDefindId,String reportId) {
+//        List<UnitDefined> reportUnits = reportCustomerDao.getAllUnitEntityByReportId(reportDefindId);
+//        for (UnitDefined reportUnit : reportUnits) {
+//            Integer unitTypeInt = reportUnit.getUnit_type();
+//            ArrayList<ReportCustomerData> reportCustomerDatas = (ArrayList<ReportCustomerData>) reportCustomerDao.getColumDatas(reportId, reportUnit.getUnit_id().toString());
+//
+//            if(UnitDefinedType.ONEDIMSTATIC.compareWith(unitTypeInt)){//一维静态
+//                ArrayList<SimpleColumDefined> reportColums = (ArrayList<SimpleColumDefined>) reportDefinedUnitOneDimDao.getColumByUnit(String.valueOf(reportUnit.getUnit_id()));
+//                Map<String, Object> checkResult = checkCustOrFomular(reportColums, reportCustomerDatas);
+//                List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
+//                if(fomularArray!=null&&fomularArray.size()>0){
+//                    for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+//                        ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
+//                        reportCustomerDao.updateUnitContext(comularData);
+//                    }
+//                }
+//            }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
+//                ArrayList<SimpleColumDefined> reportColums =
+//                        (ArrayList<SimpleColumDefined>) reportDefinedUnitOneDimDao.getColumByUnit(String.valueOf(reportUnit.getUnit_id()));
+//                Map<String, Object> checkResult = checkCustOrFomular(reportColums, reportCustomerDatas);
+//                List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
+//                if(fomularArray!=null&&fomularArray.size()>0){
+//                    for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+//                        ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
+//                        reportCustomerDao.updateGridUnitContext(comularData);
+//                    }
+//                }
+//
+//            }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
+//                ArrayList<GridColumDefined> reportColums =
+//                        (ArrayList<GridColumDefined>) reportDefinedUnitMultDimDao.getGridColumDefindsByUNit(String.valueOf(reportUnit.getUnit_id()));
+//                Map<String, Object> checkResult = checkCustOrFomularByGridDim(reportColums, reportCustomerDatas);
+//                List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
+//                if(fomularArray!=null&&fomularArray.size()>0){
+//                    for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+//                        ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
+//                        reportCustomerDao.updateGridUnitContext(comularData);
+//                    }
+//                }
+//
+//            }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
+//                if(reportCustomerDatas!=null){
+//                    ArrayList<SimpleColumDefined> reportDefindColums =
+//                            (ArrayList<SimpleColumDefined>) reportDefinedUnitOneDimDao.getColumByUnit(String.valueOf(reportUnit.getUnit_id()));
+//
+//                    Map<String,TreeUnitContext> reportGroupMapTmp = new HashMap();
+//                    for (ReportCustomerData reportCustomerData : reportCustomerDatas) {
+//                        if(reportGroupMapTmp.containsKey(reportCustomerData.getReport_group_id())){
+//                            TreeUnitContext treeUnitContext = reportGroupMapTmp.get(reportCustomerData.getReport_group_id());
+//                            treeUnitContext.getColumDatas().add(reportCustomerData);
+//                        }
+//                    }
+//
+//                    for (String groupId : reportGroupMapTmp.keySet()) {
+//                        TreeUnitContext treeUnitContext = reportGroupMapTmp.get(groupId);
+//                        ArrayList<ReportCustomerData> reportColums = treeUnitContext.getColumDatas();
+//                        Map<String, Object> checkResult = checkCustOrFomular(reportDefindColums, reportColums);
+//                        List<FomularTmpEntity> fomularArray = (List<FomularTmpEntity>) checkResult.get("fomularArray");
+//                        if(fomularArray!=null&&fomularArray.size()>0){
+//                            for (FomularTmpEntity fomularTmpEntity : fomularArray) {
+//                                ReportCustomerData comularData = fomularService.makeReportCustDataByFomular(fomularTmpEntity);
+//                                reportCustomerDao.insertUnitContext(comularData);
+//                            }
+//                        }
+//                    }
+//                }
+//            }else{
+//
+//            }
+//        }
+//    }
 
     @Override
     public Map<String, Object> getReportBaseInfo(String reportId,String reportDefinedId) {
@@ -584,6 +589,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
                         try{
                             Integer dataInt = new Integer(dataValue);
+                            logger.debug("{},{}",dataInt,definedColum);
                             if(dataInt<=maxValue&&dataInt>=minValue){
                             }else{
                                 validateResult.put(definedColum.getColum_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");

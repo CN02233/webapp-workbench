@@ -16,9 +16,9 @@ import java.util.Map;
 @Repository
 public interface IUserServiceDao {
 
-    String query_user_columns = "SELECT user_id,user_name,user_name_cn,user_type,reg_date,user_status,last_login_time";
+    String query_user_columns = "SELECT u.user_id,u.user_name,u.user_name_cn,u.user_type,u.reg_date,u.user_status,u.last_login_time";
 
-    String TABLE_NAME= "user";
+    String TABLE_NAME= "user u";
 
     @Select("")//to be continue
     @Options(useCache = false)
@@ -44,13 +44,14 @@ public interface IUserServiceDao {
     List<User> listAllUser();
 
     @Select("<script>"+query_user_columns + " FROM "+TABLE_NAME +
-            " where user_name like concat('%',#{user_name},'%')"+
-            "  <if test=\"user_id != 0\"> and user_id = #{user_id} </if> " +
-            "  and (user_type=1 or user_type=0) " +
+            "  inner join user_origin_assign uoa on u.user_name like concat('%',#{user_name},'%')"+
+            "  <if test=\"user_id != 0\"> and u.user_id = #{user_id} </if> " +
+            "  and (u.user_type=1 or u.user_type=0) and u.user_id = uoa.user_id " +
+            "  <if test=\"originId != null\"> and uoa.origin_id = #{originId} </if> " +
             "</script>" )
     @Options(useCache = false)
     Page<User> listUsersForPage(@Param("currPage") int currPage, @Param("pageSize") int pageSize
-            ,@Param("user_id") int user_id,@Param("user_name") String user_name,@Param("user_type")String user_type);
+            ,@Param("user_id") int user_id,@Param("user_name") String user_name,@Param("user_type")String user_type,@Param("originId") String originId);
 
     @Insert("INSERT INTO "+TABLE_NAME+" (user_id,user_name,user_name_cn,user_type,reg_date,user_status,last_login_time,user_pwd) " +
             " VALUE (#{user_id},#{user_name},#{user_name_cn},#{user_type},now(),#{user_status},#{last_login_time},#{user_pwd})")
@@ -61,7 +62,7 @@ public interface IUserServiceDao {
     @Options(useCache = false)
     void delUserById(int user_id);
 
-    @Select("select am.* from user u " +
+    @Select("select distinct am.* from user u " +
             "inner join user_role_assign ura on u.user_id = ura.user_id and u.user_name=#{user_nm} " +
             "inner join user_role_privilege urp on ura.user_role_id = urp.user_role_id " +
             "inner join app_module am on urp.module_id = am.module_id")

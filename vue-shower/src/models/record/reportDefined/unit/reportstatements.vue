@@ -198,11 +198,21 @@
           <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需审批机构</el-col>
             <el-col align="left" :span="15">
-              <el-checkbox-group v-model="submitParams.check_origins">
-                <el-checkbox-button v-for="origin in submitParams.defined_origins"
-                             :label="origin.origin_id"
-                             :key="origin.origin_id">{{origin.origin_name}}</el-checkbox-button>
-              </el-checkbox-group>
+              <el-select v-model="submitParams.check_origins" multiple filterable placeholder="请选择">
+                <el-option
+                  v-for="origin in submitParams.defined_origins"
+                  :key="origin.origin_id"
+                  :label="origin.origin_name"
+                  :value="origin.origin_id">
+                </el-option>
+              </el-select>
+
+              <!--<el-checkbox-group v-model="submitParams.check_origins">-->
+
+                <!--<el-checkbox-button v-for="origin in submitParams.defined_origins"-->
+                             <!--:label="origin.origin_id"-->
+                             <!--:key="origin.origin_id">{{origin.origin_name}}</el-checkbox-button>-->
+              <!--</el-checkbox-group>-->
             </el-col>
           </el-row>
         </el-col>
