@@ -5,6 +5,7 @@ import com.webapp.support.page.PageResult;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -20,4 +21,12 @@ public interface OriginService {
     Origin getOriginByUser(Integer userId);
 
     List<Origin> checkAllChildren(Integer originId);
+
+    List<Origin> checkoutSons(Integer parentOriginId,List<Origin> originList);
+
+    Map<String,Origin> getFist2Origin(Integer checkOrigin,List<Origin> allOrigins);
+
+    Collection<Map<String, Object>> checkProvAndCity(List<Origin> allOrigins);
+
+    List<Origin> getOriginByName(String searchOriginName);
 }

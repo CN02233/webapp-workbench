@@ -29,5 +29,8 @@ public interface UserService {
     User getUserByUserNm(String userName);
 
     List<Menu> getMenuList4User(String user_nm);
+    Page<User> pageUsers(int currPage,int pageSize,User user);
+    void resetPwd(Integer userId);
+
 
 }

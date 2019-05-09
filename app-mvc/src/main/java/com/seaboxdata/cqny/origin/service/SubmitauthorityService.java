@@ -16,4 +16,6 @@ public interface SubmitauthorityService {
     void addSubmitauthority(Submitauthority submitauthority);
 
     void deleteById(String originId);
+
+    List<String> getReportOriginForOrganizationUser(int currUserId);
 }

@@ -90,6 +90,10 @@
           this.doValidateUnitContext("SUBMIT")
         }
       },
+      getFolumarData(){
+        const justRefreshFomular = true
+        this.$refs.recordTemplate.getUnitContext(justRefreshFomular)
+      },
       saveReportsCallBack(unitId,processName,saveException){
         if(processName=='SUBMIT'){
           this.$emit("submitReportsCallBack",unitId,this.unitEntity.unit_name,saveException,"SAVE")

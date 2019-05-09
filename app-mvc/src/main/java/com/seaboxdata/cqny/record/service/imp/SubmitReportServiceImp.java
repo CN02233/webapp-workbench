@@ -9,11 +9,8 @@ import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
-import com.seaboxdata.cqny.record.service.ReportCustomerService;
-import com.seaboxdata.cqny.record.service.SubmitReportService;
+import com.seaboxdata.cqny.record.service.*;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
-import com.seaboxdata.cqny.record.service.ReportStatementsService;
-import com.seaboxdata.cqny.record.service.ReportUnitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +38,9 @@ public class SubmitReportServiceImp implements SubmitReportService {
     @Autowired
     private IReportCustomerDao reportCustomerDao;
 
+    @Autowired
+    private OriginService originService;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void doSubmit(SubmitReportRequestEntity submitReportEntity) throws ParseException {
@@ -60,6 +60,9 @@ public class SubmitReportServiceImp implements SubmitReportService {
             logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
             List<String> alOrigin = getAllOrigin(reportDefinedId);
             logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
+            logger.info("报表发布->{}：过滤省市机构,过滤前机构数量{}",reportDefinedId,alOrigin.size());
+            alOrigin = this.filterOrigins(alOrigin);
+            logger.info("报表发布->{}：过滤后剩余机构数量{},分别为{}",reportDefinedId,alOrigin.size(),alOrigin);
             logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
             List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin,submitReportEntity);
             logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
@@ -119,7 +122,9 @@ public class SubmitReportServiceImp implements SubmitReportService {
      */
     private List<Integer> createReportBaseData(ReportDefinedEntity reportDefined, List<String> allOrigin, SubmitReportRequestEntity submitReportEntity) throws ParseException {
         List<Integer> reportBaseIds = new ArrayList<>();
-        List<String> passAuthList = submitReportEntity.getCheck_origins();
+//        List<String> passAuthList = submitReportEntity.getCheck_origins();
+        List<String> approvePassAuth = submitReportEntity.getApprove_check_origins();
+        List<String> reviewPassAuth = submitReportEntity.getReview_check_origins();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         ReportCustomer reportCustomer = new ReportCustomer();
         reportCustomer.setReport_defined_id(reportDefined.getDefined_id());
@@ -136,10 +141,18 @@ public class SubmitReportServiceImp implements SubmitReportService {
             reportCustomer.setActive_unit(reportDefined.getUnits().get(0).getUnit_id());
             reportCustomer.setReport_start_date(format.parse(submitReportEntity.getReport_start_date()));
             reportCustomer.setReport_end_date(format.parse(submitReportEntity.getReport_end_date()));
-            if(passAuthList!=null&&passAuthList.contains(origin)){
-                reportCustomer.setPass_auth("Y");
+            
+            
+            if(approvePassAuth!=null&&approvePassAuth.contains(origin)){
+                reportCustomer.setPass_approve("Y");
             }else{
-                reportCustomer.setPass_auth("N");
+                reportCustomer.setPass_approve("N");
+            }
+
+            if(reviewPassAuth!=null&&reviewPassAuth.contains(origin)){
+                reportCustomer.setPass_review("Y");
+            }else{
+                reportCustomer.setPass_review("N");
             }
 
             reportCustomerService.createReportCustomer(reportCustomer);
@@ -344,5 +357,34 @@ public class SubmitReportServiceImp implements SubmitReportService {
             dataList.addAll(this.makeTreeDatas(children,reportId,reportGroupId,offset));
         }
         return dataList;
+    }
+
+    private List<String> filterOrigins(List<String> alOrigin){
+        List<Origin> allReportOrigins = originService.listAllOrigin();
+        Map<Integer,Origin> reportOriginTmp = new HashMap<>();
+        for (Origin allReportOrigin : allReportOrigins) {
+            reportOriginTmp.put(allReportOrigin.getOrigin_id(),allReportOrigin);
+        }
+        List<String> filterOriginIds = new ArrayList<>();
+        for(Origin allReportOrigin : allReportOrigins){
+            Integer originId = allReportOrigin.getOrigin_id();
+            if(originId==1){//全国 过滤
+                filterOriginIds.add(allReportOrigin.getOrigin_id().toString());
+            }else if(allReportOrigin.getParent_origin_id()==1){//省 过滤
+                filterOriginIds.add(allReportOrigin.getOrigin_id().toString());
+            }else if(reportOriginTmp.get(allReportOrigin.getParent_origin_id()).getParent_origin_id()==1){//市 过滤
+                filterOriginIds.add(allReportOrigin.getOrigin_id().toString());
+            }
+        }
+
+        List<String> finalOrigin = new ArrayList();
+
+        for (String reportOrigin : alOrigin) {
+            if(!filterOriginIds.contains(reportOrigin)){
+                finalOrigin.add(reportOrigin);
+            }
+        }
+
+        return finalOrigin;
     }
 }

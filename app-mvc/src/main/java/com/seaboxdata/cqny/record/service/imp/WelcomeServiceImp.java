@@ -28,31 +28,45 @@ public class WelcomeServiceImp implements WelcomeService {
     private ReportApprovalService reportApprovalService;
 
     @Override
-    public PageResult jobList(Integer currOriginId, int currPage, int pageSize) {
+    public PageResult jobList(Integer currUserId, int currPage, int pageSize) {
 
-        List<Origin> allChildren = originService.checkAllChildren(currOriginId);
+        Origin userOrigin = originService.getOriginByUser(currUserId);
+        Integer userOriginId = userOrigin.getOrigin_id();
+
+        List<Origin> allChildren = originService.checkAllChildren(userOriginId);
 
         List<Integer> allChildrenIds= new ArrayList();
         for (Origin allChild : allChildren) {
             allChildrenIds.add(allChild.getOrigin_id());
         }
 
-        List<String> childReportStatus = new ArrayList<>();
-
-        childReportStatus.add(ReportStatus.SUBMIT.getValue());
-        childReportStatus.add(ReportStatus.REVIEW.getValue());
-        if(allChildrenIds.size()<1){
+        if(allChildrenIds!=null&&allChildrenIds.size()<1)
             allChildrenIds = null;
+        if(userOrigin.getParent_origin_id()==1){
+            Page<ReportCustomer> reportCustomerList = welcomeDao.jobList(
+                    currPage,
+                    pageSize,
+                    userOriginId,
+                    ReportStatus.NORMAL.getValue(),
+                    allChildrenIds,
+                    null,
+                    ReportStatus.REVIEW.getValue());
+            PageResult pageResult = PageResult.pageHelperList2PageResult(reportCustomerList);
+            return pageResult;
+
+        }else{
+            Page<ReportCustomer> reportCustomerList = welcomeDao.jobList(
+                    currPage,
+                    pageSize,
+                    userOriginId,
+                    ReportStatus.NORMAL.getValue(),
+                    allChildrenIds,
+                    ReportStatus.SUBMIT.getValue(),
+                    null);
+            PageResult pageResult = PageResult.pageHelperList2PageResult(reportCustomerList);
+            return pageResult;
+
         }
-        Page<ReportCustomer> reportCustomerList = welcomeDao.jobList(
-                currPage,
-                pageSize,
-                currOriginId,
-                ReportStatus.NORMAL.getValue(),
-                ReportStatus.SUBMIT.getValue(),
-                allChildrenIds,
-                ReportStatus.REVIEW.getValue());
-        PageResult pageResult = PageResult.pageHelperList2PageResult(reportCustomerList);
-        return pageResult;
+
     }
 }

@@ -206,4 +206,15 @@ public class ReportStatementsController {
         return responseJsonResult;
     }
 
+
+
+    @RequestMapping("getAuthOriginTree")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getAuthOriginTree(String reportDefinedId){
+        List<Origin> orginList = reportStatementsService.getAuthOriginTree(reportDefinedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+        return jsonResult;
+    }
+
 }

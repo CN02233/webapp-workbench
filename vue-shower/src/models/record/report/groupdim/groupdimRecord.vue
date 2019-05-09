@@ -58,8 +58,7 @@
       }
     },
     methods:{
-      getUnitContext(){
-
+      getUnitContext(justRefreshFomular){
         let loading = null
         if(this.saveFlag=='N') {
           loading = this.$loading({
@@ -78,9 +77,10 @@
             unitType:this.unitType
           }
         }).then(response=>{
-          if(loading){
-            loading.close();
-          }
+          // if(loading){
+          //   loading.close();
+          // }
+          //
           this.definedGroup = []
           this.definedColums = []
           this.baseGroup = []
@@ -90,10 +90,29 @@
             if(response.columDatas){
               if(response.columDatas.length>0)
                 report_id = response.columDatas[0].report_id
-              response.columDatas.forEach(columData=>{
-                const columKey = columData.unit_id + "_"+columData.colum_id + "_" + (columData.dimensions_id || '0')
-                $t.columDatas[columKey] = columData
-              })
+                response.columDatas.forEach(columData=>{
+
+                  if(justRefreshFomular){
+                    const responseColumDatas= response.columDatas
+                    responseColumDatas.forEach(responseColumData=>{
+                      const unitId = responseColumData.unit_id
+                      const colum_id = responseColumData.colum_id
+                      const dimensions_id = responseColumData.dimensions_id
+
+                      response.definedColums.forEach(definedColum=>{
+
+                        if(definedColum.unit_id==unitId&&definedColum.colum_id==colum_id&&definedColum.colum_type=='0'){
+
+                          this.columDatas[unitId+"_"+colum_id+"_"+dimensions_id].report_data = responseColumData.report_data
+                        }
+                      })
+                    })
+                    // return
+                  }else{
+                    const columKey = columData.unit_id + "_"+columData.colum_id + "_" + (columData.dimensions_id || '0')
+                    $t.columDatas[columKey] = columData
+                  }
+                })
             }
             response.definedColums.forEach(x=>{
               if(x.group_id == null){
@@ -103,7 +122,13 @@
               }
             })
             $t.baseGroup.forEach(t=>{
-              response.columDatas.forEach(x=>{
+              let responseColumDatas = response.columDatas
+              if(justRefreshFomular){
+                responseColumDatas = Object.values(this.columDatas)
+              }
+
+              responseColumDatas.forEach(x=>{
+
                 if(t.colum_id == x.colum_id){
                   $t.last_dim_id = x.dimensions_id
                   let tt = Object.assign({children:[],dimensions_id:$t.last_dim_id}, t)
@@ -128,22 +153,9 @@
             })
           }
 
-          if(!this.hasMounted){
-            console.log(this.unitId+"--AJAX校验")
-
-            this.hasMounted = true
-            if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
-              this.$emit("refreshSaveLoading",this.unitId,"保存中....")
-              this.doSaveUnitContext()
-            }else if(this.saveFlag=='S'){
-
-            }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
-              this.doValidateUnitContext()
-            }
-          }
-
 
         }).catch(error=>{
+          console.log(error)
             this.Message.success(error)
             loading.close()
           }
@@ -156,6 +168,8 @@
         //   spinner: 'el-icon-loading',
         //   background: 'rgba(0, 0, 0, 0.7)'
         // });
+        console.log(this.columDatas)
+
         const $this = this
         $this.definedGroup.forEach(g=>{
           let key0 = g.unit_id + '_' + g.colum_id + '_' + g.dimensions_id
@@ -167,6 +181,11 @@
               $this.columDatas[key1].report_data = x.report_data
           })
         })
+
+        console.log(this.definedColums)
+        console.log(Object.values(this.columDatas))
+
+
         this.BaseRequest({
           url:"/reportCust/saveGroupUnitContext",
           method:'post',
@@ -184,6 +203,7 @@
         });
       },
       doValidateUnitContext(processName){
+
         const $this = this
         $this.definedGroup.forEach(g=>{
           let key0 = g.unit_id + '_' + g.colum_id + '_' + g.dimensions_id
@@ -195,6 +215,8 @@
               $this.columDatas[key1].report_data = x.report_data
           })
         })
+
+
         const valloading = this.$loading({
           lock: true,
           text: '数据校验中.......',
@@ -210,6 +232,9 @@
           }
         }).then(response=>{
           valloading.close();
+
+          console.log(this.columDatas)
+
           let failtMes = ""
           let validateFailed = false
           if(response!=null){
@@ -387,23 +412,6 @@
     },
     activated(){
       this.saveFlag = this.$route.params.saveFlag
-      if(this.hasMounted){
-        console.log(this.unitId+"--缓存校验")
-        debugger
-        const columDataTmp = this.definedGroup
-        this.definedGroup = null
-        this.definedGroup = columDataTmp
-        if(this.saveFlag!=null&&this.saveFlag!=undefined){
-          if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
-            this.$emit("refreshSaveLoading",this.unitId,"保存中....")
-            this.doSaveUnitContext()
-          }else if(this.saveFlag=='S'){
-
-          }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
-            this.doValidateUnitContext()
-          }
-        }
-      }
 
     }
   }

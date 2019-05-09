@@ -557,7 +557,107 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
     @Override
     public Map<String, String> validateGridUnit(ArrayList<GridColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
-        return null;
+        Map<String,List<String>> dataTmp = new HashMap<>();
+        for (ReportCustomerData columData : columDatas) {
+            String unitId = columData.getUnit_id();
+            String columId = columData.getColum_id();
+            String dimId = columData.getDimensions_id();
+            String tmpKey = unitId+"_"+columId+"_"+dimId;
+            if(!dataTmp.containsKey(tmpKey)){
+                dataTmp.put(tmpKey,new ArrayList<String>());
+            }
+            dataTmp.get(tmpKey).add(columData.getReport_data());
+        }
+
+        Map<String,String> validateResult  = new HashMap<>();
+
+        for (GridColumDefined definedColum : definedColums) {
+            Integer unitId = definedColum.getUnit_id();
+            Integer columId = definedColum.getColum_id();
+            Integer dimId = definedColum.getDim_id();
+
+            if(dataTmp.containsKey(unitId+"_"+columId+"_"+dimId)){
+                Integer columTypeINT = new Integer(definedColum.getColum_type());
+
+                List<String> dataList = dataTmp.get(unitId + "_" + columId+"_"+dimId);
+
+                for (String dataValue : dataList) {
+                    if(Strings.isNullOrEmpty(dataValue)&&!ColumType.FORMULA.compareWith(new Integer(definedColum.getColum_type()))){
+                        validateResult.put(definedColum.getColum_id().toString(),"数据不允许为空");
+                        continue;
+                    }
+
+                    if(ColumType.NUMBER.compareWith(columTypeINT)){
+                        BigDecimal maxValue = definedColum.getMax_value();
+                        Integer minValue = definedColum.getMin_value();
+
+                        try{
+                            Integer dataInt = new Integer(dataValue);
+                            BigDecimal dataBig = new BigDecimal(dataValue);
+                            logger.debug("{},{}",dataInt,definedColum);
+
+                            if(dataBig.compareTo(maxValue)<=0&&dataInt>=minValue){
+                            }else{
+                                validateResult.put(definedColum.getColum_id().toString()+"_"+definedColum.getDim_id().toString()
+                                        ,"数据应在"+minValue+"-"+maxValue+"区间");
+                            }
+                        }catch (NumberFormatException e){
+                            try{
+                                Long dataFormatter = new Long(dataValue);
+                                if(maxValue.compareTo(new BigDecimal(dataFormatter))>=0&&dataFormatter>=minValue){
+                                }else{
+                                    validateResult.put(definedColum.getColum_id().toString()
+                                            +"_"+definedColum.getDim_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                }
+                            }catch (NumberFormatException e1){
+                                try{
+                                    Float dataFormatter = new Float(dataValue);
+                                    if(maxValue.compareTo(new BigDecimal(dataFormatter))>=0&&dataFormatter>=minValue){
+                                    }else{
+                                        validateResult.put(definedColum.getColum_id().toString()
+                                                +"_"+definedColum.getDim_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                    }
+                                }catch(NumberFormatException e2){
+                                    try{
+                                        Double dataFormatter = new Double(dataValue);
+                                        if(maxValue.compareTo(new BigDecimal(dataFormatter))>=0&&dataFormatter>=minValue){
+                                        }else{
+                                            validateResult.put(definedColum.getColum_id().toString()
+                                                    +"_"+definedColum.getDim_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                        }
+                                    }catch(NumberFormatException e3){
+                                        try{
+                                            BigDecimal dataFormatter = new BigDecimal(dataValue);
+                                            if((dataFormatter.compareTo(new BigDecimal(minValue))>=0)&&(dataFormatter.compareTo(maxValue)<=0)){
+                                            }else{
+                                                validateResult.put(definedColum.getColum_id().toString()
+                                                        +"_"+definedColum.getDim_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
+                                            }
+                                        }catch(NumberFormatException e4){
+                                            validateResult.put(definedColum.getColum_id().toString()+
+                                                    "_"+definedColum.getDim_id().toString(),"数据格式错误");
+                                        }
+
+                                    }
+                                }
+                            }
+                        }
+                        if(validateResult.containsKey(definedColum.getColum_name_cn())){
+                            logger.debug("校验×××{} 值{}×××区间{}~{}校验失败.....",definedColum.getColum_name_cn(),dataValue,minValue,maxValue);
+                        }else
+                            logger.debug("校验-->{} 值{}<--区间{}~{}校验PASS.....",definedColum.getColum_name_cn(),dataValue,minValue,maxValue);
+
+                    }else if(ColumType.STRING.compareWith(columTypeINT)){
+
+                    }else if(ColumType.DATE.compareWith(columTypeINT)){
+
+                    }
+                }
+
+            }
+        }
+
+        return validateResult;
     }
 
     /**
@@ -584,41 +684,43 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                     }
 
                     if(ColumType.NUMBER.compareWith(columTypeINT)){
-                        Integer maxValue = definedColum.getMax_value();
+                        BigDecimal maxValue = definedColum.getMax_value();
                         Integer minValue = definedColum.getMin_value();
 
                         try{
                             Integer dataInt = new Integer(dataValue);
+                            BigDecimal dataBig = new BigDecimal(dataValue);
                             logger.debug("{},{}",dataInt,definedColum);
-                            if(dataInt<=maxValue&&dataInt>=minValue){
+
+                            if(dataBig.compareTo(maxValue)<=0&&dataInt>=minValue){
                             }else{
                                 validateResult.put(definedColum.getColum_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
                             }
                         }catch (NumberFormatException e){
                             try{
                                 Long dataFormatter = new Long(dataValue);
-                                if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                                if(maxValue.compareTo(new BigDecimal(dataFormatter))>=0&&dataFormatter>=minValue){
                                 }else{
                                     validateResult.put(definedColum.getColum_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
                                 }
                             }catch (NumberFormatException e1){
                                 try{
                                     Float dataFormatter = new Float(dataValue);
-                                    if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                                    if(maxValue.compareTo(new BigDecimal(dataFormatter))>=0&&dataFormatter>=minValue){
                                     }else{
                                         validateResult.put(definedColum.getColum_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
                                     }
                                 }catch(NumberFormatException e2){
                                     try{
                                         Double dataFormatter = new Double(dataValue);
-                                        if(dataFormatter<=maxValue&&dataFormatter>=minValue){
+                                        if(maxValue.compareTo(new BigDecimal(dataFormatter))>=0&&dataFormatter>=minValue){
                                         }else{
                                             validateResult.put(definedColum.getColum_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
                                         }
                                     }catch(NumberFormatException e3){
                                         try{
                                             BigDecimal dataFormatter = new BigDecimal(dataValue);
-                                            if((dataFormatter.compareTo(new BigDecimal(minValue))>=0)&&(dataFormatter.compareTo(new BigDecimal(maxValue))<=0)){
+                                            if((dataFormatter.compareTo(new BigDecimal(minValue))>=0)&&(dataFormatter.compareTo(maxValue)<=0)){
                                             }else{
                                                 validateResult.put(definedColum.getColum_id().toString(),"数据应在"+minValue+"-"+maxValue+"区间");
                                             }

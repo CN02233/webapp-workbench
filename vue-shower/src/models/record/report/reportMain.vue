@@ -1,5 +1,15 @@
 <template>
   <WorkMain :headerItems="['报送填报','报送填报列表']">
+    <el-row class="search-row" :gutter="20">
+      <el-col class="align-left" :span="17">
+        <el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"
+                     :options="cityTree">
+        </el-cascader>
+
+        <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
+        <el-button @click="getTableData(1)" type="success">查询</el-button>
+      </el-col>
+    </el-row>
     <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
@@ -18,6 +28,16 @@
               align="left"
               :formatter="getOriginName"
               label="报送机构">
+            </el-table-column>
+          <el-table-column
+              prop="origin_province"
+              align="left"
+              label="所属省">
+            </el-table-column>
+          <el-table-column
+              prop="origin_city"
+              align="left"
+              label="所属市">
             </el-table-column>
           <el-table-column
             prop="report_status"
@@ -75,12 +95,15 @@
       return {
         reportDataList: [],
         origins: {},
+        seachOriginList: [],
+        seachOriginName: '',
+        cityTree:{},
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1,
         loginUserType:'',
         status_cn:{
-           '0' : '正常',
+           '0' : '待填写',
            '1':'审批中',
            '2':'复核中',
            '3':'锁定',
@@ -104,11 +127,22 @@
         } else {
           pageNum = this.currPageNum
         }
+
+        let seachOriginId = null
+        if(this.seachOriginList!=null&&this.seachOriginList.length>0){
+          seachOriginId = this.seachOriginList[this.seachOriginList.length-1]
+        }
+
         const $this = this
         this.BaseRequest({
           url: "reportCust/pagerReport",
           method: 'get',
-          params: {currPage: pageNum, pageSize: this.eachPageNum}
+          params: {
+            currPage: pageNum,
+            pageSize: this.eachPageNum,
+            searchOriginId:seachOriginId,
+            searchOriginName:this.seachOriginName
+          }
         }).then(response => {
           response.origins.forEach(origin=>{
             $this.origins[origin['origin_id']] = origin
@@ -116,6 +150,23 @@
           $this.reportDataList = response.dataList
           // $this.origins = response.origins
           $this.totalPage = response.totalPage
+          const cityTree = []
+          response.first2Origin.forEach(proOrigin=>{
+            const province = proOrigin['province']
+            const citys = proOrigin['citys']
+            const children = []
+
+            citys.forEach(city=>{
+              children.push({value: city['origin_id'],
+                label: city['origin_name']})
+            })
+
+            cityTree.push({value: province['origin_id'],
+              label: province['origin_name'],
+              children: children})
+          })
+
+          $this.cityTree = cityTree
 
         })
       },

@@ -13,9 +13,15 @@ public interface IWelcomeDao {
     @Select("<script>" +
             "select reportCust.*,so.origin_name as report_origin_name from " +
             "(select * from report_customer where report_origin=#{self_origin} and report_status=#{normal_status} " +
+            " <if test=\"submit_status != null and originParams!=null \">  " +
             "union " +
-            "select * from report_customer where report_origin=#{self_origin} and report_status=#{submit_status} " +
-            " <if test=\"originParams != null\">  " +
+            "select * from report_customer where report_origin in " +
+            " <foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> "+
+            " #{item}" +
+            " </foreach> " +
+            "and report_status=#{submit_status} " +
+            "</if>"+
+            " <if test=\"review_status != null and originParams!=null\">  " +
             "union " +
             "select * from report_customer where report_origin in " +
             " <foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> "+
@@ -28,7 +34,7 @@ public interface IWelcomeDao {
             @Param("pageSize") Integer pageSize,
             @Param("self_origin") Integer self_origin,
             @Param("normal_status") String normal_status,
-            @Param("submit_status") String submit_status,
             @Param("originParams") List<Integer> originParams,
+            @Param("submit_status") String submit_status,
             @Param("review_status") String review_status);
 }

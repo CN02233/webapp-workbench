@@ -69,7 +69,7 @@
       }
     },
     methods:{
-      getUnitContext(){
+      getUnitContext(justRefreshFomular){
 
         let loading = null
         if(this.saveFlag=='N') {
@@ -96,7 +96,6 @@
             let imap = {}, dmap = {}
             $t.definedIndexs = []
             $t.definedDimensions = []
-            $t.definedCells = []
             $t.definedColums = []
             response.definedColums.forEach(x=>{
               if(x.colum_meta_type == 2){
@@ -115,6 +114,38 @@
                 $t.definedColums.push(xx)
               }
             })
+
+            if(justRefreshFomular){
+              response.columDatas.forEach(columData=>{
+                const columKey = columData.unit_id + "_"+columData.colum_id + "_"+columData.dimensions_id
+                // debugger
+                $t.definedColums.forEach(definedColum=>{
+                  const dimId = definedColum.dim_id
+                  const colId = definedColum.colum_id
+                  const unitId = definedColum.unit_id
+                  const columType = definedColum.colum_type
+                  if(columData.unit_id==unitId&&columData.dimensions_id==dimId&&columData.colum_id==colId&&columType=='0'){
+
+                    $t.columDatas[columKey] = columData
+                    $t.columDatas[columKey].report_data = $t.columDatas[columKey].report_data || ''
+
+                    $t.definedCells.forEach(definedCell=>{
+
+                      const definedCellColumId = definedCell.colum_id
+                      if(definedCellColumId==colId){
+                        definedCell[dimId] = $t.columDatas[columKey].report_data || ''
+                      }
+                    })
+                  }
+                })
+              })
+
+              return
+            }
+
+            $t.definedCells = []
+
+
             $t.definedCells = $t.definedIndexs.map(x=>{
               let xx = Object.assign({}, x)
               response.columDatas.forEach(c=>{
@@ -131,21 +162,25 @@
             })
             response.columDatas.forEach(columData=>{
               const columKey = columData.unit_id + "_"+columData.colum_id + "_"+columData.dimensions_id
-              $t.columDatas[columKey] = columData
-              $t.columDatas[columKey].report_data = $t.columDatas[columKey].report_data || ''
-            })
 
-            if(!this.hasMounted){
-              this.hasMounted = true
-              if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
-                this.$emit("refreshSaveLoading",this.unitId,"保存中....")
-                this.doSaveUnitContext()
-              }else if(this.saveFlag=='S'){
+              if(justRefreshFomular){
+                this.definedColums.forEach(definedColum=>{
+                  const dimId = definedColum.dim_id
+                  const colId = definedColum.colum_id
+                  const unitId = definedColum.unit_id
+                  const columType = definedColum.colum_type
+                  
+                  if(columData.unit_id==unitId&&columData.dim_id==dimId&&columData.colum_id==colId&&columType=='0'){
 
-              }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
-                this.doValidateUnitContext()
+                    $t.columDatas[columKey] = columData
+                    $t.columDatas[columKey].report_data = $t.columDatas[columKey].report_data || ''
+                  }
+                })
+              }else{
+                $t.columDatas[columKey] = columData
+                $t.columDatas[columKey].report_data = $t.columDatas[columKey].report_data || ''
               }
-            }
+            })
           }
         }).catch(error=>{
             this.Message.success(error)
@@ -154,13 +189,12 @@
         );
       },
       doSaveUnitContext(processName){
+        let validDatas = this.getValidContext()
+
         this.BaseRequest({
           url:"/reportCust/saveGridUnitContext",
           method:'post',
-          data:{
-            definedColums:this.definedColums,
-            columDatas:Object.values(this.columDatas)
-          }
+          data:validDatas
         }).then(response=>{
           // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
@@ -180,7 +214,7 @@
           background: 'rgba(0, 0, 0, 0.7)'
         });
         this.BaseRequest({
-          url:"/reportCust/validateSimpleUnitContext",
+          url:"/reportCust/validateGridUnit",
           method:'post',
           data:{
             definedColums:validDatas.definedColums,
@@ -198,20 +232,15 @@
               const dimensionsLength = this.definedDimensions.length
               const failTmp = {}
 
-              validateFailedKeys.forEach(columOrder=>{
-                const failedReason = response[columOrder]
-                const lineOrder = Math.ceil(columOrder/dimensionsLength)
-                const colum_id = this.definedCells[lineOrder-1].colum_id
-                const lineYIndexStart = (dimensionsLength*(lineOrder-1))+1
-                for (let y=0;y<dimensionsLength;y++){
-
-                  if((lineYIndexStart+y)==columOrder){
-                    const dim_id = this.definedDimensions[y].dim_id
-                    if(!failTmp[colum_id])
-                      failTmp[colum_id] = {}
-                    failTmp[colum_id][dim_id] = failedReason
-                  }
+              validateFailedKeys.forEach(validateFailedKey=>{
+                const failedReason = response[validateFailedKey]
+                const validateFailedKeyArray = validateFailedKey.split("_")
+                const failColumId = validateFailedKeyArray[0]
+                const failDimId = validateFailedKeyArray[1]
+                if(!failTmp[failColumId]){
+                  failTmp[failColumId] = {}
                 }
+                failTmp[failColumId][failDimId] = failedReason
               })
 
               this.definedCells.forEach(definedCell=>{
@@ -354,6 +383,7 @@
         this.$emit("checkStepAndSave",saveLink.nextUnit)
       },
       getValidContext(){
+
         const $t = this
         $t.definedCells.forEach(x=>{
           $t.definedDimensions.forEach(y=>{
@@ -365,11 +395,11 @@
         $t.definedColums.forEach((x,i)=>{
           let xx = Object.assign({}, x)
           xx.colum_name_cn = x.colum_name_cn + '-' + x.dim_name_cn
-          xx.colum_id = i + 1
+          // xx.colum_id = i + 1
           cols.push(xx)
           let key = x.unit_id + '_' + x.colum_id + '_' + x.dim_id
           let cc = Object.assign({}, $t.columDatas[key])
-          cc.colum_id = xx.colum_id
+          // cc.colum_id = xx.colum_id
           ds.push(cc)
         })
         return {

@@ -54,7 +54,7 @@
       }
     },
     methods:{
-      getUnitContext(){
+      getUnitContext(justRefreshFomular){
         let loading = null
         if(this.saveFlag=='N') {
           loading = this.$loading({
@@ -86,28 +86,31 @@
             if(response.columDatas){
               response.columDatas.forEach(columData=>{
                 const columKey = columData.unit_id + "_"+columData.colum_id
-                this.columDatas[columKey] = columData
                 // if(!this.dataObject[columData.unit_id]){
                 //   this.dataObject[columData.unit_id] = {}
                 // }
-                columData.colum_name_cn = defindObj['C'+columData.colum_id].colum_name_cn
-                columData.colum_desc = defindObj['C'+columData.colum_id].colum_desc
-                columData.colum_point = defindObj['C'+columData.colum_id].colum_point
-                columData.colum_type = defindObj['C'+columData.colum_id].colum_type
+                // debugger
+                if(justRefreshFomular){
+                  const colum_type = defindObj['C'+columData.colum_id].colum_type
+                  if(colum_type=='0'){
+                      this.columDatas[columKey] = columData
+                      columData.colum_name_cn = defindObj['C'+columData.colum_id].colum_name_cn
+                      columData.colum_desc = defindObj['C'+columData.colum_id].colum_desc
+                      columData.colum_point = defindObj['C'+columData.colum_id].colum_point
+                      columData.colum_type = defindObj['C'+columData.colum_id].colum_type
+                  }
+                }else{
+                  this.columDatas[columKey] = columData
+                  columData.colum_name_cn = defindObj['C'+columData.colum_id].colum_name_cn
+                  columData.colum_desc = defindObj['C'+columData.colum_id].colum_desc
+                  columData.colum_point = defindObj['C'+columData.colum_id].colum_point
+                  columData.colum_type = defindObj['C'+columData.colum_id].colum_type
+                }
               })
-              this.dataObject = response.columDatas
+              this.dataObject = Object.values(this.columDatas)
             }
 
-            if(!this.hasMounted){
-              console.log(this.unitId+"--ajax后校验")
-              if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
-                this.$emit("refreshSaveLoading",this.unitId,"保存中....")
-                this.doSaveUnitContext()
-              }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
-                this.doValidateUnitContext()
-              }
-              this.hasMounted = true
-            }
+
 
           }
         }).catch(error=>{

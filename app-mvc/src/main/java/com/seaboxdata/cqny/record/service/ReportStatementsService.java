@@ -35,4 +35,6 @@ public interface ReportStatementsService {
     void copyReportDefined(String definedId);
 
     void updateReportDefined(ReportDefinedEntity reportDefined);
+
+    List<Origin> getAuthOriginTree(String reportDefinedId);
 }

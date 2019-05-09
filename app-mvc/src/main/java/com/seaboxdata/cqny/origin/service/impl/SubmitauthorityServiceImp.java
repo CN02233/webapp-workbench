@@ -49,6 +49,11 @@ public class SubmitauthorityServiceImp implements SubmitauthorityService {
         submitauthorityDao.deleteByListId(finalOriginList);
     }
 
+    @Override
+    public List<String> getReportOriginForOrganizationUser(int currUserId) {
+        return submitauthorityDao.getOriginIdListByUserId(currUserId);
+    }
+
     private void checkOrigins(Map<String, Object> origin,List finalOriginList){
         List<Map<String, Object>> children = (List)origin.get("childrens");
         finalOriginList.add(origin.get("origin_id"));

@@ -2,13 +2,10 @@
   <WorkMain :headerItems="['用户管理','用户列表']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
-        <el-cascader filterable placeholder="请选择待查询机构"
-                     :clearable="true"
-                     :show-all-levels="false"
-                     v-model="seachOriginId"
-                     change-on-select
-                     :options="options">
+        <el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"
+                     :options="cityTree">
         </el-cascader>
+        <el-input placeholder="请输入机构名称" style="width:180px"  v-model="searchOriginName"></el-input>
         <el-input placeholder="请输入待查询用户名" style="width:180px"  v-model="seachUserId"></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
         <el-button @click="openAddModal" type="primary">新增</el-button>
@@ -23,11 +20,6 @@
           row-class-name="mini-font-size" stripe
           style="width: 100%">
           <el-table-column
-            prop="user_id"
-            align="left"
-            label="用户ID">
-          </el-table-column>
-          <el-table-column
             prop="user_name"
             align="left"
             label="用户名称">
@@ -35,13 +27,28 @@
           <el-table-column
             prop="user_name_cn"
             align="left"
-            label="用户中文名">
+            label="用户名称">
           </el-table-column>
           <el-table-column
-            prop="reg_date"
+            prop="origin_province"
             align="left"
-            label="注册日期">
+            label="所属省">
           </el-table-column>
+          <el-table-column
+            prop="origin_city"
+            align="left"
+            label="所属市">
+          </el-table-column>
+          <el-table-column
+            prop="origin_name"
+            align="left"
+            label="所属机构">
+          </el-table-column>
+          <!--<el-table-column-->
+            <!--prop="reg_date"-->
+            <!--align="left"-->
+            <!--label="注册日期">-->
+          <!--</el-table-column>-->
           <!--<el-table-column-->
             <!--prop="last_login_time"-->
             <!--align="left"-->
@@ -53,6 +60,7 @@
             <template slot-scope="scope">
               <el-button type="text" @click="openEditModal(scope.row)" size="small">编辑</el-button>
               <el-button type="text" @click="openAuthModal(scope.row)" size="small">权限</el-button>
+              <el-button type="text" @click="resetPwd(scope.row)" size="small">重置密码</el-button>
               <el-button type="text" @click="delUser(scope.row)" size="small">删除</el-button>
             </template>
           </el-table-column>
@@ -94,7 +102,7 @@
         </el-form-item>
 
         <el-form-item :size="small" label="所属机构" >
-          <!--<treeselect v-model="formData.origin_id"  :options="options" />-->
+          <treeselect v-model="formData.origin_id"  :options="options" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -136,10 +144,13 @@
       return {
         userDataList: [],
         originList: [],
+        seachOriginList: [],
+        searchOriginName: '',
+        cityTree:{},
         userType: 1,
         seachUserId: null,
         seachOriginId: null,
-        tableDataUrl: 'sys/user/listUserPage',
+        tableDataUrl: 'cqnyUser/listUserPage',
         currPageNum: 1,
         totalPage: 1,
         showModalPage: false,
@@ -196,8 +207,8 @@
         }
         const $this = this
         let seachOriginId = null
-        if(this.seachOriginId!=null&&this.seachOriginId.length>0){
-          seachOriginId = this.seachOriginId[this.seachOriginId.length-1]
+        if(this.seachOriginList!=null&&this.seachOriginList.length>0){
+          seachOriginId = this.seachOriginList[this.seachOriginList.length-1]
         }
         if(this.seachUserId==null||this.seachUserId==''){
           this.seachUserId = ""
@@ -205,10 +216,31 @@
         this.BaseRequest({
           url: this.tableDataUrl,
           method: 'get',
-          params: {currPage: pageNum, pageSize: 10, user_name: this.seachUserId,originId:seachOriginId}
+          params: {currPage: pageNum,
+            pageSize: 10,
+            user_name_cn: this.seachUserId,
+            searchOriginName: this.searchOriginName,
+            searchOriginId:seachOriginId}
         }).then(reponse => {
           $this.totalPage = reponse.totalPage
           $this.refreshTableList(reponse.dataList)
+          const cityTree = []
+          reponse.first2Origin.forEach(proOrigin=>{
+            const province = proOrigin['province']
+            const citys = proOrigin['citys']
+            const children = []
+
+            citys.forEach(city=>{
+              children.push({value: city['origin_id'],
+                label: city['origin_name']})
+            })
+
+            cityTree.push({value: province['origin_id'],
+              label: province['origin_name'],
+              children: children})
+          })
+
+          $this.cityTree = cityTree
         })
       },
       getOriginList () { // 弹出model触发、获取机构树状展示
@@ -284,6 +316,37 @@
 
           this.formData.origin_id = reponse.origin_id
         })
+      },
+      resetPwd(row){
+        const userId = row.user_id
+        this.$confirm('确定将该用户密码重置？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(() => {
+          const loading = this.$loading({
+            lock: true,
+            text: '删除中',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
+
+          this.BaseRequest({
+            url:'cqnyUser/resetPwd',
+            method:'get',
+            params:{'userId':userId}
+          }).then(response=>{
+            this.Message.success("重置成功")
+            loading.close()
+            this.getTableData(1)
+          }).catch(error=>{
+            console.log(error)
+            loading.close()
+            this.Message.error("重置失败"+error)
+          })
+        }).catch(() => {
+        });
       },
       submitDataForm: function () { // user submit
         if (this.checkInputNull()) {

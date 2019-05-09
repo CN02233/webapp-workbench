@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,17 +40,37 @@ public class WelcomeController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult jobList(int currPage,int pageSize){
         User user = SessionSupport.checkoutUserFromSession();
-        Origin userOrigin = originService.getOriginByUser(user.getUser_id());
-        Integer userOriginId = userOrigin.getOrigin_id();
-        PageResult reportCustomers = welcomeService.jobList(userOriginId, currPage, pageSize);
+
+//        1：填报用户
+//        2：监管用户
+//        0：审核用户
+        String userType = user.getUser_type();
+        if("0".equals(userType)){
+
+        }else if("1".equals(userType)){
+
+        }else if("2".equals(userType)){
+            Map<String,Object> responseMap = new HashMap<>();
+            responseMap.put("currPage",currPage);
+            responseMap.put("pageSize",pageSize);
+            responseMap.put("totalPage",1);
+            responseMap.put("totalNum",0);
+            responseMap.put("dataList",new ArrayList<>());
+            responseMap.put("userType",userType);
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,responseMap);
+            return jsonResult;
+        }
+
+        PageResult reportCustomers = welcomeService.jobList(user.getUser_id(), currPage, pageSize);
         Map<String,Object> responseMap = new HashMap<>();
         responseMap.put("currPage",reportCustomers.getCurrPage());
         responseMap.put("pageSize",reportCustomers.getPageSize());
         responseMap.put("totalPage",reportCustomers.getTotalPage());
         responseMap.put("totalNum",reportCustomers.getTotalNum());
         responseMap.put("dataList",reportCustomers.getDataList());
+        responseMap.put("userType",userType);
 
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,reportCustomers);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,responseMap);
 
         return jsonResult;
     }

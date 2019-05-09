@@ -14,6 +14,7 @@ import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
 import com.seaboxdata.cqny.record.service.ReportStatementsService;
 import com.seaboxdata.cqny.record.service.ReportUnitService;
 import com.webapp.support.page.PageResult;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -173,6 +174,23 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     @Override
     public void updateReportDefined(ReportDefinedEntity reportDefined) {
         reportStatementsDao.updateReportStatements(reportDefined);
+    }
+
+//    @Override
+    public List<Origin> getAuthOriginTree(String reportDefinedId) {
+        List<Origin> allAthOrigin = reportStatementsDao.getDefinedOriginsById(reportDefinedId);
+        Map<Integer, Origin> tmpOrigin = new HashMap<>();
+        for (Origin origin : allAthOrigin) {
+            tmpOrigin.put(origin.getOrigin_id(),origin);
+        }
+
+//        for (Origin fullOrigin : fullOrigins) {
+//            if(allAthOrigin.contains(fullOrigin)){
+//
+//            }
+//        }
+
+        return null;
     }
 
     private void groupCopyUnit(List<CopyReportDefinedTmp> copyReportDefinedTmps,

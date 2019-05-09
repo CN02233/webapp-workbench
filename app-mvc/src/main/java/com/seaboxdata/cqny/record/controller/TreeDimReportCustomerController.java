@@ -44,6 +44,28 @@ public class TreeDimReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("validateTreeData")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult validateTreeData(@RequestBody ArrayList<TreeUnitContext> treeUnitContexts){
+        Map<String,String> responseResult = new HashMap<>();
+        if(treeUnitContexts!=null&&treeUnitContexts.size()>0){
+            for (TreeUnitContext treeUnitContext : treeUnitContexts) {
+                ArrayList<SimpleColumDefined> definedColums = treeUnitContext.getDefinedColums();
+                ArrayList<ReportCustomerData> columDatas = treeUnitContext.getColumDatas();
+                Map<String, String> validateResult = reportCustomerService.validateSimpleUnitByDimensions(definedColums, columDatas);
+                if(validateResult!=null&&validateResult.size()>0){
+                    responseResult.putAll(validateResult);
+                }
+            }
+        }
+        
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,responseResult);
+
+        return jsonResult;
+    }
+
+
 
 
 }

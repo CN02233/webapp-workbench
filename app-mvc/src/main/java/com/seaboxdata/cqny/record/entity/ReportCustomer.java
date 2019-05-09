@@ -26,6 +26,8 @@ public class ReportCustomer {
     private Integer active_unit;
     private List<UnitDefined> unitEntities;
     private String pass_auth;
+    private String pass_approve;
+    private String pass_review;
     private String report_status;
 
     private Date report_data_start;
@@ -35,6 +37,9 @@ public class ReportCustomer {
 
     //merge from record.reportunit.ReportCustomer
     private String user_name;
+
+    private String origin_city;
+    private String origin_province;
 
 
     public Integer getReport_id() {
@@ -208,5 +213,37 @@ public class ReportCustomer {
 
     public void setReport_data_end_str(String report_data_end_str) {
         this.report_data_end_str = report_data_end_str;
+    }
+
+    public String getPass_approve() {
+        return pass_approve;
+    }
+
+    public void setPass_approve(String pass_approve) {
+        this.pass_approve = pass_approve;
+    }
+
+    public String getPass_review() {
+        return pass_review;
+    }
+
+    public void setPass_review(String pass_review) {
+        this.pass_review = pass_review;
+    }
+
+    public String getOrigin_city() {
+        return origin_city;
+    }
+
+    public void setOrigin_city(String origin_city) {
+        this.origin_city = origin_city;
+    }
+
+    public String getOrigin_province() {
+        return origin_province;
+    }
+
+    public void setOrigin_province(String origin_province) {
+        this.origin_province = origin_province;
     }
 }

@@ -57,8 +57,12 @@
           <el-input   auto-complete="off" ></el-input>
         </el-form-item>
         -->
-        <el-form-item :size="small" label="用户名称" >
+        <el-form-item :size="small" label="用户登陆名" >
           <el-input v-model="formData.user_name" auto-complete="off" ></el-input>
+        </el-form-item>
+
+        <el-form-item :size="small" label="用户中文名" >
+          <el-input  v-model="formData.user_name_cn" auto-complete="off" ></el-input>
         </el-form-item>
 
         <el-form-item :size="small" label="行政机构" >
@@ -121,6 +125,7 @@ export default {
       formData: {
         user_id: null,
         user_name: null,
+        user_name_cn: null,
         organization_id: null
       },
       options: []
@@ -157,7 +162,7 @@ export default {
       }
       const $this = this
       this.BaseRequest({
-        url: this.tableDataUrl,
+        url: "sys/user/pageUsers",
         method: 'get',
         params: {currPage: pageNum, pageSize: 10, userType: this.userType}
       }).then(reponse => {
@@ -246,7 +251,7 @@ export default {
         this.BaseRequest({
           url: 'sys/user/saveNewUser',
           method: 'get',
-          params: {'user_name': this.formData.user_name, 'user_type': this.userType}
+          params: {'user_name': this.formData.user_name,user_name_cn:this.formData.user_name_cn, 'user_type': this.userType}
         }).then((response) => {
           this.Message.success('保存成功')
           // add user——organization relation

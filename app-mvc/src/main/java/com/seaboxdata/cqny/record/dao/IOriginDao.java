@@ -45,4 +45,6 @@ public interface IOriginDao {
             "and uoa.user_id = #{userId}")
     Origin getOriginByUserId(Integer userId);
 
+    @Select("select * from sys_origin where origin_name like concat('%',#{searchOriginName},'%')")
+    List<Origin> getOriginByName(String searchOriginName);
 }

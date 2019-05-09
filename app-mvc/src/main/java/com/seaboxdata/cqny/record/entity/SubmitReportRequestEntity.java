@@ -7,6 +7,8 @@ public class SubmitReportRequestEntity {
     private String report_start_date;
     private String report_end_date;
     private List<String> check_origins;
+    private List<String> approve_check_origins;
+    private List<String> review_check_origins;
 
     private String report_data_start;
     private String report_data_end;
@@ -57,5 +59,21 @@ public class SubmitReportRequestEntity {
 
     public void setReport_data_end(String report_data_end) {
         this.report_data_end = report_data_end;
+    }
+
+    public List<String> getApprove_check_origins() {
+        return approve_check_origins;
+    }
+
+    public void setApprove_check_origins(List<String> approve_check_origins) {
+        this.approve_check_origins = approve_check_origins;
+    }
+
+    public List<String> getReview_check_origins() {
+        return review_check_origins;
+    }
+
+    public void setReview_check_origins(List<String> review_check_origins) {
+        this.review_check_origins = review_check_origins;
     }
 }

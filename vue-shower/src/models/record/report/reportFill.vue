@@ -3,7 +3,8 @@
     <div class="fill-root">
       <div class="fill-steps">
         <el-steps process-status="finish"	direction="vertical" :active="activeStepNum">
-          <el-step :status="validateResult[unitEntity.unit_id]" @click.native="e => stepClick(e, unitNum) "
+          <el-step :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
+                   @click.native="e => stepClick(e, unitNum) "
                    v-for="(unitEntity,unitNum) in unitEntities"
                    :title="unitEntity.unit_name"></el-step>
         </el-steps>
@@ -159,6 +160,12 @@
           });
           if(needSubmit){
             this.reportCommitAuth()
+          }else{//非提交，只校验 需要刷新页面公式的值
+            this.unitEntities.forEach(unitEntity=>{
+              const unitId = unitEntity.unit_id
+              const reportContextRef = this.$refs['reportContextRef'+unitId][0]
+              reportContextRef.getFolumarData()
+            })
           }
         }).catch(error=>{
           this.doSomethinLoading.close();
@@ -170,7 +177,7 @@
         });
       },
       doSubmitContext(processName){
-        this.validateResult = {}
+        // this.validateResult = {}
         this.doneCount=0
         this.doneExcetionMessage = null
         const $this = this
@@ -208,7 +215,7 @@
         this.doneCount = this.doneCount+1
         if(saveException){
           if(this.doneExcetionMessage){
-            this.doneExcetionMessage = this.doneExcetionMessage+saveException
+            this.doneExcetionMessage = this.doneExcetionMessage+"<br>"+saveException
           }else{
             this.doneExcetionMessage = saveException
           }
@@ -219,8 +226,9 @@
           this.doneCount=0
           if(this.doneExcetionMessage){
             this.$notify({
-              title: '保存异常',
+              title: '保存失败',
               type: 'error',
+              dangerouslyUseHTMLString: true,
               message: this.doneExcetionMessage
             });
           }else{
@@ -234,12 +242,11 @@
       },
       validateReportsCallBack(unitId,unitName,saveException){
         this.doneCount = this.doneCount+1
-        console.log("unit "+unitId+"   "+saveException)
         if(saveException){
           this.validateResult[unitId] = "error"
           saveException = unitName+":"+saveException
           if(this.doneExcetionMessage){
-            this.doneExcetionMessage = this.doneExcetionMessage+saveException
+            this.doneExcetionMessage = this.doneExcetionMessage+"<br>"+saveException
           }else{
             this.doneExcetionMessage = saveException
           }
@@ -250,15 +257,16 @@
           this.doSomethinLoading.close()
           this.doSomethinLoading = null
           this.doneCount=0
+          const unitEntitiesTmp = this.unitEntities
+          this.unitEntities = null
+          this.unitEntities = unitEntitiesTmp
           if(this.doneExcetionMessage){
             this.$notify({
               title: '校验失败',
               type: 'error',
+              dangerouslyUseHTMLString: true,
               message: this.doneExcetionMessage
             });
-            const unitEntitiesTmp = this.unitEntities
-            this.unitEntities = null
-            this.unitEntities = unitEntitiesTmp
           }else{
             this.$notify({
               title: '校验成功',
@@ -272,11 +280,18 @@
       submitReportsCallBack(unitId,unitName,saveException,processName){
         this.doneCount = this.doneCount+1
         if(saveException){
+          if(processName=='VALIDATE'){
+            this.validateResult[unitId] = "error"
+          }
           saveException = unitName+":"+saveException
           if(this.doneExcetionMessage){
-            this.doneExcetionMessage = this.doneExcetionMessage+saveException
+            this.doneExcetionMessage = this.doneExcetionMessage+"<br>"+saveException
           }else{
             this.doneExcetionMessage = saveException
+          }
+        }else{
+          if(processName=='VALIDATE'){
+            this.validateResult[unitId] = "success"
           }
         }
         if(this.doneCount==this.unitEntities.length){
@@ -286,18 +301,27 @@
           let processTitle = "保存"
           if(processName=='VALIDATE'){
             processTitle="校验"
+            const unitEntitiesTmp = this.unitEntities
+            this.unitEntities = null
+            this.unitEntities = unitEntitiesTmp
           }
           if(this.doneExcetionMessage){
             this.$notify({
               title: processTitle+'失败',
+              dangerouslyUseHTMLString: true,
               type: 'error',
               message: this.doneExcetionMessage
             });
           }else{
+
+            let processmessage = "您已成功保存报表信息"
+            if(processName=='VALIDATE'){
+              processmessage="所有输入项均校验通过"
+            }
             this.$notify({
               title: processTitle+'成功',
               type: 'success',
-              message: "所有输入项均校验通过"
+              message: processmessage
             });
             if(processName=="SAVE"){
               this.doSubmitContext("VALIDATE")

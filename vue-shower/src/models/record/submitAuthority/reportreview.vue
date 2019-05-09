@@ -1,62 +1,78 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送复核']">
+    <el-row class="search-row" :gutter="20">
+      <el-col class="align-left" :span="17">
+        <el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"
+                     :options="cityTree">
+        </el-cascader>
+
+        <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
+        <el-button @click="getTableData(1)" type="success">查询</el-button>
+      </el-col>
+    </el-row>
     <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
-          style="width: 100%">
-          <el-table-column
-            prop="report_id"
-            align="left"
-            label="报表ID">
-          </el-table-column>
+          row-style="height:20px"
+          style="width: 100%;">
           <el-table-column
             prop="report_name"
             align="left"
             label="报表名称">
           </el-table-column>
           <el-table-column
-            prop="active_unit"
+            prop="report_origin"
             align="left"
-            label="报表步骤数">
+            :formatter="getOriginName"
+            label="报送机构">
           </el-table-column>
           <el-table-column
-            prop="report_origin"
-            align="left" :formatter="formattOriginName"
-            label="填报机构">
+            prop="origin_province"
+            align="left"
+            label="所属省">
+          </el-table-column>
+          <el-table-column
+            prop="origin_city"
+            align="left"
+            label="所属市">
           </el-table-column>
           <el-table-column
             prop="report_status"
-            align="left"
-            label="状态"
-            :formatter="formatStatus"
-          >
+            align="left" width="100"
+            :formatter="getReportStatus"
+            label="报送状态">
           </el-table-column>
           <el-table-column
-            prop="create_date"
+            prop="report_start_date_str"
             align="left"
-            label="创建时间">
+            label="报送开始时间">
           </el-table-column>
           <el-table-column
-            prop="user_name"
+            prop="report_end_date_str"
             align="left"
-            label="创建人">
+            label="报送结束时间">
           </el-table-column>
           <el-table-column
-            fixed="right"
+            prop="report_start_date_str"
+            :formatter="fomartterReportDataDate"
+            align="left"
+            label="报表期间">
+          </el-table-column>
+
+          <el-table-column
             label="操作"
             align="left"
-            width="250"
           >
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 @click="handlePass(scope.$index, scope.row)">通过</el-button>
-              <!--<el-button-->
-                <!--size="mini"-->
-                <!--@click="handleReject(scope.$index, scope.row)">驳回</el-button>-->
+              <el-button
+                size="mini"
+                @click="handleReject(scope.$index, scope.row)">驳回</el-button>
               <el-button
                 size="mini"
                 @click="handleRefill(scope.$index, scope.row)">返回重填</el-button>
@@ -97,6 +113,21 @@ export default {
       reportDataList: [],
       definedDataObjs: {},
       origins: {},
+      seachOriginList: [],
+      seachOriginName: '',
+      cityTree:{},
+      status_cn:{
+        '0' : '待填写',
+        '1':'审批中',
+        '2':'复核中',
+        '3':'锁定',
+        '4':'失效',
+        '5':'报表发布',
+        '6':'待上传签名',
+        '7':'未到填写日期',
+        '8':'过期',
+        '9':'填报完成'
+      },
       tableDataUrl: 'reportApproval/listReportReview',
       currPageNum: 1,
       eachPageNum: 10,
@@ -130,10 +161,16 @@ export default {
         pageNum = this.currPageNum
       }
       const $this = this
+      let seachOriginId = null
+      if(this.seachOriginList!=null&&this.seachOriginList.length>0){
+        seachOriginId = this.seachOriginList[this.seachOriginList.length-1]
+      }
       this.BaseRequest({
         url: this.tableDataUrl,
         method: 'get',
-        params: {currPage: pageNum, pageSize: this.eachPageNum}
+        params: {currPage: pageNum, pageSize: this.eachPageNum,
+          searchOriginId:seachOriginId,
+          searchOriginName:this.seachOriginName}
       }).then(response => {
         /* if (response.dataList != null) {
             response.dataList.forEach(definedObj => {
@@ -142,7 +179,23 @@ export default {
           } */
         $this.reportDataList = response.dataList
         $this.totalPage = response.totalPage
+        const cityTree = []
+        response.first2Origin.forEach(proOrigin=>{
+          const province = proOrigin['province']
+          const citys = proOrigin['citys']
+          const children = []
 
+          citys.forEach(city=>{
+            children.push({value: city['origin_id'],
+              label: city['origin_name']})
+          })
+
+          cityTree.push({value: province['origin_id'],
+            label: province['origin_name'],
+            children: children})
+        })
+
+        $this.cityTree = cityTree
       })
     },
     refreshTableList: function (dataList) {
@@ -221,6 +274,9 @@ export default {
         }
       })
     },
+    getReportStatus(rowData){
+      return this.status_cn[rowData.report_status]
+    },
 
     formattOriginName(reportData){
       return this.origins[reportData.report_origin]
@@ -234,26 +290,12 @@ export default {
 }
 </script>
 
+<style lang="css">
+  .mini-font-size{
+    font-size: 12px !important;
+  }
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
-
-  .el-row{
-    margin-top:20px;
-  }
-
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
-  .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    height:$tableRowHeight;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
-  }
 </style>

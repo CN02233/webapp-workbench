@@ -1,7 +1,9 @@
 <template>
   <div class="welcome-root">
 
-    <WorkMain :contextClass="'welcome-table-context'" class="self-report" :noNeedHome="true" :headerItems="['待办事项']">
+    <WorkMain :contextClass="'welcome-table-context'"
+              :class="{'full-height':userType==1,'full-self-report':userType==0||userType==2}"
+              :noNeedHome="true" :headerItems="['待办事项']">
 
       <el-row class="table-page-root-outoptions">
         <el-col :span="24">
@@ -60,7 +62,7 @@
 
     </WorkMain>
 
-    <WorkMain :contextClass="'welcome-table-context'" class="self-report" :noNeedHome="true" :headerItems="['报表统计']">
+    <WorkMain v-if="userType==0||userType==2" :contextClass="'welcome-table-context'" class="self-report" :noNeedHome="true" :headerItems="['报表统计']">
       <div class="self-report-chart">
        <echart ref="chart1" :options="pieOptions" ></echart>
       </div>
@@ -101,7 +103,7 @@
     data() {
         return {
           reportStatus:{
-            'NORMAL':'填报中',
+            'NORMAL':'待填写',
             'SUBMIT':'审批中',
             'REVIEW':'审核中',
             // 'LOCK':'锁定',
@@ -127,6 +129,7 @@
           eachPageNum: 10,
           totalPage: 1,
           jobCurrPageNum: 1,
+          userType: 1,
           jobTotalPage: 1,
           tagTypeArray:['success','info','warning','danger'	],
           selfReportInfo:{},
@@ -185,6 +188,7 @@
           if(response){
             this.jobTotalPage = response.totalPage
             this.jobReportList = response.dataList
+            this.userType = response.userType
           }
         })
       },
@@ -244,7 +248,7 @@
       getReportDates(rowData){
         return rowData.report_start_date_str+"~"+rowData.report_end_date_str
       },
-      reportFill(reportId){
+      reportFIll(reportId){
         this.$router.push({
           path: "/record/report/reportFill?reportId="+reportId+"&isView=N"
         });
@@ -288,6 +292,10 @@
     width:100%;
     height:50% !important;
     overflow: auto;
+  }
+
+  .full-height{
+    height:100%;
   }
 
   .slef-report-tag{

@@ -1,11 +1,14 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.dao.IReportApprovalDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
+import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportApprovalService;
 import com.webapp.support.page.PageResult;
 import org.slf4j.Logger;
@@ -25,17 +28,10 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
     private ISubmitauthorityDao submitauthorityDao;
 
     @Override
-    public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize) {
+    public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize,List<Integer> originIds) {
         Set finalOriginSet = new HashSet();
 
-        if(ReportStatus.REVIEW.compareTo(reportStatus)){
-            finalOriginSet = getOrigins(userId);
-        }else{
-            Origin origin = submitauthorityDao.getOriginByUserId(userId);
-            finalOriginSet.add(origin.getOrigin_id());
-        }
-
-        Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(currPage, pageSize, reportStatus, finalOriginSet);
+        Page<ReportCustomer> approveList = reportApprovalDao.listReportApproval(currPage, pageSize, reportStatus, originIds);
         logger.debug("approveList :{}",approveList);
         PageResult pageResult = PageResult.pageHelperList2PageResult(approveList);
         return pageResult;
@@ -59,6 +55,8 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
     private Set getOrigins(int user_id) {
         Origin origin;
         origin = submitauthorityDao.getOriginByUserId(user_id);
+//        origin = originService.getOriginByUser(user_id);
+        
         if (origin==null){
             return null;
         }else{

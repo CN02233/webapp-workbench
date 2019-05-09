@@ -43,22 +43,35 @@ public interface IUserServiceDao {
     @Options(useCache = false)
     List<User> listAllUser();
 
-    @Select("<script>"+query_user_columns + " FROM "+TABLE_NAME +
-            "  inner join user_origin_assign uoa on u.user_name like concat('%',#{user_name},'%')"+
+    @Select("<script>"+query_user_columns + ",so.origin_id,so.origin_name FROM "+TABLE_NAME +
+            "  , user_origin_assign uoa,sys_origin so where u.user_name like concat('%',#{user_name},'%')"+
             "  <if test=\"user_id != 0\"> and u.user_id = #{user_id} </if> " +
-            "  and (u.user_type=1 or u.user_type=0) and u.user_id = uoa.user_id " +
+            "  <if test=\"user_type != null\">   and u.user_type=#{user_type}  </if> " +
+            "  <if test=\"user_type == null\">   and (u.user_type=1 or u.user_type=0)  </if> " +
+            " and u.user_id = uoa.user_id " +
+            " and so.origin_id = uoa.origin_id"+
+            " and so.origin_id = uoa.origin_id"+
             "  <if test=\"originId != null\"> and uoa.origin_id = #{originId} </if> " +
             "</script>" )
     @Options(useCache = false)
     Page<User> listUsersForPage(@Param("currPage") int currPage, @Param("pageSize") int pageSize
             ,@Param("user_id") int user_id,@Param("user_name") String user_name,@Param("user_type")String user_type,@Param("originId") String originId);
 
-    @Insert("INSERT INTO "+TABLE_NAME+" (user_id,user_name,user_name_cn,user_type,reg_date,user_status,last_login_time,user_pwd) " +
+    @Select("<script>"+query_user_columns + " FROM "+TABLE_NAME +
+            " where  <if test=\"user_type != null\">    u.user_type=#{user_type}  </if> " +
+            "  <if test=\"user_type == null\">    (u.user_type=1 or u.user_type=0)  </if> " +
+            "  <if test=\"user_id != 0\"> and u.user_id = #{user_id} </if> " +
+            "</script>" )
+    @Options(useCache = false)
+    Page<User> pageUsers(@Param("currPage") int currPage, @Param("pageSize") int pageSize
+            ,@Param("user_id") int user_id,@Param("user_name") String user_name,@Param("user_type")String user_type);
+
+    @Insert("INSERT INTO user (user_id,user_name,user_name_cn,user_type,reg_date,user_status,last_login_time,user_pwd) " +
             " VALUE (#{user_id},#{user_name},#{user_name_cn},#{user_type},now(),#{user_status},#{last_login_time},#{user_pwd})")
     @Options(useCache = false)
     void saveNewUser(User user);
 
-    @Delete("DELETE FROM "+TABLE_NAME+" WHERE user_id = #{user_id}")
+    @Delete("DELETE FROM user WHERE user_id = #{user_id}")
     @Options(useCache = false)
     void delUserById(int user_id);
 
@@ -69,9 +82,18 @@ public interface IUserServiceDao {
     @Options(useCache = false)
     List<Menu> getMenuList4User(String user_nm);
 
-    @Update("update "+TABLE_NAME+" set user_name=#{user_name} ,user_type=#{user_type},user_status=#{user_status} where user_id=#{user_id}")
+    @Update("update user set user_name=#{user_name} ,user_type=#{user_type},user_status=#{user_status} where user_id=#{user_id}")
     @Options(useCache = false)
     void updateSave(User user);
+
+    @Update("<script>" +
+            "update user set user_pwd=#{md5Value}" +
+            "<if test='status!=null'> ,user_status=#{status}</if>" +
+            " where user_id = #{userId}" +
+            "</script>")
+    void updatePwd(@Param("userId") Integer userId,
+                   @Param("md5Value") String md5Value,
+                   @Param("status") String status);
 
 //    @Select(query_user_columns + " FROM "+TABLE_NAME+" " +
 //            "WHERE user_nm=#{username} AND user_pwd=password(#{password})")

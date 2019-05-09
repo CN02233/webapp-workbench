@@ -221,10 +221,18 @@ export default {
     },
     saveAssign () { // 保存关联关系到表中
       this.getTreeNode()
+      if(this.origin_ids!=null&&this.origin_ids.length>0){
+
+      }else{
+        return
+      }
+
+      const requestOrigins = []
+      requestOrigins.push(this.origin_ids[0])
       this.BaseRequest({
         url: '/administrative/saveOrganizationAndOriginAssign',
         method: 'get',
-        params: {'organizationId': this.formSubmitData.organization_id, 'originIds': this.origin_ids.join()}
+        params: {'organizationId': this.formSubmitData.organization_id, 'originIds': requestOrigins.join()}
       }).then(() => {
         this.Message.success('保存成功')
         this.closeModal()

@@ -21,20 +21,42 @@
         </el-col>
       </el-row>
 
-      <el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">
-        <el-col  align="left" class="tree_colum"
-                 :span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"
-                 v-for="elColData in elColDatas">
-          <el-input size="mini" v-if="elColData!=null" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>
-          <span v-else> -- </span>
-        </el-col>
-        <!--{{groupDatas.columNameLink[]}}-->
-        <el-col align="center" v-if="groupDatas.elRowDatas.length>1&&isView!='Y'" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
-          <el-button size="mini" @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
-          <!--<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>-->
-          <el-button size="mini" @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
-        </el-col>
-      </el-row>
+
+      <el-form ref="form"  label-width="0px">
+        <el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">
+          <el-col  align="left" class="tree_colum"
+                   :span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"
+                   v-for="elColData in elColDatas">
+            <el-form-item  v-if="elColData!=null" size="mini" :class="{'error_row':elColData.validate_error!=null}" :error="elColData.validate_error">
+              <el-input size="mini" style="width:100%" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>
+            </el-form-item>
+            <span v-else> -- </span>
+          </el-col>
+
+          <el-col align="center" v-if="groupDatas.elRowDatas.length>1&&isView!='Y'" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
+            <el-button size="mini" @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
+            <!--<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>-->
+            <el-button size="mini" @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
+          </el-col>
+
+        </el-row>
+
+      </el-form>
+
+      <!--<el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">-->
+        <!--<el-col  align="left" class="tree_colum"-->
+                 <!--:span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"-->
+                 <!--v-for="elColData in elColDatas">-->
+          <!--<el-input size="mini" v-if="elColData!=null" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>-->
+          <!--<span v-else> &#45;&#45; </span>-->
+        <!--</el-col>-->
+        <!--&lt;!&ndash;{{groupDatas.columNameLink[]}}&ndash;&gt;-->
+        <!--<el-col align="center" v-if="groupDatas.elRowDatas.length>1&&isView!='Y'" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">-->
+          <!--<el-button size="mini" @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>-->
+          <!--&lt;!&ndash;<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>&ndash;&gt;-->
+          <!--<el-button size="mini" @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>-->
+        <!--</el-col>-->
+      <!--</el-row>-->
     </div>
 
   </div>
@@ -97,8 +119,7 @@
       }
     },
     methods:{
-      getUnitContext(){
-
+      getUnitContext(justRefreshFomular){
         let loading = null
         if(this.saveFlag=='N') {
           loading = this.$loading({
@@ -120,6 +141,44 @@
             loading.close();
           }
           if(response){
+            // console.log(justRefreshFomular)
+
+            if(justRefreshFomular){
+              const groups = Object.keys(this.definedColumsGroup)
+              groups.forEach(groupKey=>{
+                const groupContext = this.definedColumsGroup[groupKey]
+                console.log(groupContext)
+                const elColumDefineds = groupContext.elColumDefineds
+                response.columDatas.forEach(columData=>{
+                  const unit_id = columData.unit_id
+                  const dimensions_id = columData.dimensions_id
+                  const colum_id = columData.colum_id
+
+                  if(elColumDefineds[unit_id+"-"+dimensions_id]){
+                    const columType = elColumDefineds[unit_id+"-"+dimensions_id].colum_type
+                    if(columType==0){
+                      groupContext.elRowDatas.forEach(elRowData=>{
+                        elRowData.forEach(elData=>{
+                          if(elData){
+                            // debugger
+                            if(elData.dimensions_id==dimensions_id&&elData.unit_id==unit_id&&elData.colum_id==colum_id){
+                              // console.log("response "+unit_id+"--"+colum_id+"--"+dimensions_id)
+                              // console.log("el data "+elData.unit_id+"--"+elData.colum_id+"--"+elData.dimensions_id)
+                              elData.report_data = columData.report_data
+                            }
+                          }
+                        })
+                      })
+                    }
+                  }
+                })
+              })
+              return
+            }
+
+            console.log(justRefreshFomular+"---over")
+
+
             this.definedColums = response.definedColums
 
             //分组
@@ -145,7 +204,6 @@
               }
               definedColumsGroup[groupId].push(definedColum)
               const groupArray = definedColumsGroup[groupId]
-              console.log(groupArray)
               const columNameLink = treeDatasGroup[groupId].columNameLink
               columNameLink[definedColum.unit_id+'-'+definedColum.colum_id] = {}
               columNameLink[definedColum.unit_id+'-'+definedColum.colum_id].name = definedColum.colum_name_cn
@@ -195,17 +253,6 @@
 
             this.definedColumsGroup = treeDatasGroup
 
-            if(!this.hasMounted){
-              this.hasMounted = true
-              if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
-                this.$emit("refreshSaveLoading",this.unitId,"保存中....")
-                this.doSaveUnitContext()
-              }else if(this.saveFlag=='S'){
-
-              }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
-                this.doValidateUnitContext()
-              }
-            }
             //
             // this.definedColumsTotal = response.definedColums.length
             // this.colSpan = Math.floor(24/(this.definedColumsTotal+1))
@@ -255,16 +302,63 @@
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
           this.$emit("saveReportsCallBack",this.unitId,processName)
         }).catch(error => {
+          this.getUnitContext(false)
           this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
       },
-      doValidateUnitContext(){
-        let failedMessage = null
-        if(false){
-          // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
-          failedMessage = "有输入错误"
-        }
-        this.$emit("validateReportsCallBack",this.unitId,failedMessage)
+      doValidateUnitContext(processName){
+        const saveColums = new Array()
+        const groupIds = Object.keys(this.definedColumsGroup)
+        groupIds.forEach(groupId=>{
+          const saveObjTmp={}
+          const saveColumDatasTmp = []
+          const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
+          saveObjTmp.groupId = groupId
+          saveObjTmp.columDatas = saveColumDatasTmp
+          saveObjTmp.definedColums = this.definedColumsGroup[groupId].definedColums
+          saveColums.push(saveObjTmp)
+        })
+
+        this.BaseRequest({
+          url:"/treeReportCust/validateTreeData",
+          method:'post',
+          data:saveColums
+        }).then(response=>{
+          let validateFailed = false
+          if(response!=null){
+            const validateFailedKeys = Object.keys(response)
+            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
+              validateFailed = true
+            }
+          }else{
+            response = {}
+          }
+
+          const groupIds =  Object.keys(this.definedColumsGroup)
+          groupIds.forEach(groupId=>{
+            const groupContext = this.definedColumsGroup[groupId]
+            const columDatas = groupContext.columDatas
+            columDatas.forEach(columData=>{
+              if(response[columData.dimensions_id]){
+                columData.validate_error = response[columData.dimensions_id]
+              }else{
+                columData.validate_error = null
+              }
+            })
+          })
+
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          let failedMessage = null
+          if(validateFailed){
+            // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            failedMessage = "有输入错误"
+          }
+          const dataTmp = this.definedColumsGroup
+          this.definedColumsGroup = null
+          this.definedColumsGroup = dataTmp
+          this.$emit("validateReportsCallBack",this.unitId,processName,failedMessage)
+
+        });
       },
       saveUnitContext(needUpdateStep){
         const $this = this
@@ -611,6 +705,7 @@
         insertRowData.forEach(insertColData=>{
           if(insertColData!=null){
             insertColData.report_data = ""
+            insertColData.colum_id = null
           }
         })
 
@@ -748,5 +843,11 @@
 
   .skip_line{
     border-top:1px solid black;
+  }
+  .error_row{
+    margin:0 0 15px 0;
+  }
+  .el-form-item{
+    margin:0;
   }
 </style>

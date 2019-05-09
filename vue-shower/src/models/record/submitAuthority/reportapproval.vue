@@ -1,54 +1,71 @@
 <template>
-  <WorkMain :headerItems="['报送管理','报送审批']">
+  <WorkMain :headerItems="['报送管理','报送审核']">
+    <el-row class="search-row" :gutter="20">
+      <el-col class="align-left" :span="17">
+        <el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"
+                     :options="cityTree">
+        </el-cascader>
+
+        <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
+        <el-button @click="getTableData(1)" type="success">查询</el-button>
+      </el-col>
+    </el-row>
     <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
-          style="width: 100%">
-          <el-table-column
-            prop="report_id"
-            align="left"
-            label="报表ID">
-          </el-table-column>
+          row-style="height:20px"
+          style="width: 100%;">
           <el-table-column
             prop="report_name"
             align="left"
             label="报表名称">
           </el-table-column>
           <el-table-column
-            prop="active_unit"
+            prop="report_origin"
             align="left"
-            label="报表步骤数">
+            :formatter="getOriginName"
+            label="报送机构">
           </el-table-column>
           <el-table-column
-            prop="report_origin"
-            align="left" :formatter="formattOriginName"
-            label="填报机构">
+            prop="origin_province"
+            align="left"
+            label="所属省">
+          </el-table-column>
+          <el-table-column
+            prop="origin_city"
+            align="left"
+            label="所属市">
           </el-table-column>
           <el-table-column
             prop="report_status"
-            align="left"
-            label="状态"
-            :formatter="formatStatus">
+            align="left" width="100"
+            :formatter="getReportStatus"
+            label="报送状态">
           </el-table-column>
           <el-table-column
-            prop="create_date"
+            prop="report_start_date_str"
             align="left"
-            label="创建时间">
+            label="报送开始时间">
           </el-table-column>
           <el-table-column
-            prop="user_name"
+            prop="report_end_date_str"
             align="left"
-            label="创建人">
+            label="报送结束时间">
           </el-table-column>
           <el-table-column
-            fixed="right"
+            prop="report_start_date_str"
+            :formatter="fomartterReportDataDate"
+            align="left"
+            label="报表期间">
+          </el-table-column>
+
+          <el-table-column
             label="操作"
             align="left"
-            width="250"
-            >
+          >
             <template slot-scope="scope">
               <el-button
                 size="mini"
@@ -81,162 +98,203 @@
 </template>
 
 <script>
-import WorkTablePager from '@/models/public/WorkTablePager'
-import WorkMain from '@/models/public/WorkMain'
-import { required } from 'vuelidate/lib/validators'
-import Treeselect from '@riophae/vue-treeselect'
-import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-export default {
-  name: 'ReportApproval',
-  data () {
-    return {
-      reportDataList: [],
-      definedDataObjs: {},
-      origins: {},
-      tableDataUrl: 'reportApproval/listReportApproval',
-      currPageNum: 1,
-      eachPageNum: 10,
-      totalPage: 1,
-      showModalPage: false,
-      isEditModal: false,
-      dialogTitle: ''
-    }
-  },
-  validations: {
-    // 提交前的验证
-  },
-  computed: {
-    // 初始化加载
-  },
-  components: {
-    Treeselect,
-    WorkTablePager,
-    WorkMain
-  },
-  methods: {
-    formatStatus: function (row, column) {
-      if (row.report_status === '1') {
-        return '审核中'
+  import WorkTablePager from '@/models/public/WorkTablePager'
+  import WorkMain from '@/models/public/WorkMain'
+  import { required } from 'vuelidate/lib/validators'
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+  export default {
+    name: 'ReportApproval',
+    data () {
+      return {
+        reportDataList: [],
+        definedDataObjs: {},
+        origins: {},
+        seachOriginList: [],
+        seachOriginName: '',
+        cityTree:{},
+        status_cn:{
+          '0' : '待填写',
+          '1':'审批中',
+          '2':'复核中',
+          '3':'锁定',
+          '4':'失效',
+          '5':'报表发布',
+          '6':'待上传签名',
+          '7':'未到填写日期',
+          '8':'过期',
+          '9':'填报完成'
+        },
+        tableDataUrl: 'reportApproval/listReportApproval',
+        currPageNum: 1,
+        eachPageNum: 10,
+        totalPage: 1,
+        showModalPage: false,
+        isEditModal: false,
+        dialogTitle: ''
       }
     },
-    getTableData: function (pageNum) {
-      if (pageNum && pageNum !== '') {
-        this.currPageNum = pageNum
-      } else {
-        pageNum = this.currPageNum
-      }
-      const $this = this
-      const loading = this.$loading({
-        lock: true,
-        text: '获取数据中.......',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-      this.BaseRequest({
-        url: this.tableDataUrl,
-        method: 'get',
-        params: {currPage: pageNum, pageSize: this.eachPageNum}
-      }).then(response => {
-        /* if (response.dataList != null) {
-          response.dataList.forEach(definedObj => {
-            $this.definedDataObjs[definedObj.organization_id] = definedObj
-          })
-        } */
-        loading.close();
-        $this.reportDataList = response.dataList
-        $this.totalPage = response.totalPage
-      })
+    validations: {
+      // 提交前的验证
     },
-    refreshTableList: function (dataList) {
-      this.reportDataList = dataList
+    computed: {
+      // 初始化加载
     },
-    closeModal: function () {
-      this.showModalPage = false
-      this.isEditModal = false
+    components: {
+      Treeselect,
+      WorkTablePager,
+      WorkMain
     },
-    handlePass (index, row) { // 通过
-      const loading = this.$loading({
-        lock: true,
-        text: '审批中.......',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-      this.BaseRequest({
-        url: '/reportApproval/ReportApprovalOperator',
-        method: 'get',
-        params: {'reportId': row.report_id, 'reportStatus': 'pass'}
-      }).then(() => {
-        loading.close();
-        this.Message.success('审批成功')
-        this.getTableData()
-      })
-    },
-    handleReject (index, row) { // 驳回
-      const loading = this.$loading({
-        lock: true,
-        text: '审批中.......',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-      this.BaseRequest({
-        url: '/reportApproval/ReportApprovalOperator',
-        method: 'get',
-        params: {'reportId': row.report_id, 'reportStatus': 'reject'}
-      }).then(() => {
-        loading.close();
-        this.Message.success('审批成功')
-        this.getTableData()
-      })
-    },
-    getOriginList () {
-      const loading = this.$loading({
-        lock: true,
-        text: '获取机构列表中.......',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-      this.BaseRequest({
-        url: 'submitAU/listAllSubmitauthority',
-        method: 'get'
-      }).then(response => {
-        loading.close();
-        if (response != null && response.length > 0) {
-          const originTmp = new Object()
-
-          function getChildOrigin(originList){
-            originList.forEach(origin=>{
-              originTmp[origin.id] = origin.label
-              if(origin.children){
-                getChildOrigin(origin.children)
-              }
-            })
-          }
-          getChildOrigin(response)
-
-          this.origins = originTmp
+    methods: {
+      formatStatus: function (row, column) {
+        if (row.report_status === '1') {
+          return '审核中'
         }
-      })
-    },
-    formattOriginName(reportData){
-      return this.origins[reportData.report_origin]
-    },
-    checkInputNull () {
-      const checkResult = this.$v.$invalid
-      if (checkResult) {
-        this.$notify({
-          dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、状态'
+      },
+      getTableData: function (pageNum) {
+        if (pageNum && pageNum !== '') {
+          this.currPageNum = pageNum
+        } else {
+          pageNum = this.currPageNum
+        }
+        const $this = this
+        const loading = this.$loading({
+          lock: true,
+          text: '获取数据中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        let seachOriginId = null
+        if(this.seachOriginList!=null&&this.seachOriginList.length>0){
+          seachOriginId = this.seachOriginList[this.seachOriginList.length-1]
+        }
+        this.BaseRequest({
+          url: this.tableDataUrl,
+          method: 'get',
+          params: {currPage: pageNum, pageSize: this.eachPageNum,
+            searchOriginId:seachOriginId,
+            searchOriginName:this.seachOriginName}
+        }).then(response => {
+          /* if (response.dataList != null) {
+            response.dataList.forEach(definedObj => {
+              $this.definedDataObjs[definedObj.organization_id] = definedObj
+            })
+          } */
+          loading.close();
+          $this.reportDataList = response.dataList
+          $this.totalPage = response.totalPage
+          const cityTree = []
+          response.first2Origin.forEach(proOrigin=>{
+            const province = proOrigin['province']
+            const citys = proOrigin['citys']
+            const children = []
+
+            citys.forEach(city=>{
+              children.push({value: city['origin_id'],
+                label: city['origin_name']})
+            })
+
+            cityTree.push({value: province['origin_id'],
+              label: province['origin_name'],
+              children: children})
+          })
+
+          $this.cityTree = cityTree
         })
+      },
+      refreshTableList: function (dataList) {
+        this.reportDataList = dataList
+      },
+      closeModal: function () {
+        this.showModalPage = false
+        this.isEditModal = false
+      },
+      handlePass (index, row) { // 通过
+        const loading = this.$loading({
+          lock: true,
+          text: '审批中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url: '/reportApproval/ReportApprovalOperator',
+          method: 'get',
+          params: {'reportId': row.report_id, 'reportStatus': 'pass'}
+        }).then(() => {
+          loading.close();
+          this.Message.success('审批成功')
+          this.getTableData()
+        })
+      },
+      handleReject (index, row) { // 驳回
+        const loading = this.$loading({
+          lock: true,
+          text: '审批中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url: '/reportApproval/ReportApprovalOperator',
+          method: 'get',
+          params: {'reportId': row.report_id, 'reportStatus': 'reject'}
+        }).then(() => {
+          loading.close();
+          this.Message.success('审批成功')
+          this.getTableData()
+        })
+      },
+      getOriginList () {
+        const loading = this.$loading({
+          lock: true,
+          text: '获取机构列表中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url: 'submitAU/listAllSubmitauthority',
+          method: 'get'
+        }).then(response => {
+          loading.close();
+          if (response != null && response.length > 0) {
+            const originTmp = new Object()
+
+            function getChildOrigin(originList){
+              originList.forEach(origin=>{
+                originTmp[origin.id] = origin.label
+                if(origin.children){
+                  getChildOrigin(origin.children)
+                }
+              })
+            }
+            getChildOrigin(response)
+
+            this.origins = originTmp
+          }
+        })
+      },
+      formattOriginName(reportData){
+        return this.origins[reportData.report_origin]
+      },
+      getReportStatus(rowData){
+        return this.status_cn[rowData.report_status]
+      },
+      checkInputNull () {
+        const checkResult = this.$v.$invalid
+        if (checkResult) {
+          this.$notify({
+            dangerouslyUseHTMLString: true,
+            message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、状态'
+          })
+        }
+        return checkResult
       }
-      return checkResult
+    },
+    mounted: function () { // 初始化
+      this.reportDataList = []
+      this.getTableData(1)
+      this.getOriginList()
     }
-  },
-  mounted: function () { // 初始化
-    this.reportDataList = []
-    this.getTableData(1)
-    this.getOriginList()
   }
-}
 </script>
 
 <style lang="css">

@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pc on 2017/6/30.
@@ -36,6 +37,19 @@ public class UserController {
     public String getUserByPage(int currPage, int pageSize,User user, String userType,String originId){
         user.setUser_type(userType);
         Page<User> userPageList = userService.listUsersForPage(currPage, pageSize,user,originId);
+        PageResult pageResult = PageResult.pageHelperList2PageResult(userPageList);
+
+        String jsonResult = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, pageResult);
+        return jsonResult;
+    }
+
+    @RequestMapping("pageUsers")
+    @ResponseBody
+    @JsonpCallback
+    @CrossOrigin(allowCredentials="true")
+    public String pageUsers(int currPage, int pageSize,User user, String userType){
+        user.setUser_type(userType);
+        Page<User> userPageList = userService.pageUsers(currPage, pageSize,user);
         PageResult pageResult = PageResult.pageHelperList2PageResult(userPageList);
         String jsonResult = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, pageResult);
         return jsonResult;

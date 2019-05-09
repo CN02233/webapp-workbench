@@ -1,68 +1,83 @@
 <template>
   <WorkMain :headerItems="['报送管理','报送监管']">
     <el-row class="search-row" :gutter="20">
-      <el-col class="align-left table-button-group" :span="17">
-        <el-select v-model="originId" placeholder="请选择报送机构">
-          <el-option
-            v-for="item in originOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <el-button @click="queryByOriginId" type="primary">查询</el-button>
+      <el-col class="align-left" :span="17">
+        <el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"
+                     :options="cityTree">
+        </el-cascader>
+
+        <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
+        <el-button @click="getTableData(1)" type="success">查询</el-button>
       </el-col>
     </el-row>
-    <el-row class="table-page-root">
+
+    <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
           :data="reportDataList"
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
-          style="width: 100%">
-          <el-table-column
-            prop="report_id"
-            align="left"
-            width="100"
-            label="报表ID">
-          </el-table-column>
+          row-style="height:20px"
+          style="width: 100%;">
           <el-table-column
             prop="report_name"
             align="left"
             label="报表名称">
           </el-table-column>
           <el-table-column
-            prop="report_origin_name"
+            prop="report_origin"
             align="left"
-            label="填报单位">
+            :formatter="getOriginName"
+            label="报送机构">
+          </el-table-column>
+          <el-table-column
+            prop="origin_province"
+            align="left"
+            label="所属省">
+          </el-table-column>
+          <el-table-column
+            prop="origin_city"
+            align="left"
+            label="所属市">
           </el-table-column>
           <el-table-column
             prop="report_status"
-            align="left"
-            width="100"
-            label="状态"
-            :formatter="formatStatus">
+            align="left" width="100"
+            :formatter="getReportStatus"
+            label="报送状态">
           </el-table-column>
           <el-table-column
-            prop="report_end_date"
+            prop="report_start_date_str"
             align="left"
-            label="最后保存日期">
+            label="报送开始时间">
           </el-table-column>
           <el-table-column
-            fixed="right"
+            prop="report_end_date_str"
+            align="left"
+            label="报送结束时间">
+          </el-table-column>
+          <el-table-column
+            prop="report_start_date_str"
+            :formatter="fomartterReportDataDate"
+            align="left"
+            label="报表期间">
+          </el-table-column>
+
+          <el-table-column
             label="操作"
             align="left"
-            width="100"
           >
             <template slot-scope="scope">
-              <el-button @click="reportShow(scope.row.report_id)"
-                size="mini"
-              >详情</el-button>
+              <el-button size="mini" v-if="scope.row.report_status == 0 &&loginUserType=='1'" @click="reportFIll(scope.row.report_id)">填报</el-button>
+              <el-button size="mini" v-if="scope.row.report_status != 0||loginUserType=='0'" @click="viewReportFill(scope.row.report_id)">查看</el-button>
+              <!--<el-button size="mini" v-if="scope.row.report_status == 9" type="danger" @click="reportCommitAuth(scope.row.report_id)">提交</el-button>-->
+              <!--<el-button size="mini" v-if="scope.row.report_status == 0" type="danger"  @click="reportCommitAuth( scope.row.report_id)">提交</el-button>-->
             </template>
           </el-table-column>
         </el-table>
       </el-col>
     </el-row>
+
 
     <!-- 分页 refreshData:点击页码上一页下一页时调用的方法、pageCount:总页数-->
     <WorkTablePager @refreshData="getTableData"
@@ -86,8 +101,11 @@
       return {
         reportDataList: [],
         definedDataObjs: {},
-        tableDataUrl: 'reportStatements/listReportStatementsByUser',
+        tableDataUrl: 'reportApproval/listAllSupervision',
         currPageNum: 1,
+        cityTree:{},
+        seachOriginList: [],
+        seachOriginName: '',
         eachPageNum: 10,
         totalPage: 1,
         showModalPage: false,
@@ -161,10 +179,16 @@
           spinner: 'el-icon-loading',
           background: 'rgba(0, 0, 0, 0.7)'
         });
+        let seachOriginId = null
+        if(this.seachOriginList!=null&&this.seachOriginList.length>0){
+          seachOriginId = this.seachOriginList[this.seachOriginList.length-1]
+        }
         this.BaseRequest({
           url: this.tableDataUrl,
           method: 'get',
-          params: { 'currPage': pageNum, 'pageSize': this.eachPageNum }
+          params: { 'currPage': pageNum, 'pageSize': this.eachPageNum,
+            searchOriginId:seachOriginId,
+            searchOriginName:this.seachOriginName}
         }).then(response => {
           loading.close();
           if (response.dataList != null) {
@@ -174,6 +198,24 @@
           }
           $this.reportDataList = response.dataList
           $this.totalPage = response.totalPage
+          const cityTree = []
+
+          response.first2Origin.forEach(proOrigin=>{
+            const province = proOrigin['province']
+            const citys = proOrigin['citys']
+            const children = []
+
+            citys.forEach(city=>{
+              children.push({value: city['origin_id'],
+                label: city['origin_name']})
+            })
+
+            cityTree.push({value: province['origin_id'],
+              label: province['origin_name'],
+              children: children})
+          })
+
+          $this.cityTree = cityTree
         })
       },
       refreshTableList: function (dataList) {
@@ -216,12 +258,17 @@
         this.$router.push({
           path: "/record/report/reportFill?reportId="+reportId+"&isView=Y"
         });
+      },
+      viewReportFill(reportId){
+        this.$router.push({
+          path: "/record/report/reportFill?reportId="+reportId+"&isView=Y"
+        });
       }
     },
     mounted: function () { // 初始化
       this.reportDataList = []
       this.getTableData(1)
-      this.getOrigin()
+      // this.getOrigin()
     }
   }
 </script>

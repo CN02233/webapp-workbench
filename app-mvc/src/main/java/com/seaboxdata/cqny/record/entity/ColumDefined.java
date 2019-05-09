@@ -2,6 +2,8 @@ package com.seaboxdata.cqny.record.entity;
 
 import com.webapp.support.json.JsonSupport;
 
+import java.math.BigDecimal;
+
 public class ColumDefined {
     private Integer unit_id;
 
@@ -11,7 +13,7 @@ public class ColumDefined {
     private String colum_type;
 
     private Integer min_value;
-    private Integer max_value    ;
+    private BigDecimal max_value    ;
 
     private String colum_point;
     private String colum_desc;
@@ -60,11 +62,11 @@ public class ColumDefined {
         this.min_value = min_value;
     }
 
-    public Integer getMax_value() {
+    public BigDecimal getMax_value() {
         return max_value;
     }
 
-    public void setMax_value(Integer max_value) {
+    public void setMax_value(BigDecimal max_value) {
         this.max_value = max_value;
     }
 

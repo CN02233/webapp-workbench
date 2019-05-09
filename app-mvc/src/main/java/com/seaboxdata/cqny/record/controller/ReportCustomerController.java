@@ -1,5 +1,7 @@
 package com.seaboxdata.cqny.record.controller;
 
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
@@ -18,10 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("reportCust")
@@ -44,23 +43,85 @@ public class ReportCustomerController {
     @RequestMapping("pagerReport")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public JsonResult pagerReport(Integer currPage, Integer pageSize){
+    public JsonResult pagerReport(Integer currPage, Integer pageSize,String searchOriginId,String searchOriginName){
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
 
         Origin userOrigin = originService.getOriginByUser(currUserId);
         Integer userOriginId = userOrigin.getOrigin_id();
-        List<Origin> childrenOrigin = originService.checkAllChildren(userOriginId);
-        List<Integer> originParams = new ArrayList<>();
-        originParams.add(userOriginId);
-        if(childrenOrigin!=null){
-            for (Origin origin : childrenOrigin) {
-                originParams.add(origin.getOrigin_id());
-            }
+
+        List<Origin> allOrigins = originService.listAllOrigin();
+
+
+        //获取所有有权限的机构
+        List<Origin> childrenOrigin = originService.checkoutSons(userOriginId, allOrigins);
+        List<Integer> childrenOriginIds = new ArrayList<>();
+        childrenOriginIds.add(userOrigin.getOrigin_id());
+        for (Origin originChild : childrenOrigin) {
+            Integer originId = originChild.getOrigin_id();
+            childrenOriginIds.add(originId);
         }
 
-        PageResult pageResult = reportCustomerService.pagerReport(currPage, pageSize, originParams);
-        childrenOrigin.add(userOrigin);
+        //是否选择了机构
+        if(!Strings.isNullOrEmpty(searchOriginId)){
+            List<Integer> childrenOriginIdsTmp = new ArrayList<>();
+            List<Origin> searchOriginChildren = originService.checkoutSons(new Integer(searchOriginId), allOrigins);
+            if(searchOriginChildren!=null&&searchOriginChildren.size()>0){
+                for (Origin searchOriginChild : searchOriginChildren) {
+                    Integer searchOriginIdTmp = searchOriginChild.getOrigin_id();
+                    if(childrenOriginIds.contains(searchOriginIdTmp)){
+                        childrenOriginIdsTmp.add(searchOriginIdTmp);
+                    }
+                }
+            }
+            childrenOriginIds = childrenOriginIdsTmp;
+        }
+
+        //是否根据机构名称模糊查询
+        if(!Strings.isNullOrEmpty(searchOriginName)){
+            List<Integer> childrenOriginIdsTmp = new ArrayList<>();
+            List<Origin> searchOriginsByName = originService.getOriginByName(searchOriginName);
+            if(searchOriginsByName!=null&&searchOriginsByName.size()>0){
+                for (Origin searchOriginChild : searchOriginsByName) {
+                    Integer searchOriginIdTmp = searchOriginChild.getOrigin_id();
+                    if(childrenOriginIds.contains(searchOriginIdTmp)){
+                        childrenOriginIdsTmp.add(searchOriginIdTmp);
+                    }
+                }
+            }
+            childrenOriginIds = childrenOriginIdsTmp;
+
+        }
+
+
+        PageResult pageResult = null;
+        if(childrenOriginIds!=null&&childrenOriginIds.size()>0){
+            pageResult = reportCustomerService.pagerReport(currPage, pageSize, childrenOriginIds);
+            childrenOrigin.add(userOrigin);
+
+            List<ReportCustomer> resultData = pageResult.getDataList();
+            for (ReportCustomer resultDatum : resultData) {
+                Integer reportOriginId = resultDatum.getReport_origin();
+                Map<String, Origin> result = originService.getFist2Origin(reportOriginId, allOrigins);
+                if(result.get("cityOrigin")!=null)
+                    resultDatum.setOrigin_city(result.get("cityOrigin").getOrigin_name());
+                if(result.get("provinceOrigin")!=null)
+                    resultDatum.setOrigin_province(result.get("provinceOrigin").getOrigin_name());
+            }
+        }else{
+            pageResult = new PageResult();
+            pageResult.setCurrPage(currPage);
+            pageResult.setPageSize(pageSize);
+            pageResult.setTotalNum(0);
+            pageResult.setTotalPage(1);
+            ArrayList<Object> resultList = Lists.newArrayList();
+            resultList.addAll(resultList);
+            pageResult.setDataList(resultList);
+        }
+
+
+        Collection<Map<String, Object>> first2Origin = originService.checkProvAndCity(allOrigins);
+
 
         Map<String,Object> responseMap = new HashMap<>();
         responseMap.put("currPage",pageResult.getCurrPage());
@@ -69,6 +130,7 @@ public class ReportCustomerController {
         responseMap.put("totalNum",pageResult.getTotalNum());
         responseMap.put("totalPage",pageResult.getTotalPage());
         responseMap.put("origins",childrenOrigin);
+        responseMap.put("first2Origin",first2Origin);
 
 
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,responseMap);
@@ -278,9 +340,9 @@ public class ReportCustomerController {
         if("Y".equals(reportCustomer.getPass_auth())){
             reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.APPROVE);
         }else{
-//            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
-            //modify by SongChaoqun 20190506 审批直接到复核 不走上级审批流程
-            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REVIEW);
+            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
+//            modify by SongChaoqun 20190506 审批直接到复核 不走上级审批流程
+//            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REVIEW);
         }
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 

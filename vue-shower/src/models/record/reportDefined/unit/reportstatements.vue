@@ -196,9 +196,9 @@
             </el-col>
           </el-row>
           <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">不需审批机构</el-col>
+            <el-col :span="8" :offset="1">不需审核机构</el-col>
             <el-col align="left" :span="15">
-              <el-select v-model="submitParams.check_origins" multiple filterable placeholder="请选择">
+              <el-select v-model="submitParams.approve_check_origins" multiple filterable placeholder="请选择">
                 <el-option
                   v-for="origin in submitParams.defined_origins"
                   :key="origin.origin_id"
@@ -206,13 +206,19 @@
                   :value="origin.origin_id">
                 </el-option>
               </el-select>
-
-              <!--<el-checkbox-group v-model="submitParams.check_origins">-->
-
-                <!--<el-checkbox-button v-for="origin in submitParams.defined_origins"-->
-                             <!--:label="origin.origin_id"-->
-                             <!--:key="origin.origin_id">{{origin.origin_name}}</el-checkbox-button>-->
-              <!--</el-checkbox-group>-->
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">不需复核机构</el-col>
+            <el-col align="left" :span="15">
+              <el-select v-model="submitParams.review_check_origins" multiple filterable placeholder="请选择">
+                <el-option
+                  v-for="origin in submitParams.defined_origins"
+                  :key="origin.origin_id"
+                  :label="origin.origin_name"
+                  :value="origin.origin_id">
+                </el-option>
+              </el-select>
             </el-col>
           </el-row>
         </el-col>
@@ -326,7 +332,8 @@ export default {
         report_end_date_str: '',
         report_data_start_str: '',
         report_data_end_str: '',
-        check_origins: [],
+        approve_check_origins: [],
+        review_check_origins: [],
         defined_origins: []
       },
       submitedParams:{
@@ -443,6 +450,9 @@ export default {
           this.treeData = response
         }
       })
+    },
+    getAuthOriginTree(reportDefinedId){
+
     },
     getDefinedAndOriginAssign (definedId, thisRef) { // 获取选择的机构id
       this.BaseRequest({
@@ -627,7 +637,8 @@ export default {
           'report_end_date': this.submitParams.report_end_date_str,
           'report_data_start': this.submitParams.report_data_start_str,
           'report_data_end': this.submitParams.report_data_end_str,
-          'check_origins': this.submitParams.check_origins
+          'approve_check_origins': this.submitParams.approve_check_origins,
+          'review_check_origins': this.submitParams.review_check_origins
         }
       }).then(response => {
         loading.close()

@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Set;
 
 @Repository
@@ -28,8 +29,12 @@ public interface IReportApprovalDao {
             "\treport_customer rc  LEFT JOIN report_defined rd on rc.report_defined_id=rd.defined_id \n" +
             "where \n" +
             " rc.report_status = #{status}\n" +
-            "\tand\n" +
-            " rc.pass_auth = 'N'\n" +
+            "<if test='status==1'>" +
+            " and pass_approve = 'N' " +
+            "</if>"+
+            "<if test='status==2'>" +
+            " and pass_review = 'N' " +
+            "</if>"+
             "\tand\n" +
             " rc.report_origin IN " +
             "<foreach item='item' index='index' collection='originList' open='(' separator=',' close=')'> " +
@@ -37,9 +42,9 @@ public interface IReportApprovalDao {
             "</foreach>" +
             "</script>")
     Page<ReportCustomer> listReportApproval(@Param("currPage") Integer currPage,
-                                                      @Param("pageSize") Integer pageSize,
-                                                      @Param("status") String status,
-                                                      @Param("originList") Set originList);
+                                            @Param("pageSize") Integer pageSize,
+                                            @Param("status") String status,
+                                            @Param("originList") List<Integer> originList);
 
     @Update("<script>update report_customer <set>"
             +"<if test='reportStatus!=null'>"

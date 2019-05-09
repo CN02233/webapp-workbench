@@ -31,7 +31,7 @@ public class UserServiceImp implements UserService {
 
     private static Logger logger = LoggerFactory.getLogger(UserServiceImp.class);
 
-    private String DEFAULT_PWD = "111111";
+    private String DEFAULT_PWD = "123456";
 
     @Autowired
     private IUserServiceDao userServiceDao;
@@ -60,6 +60,15 @@ public class UserServiceImp implements UserService {
         return allUser;
     }
 
+    public Page<User> pageUsers(int currPage,int pageSize,User user){
+
+        Page<User> allUser = userServiceDao.pageUsers(
+                currPage,pageSize,
+                user.getUser_id(),user.getUser_name(),user.getUser_type());
+
+        return allUser;
+    }
+
     public User createUser(User user){
         SimpleDateFormat format = new SimpleDateFormat("ssSSS");
         StringBuilder builder = new StringBuilder();
@@ -80,6 +89,10 @@ public class UserServiceImp implements UserService {
 
     public void updateUser(User user){
         userServiceDao.updateSave(user);
+    }
+
+    public void resetPwd(Integer userId){
+        userServiceDao.updatePwd(userId,MD5.getMD5Value(DEFAULT_PWD),String.valueOf(UserStatus.PWD_EXPIRED.getStatus()));
     }
 
     public void delUserById(int user_id){
