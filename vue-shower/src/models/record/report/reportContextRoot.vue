@@ -82,6 +82,14 @@
       doValidateUnitContext(processName){
         this.$refs.recordTemplate.doValidateUnitContext(processName)
       },
+      doSaveAndValidate(prcessName){
+        //console.log("doSaveAndValidate is running...."+prcessName)
+        if(prcessName=='SAVE'){
+          this.doSaveContext("SAVEANDVALIDATE")
+        }else if(prcessName=='VALIDATE'){
+          this.doValidateUnitContext("SAVEANDVALIDATE")
+        }
+      },
       doSubmitContext(prcessName){
         if(prcessName=='SAVE'){
           this.doSaveContext("SUBMIT")
@@ -97,13 +105,17 @@
       saveReportsCallBack(unitId,processName,saveException){
         if(processName=='SUBMIT'){
           this.$emit("submitReportsCallBack",unitId,this.unitEntity.unit_name,saveException,"SAVE")
-        }else{
+        }else if(processName=='SAVEANDVALIDATE'){
+          this.$emit("saveAndValidateCallBack",unitId,this.unitEntity.unit_name,saveException,"SAVE")
+        } else{
           this.$emit("saveReportsCallBack",unitId,saveException)
         }
       },
       validateReportsCallBack(unitId,processName,saveException){
         if(processName=='SUBMIT'){
           this.$emit("submitReportsCallBack",unitId,this.unitEntity.unit_name,saveException,"VALIDATE")
+        }else if(processName=='SAVEANDVALIDATE'){
+          this.$emit("saveAndValidateCallBack",unitId,this.unitEntity.unit_name,saveException,"VALIDATE")
         }else{
           this.$emit("validateReportsCallBack",unitId,this.unitEntity.unit_name,saveException)
         }
@@ -113,7 +125,7 @@
     mounted() {
       var height= this.$refs.recordTemplate //100
 
-      console.log(height)
+      //console.log(height)
       // this.selectActiveStep('N')
     },
     activated() {

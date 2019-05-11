@@ -338,7 +338,7 @@ export default {
       method: 'get',
       params: {currPage: 1, pageSize: 100}
     }).then(response => {
-      console.log(response)
+      //console.log(response)
       $this.administrativeList = response.dataList
     })
   }

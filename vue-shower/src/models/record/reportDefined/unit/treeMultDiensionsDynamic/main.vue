@@ -4,7 +4,7 @@
 
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
-        <el-button @click="addColum()" type="primary">新增</el-button>
+        <el-button v-if="isView!='Y'" @click="addColum()" type="primary">新增</el-button>
         <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
     </el-row>
@@ -62,44 +62,47 @@
     </WorkTablePager>
 
     <!--新增输入项弹窗-->
-    <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" >
-      <el-form ref="editForm" class="modal-form" label-position="left" label-width="30%" :model="formData">
-        <el-form-item label="输入单元名称" >
+    <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'"
+               :close-on-click-modal='false'
+               :close-on-press-escape="false"
+               :visible.sync="addOrEditModelOpend" >
+      <el-form ref="editForm" class="modal-form" label-position="right" label-width="30%" :model="formData">
+        <el-form-item size="mini" label="输入单元名称" >
           <el-input v-model="formData.group_name" :disabled="group_name!=''||isView=='Y'"  auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item label="上级维度" >
+        <el-form-item size="mini" label="上级维度" >
           <el-select :disabled="(isEditModal&&formData.parent_id==0)||isView=='Y'" v-model="formData.parent_id"  :value="formData.parent_id" style="width:100%;" placeholder="请选择数据类型">
             <el-option key="0" label="无上级" :value="0"></el-option>
             <el-option :key="unitColum.colum_id" v-for="unitColum in unitColums" :label="unitColum.colum_name_cn" :value="unitColum.colum_id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="维度名称" >
+        <el-form-item size="mini" label="维度名称" >
           <el-input  :disabled="isView=='Y'"  v-model="formData.colum_name" placeholder="输入项代号 例:realBalance"  auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item label="维度中文名称" >
+        <el-form-item size="mini" label="维度中文名称" >
           <el-input  :disabled="isView=='Y'"  v-model="formData.colum_name_cn" placeholder="维度中文示意 例:实际收入" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item label="输入项数据类型" >
+        <el-form-item size="mini" label="输入项数据类型" >
           <el-select :disabled="isView=='Y'"  v-model="formData.colum_type" style="width:100%;" placeholder="请选择数据类型">
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="单位" >
+        <el-form-item size="mini" label="单位" >
           <el-input :disabled="isView=='Y'"  v-model="formData.colum_point" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
+        <el-form-item size="mini" v-if="formData.colum_type=='1'" label="最小值" >
           <el-input :disabled="isView=='Y'"  v-model="formData.min_value" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
+        <el-form-item size="mini" v-if="formData.colum_type=='1'" label="最大值" >
           <el-input :disabled="isView=='Y'"  v-model="formData.max_value" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type!='0'" label="是否需要记忆" >
+        <el-form-item size="mini" v-if="formData.colum_type!='0'" label="是否需要记忆" >
           <el-select :disabled="isView=='Y'"  v-model="formData.need_remember" style="width:100%;" placeholder="请选择">
             <el-option  label="是" value="Y"></el-option>
             <el-option  label="否" value="N"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type=='0'" label="公式" >
+        <el-form-item size="mini" v-if="formData.colum_type=='0'" label="公式" >
           <el-input
             type="textarea"
             :rows="10"
@@ -126,9 +129,10 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
+    <el-dialog title="公式设定" width="65%"  :close-on-click-modal='false'
+               :close-on-press-escape="false" :show-close='false'	:visible.sync="isOpenFormulaEditor" >
 
-      <el-form class="modal-form" label-position="right" label-width="100px" >
+      <el-form label-position="right" label-width="20%"  align="left" class="modal-form"  >
         <el-form-item label="选择输入项" >
           <el-cascader
             ref="unitSelectRef"
@@ -149,13 +153,14 @@
           <el-button @click="formulaAdd('/')">/</el-button>
           <el-button @click="formulaAdd('(')">(</el-button>
           <el-button @click="formulaAdd(')')">)</el-button>
-          <el-button @click="formulaBack"><-(回退)</el-button>
+          <el-button @click="formulaBack">回退</el-button>
+          <el-button @click="fomularClear">清空</el-button>
         </el-form-item>
 
         <el-form-item label="公式内容" >
           <el-input
             type="textarea"
-            :rows="10"
+            :rows="4"
             :disabled="true"
             v-model="formData.colum_formula_desc">
           </el-input>
@@ -315,12 +320,12 @@
           params:{'columId':columnId}
         }).then(response=>{
           loading.close()
-          console.log(response)
+          //console.log(response)
           this.editFormData = response
           this.addOrEditModelOpend = true
           this.isEditModal = true
         }).catch(error=>{
-          console.log(error)
+          //console.log(error)
           loading.close()
           this.Message.error("删除失败"+error)
         })
@@ -349,7 +354,7 @@
             loading.close()
             this.getTableData(1)
           }).catch(error=>{
-            console.log(error)
+            //console.log(error)
             loading.close()
             this.Message.error("删除失败"+error)
           })
@@ -545,7 +550,7 @@
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
         const unitClickId = this.fomularColumnTmp[0]
         this.otherUnits.forEach(unitData=>{
-          console.log(unitData)
+          //console.log(unitData)
           if(unitData.value == unitClickId){
             if(unitData.children){
               unitData.children.forEach(columData=>{
@@ -584,6 +589,17 @@
         this.formulaContext.pop()
         this.formulaDescContext.pop()
         this.formulaDescContextTmp = ''
+        this.formulaDescContextTmp = ''
+        if(this.formulaDescContext.length<1){
+          if(this.isEditModal){
+            this.editFormData.colum_formula_desc =""
+            this.editFormData.colum_formula = ""
+          }else{
+            this.addFormData.colum_formula_desc =""
+            this.addFormData.colum_formula = ""
+          }
+          return
+        }
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
           const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
@@ -605,6 +621,18 @@
             }
           }
         })
+      },
+      fomularClear(){
+        this.formulaContext = []
+        this.formulaDescContext = []
+        this.formulaDescContextTmp = ''
+        if(this.isEditModal){
+          this.editFormData.colum_formula_desc =""
+          this.editFormData.colum_formula = ""
+        }else{
+          this.addFormData.colum_formula_desc =""
+          this.addFormData.colum_formula = ""
+        }
       },
       fomularConfirm(){
         this.colum_formula_array = this.formulaContext
@@ -670,24 +698,11 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
-
-  .el-row{
-    margin-top:20px;
+  .el-form{
+    margin:0 0 30px 0;
   }
 
-  $seachRowHeight : 50px;
-  $pagerRowHeight : 50px;
-  $tableRowHeight : calc(100% - #{$seachRowHeight+$pagerRowHeight+10});
-  .search-row{
-    height:$seachRowHeight;
-  }
-
-  .table-row{
-    height:$tableRowHeight;
-    overflow: auto;
-  }
-
-  .pager-row{
-    height:$pagerRowHeight;
+  .el-form-item{
+    margin:0 0 15px 0;
   }
 </style>

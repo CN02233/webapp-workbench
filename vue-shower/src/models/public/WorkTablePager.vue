@@ -23,8 +23,8 @@
     },
     methods: {
       goToPage:function(pageNum){
-        console.log(this.pageCount);
-        console.log(this.tableDataUrl);
+        //console.log(this.pageCount);
+        //console.log(this.tableDataUrl);
         this.$emit('refreshData',pageNum);
       }
     }

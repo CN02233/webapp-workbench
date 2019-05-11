@@ -4,7 +4,8 @@
     <div v-for="(groupDatas,groupKey) in definedColumsGroup">
       <el-row v-if="(Object.keys(groupDatas.elColumDefineds).length>1)&&isView!='Y'">
         <el-col align="left" :span="24">
-          <el-button type="success" size="small" v-if="isView!='Y'" @click="addRootNode(groupKey)">添加{{groupDatas.rootTreeNodeName}}</el-button>
+          <!--<el-button type="success" size="small" v-if="isView!='Y'" @click="addRootNode(groupKey)">添加{{groupDatas.rootTreeNodeName}}</el-button>-->
+          <el-button type="success" size="small" v-if="isView!='Y'" @click="addRootNode(groupKey)">新增组</el-button>
         </el-col>
       </el-row>
 
@@ -147,7 +148,7 @@
               const groups = Object.keys(this.definedColumsGroup)
               groups.forEach(groupKey=>{
                 const groupContext = this.definedColumsGroup[groupKey]
-                console.log(groupContext)
+                //console.log(groupContext)
                 const elColumDefineds = groupContext.elColumDefineds
                 response.columDatas.forEach(columData=>{
                   const unit_id = columData.unit_id
@@ -176,7 +177,7 @@
               return
             }
 
-            console.log(justRefreshFomular+"---over")
+            //console.log(justRefreshFomular+"---over")
 
 
             this.definedColums = response.definedColums
@@ -237,7 +238,7 @@
               const dimensions_id = columData['dimensions_id']
               response.definedColums.forEach(definedColum=>{
                 if(unit_id==definedColum['unit_id']&&dimensions_id==definedColum['colum_id']){
-                  console.log(unit_id+"--"+dimensions_id+"--"+definedColum['unit_id']+"---"+definedColum['colum_id'])
+                  //console.log(unit_id+"--"+dimensions_id+"--"+definedColum['unit_id']+"---"+definedColum['colum_id'])
                   treeDatasGroup[definedColum['group_id']].columDatas.push(columData)
                 }
               })
@@ -278,7 +279,7 @@
           const saveObjTmp={}
           const saveColumDatasTmp = []
           const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
-          console.log(elRowDatas)
+          //console.log(elRowDatas)
           elRowDatas.forEach((elRowData,rowNum)=>{
             elRowData.forEach(elColumCol=>{
               if(elColumCol!=null){
@@ -370,7 +371,7 @@
           const saveObjTmp={}
           const saveColumDatasTmp = []
           const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
-          console.log(elRowDatas)
+          //console.log(elRowDatas)
           elRowDatas.forEach((elRowData,rowNum)=>{
             elRowData.forEach(elColumCol=>{
               if(elColumCol!=null){
@@ -428,13 +429,13 @@
         });
       },
       checkStepAndSave(saveLink){
-        console.log(saveLink.unit_id)
-        console.log("data is "+JSON.stringify(this.definedColumsGroup))
+        //console.log(saveLink.unit_id)
+        //console.log("data is "+JSON.stringify(this.definedColumsGroup))
         this.$emit("checkStepAndSave",saveLink.nextUnit)
       },
       nextStep(){
-        console.log('next step is running....'+this.unitId)
-        console.log("data is "+JSON.stringify(this.definedColumsGroup))
+        //console.log('next step is running....'+this.unitId)
+        //console.log("data is "+JSON.stringify(this.definedColumsGroup))
 
         // this.saveUnitContext(true)
       },
@@ -676,7 +677,7 @@
         //循环找到第一个当前需要增加子节点的节点的行 在该行前面插入需要增加的子节点
         for(let insertIndex = (parentRowNum+1);insertIndex<this.definedColumsGroup[groupId].elRowDatas.length;insertIndex++){
           const checkRow = this.definedColumsGroup[groupId].elRowDatas[insertIndex]
-          console.log(checkRow)
+          //console.log(checkRow)
 
           let checkRowLevel = 0
           for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
@@ -742,10 +743,10 @@
           }
           if (cpRowLevel < checkRowLevel) {//需要复制
             cpArrayTmp.push(elRowDataTmp)
-            console.log("need")
+            //console.log("need")
           } else {
             endRowNum = cpIndex
-            console.log("not need")
+            //console.log("not need")
 
             break
           }
@@ -784,11 +785,15 @@
           if (delRowLevel < checkRowLevel) {//需要删除
           } else {
             endRowNum = delIndex
-
             break
           }
         }
-        this.definedColumsGroup[groupId].elRowDatas.splice(delRowNum,(endRowNum-delRowNum))
+        if(endRowNum==0){
+          this.definedColumsGroup[groupId].elRowDatas.splice(delRowNum,delRowNum)
+        }else{
+          this.definedColumsGroup[groupId].elRowDatas.splice(delRowNum,(endRowNum-delRowNum))
+        }
+
       },
       setSaveFlag(saveFlag){
         this.saveFlag = saveFlag

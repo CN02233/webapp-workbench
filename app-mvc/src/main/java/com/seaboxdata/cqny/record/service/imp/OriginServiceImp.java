@@ -1,7 +1,6 @@
 package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
 import com.seaboxdata.cqny.record.dao.IOriginDao;
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.service.OriginService;
@@ -158,5 +157,67 @@ public class OriginServiceImp implements OriginService {
     public List<Origin> getOriginByName(String searchOriginName) {
         List<Origin> result = originDao.getOriginByName(searchOriginName);
         return result;
+    }
+
+    public Origin getOriginTree(List<Integer> childrenOrigins, List<Origin> allOrigins){
+        Map<Integer,Origin> fullOriginTMp = new HashMap<>();
+        if(allOrigins!=null&&allOrigins.size()>0){
+            for (Origin originTmp : allOrigins) {
+                Integer originId = originTmp.getOrigin_id();
+                fullOriginTMp.put(originId,originTmp);
+            }
+        }
+
+        Map<Integer,Origin> checkoutOriginMap = new HashMap<>();
+
+        if(childrenOrigins!=null){
+            for (Integer originChild : childrenOrigins) {
+                checkoutOriginMap.putAll(this.getParentOrigin(fullOriginTMp,originChild));
+            }
+        }
+
+        logger.debug("{}",checkoutOriginMap);
+
+        Origin originTree = makeOriginTree(checkoutOriginMap);
+
+        return originTree;
+    }
+
+    public Origin makeOriginTree(Map<Integer,Origin> originsMap){
+        Set<Integer> originIds = originsMap.keySet();
+        Integer rootOrigin = null;
+        for (Integer originId : originIds) {
+            Origin origin = originsMap.get(originId);
+            Integer parentOriginId = origin.getParent_origin_id();
+            if(originsMap.containsKey(parentOriginId)){
+                List<Origin> allChildren = originsMap.get(parentOriginId).getChildren();
+                if(allChildren==null){
+                    allChildren = new ArrayList<>();
+                    originsMap.get(parentOriginId).setChildren(allChildren);
+                }
+
+                originsMap.get(parentOriginId).getChildren().add(origin);
+            }else{
+                rootOrigin = origin.getOrigin_id();
+            }
+        }
+
+        return originsMap.get(rootOrigin);
+    }
+
+    private Map<Integer, Origin> getParentOrigin(Map<Integer,Origin> fullOriginTMp, Integer checkOriginId){
+        logger.debug("获取上级机构 {}",checkOriginId);
+        Map<Integer,Origin> resultOrigins = new HashMap<>();
+        if(fullOriginTMp.containsKey(checkOriginId)){
+            Origin checkOrigin = fullOriginTMp.get(checkOriginId);
+            resultOrigins.put(checkOriginId,checkOrigin);
+            Integer parentOrigin = checkOrigin.getParent_origin_id();
+            if(parentOrigin!=null){
+                resultOrigins.putAll(this.getParentOrigin(fullOriginTMp,parentOrigin));
+            }
+
+        }
+
+        return resultOrigins;
     }
 }

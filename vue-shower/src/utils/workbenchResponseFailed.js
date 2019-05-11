@@ -60,6 +60,9 @@ failedProcess.checkWorkbenchResult = function(response,withMessage){
         return res
       }
 
+    }else if(res.faild_reason === 'PWD_EXPIRED'){
+      router.push("/login");
+      hasOpenLogoutMessageBox = false
     }else{
       Message.error(res.result_msg)
     }

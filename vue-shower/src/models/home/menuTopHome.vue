@@ -62,7 +62,7 @@
     },
     methods:{
       mainPageChange:function(pageName){
-        console.log(pageName);
+        //console.log(pageName);
       },
       logout:function(commound){
         MessageBox.confirm('退出系统将丢失当前未保存的相关操作，确定退出？', '提示', {

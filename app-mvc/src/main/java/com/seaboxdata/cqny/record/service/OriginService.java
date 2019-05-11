@@ -2,8 +2,6 @@ package com.seaboxdata.cqny.record.service;
 
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.webapp.support.page.PageResult;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,4 +27,6 @@ public interface OriginService {
     Collection<Map<String, Object>> checkProvAndCity(List<Origin> allOrigins);
 
     List<Origin> getOriginByName(String searchOriginName);
+
+    Origin getOriginTree(List<Integer> childrenOrigins, List<Origin> allOrigins);
 }

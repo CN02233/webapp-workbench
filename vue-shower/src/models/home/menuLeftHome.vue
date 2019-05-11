@@ -99,7 +99,7 @@
     },
     methods:{
       mainPageChange:function(pageName){
-        console.log(pageName);
+        //console.log(pageName);
       },
       logout:function(commound){
         MessageBox.confirm('退出系统将丢失当前未保存的相关操作，确定退出？', '提示', {
@@ -160,16 +160,16 @@
         }
       },
       exitHandler(){
-        console.log("ehere")
+        //console.log("ehere")
         if (!document.webkitIsFullScreen &&!document.mozFullScreen &&!document.msFullscreenElement) {
           this.fullScreen = false
-          console.log("mmmmmmm")
+          //console.log("mmmmmmm")
         }else{
-          console.log("yyyyy")
+          //console.log("yyyyy")
         }
       },
       collapseMenu(){
-        console.log("collapseMenu is running.....")
+        //console.log("collapseMenu is running.....")
         this.isCollapse = !this.isCollapse
       }
     },

@@ -362,7 +362,7 @@
     },
 
     mounted() {
-      console.log("mounted is running......")
+      //console.log("mounted is running......")
       this.reportId = this.$route.query.reportId
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
@@ -370,7 +370,7 @@
       this.checkUnitStep()
     },
     activated() {
-      console.log("activate is runnig......")
+      //console.log("activate is runnig......")
     }
   }
 </script>

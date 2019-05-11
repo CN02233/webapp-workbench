@@ -20,7 +20,7 @@ public interface ReportStatementsService {
 
     ReportDefinedEntity getReportDefinedById(Integer integer);
 
-    void saveDefinedAndOriginAssign(String[] originIds, String definedId);
+    void saveDefinedAndOriginAssign(List originIds, String definedId);
 
     List<String> getDefinedAndOriginAssignById(String definedId);
 
@@ -37,4 +37,6 @@ public interface ReportStatementsService {
     void updateReportDefined(ReportDefinedEntity reportDefined);
 
     List<Origin> getAuthOriginTree(String reportDefinedId);
+
+    Origin getDefinedOriginTreeById(String definedId);
 }

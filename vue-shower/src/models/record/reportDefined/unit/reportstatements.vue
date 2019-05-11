@@ -37,25 +37,34 @@
             label="创建时间">
           </el-table-column>
           <el-table-column
-            prop="report_start_date"
+            prop="reportStartDate"
             align="left"
             label="报送起始日期">
           </el-table-column>
           <el-table-column
-            prop="report_end_date"
+            prop="reportEndDate"
             align="left"
             label="报送截止日期">
           </el-table-column>
           <el-table-column
-            prop="user_name"
+            prop="reportDataStart"
             align="left"
-            label="创建人">
+            label="填报区间开始日期">
           </el-table-column>
+          <el-table-column
+            prop="reportDataEnd"
+            align="left"
+            label="填报区间截止日期">
+          </el-table-column>
+          <!--<el-table-column-->
+            <!--prop="user_name"-->
+            <!--align="left"-->
+            <!--label="创建人">-->
+          <!--</el-table-column>-->
           <el-table-column
             fixed="right"
             label="操作"
             align="left"
-            width="400"
             >
             <template slot-scope="scope">
               <el-button
@@ -196,29 +205,27 @@
             </el-col>
           </el-row>
           <el-row class="table-options-modal-item">
+            <el-row class="table-options-modal-item">
+
             <el-col :span="8" :offset="1">不需审核机构</el-col>
             <el-col align="left" :span="15">
-              <el-select v-model="submitParams.approve_check_origins" multiple filterable placeholder="请选择">
-                <el-option
-                  v-for="origin in submitParams.defined_origins"
-                  :key="origin.origin_id"
-                  :label="origin.origin_name"
-                  :value="origin.origin_id">
-                </el-option>
-              </el-select>
+              <!--defined_origins-->
+              <el-tree
+                :data="submitParams.defined_origins"
+                :props="definedTreeProps"
+                ref="approveCheckOrigins"
+                show-checkbox >
+              </el-tree>
             </el-col>
           </el-row>
-          <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需复核机构</el-col>
             <el-col align="left" :span="15">
-              <el-select v-model="submitParams.review_check_origins" multiple filterable placeholder="请选择">
-                <el-option
-                  v-for="origin in submitParams.defined_origins"
-                  :key="origin.origin_id"
-                  :label="origin.origin_name"
-                  :value="origin.origin_id">
-                </el-option>
-              </el-select>
+              <el-tree
+                :data="submitParams.defined_origins"
+                :props="definedTreeProps"
+                ref="reviewCheckOrigins"
+                show-checkbox >
+              </el-tree>
             </el-col>
           </el-row>
         </el-col>
@@ -237,34 +244,41 @@
     <el-dialog class="table-options-modal" title="已发布报表设置查看" :visible.sync="submitedModel" >
       <el-row :gutter="16">
         <el-col :sm="20">
+          <!--<el-row class="table-options-modal-item">-->
+            <!--<el-col :span="8" :offset="1">报送起始日期</el-col>-->
+            <!--<el-col :span="15">-->
+              <!--<el-input :disabled="true" v-model="submitedParams.reportStartDate"></el-input>-->
+            <!--</el-col>-->
+          <!--</el-row>-->
+          <!--<el-row class="table-options-modal-item">-->
+            <!--<el-col :span="8" :offset="1">报送截止日期</el-col>-->
+            <!--<el-col :span="15">-->
+              <!--<el-input :disabled="true" v-model="submitedParams.reportEndDate"></el-input>-->
+            <!--</el-col>-->
+          <!--</el-row>-->
+          <!--<el-row class="table-options-modal-item">-->
+            <!--<el-col :span="8" :offset="1">填报区间开始日期</el-col>-->
+            <!--<el-col :span="15">-->
+              <!--<el-input :disabled="true" v-model="submitedParams.reportDataStart"></el-input>-->
+            <!--</el-col>-->
+          <!--</el-row>-->
+          <!--<el-row class="table-options-modal-item">-->
+            <!--<el-col :span="8" :offset="1">填报区间截止日期</el-col>-->
+            <!--<el-col :span="15">-->
+              <!--<el-input :disabled="true" v-model="submitedParams.reportDataEnd"></el-input>-->
+            <!--</el-col>-->
+          <!--</el-row>-->
           <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">报送起始日期</el-col>
-            <el-col :span="15">
-              <el-input :disabled="true" v-model="submitedParams.reportStartDate"></el-input>
-            </el-col>
-          </el-row>
-          <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">报送截止日期</el-col>
-            <el-col :span="15">
-              <el-input :disabled="true" v-model="submitedParams.reportEndDate"></el-input>
-            </el-col>
-          </el-row>
-          <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">填报区间开始日期</el-col>
-            <el-col :span="15">
-              <el-input :disabled="true" v-model="submitedParams.reportDataStart"></el-input>
-            </el-col>
-          </el-row>
-          <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">填报区间截止日期</el-col>
-            <el-col :span="15">
-              <el-input :disabled="true" v-model="submitedParams.reportDataEnd"></el-input>
-            </el-col>
-          </el-row>
-          <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">不需审批机构</el-col>
+            <el-col :span="8" :offset="1">不需审核机构</el-col>
             <el-col align="left" :span="15">
-              <el-tag v-for="originName in submitedParams.passOriginNames">{{originName}}</el-tag>
+              <el-tag v-for="originName in submitedParams.passApproveOriginNames">{{originName}}</el-tag>
+
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">不需复核机构</el-col>
+            <el-col align="left" :span="15">
+              <el-tag v-for="originName in submitedParams.passReviewOriginNames">{{originName}}</el-tag>
 
             </el-col>
           </el-row>
@@ -342,6 +356,11 @@ export default {
         reportDataStart: '',
         reportDataEnd: '',
         passOriginNames: [],
+      },
+      definedTreeProps:{
+        children: 'children',
+        label: 'origin_name',
+        id: 'origin_id'
       }
     }
   },
@@ -506,8 +525,8 @@ export default {
     saveAssign () {
       this.BaseRequest({
         url: 'reportStatements/saveDefinedAndOriginAssign',
-        method: 'get',
-        params: {'definedId': this.formSubmitData.defined_id, 'originIds': this.origin_ids.join()}
+        method: 'post',
+        data: {'definedId': this.formSubmitData.defined_id, 'originIds': this.origin_ids}
       }).then(() => {
         this.Message.success('保存成功')
         this.closeModal()
@@ -601,12 +620,15 @@ export default {
       this.submitParams.defined_id = definedData.defined_id
       this.submitParams.defined_name = definedData.defined_name
       this.BaseRequest({
-        url: '/reportStatements/getDefinedOriginsById',
+        url: '/reportStatements/getDefinedOriginTreeById',
         params: {
           definedId: definedData.defined_id
         }
       }).then(response => {
-        this.submitParams.defined_origins = response
+        console.log(response)
+        this.submitParams.defined_origins = new Array()
+        this.submitParams.defined_origins.push(response)
+        console.log(this.submitParams.defined_origins)
       })
     },
     submitReport () {
@@ -628,6 +650,20 @@ export default {
         spinner: 'el-icon-loading',
         background: 'rgba(0, 0, 0, 0.7)'
       })
+
+      // approveCheckOrigins
+      this.submitParams.approve_check_origins = []
+      let approveNodeData = this.$refs.approveCheckOrigins.getCheckedNodes()
+      for (let i = 0; i < approveNodeData.length; i++) {
+        this.submitParams.approve_check_origins.push(approveNodeData[i].origin_id)
+      }
+
+      this.submitParams.review_check_origins = []
+      let review_check_origins = this.$refs.approveCheckOrigins.getCheckedNodes()
+      for (let i = 0; i < review_check_origins.length; i++) {
+        this.submitParams.review_check_origins.push(review_check_origins[i].origin_id)
+      }
+
       this.BaseRequest({
         url: '/reportStatements/sumitReportDefined',
         method: 'post',

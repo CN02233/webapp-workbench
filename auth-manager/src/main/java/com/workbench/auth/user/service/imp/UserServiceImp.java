@@ -95,6 +95,11 @@ public class UserServiceImp implements UserService {
         userServiceDao.updatePwd(userId,MD5.getMD5Value(DEFAULT_PWD),String.valueOf(UserStatus.PWD_EXPIRED.getStatus()));
     }
 
+    @Override
+    public void changePwd(int userId, String userPwd) {
+        userServiceDao.updatePwd(userId,MD5.getMD5Value(userPwd),String.valueOf(UserStatus.NORMAL.getStatus()));
+    }
+
     public void delUserById(int user_id){
         userServiceDao.delUserById(user_id);
     }

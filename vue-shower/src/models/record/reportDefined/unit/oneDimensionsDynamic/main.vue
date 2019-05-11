@@ -51,7 +51,10 @@
     </WorkTablePager>
 
     <!--新增输入项弹窗--><!--:rules="scope.row.colum_type=='0'?{required:true,message:'必填字段'}:{required:false}"-->
-    <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" width="80%" >
+    <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'"
+               :close-on-click-modal='false'
+               :close-on-press-escape="false"
+               :visible.sync="addOrEditModelOpend" width="80%" >
       <el-form :rules="editModel.rules" :model="editModel"  ref="form">
       <el-row v-if="isView=='N'" style="margin:5px;">
         <el-col :span="24">
@@ -160,7 +163,8 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
+    <el-dialog title="公式设定" width="65%"  :close-on-click-modal='false'
+               :close-on-press-escape="false" :show-close='false'	:visible.sync="isOpenFormulaEditor" >
       <el-form class="modal-form" label-position="right" label-width="100px" >
         <el-form-item v-if="isView=='N'" label="选择输入项" >
           <el-cascader
@@ -181,13 +185,14 @@
           <el-button @click="formulaAdd('/')">/</el-button>
           <el-button @click="formulaAdd('(')">(</el-button>
           <el-button @click="formulaAdd(')')">)</el-button>
-          <el-button @click="formulaBack"><-(回退)</el-button>
+          <el-button @click="formulaBack">回退</el-button>
+          <el-button @click="fomularClear">清空</el-button>
         </el-form-item>
 
         <el-form-item label="公式内容" >
           <el-input
             type="textarea"
-            :rows="10"
+            :rows="4"
             :disabled="true"
             v-model="editModel.selectRow.colum_formula_desc">
           </el-input>
@@ -382,7 +387,7 @@
           this.addOrEditModelOpend = true
           this.isEditModal = true
         }).catch(error=>{
-          console.log(error)
+          //console.log(error)
           loading.close()
           this.Message.error("删除失败"+error)
         })
@@ -412,7 +417,7 @@
             this.getTableData(1)
             this.getGroupname()
           }).catch(error=>{
-            console.log(error)
+            //console.log(error)
             loading.close()
             this.Message.error("删除失败"+error)
           })
@@ -609,12 +614,30 @@
         this.formulaContext.pop()
         this.formulaDescContext.pop()
         this.formulaDescContextTmp = ''
+        this.formulaDescContextTmp = ''
+        if(this.formulaDescContext.length<1){
+          this.editModel.selectRow.colum_formula_desc =""
+          this.editModel.selectRow.colum_formula = ""
+          return
+        }
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
           const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
-          this.editModel.selectRow.colum_formula_desc +=formulaDesc.context
-          this.editModel.selectRow.colum_formula +=formulaContext
+          if(i==0){
+            this.editModel.selectRow.colum_formula_desc =formulaDesc.context
+            this.editModel.selectRow.colum_formula = formulaContext
+          }else{
+            this.editModel.selectRow.colum_formula_desc +=formulaDesc.context
+            this.editModel.selectRow.colum_formula +=formulaContext
+          }
         })
+      },
+      fomularClear(){
+        this.formulaContext = []
+        this.formulaDescContext = []
+        this.formulaDescContextTmp = ''
+        this.editModel.selectRow.colum_formula_desc =""
+        this.editModel.selectRow.colum_formula = ""
       },
       fomularConfirm(){
         this.colum_formula_array = this.formulaContext

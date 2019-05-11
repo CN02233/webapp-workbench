@@ -20,6 +20,8 @@ public interface IReportApprovalDao {
             "\trc.last_modify_user,\n" +
             "\trc.report_defined_id,\n" +
             "\trc.report_end_date,\n" +
+            "\trc.report_data_start,\n" +
+            "\trc.report_data_end,\n" +
             "\trc.report_id,\n" +
             "\trc.report_name,\n" +
             "\trc.report_origin,\n" +

@@ -9,12 +9,8 @@ import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.dao.IReportStatementsDao;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import com.seaboxdata.cqny.record.entity.onedim.SimpleColumDefined;
-import com.seaboxdata.cqny.record.service.ReportDefinedUnitMultDimService;
-import com.seaboxdata.cqny.record.service.ReportDefinedUnitOneDimService;
-import com.seaboxdata.cqny.record.service.ReportStatementsService;
-import com.seaboxdata.cqny.record.service.ReportUnitService;
+import com.seaboxdata.cqny.record.service.*;
 import com.webapp.support.page.PageResult;
-import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +41,9 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 
     @Autowired
     private ReportDefinedUnitMultDimService reportDefinedUnitMultDimService;
+    
+    @Autowired
+    private OriginService originService;
 
     @Override
     public PageResult listReportStatements(int currPage, int pageSize) {
@@ -106,7 +105,9 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
         }
     }
     @Override
-    public void saveDefinedAndOriginAssign(String[] originIds, String definedId) {
+    @Transactional(rollbackFor = Exception.class)
+    public void saveDefinedAndOriginAssign(List originIds, String definedId) {
+        reportStatementsDao.delDefinedAndOriginAssign(definedId);
         reportStatementsDao.saveDefinedAndOriginAssign(originIds,definedId);
     }
 
@@ -191,6 +192,21 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 //        }
 
         return null;
+    }
+
+    @Override
+    public Origin getDefinedOriginTreeById(String definedId) {
+        List<Origin> allDefinedOrigins = this.getDefinedOriginsById(definedId);
+        List<Integer> allDefinedOriginIds = new ArrayList<>();
+        for (Origin definedOrigin : allDefinedOrigins) {
+            Integer definedOriginId = definedOrigin.getOrigin_id();
+            allDefinedOriginIds.add(definedOriginId);
+        }
+
+        List<Origin> allOrigins = originService.listAllOrigin();
+        Origin originTree = originService.getOriginTree(allDefinedOriginIds, allOrigins);
+
+        return originTree;
     }
 
     private void groupCopyUnit(List<CopyReportDefinedTmp> copyReportDefinedTmps,

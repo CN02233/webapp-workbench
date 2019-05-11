@@ -1,15 +1,15 @@
 <template>
   <WorkMain :headerItems="['报送填报','报送填报列表']">
-    <el-row class="search-row" :gutter="20">
-      <el-col class="align-left" :span="17">
-        <el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"
-                     :options="cityTree">
-        </el-cascader>
+    <!--<el-row class="search-row" :gutter="20">-->
+      <!--<el-col class="align-left" :span="17">-->
+        <!--<el-cascader :change-on-select="true" v-model="seachOriginList" :clearable="true"-->
+                     <!--:options="cityTree">-->
+        <!--</el-cascader>-->
 
-        <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
-        <el-button @click="getTableData(1)" type="success">查询</el-button>
-      </el-col>
-    </el-row>
+        <!--<el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>-->
+        <!--<el-button @click="getTableData(1)" type="success">查询</el-button>-->
+      <!--</el-col>-->
+    <!--</el-row>-->
     <el-row class="table-page-root-outoptions">
       <el-col :span="24">
         <el-table
@@ -247,4 +247,8 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
+
+  .search-row{
+    margin:5px 0 0 0;
+  }
 </style>

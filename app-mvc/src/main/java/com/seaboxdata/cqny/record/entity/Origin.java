@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.record.entity;
 
 import java.util.Date;
+import java.util.List;
 
 public class Origin {
 
@@ -10,6 +11,8 @@ public class Origin {
     private String origin_status;
     private Date create_date;
     private String create_user;
+
+    private List<Origin> children;
 
 
     public Integer getOrigin_id() {
@@ -58,5 +61,13 @@ public class Origin {
 
     public void setCreate_user(String create_user) {
         this.create_user = create_user;
+    }
+
+    public List<Origin> getChildren() {
+        return children;
+    }
+
+    public void setChildren(List<Origin> children) {
+        this.children = children;
     }
 }

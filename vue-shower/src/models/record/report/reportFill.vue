@@ -18,6 +18,7 @@
             @saveReportsCallBack="saveReportsCallBack"
             @validateReportsCallBack="validateReportsCallBack"
             @submitReportsCallBack="submitReportsCallBack"
+            @saveAndValidateCallBack="saveAndValidateCallBack"
             class="fill-context-child"
             v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
             v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
@@ -30,7 +31,7 @@
           <!--<el-button  @click="saveContext" type="danger">保存</el-button>-->
           <el-button  @click="doSaveContext" type="danger">保存</el-button>
           <!--<el-button  @click="validateContext" type="success">校验</el-button>-->
-          <el-button  @click="doValidateContext" type="success">校验</el-button>
+          <el-button  @click="doSaveAndValidate('SAVE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
           <el-button  @click="doSubmitContext('SAVE')" type="warning">提交</el-button>
         </div>
@@ -121,6 +122,22 @@
           const unitId = unitEntity.unit_id
           const reportContextRef = this.$refs['reportContextRef'+unitId][0]
           reportContextRef.doSaveContext()
+        })
+      },
+      doSaveAndValidate(processName){//先SAVE 再VALIDATE 再REFRESH
+        this.validateResult = {}
+        this.doneCount=0
+        this.doneExcetionMessage = null
+        this.doSomethinLoading = this.$loading({
+          lock: true,
+          text: '保存中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        this.unitEntities.forEach(unitEntity=>{
+          const unitId = unitEntity.unit_id
+          const reportContextRef = this.$refs['reportContextRef'+unitId][0]
+          reportContextRef.doSaveAndValidate(processName)
         })
       },
       doValidateContext(){
@@ -237,6 +254,63 @@
               type: 'success',
               message: "您已成功保存报表信息"
             });
+          }
+        }
+      },
+      saveAndValidateCallBack(unitId,unitName,saveException,processName){
+        this.doneCount = this.doneCount+1
+        if(saveException){
+          if(processName=='VALIDATE'){
+            this.validateResult[unitId] = "error"
+          }
+          saveException = unitName+":"+saveException
+          if(this.doneExcetionMessage){
+            this.doneExcetionMessage = this.doneExcetionMessage+"<br>"+saveException
+          }else{
+            this.doneExcetionMessage = saveException
+          }
+        }else{
+          if(processName=='VALIDATE'){
+            this.validateResult[unitId] = "success"
+          }
+        }
+        if(this.doneCount==this.unitEntities.length){
+          this.doSomethinLoading.close()
+          this.doSomethinLoading = null
+          this.doneCount=0
+          let processTitle = "保存"
+          if(processName=='VALIDATE'){
+            processTitle="校验"
+            const unitEntitiesTmp = this.unitEntities
+            this.unitEntities = null
+            this.unitEntities = unitEntitiesTmp
+          }
+          if(this.doneExcetionMessage){
+            this.$notify({
+              title: processTitle+'失败',
+              dangerouslyUseHTMLString: true,
+              type: 'error',
+              message: this.doneExcetionMessage
+            });
+          }else{
+
+            let processmessage = "您已成功保存报表信息"
+            if(processName=='VALIDATE'){
+              processmessage="所有输入项均校验通过"
+            }
+            this.$notify({
+              title: processTitle+'成功',
+              type: 'success',
+              message: processmessage
+            });
+            //console.log(processName+"---"+this.doneCount)
+
+            if(processName=="SAVE"){
+              this.doSaveAndValidate("VALIDATE")
+            }else if(processName=="VALIDATE"){
+              this.doRefreshFomular()
+            }
+
           }
         }
       },

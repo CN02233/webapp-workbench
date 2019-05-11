@@ -102,4 +102,7 @@ public interface ISubmitauthorityDao {
             "   uos.user_id = #{userId}  " +
             " )")
     List<String> getOriginIdListByUserId(@Param("userId") Integer userId);
+
+    @Select("")
+    Map<String,Object> getReportSubmitInfo(String reportDefinedId);
 }

@@ -495,7 +495,8 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
         }
         Map<String,Object> baseInfoMap = new HashMap<>();
-        List<String> passOriginNames = new ArrayList<>();
+        List<String> passApproveOriginNames = new ArrayList<>();
+        List<String> passReviewOriginNames = new ArrayList<>();
         int count=0;
         for (ReportCustomer reportCustomer : allReportCustomer) {
             String reportStartDate = reportCustomer.getReport_start_date_str();
@@ -509,11 +510,15 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 baseInfoMap.put("reportDataEnd",reportDataEnd);
             }
             count++;
-            if("Y".equals(reportCustomer.getPass_auth())){
-                passOriginNames.add(reportCustomer.getReport_origin_name());
+            if("Y".equals(reportCustomer.getPass_approve())){
+                passApproveOriginNames.add(reportCustomer.getReport_origin_name());
+            }
+            if("Y".equals(reportCustomer.getPass_review())){
+                passReviewOriginNames.add(reportCustomer.getReport_origin_name());
             }
         }
-        baseInfoMap.put("passOriginNames",passOriginNames);
+        baseInfoMap.put("passApproveOriginNames",passApproveOriginNames);
+        baseInfoMap.put("passReviewOriginNames",passReviewOriginNames);
         return baseInfoMap;
     }
 

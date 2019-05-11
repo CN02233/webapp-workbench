@@ -337,13 +337,19 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult doCommitAuth(String reportId){
         ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
-        if("Y".equals(reportCustomer.getPass_auth())){
-            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.APPROVE);
+
+        String passApprove = reportCustomer.getPass_approve();
+        if("Y".equals(passApprove)){
+            String passReview = reportCustomer.getPass_approve();
+            if("Y".equals(passReview)){
+                reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REPORT_DONE);
+            }else{
+                reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REVIEW);
+            }
         }else{
             reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
-//            modify by SongChaoqun 20190506 审批直接到复核 不走上级审批流程
-//            reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REVIEW);
         }
+
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 
         return jsonResult;

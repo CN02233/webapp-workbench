@@ -351,7 +351,11 @@ public class SubmitReportServiceImp implements SubmitReportService {
             reportCustomerData.setUnit_id(simpleColumDefined.getUnit_id().toString());
             reportCustomerData.setReport_id(reportId);
             reportCustomerData.setReport_group_id(reportGroupId);
-            reportCustomerData.setReport_data("0");
+            String defaultValue = simpleColumDefined.getDefault_value();
+            if(Strings.isNullOrEmpty(defaultValue)){
+                defaultValue = "0";
+            }
+            reportCustomerData.setReport_data(defaultValue);
             dataList.add(reportCustomerData);
             ArrayList<Map<String, Object>> children = (ArrayList<Map<String, Object>>) stringObjectMap.get("children");
             dataList.addAll(this.makeTreeDatas(children,reportId,reportGroupId,offset));

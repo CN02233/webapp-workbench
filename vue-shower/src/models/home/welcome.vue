@@ -2,7 +2,7 @@
   <div class="welcome-root">
 
     <WorkMain :contextClass="'welcome-table-context'"
-              :class="{'full-height':userType==1,'full-self-report':userType==0||userType==2}"
+              :class="{'full-height':userType==1,'self-report':userType==0||userType==2}"
               :noNeedHome="true" :headerItems="['待办事项']">
 
       <el-row class="table-page-root-outoptions">
@@ -104,8 +104,8 @@
         return {
           reportStatus:{
             'NORMAL':'待填写',
-            'SUBMIT':'审批中',
-            'REVIEW':'审核中',
+            'SUBMIT':'审核中',
+            'REVIEW':'复核中',
             // 'LOCK':'锁定',
             // 'REMOVE':'失效',
             // 'UP_SIGIN':'待上传签名',
@@ -135,8 +135,12 @@
           selfReportInfo:{},
           jobReportList:[],
           childrenReportInfo:[],
-          pieOptions : {
+          pieOptions:{
             color:[ '#5f97ff', '#998ff3','#94cf87', '#ffe582', '#9aeedc'],
+            tooltip: {
+              trigger: 'item',
+              formatter: "{a} <br/>{b}: {c} ({d}%)"
+            },
             series: [
               {
                 name:'访问来源',
@@ -150,8 +154,13 @@
                   },
                   emphasis: {
                     show: true,
+                    // formatter:function(param,b){
+                    //   // debugger
+                    //   return param.name+":"+param.value;
+                    // },
+                    formatter:'{b}:{c}\n占{d}%',
                     textStyle: {
-                      fontSize: '20',
+                      fontSize: '15',
                       fontWeight: 'bold'
                     }
                   }
@@ -165,6 +174,42 @@
               }
             ]
           }
+          // pieOptions : {
+          //   color:[ '#5f97ff', '#998ff3','#94cf87', '#ffe582', '#9aeedc'],
+          //   tooltip : {
+          //     trigger: 'item',
+          //     // formatter: "{a} <br/>{b} : {c} ({d}%)"
+          //     formatter: "here"
+          //   },
+          //   series: [
+          //     {
+          //       name:'访问来源',
+          //       type:'pie',
+          //       radius: ['50%', '70%'],
+          //       avoidLabelOverlap: false,
+          //
+          //       label: {
+          //         normal: {
+          //           show: false,
+          //           position: 'center'
+          //         },
+          //         emphasis: {
+          //           show: true,
+          //           textStyle: {
+          //             fontSize: '20',
+          //             fontWeight: 'bold'
+          //           }
+          //         }
+          //       },
+          //       labelLine: {
+          //         normal: {
+          //           show: false
+          //         }
+          //       },
+          //       data:[]
+          //     }
+          //   ]
+          // }
         }
     },
     components: {
@@ -221,14 +266,13 @@
                     if(childrenReportInfoTmp[reportStatusCn])
                       childrenReportInfoTmp[reportStatusCn] = childrenReportInfoTmp[reportStatusCn]+childReportInfo[reportStatusCode]
                     else{
-                      childrenReportInfoTmp[reportStatusCn] = childReportInfo[reportStatusCode]+1
+                      childrenReportInfoTmp[reportStatusCn] = childReportInfo[reportStatusCode]
                     }
                   }
 
                 })
               })
             }
-            console.log(childrenReportInfoTmp)
             if(childrenReportInfoTmp!=null){
               const statusCns = Object.keys(childrenReportInfoTmp)
               statusCns.forEach(statusCn=>{
@@ -295,7 +339,7 @@
   }
 
   .full-height{
-    height:100%;
+    height:100% !important;
   }
 
   .slef-report-tag{

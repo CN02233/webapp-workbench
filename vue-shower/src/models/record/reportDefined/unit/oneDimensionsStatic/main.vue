@@ -58,49 +58,53 @@
     </WorkTablePager>
 
     <!--新增输入项弹窗-->
-    <el-dialog :title="isView=='Y'?'查看输入项':(isEditModal?'编辑输入项':'新增输入项')" :visible.sync="addOrEditModelOpend" >
-      <el-form ref="editForm" class="modal-form" label-position="left" label-width="30%" :model="formData">
-        <el-form-item label="输入项名称" >
+    <el-dialog
+      :close-on-click-modal='false'
+      :close-on-press-escape="false"
+      :title="isView=='Y'?'查看输入项':(isEditModal?'编辑输入项':'新增输入项')"
+      :visible.sync="addOrEditModelOpend" >
+      <el-form ref="editForm" class="modal-form" label-position="right" label-width="30%" :model="formData">
+        <el-form-item size="mini" label="输入项名称" >
           <el-input v-model="formData.colum_name"  :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item label="输入项中文名称" >
+        <el-form-item size="mini" label="输入项中文名称" >
           <el-input v-model="formData.colum_name_cn" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item label="输入项数据类型" >
+        <el-form-item size="mini" label="输入项数据类型" >
           <el-select v-model="formData.colum_type" :disabled="isView=='Y'" style="width:100%;" placeholder="请选择数据类型">
             <el-option :key="key" v-for="(value, key) in columDataType" :label="value" :value="key"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="输入项单位" >
+        <el-form-item size="mini" label="输入项单位" >
           <el-input v-model="formData.colum_point" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type!='0'" label="输入项缺省值" >
+        <el-form-item size="mini" v-if="formData.colum_type!='0'" label="输入项缺省值" >
           <el-input v-model="formData.default_value" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type=='1'" label="最小值" >
+        <el-form-item size="mini" v-if="formData.colum_type=='1'" label="最小值" >
           <el-input v-model="formData.min_value" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type=='1'" label="最大值" >
+        <el-form-item size="mini" v-if="formData.colum_type=='1'" label="最大值" >
           <el-input v-model="formData.max_value" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
-        <el-form-item v-if="formData.colum_type!='0'" label="是否需要记忆" >
+        <el-form-item size="mini" v-if="formData.colum_type!='0'" label="是否需要记忆" >
           <el-select v-model="formData.need_remember" :disabled="isView=='Y'" style="width:100%;" placeholder="请选择">
             <el-option  label="是" value="Y"></el-option>
             <el-option  label="否" value="N"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="输入项备注" >
+        <el-form-item size="mini" label="输入项备注" >
           <el-input v-model="formData.colum_desc" :disabled="isView=='Y'" auto-complete="off" ></el-input>
         </el-form-item>
         <el-form-item v-if="formData.colum_type=='0'" label="公式" >
           <el-input
             type="textarea"
-            :rows="10"
+            :rows="4"
             v-model="formData.colum_formula_desc" :disabled="true" auto-complete="off" >
           </el-input>
         </el-form-item>
       </el-form>
-      <div slot="footer" v-if="isView=='N'" class="dialog-footer">
+      <div slot="footer"  v-if="isView=='N'" class="dialog-footer">
         <el-tooltip v-if="formData.colum_type=='0'&&!isEditModal" slot="append" class="item" effect="dark" content="点此设置公式" placement="top">
           <el-button @click="openFormulaEditor()" icon="el-icon-edit">定义公式</el-button>
         </el-tooltip>
@@ -112,10 +116,11 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
+    <el-dialog width="65%" title="公式设定"  :close-on-click-modal='false'
+               :close-on-press-escape="false" :show-close='false'	:visible.sync="isOpenFormulaEditor" >
 
-      <el-form class="modal-form" label-position="right" label-width="100px" >
-        <el-form-item label="选择输入项" >
+      <el-form  label-position="right" label-width="20%"  align="left" class="modal-form"  >
+        <el-form-item  label="选择输入项" >
           <el-cascader
             ref="unitSelectRef"
             :options="otherUnits"
@@ -134,13 +139,14 @@
           <el-button @click="formulaAdd('/')">/</el-button>
           <el-button @click="formulaAdd('(')">(</el-button>
           <el-button @click="formulaAdd(')')">)</el-button>
-          <el-button @click="formulaBack"><-(回退)</el-button>
+          <el-button @click="formulaBack">回退</el-button>
+          <el-button @click="fomularClear">清空</el-button>
         </el-form-item>
 
         <el-form-item label="公式内容" >
           <el-input
             type="textarea"
-            :rows="10"
+            :rows="4"
             :disabled="true"
             v-model="formData.colum_formula_desc">
           </el-input>
@@ -287,12 +293,12 @@
           params:{'columId':columnId}
         }).then(response=>{
           loading.close()
-          console.log(response)
+          //console.log(response)
           this.editFormData = response
           this.addOrEditModelOpend = true
           this.isEditModal = true
         }).catch(error=>{
-          console.log(error)
+          //console.log(error)
           loading.close()
           this.Message.error("删除失败"+error)
         })
@@ -321,7 +327,7 @@
             loading.close()
             this.getTableData(1)
           }).catch(error=>{
-            console.log(error)
+            //console.log(error)
             loading.close()
             this.Message.error("删除失败"+error)
           })
@@ -574,7 +580,7 @@
         const columtClickId = this.fomularColumnTmp[this.fomularColumnTmp.length-1]
         const unitClickId = this.fomularColumnTmp[0]
         this.otherUnits.forEach(unitData=>{
-          console.log(unitData)
+          //console.log(unitData)
           if(unitData.value == unitClickId){
             if(unitData.children){
               unitData.children.forEach(columData=>{
@@ -613,9 +619,22 @@
         this.formulaContext.pop()
         this.formulaDescContext.pop()
         this.formulaDescContextTmp = ''
+        if(this.formulaDescContext.length<1){
+          if(this.isEditModal){
+            this.editFormData.colum_formula_desc =""
+            this.editFormData.colum_formula = ""
+          }else{
+            this.addFormData.colum_formula_desc =""
+            this.addFormData.colum_formula = ""
+          }
+          return
+        }
+
         this.formulaDescContext.forEach((formulaDesc,i)=>{
           // this.formulaDescContextTmp+=formulaDesc.context
-          const formulaContext = this.formulaContext[i].isSymbol?this.formulaContext[i].context:("#"+this.formulaContext[i].context+"#")
+          const formulaContext = this.formulaContext[i].isSymbol
+            ?this.formulaContext[i].context
+            :("#"+this.formulaContext[i].context+"#")
           if(this.isEditModal){
             if(i==0){
               this.editFormData.colum_formula_desc =formulaDesc.context
@@ -634,6 +653,18 @@
             }
           }
         })
+      },
+      fomularClear(){
+        this.formulaContext = []
+        this.formulaDescContext = []
+        this.formulaDescContextTmp = ''
+        if(this.isEditModal){
+          this.editFormData.colum_formula_desc =""
+          this.editFormData.colum_formula = ""
+        }else{
+          this.addFormData.colum_formula_desc =""
+          this.addFormData.colum_formula = ""
+        }
       },
       fomularConfirm(){
         this.colum_formula_array = this.formulaContext
@@ -705,4 +736,11 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
+  .el-form{
+    margin:0 0 30px 0;
+  }
+
+  .el-form-item{
+    margin:0 0 15px 0;
+  }
 </style>

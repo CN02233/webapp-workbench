@@ -155,7 +155,7 @@
 
 
         }).catch(error=>{
-          console.log(error)
+          //console.log(error)
             this.Message.success(error)
             loading.close()
           }
@@ -168,7 +168,7 @@
         //   spinner: 'el-icon-loading',
         //   background: 'rgba(0, 0, 0, 0.7)'
         // });
-        console.log(this.columDatas)
+        //console.log(this.columDatas)
 
         const $this = this
         $this.definedGroup.forEach(g=>{
@@ -182,8 +182,8 @@
           })
         })
 
-        console.log(this.definedColums)
-        console.log(Object.values(this.columDatas))
+        //console.log(this.definedColums)
+        //console.log(Object.values(this.columDatas))
 
 
         this.BaseRequest({
@@ -233,7 +233,7 @@
         }).then(response=>{
           valloading.close();
 
-          console.log(this.columDatas)
+          //console.log(this.columDatas)
 
           let failtMes = ""
           let validateFailed = false
@@ -374,8 +374,8 @@
         });
       },
       nextStep(){
-        console.log('next step is running....'+this.unitId)
-        console.log("data is "+JSON.stringify(this.columDatas))
+        //console.log('next step is running....'+this.unitId)
+        //console.log("data is "+JSON.stringify(this.columDatas))
         // this.saveUnitContext(true)
       },
       addGroup(){
@@ -399,8 +399,8 @@
         })
       },
       checkStepAndSave(saveLink){
-        console.log(saveLink.unit_id)
-        console.log("data is "+JSON.stringify(this.columDatas))
+        //console.log(saveLink.unit_id)
+        //console.log("data is "+JSON.stringify(this.columDatas))
         this.$emit("checkStepAndSave",saveLink.nextUnit)
       },
       setSaveFlag(saveFlag){

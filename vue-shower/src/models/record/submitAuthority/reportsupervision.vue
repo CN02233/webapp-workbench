@@ -27,7 +27,7 @@
           <el-table-column
             prop="report_origin"
             align="left"
-            :formatter="getOriginName"
+            :formatter="formattOriginName"
             label="报送机构">
           </el-table-column>
           <el-table-column
@@ -103,6 +103,7 @@
         definedDataObjs: {},
         tableDataUrl: 'reportApproval/listAllSupervision',
         currPageNum: 1,
+        origins: {},
         cityTree:{},
         seachOriginList: [],
         seachOriginName: '',
@@ -112,6 +113,18 @@
         isEditModal: false,
         dialogTitle: '',
         originOptions: [],
+        status_cn:{
+          '0' : '待填写',
+          '1':'审批中',
+          '2':'复核中',
+          '3':'锁定',
+          '4':'失效',
+          '5':'报表发布',
+          '6':'待上传签名',
+          '7':'未到填写日期',
+          '8':'过期',
+          '9':'填报完成'
+        },
         originId: ''
       }
     },
@@ -253,7 +266,36 @@
           }
           // console.log(response)
         })
+      },getOriginList () {
+        const loading = this.$loading({
+          lock: true,
+          text: '获取机构列表中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url: 'submitAU/listAllSubmitauthority',
+          method: 'get'
+        }).then(response => {
+          loading.close();
+          if (response != null && response.length > 0) {
+            const originTmp = new Object()
+
+            function getChildOrigin(originList){
+              originList.forEach(origin=>{
+                originTmp[origin.id] = origin.label
+                if(origin.children){
+                  getChildOrigin(origin.children)
+                }
+              })
+            }
+            getChildOrigin(response)
+
+            this.origins = originTmp
+          }
+        })
       },
+
       reportShow(reportId){
         this.$router.push({
           path: "/record/report/reportFill?reportId="+reportId+"&isView=Y"
@@ -263,12 +305,21 @@
         this.$router.push({
           path: "/record/report/reportFill?reportId="+reportId+"&isView=Y"
         });
+      },
+      formattOriginName(reportData){
+        return this.origins[reportData.report_origin]
+      },
+      getReportStatus(rowData){
+        return this.status_cn[rowData.report_status]
+      },
+      fomartterReportDataDate(rowData){
+        return rowData.report_data_start_str+'~'+rowData.report_data_end_str
       }
     },
     mounted: function () { // 初始化
       this.reportDataList = []
       this.getTableData(1)
-      // this.getOrigin()
+      this.getOrigin()
     }
   }
 </script>

@@ -26,7 +26,7 @@
           <el-table-column
             prop="report_origin"
             align="left"
-            :formatter="getOriginName"
+            :formatter="formattOriginName"
             label="报送机构">
           </el-table-column>
           <el-table-column
@@ -287,6 +287,9 @@
           })
         }
         return checkResult
+      },
+      fomartterReportDataDate(rowData){
+        return rowData.report_data_start_str+'~'+rowData.report_data_end_str
       }
     },
     mounted: function () { // 初始化
@@ -305,4 +308,8 @@
 
 <style rel="stylesheet/scss" lang="scss" scoped>
   @import "@/styles/table-page.scss";
+
+  .search-row{
+    margin:5px 0 0 0;
+  }
 </style>

@@ -47,7 +47,10 @@
     </WorkTablePager>
 
     <!--新增输入项弹窗-->
-    <el-dialog :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" width="80%" >
+    <el-dialog
+      :close-on-click-modal='false'
+      :close-on-press-escape="false"
+      :title="isEditModal?'编辑输入项':'新增输入项'" :visible.sync="addOrEditModelOpend" width="80%" >
       <el-form :rules="editModel.rules" :model="editModel"  ref="form">
       <el-row class="table-row">
           <el-col :span="24">
@@ -108,7 +111,10 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="公式设定" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenFormulaEditor" >
+    <el-dialog
+      :close-on-click-modal='false'
+      :close-on-press-escape="false"
+      title="公式设定" :show-close='false'	:visible.sync="isOpenFormulaEditor" >
 
       <el-form class="modal-form" label-position="right" label-width="100px" >
         <el-form-item label="选择输入项" >
@@ -140,7 +146,8 @@
           <el-button @click="formulaAdd('8')" size="mini">8</el-button>
           <el-button @click="formulaAdd('9')" size="mini">9</el-button>
           <el-button @click="formulaAdd('.')" size="mini">.</el-button>
-          <el-button @click="formulaBack" size="mini"><-(回退)</el-button>
+          <el-button @click="formulaBack" size="mini">回退</el-button>
+          <el-button @click="formulaBack" size="mini">清空</el-button>
         </el-form-item>
 
         <el-form-item label="公式内容" >
@@ -201,7 +208,8 @@
       </el-form>
     </el-dialog>
 
-    <el-dialog :title="dimIndex>-1?'编辑维度':'新增维度'" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenDimEditor" >
+    <el-dialog :title="dimIndex>-1?'编辑维度':'新增维度'"  :close-on-click-modal='false'
+               :close-on-press-escape="false" :show-close='false'	:visible.sync="isOpenDimEditor" >
       <el-form :rules="editModel.rules" :model="dimForm" ref="dform" class="modal-form" label-position="right" label-width="120px" >
         <el-form-item label="维度名称" :rules='editModel.rules.colum_name' prop="dim_name" >
           <el-input v-model="dimForm.dim_name">
@@ -218,7 +226,8 @@
       </el-row>
     </el-dialog>
 
-    <el-dialog :title="colForm.colum_name_cn!=null?'编辑项目':'新增项目'" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenColEditor" >
+    <el-dialog :title="colForm.colum_name_cn!=null?'编辑项目':'新增项目'"  :close-on-click-modal='false'
+               :close-on-press-escape="false" :show-close='false'	:visible.sync="isOpenColEditor" >
       <el-form :rules="editModel.rules" :model="colForm" ref="cform" class="modal-form" label-position="right" label-width="120px" >
         <el-form-item label="项目名称" :rules='editModel.rules.colum_name' prop="colum_name" >
           <el-input :disabled="isView=='Y'" v-model="colForm.colum_name"></el-input>
@@ -242,7 +251,8 @@
       </el-row>
     </el-dialog>
 
-    <el-dialog :title="(colIndex>-1&&datField!='')?'编辑输入框':'新增输入框'" :close-on-press-escape='false' :show-close='false'	:visible.sync="isOpenDatEditor" >
+    <el-dialog :title="(colIndex>-1&&datField!='')?'编辑输入框':'新增输入框'"  :close-on-click-modal='false'
+               :close-on-press-escape="false" :show-close='false'	:visible.sync="isOpenDatEditor" >
       <el-form ref="uform" :rules="editModel.rules" :model="datForm" class="modal-form" label-position="left" label-width="30%">
         <el-form-item label="输入项数据类型" :rules='editModel.rules.colum_type' prop="colum_type">
           <el-select :disabled="isView=='Y'" v-model="datForm.colum_type" style="width:100%;" placeholder="请选择数据类型">
@@ -471,7 +481,7 @@
           this.addOrEditModelOpend = true
           this.isEditModal = true
         }).catch(error=>{
-          console.log(error)
+          //console.log(error)
           loading.close()
           this.Message.error("加载数据失败"+error)
         })
@@ -499,7 +509,7 @@
             loading.close()
             this.getTableData(1)
           }).catch(error=>{
-            console.log(error)
+            //console.log(error)
             loading.close()
             this.Message.error("删除失败"+error)
           })
@@ -897,7 +907,7 @@
         this.formulaContext.push({"context":unitClickId+"_"+columtClickId,"columKey":unitLabel+'_'+columtClickId.toString().replace(/\./g,"_"),"isSymbol":false})
         this.datForm.colum_formula_desc +=finalContext
         this.datForm.colum_formula +=("#"+unitClickId+"."+columtClickId+"#")
-        console.log(this.formulaContext)
+        //console.log(this.formulaContext)
       },
       formulaAdd(addContext){
         this.formulaDescContext.push({"context":addContext,"isSymbol":true})
@@ -925,6 +935,13 @@
             this.datForm.colum_formula +=formulaContext
           }
         })
+      },
+      fomularClear(){
+        this.formulaContext = []
+        this.formulaDescContext = []
+        this.formulaDescContextTmp = ''
+        this.datForm.colum_formula_desc =""
+        this.datForm.colum_formula = ""
       },
       fomularConfirm(){
         this.colum_formula_array = this.formulaContext

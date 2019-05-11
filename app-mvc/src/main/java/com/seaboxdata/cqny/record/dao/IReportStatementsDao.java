@@ -97,7 +97,7 @@ public interface IReportStatementsDao {
             "<foreach item=\"item\" index=\"index\" collection=\"originIds\" separator=\",\">" +
             "(#{definedId},#{item})" +
             "</foreach></script>")
-    void saveDefinedAndOriginAssign(@Param("originIds")String[] originIds,@Param("definedId") String definedId);
+    void saveDefinedAndOriginAssign(@Param("originIds")List originIds,@Param("definedId") String definedId);
 
     @Select("SELECT\n" +
             "\ta.origin_id\n" +

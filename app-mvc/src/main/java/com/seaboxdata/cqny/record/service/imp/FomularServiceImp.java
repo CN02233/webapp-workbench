@@ -99,8 +99,8 @@ public class FomularServiceImp implements FomularService {
                         fomular = fomular.replace("#","FL");
                         Expression expression= AviatorEvaluator.compile(fomular);
                         Set<String> groups = fomularGroups.keySet();
-                        logger.debug("刷新公式：{}",fomular);
-                        logger.debug("公式参数：{}",fomularGroups);
+                        logger.info("刷新公式：{}",fomular);
+                        logger.info("公式参数：{}",fomularGroups);
 
                         for (String group : groups) {
                             Map<String, Object> fomularContext = fomularGroups.get(group);
@@ -108,7 +108,7 @@ public class FomularServiceImp implements FomularService {
                             fomularGroupResult.put(group,result);
                         }
                         fomularColumRempved.add(fomularColum);
-                        logger.debug("刷新组信息:{}",fomularGroups);
+                        logger.info("刷新组信息:{}",fomularGroups);
                         for (String fomularGroup : fomularGroupResult.keySet()) {
                             Object fomularGroupDATA = fomularGroupResult.get(fomularGroup);
                             UnitDefinedType unitTypeInt = unitTypeTmp.get(fomularColum.getUnit_id());
@@ -388,6 +388,11 @@ public class FomularServiceImp implements FomularService {
         Map<String,Map<String,Object>> fomularGroupTmp = new HashMap<>();
 
         for (String fomularColum : fomularColums) {//获取公式中各个运算参数的具体值
+
+            if("255.2372".equals(fomularColum)||"255.2374".equals(fomularColum))
+            {
+                logger.debug("{}","YYY");
+            }
 
             String fomularColumTmp = fomularColum.replace(".", "_");
 

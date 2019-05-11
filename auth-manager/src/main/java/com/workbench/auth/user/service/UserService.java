@@ -33,4 +33,5 @@ public interface UserService {
     void resetPwd(Integer userId);
 
 
+    void changePwd(int userId, String userPwd);
 }

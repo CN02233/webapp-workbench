@@ -3,6 +3,7 @@ package com.seaboxdata.cqny.record.controller;
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.config.ReportDefinedStatus;
 import com.seaboxdata.cqny.record.entity.SubmitReportRequestEntity;
+import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.seaboxdata.cqny.record.service.SubmitReportService;
 import com.seaboxdata.cqny.record.entity.ReportDefinedEntity;
 import com.seaboxdata.cqny.record.service.ReportStatementsService;
@@ -22,8 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * 报送报表的新增 修改 删除 查询
@@ -40,6 +40,9 @@ public class ReportStatementsController {
     @Autowired
     private SubmitReportService reportDefinedSubmitService;
 
+    @Autowired
+    private ReportCustomerService reportCustomerService;
+
     public ReportStatementsController() {
     }
 
@@ -55,6 +58,19 @@ public class ReportStatementsController {
     @CrossOrigin(allowCredentials="true")
     public String listReportStatements(int currPage, int pageSize){
         PageResult originList = reportStatementsService.listReportStatements(currPage, pageSize);
+        List<ReportDefinedEntity> reportDefinedList = originList.getDataList();
+        if(reportDefinedList!=null){
+            for (ReportDefinedEntity reportDefinedEntity : reportDefinedList) {
+                Integer reportDefinedId = reportDefinedEntity.getDefined_id();
+                Map<String, Object> reportBaseInfo = reportCustomerService.getReportBaseInfo(null, reportDefinedId.toString());
+                if(reportBaseInfo!=null){
+                    reportDefinedEntity.setReportDataEnd(String.valueOf(reportBaseInfo.get("reportDataEnd")!=null?reportBaseInfo.get("reportDataEnd"):""));
+                    reportDefinedEntity.setReportDataStart(String.valueOf(reportBaseInfo.get("reportDataStart")!=null?reportBaseInfo.get("reportDataStart"):""));
+                    reportDefinedEntity.setReportStartDate(String.valueOf(reportBaseInfo.get("reportStartDate")!=null?reportBaseInfo.get("reportStartDate"):""));
+                    reportDefinedEntity.setReportEndDate(String.valueOf(reportBaseInfo.get("reportEndDate")!=null?reportBaseInfo.get("reportEndDate"):""));
+                }
+            }
+        }
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, originList);
         return jsonpResponse;
     }
@@ -83,7 +99,10 @@ public class ReportStatementsController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     @Transactional
-    public JsonResult saveDefinedAndOriginAssign(String[] originIds,String definedId){
+    public JsonResult saveDefinedAndOriginAssign(@RequestBody Map<String,Object> definedOrigins){
+        List<String> originIds = (ArrayList<String>) definedOrigins.get("originIds");
+        Double definedIdD = (Double) definedOrigins.get("definedId");
+        String definedId = definedIdD.toString();
         delDefinedAndOriginAssign(definedId);
         reportStatementsService.saveDefinedAndOriginAssign(originIds,definedId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,null);
@@ -122,6 +141,15 @@ public class ReportStatementsController {
     public JsonResult getDefinedOriginsById(String definedId){
         List<Origin> result=reportStatementsService.getDefinedOriginsById(definedId);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,result);
+        return jsonResult;
+    }
+
+    @RequestMapping("getDefinedOriginTreeById")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getDefinedOriginTreeById(String definedId){
+        Origin resultList =reportStatementsService.getDefinedOriginTreeById(definedId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "保存成功", null,resultList);
         return jsonResult;
     }
 

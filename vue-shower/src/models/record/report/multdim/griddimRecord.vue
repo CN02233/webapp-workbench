@@ -372,14 +372,14 @@
         });
       },
       nextStep(){
-        console.log('next step is running....'+this.unitId)
-        console.log("data is "+JSON.stringify(this.columDatas))
+        //console.log('next step is running....'+this.unitId)
+        //console.log("data is "+JSON.stringify(this.columDatas))
 
         // this.saveUnitContext(true)
       },
       checkStepAndSave(saveLink){
-        console.log(saveLink.unit_id)
-        console.log("data is "+JSON.stringify(this.columDatas))
+        //console.log(saveLink.unit_id)
+        //console.log("data is "+JSON.stringify(this.columDatas))
         this.$emit("checkStepAndSave",saveLink.nextUnit)
       },
       getValidContext(){

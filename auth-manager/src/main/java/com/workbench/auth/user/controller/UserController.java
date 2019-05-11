@@ -6,18 +6,17 @@ import com.webapp.support.session.SessionSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
 import com.workbench.auth.menu.entity.Menu;
+import com.workbench.auth.user.entity.UserStatus;
 import com.workbench.auth.user.service.UserService;
 import com.workbench.auth.user.entity.User;
 import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by pc on 2017/6/30.
@@ -148,5 +147,24 @@ public class UserController {
         logger.debug("jsonResult information after delete :{}",jsonResult.toString());
 
         return jsonResult.toString();
+    }
+
+    @RequestMapping(value = "changePwd")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult changePwd(@RequestBody User user){
+        String userName = user.getUser_name();
+        User userDb = userService.getUserByUserNm(userName);
+        String userPwd = user.getUser_pwd();
+
+        userService.changePwd(userDb.getUser_id(),userPwd);
+
+        User userFromSession = SessionSupport.checkoutUserFromSession();
+        userFromSession.setUser_status(String.valueOf(UserStatus.NORMAL.getStatus()));
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "修改成功",
+                null, JsonResult.RESULT.SUCCESS.toString());
+
+        return jsonResult;
     }
 }

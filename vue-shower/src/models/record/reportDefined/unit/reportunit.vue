@@ -2,7 +2,7 @@
   <WorkMain :headerItems="['报送管理','报送单元']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left table-button-group" :span="17">
-        <el-button @click="openAddModal" type="primary">新增</el-button>
+        <el-button v-if="isView!='Y'" @click="openAddModal" type="primary">新增</el-button>
         <el-button @click="$router.go(-1)" type="warning">返回</el-button>
       </el-col>
     </el-row>
@@ -285,7 +285,7 @@ export default {
         this.closeModal()
         this.getTableData()
       }).catch(error => {
-        console.log(error)
+        //console.log(error)
         loading.close()
         this.Message.error('保存失败' + error)
       })
@@ -300,7 +300,7 @@ export default {
       this.formSubmitData.unit_name = row.unit_name
       // this.formSubmitData.origin_id = row.origin_id
       this.formSubmitData.status = row.status
-      console.log(row)
+      //console.log(row)
       this.formSubmitData.unit_type = row.unit_type
     },
     clearData () { // 每次添加之前清空数据、

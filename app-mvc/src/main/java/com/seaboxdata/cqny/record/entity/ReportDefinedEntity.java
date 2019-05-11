@@ -27,6 +27,11 @@ public class ReportDefinedEntity {
     @JsonFormat( pattern = "yyyy-MM-dd",timezone = "GMT+8")
     private Date report_end_date;
 
+    private String reportStartDate;
+    private String reportEndDate;
+    private String reportDataStart;
+    private String reportDataEnd;
+
     //add by SongChaoqun
     private List<UnitDefined> units;
 
@@ -116,5 +121,37 @@ public class ReportDefinedEntity {
 
     public void setReport_end_date(Date report_end_date) {
         this.report_end_date = report_end_date;
+    }
+
+    public String getReportStartDate() {
+        return reportStartDate;
+    }
+
+    public void setReportStartDate(String reportStartDate) {
+        this.reportStartDate = reportStartDate;
+    }
+
+    public String getReportEndDate() {
+        return reportEndDate;
+    }
+
+    public void setReportEndDate(String reportEndDate) {
+        this.reportEndDate = reportEndDate;
+    }
+
+    public String getReportDataStart() {
+        return reportDataStart;
+    }
+
+    public void setReportDataStart(String reportDataStart) {
+        this.reportDataStart = reportDataStart;
+    }
+
+    public String getReportDataEnd() {
+        return reportDataEnd;
+    }
+
+    public void setReportDataEnd(String reportDataEnd) {
+        this.reportDataEnd = reportDataEnd;
     }
 }
