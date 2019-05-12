@@ -79,8 +79,10 @@ public class FomularServiceImp implements FomularService {
             logger.debug("剩余公式组数据：{}",allFomularColums);
             HashSet<Object> fomularColumRempved = new HashSet<>();
             Set<ColumDefined> fomularColums = allFomularColums.keySet();
+            String fomularCache = null;
             for (ColumDefined fomularColum : fomularColums) {
                 String fomular = fomularColum.getColum_formula();
+                fomularCache = fomular;
                 if(fomular.indexOf("SUM")<0){
                     List<String> fomularParams = fomularParamNames(fomular);
                     boolean refreshAfter = false;
@@ -102,10 +104,26 @@ public class FomularServiceImp implements FomularService {
                         logger.info("刷新公式：{}",fomular);
                         logger.info("公式参数：{}",fomularGroups);
 
+                        Map<String, Object> fomularContext = new HashMap<>();
+                        boolean mergeGroup = false;
                         for (String group : groups) {
-                            Map<String, Object> fomularContext = fomularGroups.get(group);
+                            Map<String, Object> fomularContextTmp = fomularGroups.get(group);
+                            if(fomularContextTmp.size()<2){
+                                if(!Strings.isNullOrEmpty(fomularCache)&&fomularCache.indexOf("SUM")>0){
+                                    Object result = expression.execute(fomularContextTmp);
+                                    fomularGroupResult.put(group,result);
+                                }else{
+                                    fomularContext.putAll(fomularContextTmp);
+                                    mergeGroup = true;
+                                }
+                            }else{
+                                Object result = expression.execute(fomularContextTmp);
+                                fomularGroupResult.put(group,result);
+                            }
+                        }
+                        if(mergeGroup){
                             Object result = expression.execute(fomularContext);
-                            fomularGroupResult.put(group,result);
+                            fomularGroupResult.put("",result);
                         }
                         fomularColumRempved.add(fomularColum);
                         logger.info("刷新组信息:{}",fomularGroups);

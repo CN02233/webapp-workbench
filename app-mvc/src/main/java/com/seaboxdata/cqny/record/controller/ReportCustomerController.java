@@ -341,8 +341,8 @@ public class ReportCustomerController {
         ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
 
         String passApprove = reportCustomer.getPass_approve();
+        String passReview = reportCustomer.getPass_review();
         if("Y".equals(passApprove)){
-            String passReview = reportCustomer.getPass_approve();
             if("Y".equals(passReview)){
                 reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REPORT_DONE);
             }else{
