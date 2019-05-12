@@ -659,7 +659,7 @@ export default {
       }
 
       this.submitParams.review_check_origins = []
-      let review_check_origins = this.$refs.approveCheckOrigins.getCheckedNodes()
+      let review_check_origins = this.$refs.reviewCheckOrigins.getCheckedNodes()
       for (let i = 0; i < review_check_origins.length; i++) {
         this.submitParams.review_check_origins.push(review_check_origins[i].origin_id)
       }

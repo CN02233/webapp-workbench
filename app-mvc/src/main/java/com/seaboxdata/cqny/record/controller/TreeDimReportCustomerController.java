@@ -39,7 +39,7 @@ public class TreeDimReportCustomerController {
 
         treeDimReportCustomerService.saveTreeData(treeUnitContexts);
 
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }

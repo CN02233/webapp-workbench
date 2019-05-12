@@ -83,6 +83,7 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     @Override
     public void reportApprovalOperator(String reportId, String reportStatus) {
+        
         if(reportStatus.equals("pass")){
             reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.REVIEW.getValue());
         }

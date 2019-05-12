@@ -301,7 +301,11 @@
         }).then(response=>{
           // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
-          this.$emit("saveReportsCallBack",this.unitId,processName)
+          if(response){
+            this.$emit("saveReportsCallBack",this.unitId,processName)
+          }else{
+            this.$emit("saveReportsCallBack",this.unitId,processName,"保存失败")
+          }
         }).catch(error => {
           this.getUnitContext(false)
           this.$emit("saveReportsCallBack",this.unitId,processName,error)
@@ -325,6 +329,13 @@
           method:'post',
           data:saveColums
         }).then(response=>{
+
+          if(response){
+          }else{
+            this.$emit("validateReportsCallBack",this.unitId,processName,"校验出现异常")
+          }
+
+
           let validateFailed = false
           if(response!=null){
             const validateFailedKeys = Object.keys(response)

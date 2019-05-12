@@ -389,8 +389,18 @@ public class ReportApprovalController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult ReportApprovalOperator( String reportId,String reportStatus){
-        reportApprovalService.reportApprovalOperator(reportId,reportStatus);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+        ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
+
+        if("pass".equals(reportStatus)){
+            String passReview = reportCust.getPass_review();
+            if("Y".equals(passReview)){
+                reportCustomerService.updateReportCustomerStatus(reportId,ReportStatus.REPORT_DONE);
+            }
+        }else{
+            reportApprovalService.reportApprovalOperator(reportId,reportStatus);
+        }
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "审核成功", null,null);
         return jsonResult;
     }
 
@@ -407,8 +417,17 @@ public class ReportApprovalController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult reportReviewOperator( String reportId,String reportStatus){
-        reportApprovalService.reportReviewOperator(reportId,reportStatus);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+        ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
+        if("reject".equals(reportStatus)) {
+            String passApprove = reportCust.getPass_approve();
+            if("Y".equals(passApprove)){
+                reportCustomerService.updateReportCustomerStatus(reportId,ReportStatus.NORMAL);
+            }
+        }else{
+            reportApprovalService.reportReviewOperator(reportId,reportStatus);
+        }
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "复核成功", null,null);
         return jsonResult;
     }
 }

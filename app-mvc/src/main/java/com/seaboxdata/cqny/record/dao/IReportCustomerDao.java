@@ -181,4 +181,7 @@ public interface IReportCustomerDao {
             "report_customer rc " +
             " inner join sys_origin so on  rc.report_defined_id =#{reportDefinedId} and rc.report_origin=so.origin_id")
     List<ReportCustomer> getReportBaseInfoByDefinedId(String reportDefinedId);
+
+    @Select("select * from report_customer where report_id = #{reportID}")
+    ReportCustomer getReportCustomerByReportID(String reportID);
 }

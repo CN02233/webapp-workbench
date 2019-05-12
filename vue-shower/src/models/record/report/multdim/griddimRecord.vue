@@ -198,7 +198,11 @@
         }).then(response=>{
           // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
-          this.$emit("saveReportsCallBack",this.unitId,processName)
+          if(response){
+            this.$emit("saveReportsCallBack",this.unitId,processName)
+          }else{
+            this.$emit("saveReportsCallBack",this.unitId,processName,"保存失败")
+          }
         }).catch(error => {
           this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
@@ -222,6 +226,13 @@
           }
         }).then(response=>{
           valloading.close();
+
+          if(response){
+          }else{
+            this.$emit("validateReportsCallBack",this.unitId,processName,"校验出现异常")
+          }
+
+
           let validateFailed = false
           let failtMes = ""
           if(response!=null){

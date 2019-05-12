@@ -169,20 +169,29 @@
             reportId:this.reportId,
           }
         }).then(response=>{
-          this.doSomethinLoading.close();
-          this.$notify({
-            title: '公式刷新完毕',
-            type: 'success',
-            message: "动态计算项已按照您的填写更新"
-          });
-          if(needSubmit){
-            this.reportCommitAuth()
-          }else{//非提交，只校验 需要刷新页面公式的值
-            this.unitEntities.forEach(unitEntity=>{
-              const unitId = unitEntity.unit_id
-              const reportContextRef = this.$refs['reportContextRef'+unitId][0]
-              reportContextRef.getFolumarData()
-            })
+          if(response){
+            this.doSomethinLoading.close();
+            this.$notify({
+              title: '公式刷新完毕',
+              type: 'success',
+              message: "动态计算项已按照您的填写更新"
+            });
+            if(needSubmit){
+              this.reportCommitAuth()
+            }else{//非提交，只校验 需要刷新页面公式的值
+              this.unitEntities.forEach(unitEntity=>{
+                const unitId = unitEntity.unit_id
+                const reportContextRef = this.$refs['reportContextRef'+unitId][0]
+                reportContextRef.getFolumarData()
+              })
+            }
+          }else{
+            this.doSomethinLoading.close();
+            this.$notify({
+              title: '公式刷新失败',
+              type: 'error',
+              message: "刷新公式异常"
+            });
           }
         }).catch(error=>{
           this.doSomethinLoading.close();

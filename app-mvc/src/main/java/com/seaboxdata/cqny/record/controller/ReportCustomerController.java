@@ -246,8 +246,9 @@ public class ReportCustomerController {
                 saveSimpleUnitContext.getDefinedColums(),
                 saveSimpleUnitContext.getColumDatas(),
                 true);
+
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }
@@ -256,7 +257,6 @@ public class ReportCustomerController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult validateSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
-
         Map<String, String> validateResult = reportCustomerService.validateSimpleUnitByColum(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "校验完成", null,validateResult);
@@ -306,7 +306,7 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult saveGroupUnitContext(@RequestBody SaveSimpleUnitContext saveUnitContext){
         reportCustomerService.updateOrInsertGroupUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,JsonResult.RESULT.SUCCESS);
         return jsonResult;
     }
 
@@ -316,7 +316,8 @@ public class ReportCustomerController {
     public JsonResult saveGridUnitContext(@RequestBody SaveGridUnitContext saveUnitContext){
 
         reportCustomerService.updateOrInsertGridUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,
+                JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }
@@ -326,7 +327,8 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult refreshFomular(String reportDefinedId,String reportId){
         reportCustomerService.refreshFomular(reportDefinedId,reportId);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "刷新成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "刷新成功", null,
+                JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }
