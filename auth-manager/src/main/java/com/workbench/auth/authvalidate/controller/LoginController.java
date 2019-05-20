@@ -55,6 +55,14 @@ public class LoginController extends AbstractLoginController{
                     this.addUserToSession(user_name);
                     return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登陆成功,密码过期需要修改",
                             null, LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
+                }else if(LoginResult.LOGIN_RESULT.NEVER_LOGIN.equals(loginResult.getResult_code())){
+                    this.addUserToSession(user_name);
+                    return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登陆成功,用户首次登陆",
+                            null, LoginResult.LOGIN_RESULT.NEVER_LOGIN.toString());
+                }else if(LoginResult.LOGIN_RESULT.USER_STATS_NOT_NORMAL.equals(loginResult.getResult_code())){
+                    this.addUserToSession(user_name);
+                    return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "登陆成功,用户为非正常状态",
+                            null, LoginResult.LOGIN_RESULT.USER_STATS_NOT_NORMAL.toString());
                 }
 
                 return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD, loginResult.getValidate_result(),

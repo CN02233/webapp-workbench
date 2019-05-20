@@ -1,6 +1,5 @@
 package com.seaboxdata.cqny.origin.controller;
 
-import com.github.pagehelper.Page;
 import com.google.common.base.Strings;
 import com.seaboxdata.cqny.origin.entity.CqnyUser;
 import com.seaboxdata.cqny.origin.service.CqnyUserService;
@@ -9,12 +8,14 @@ import com.seaboxdata.cqny.record.service.OriginService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
+import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
+import com.workbench.auth.user.entity.UserStatus;
 import com.workbench.auth.user.service.UserService;
-import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -116,6 +117,84 @@ public class CqnyUserController {
         }
 
         JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
+        return response;
+    }
+
+    @RequestMapping("selectOriginType")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult selectOriginType(@RequestBody Map<String,Object> selectOriginMap){
+//        String userId, String user_name, String origin_type
+        String userId = selectOriginMap.containsKey("userId")?(String)selectOriginMap.get("userId"):null;
+        String user_name = selectOriginMap.containsKey("user_name")?(String)selectOriginMap.get("user_name"):null;
+        String origin_type = selectOriginMap.containsKey("origin_type")?(String)selectOriginMap.get("origin_type"):null;
+        if(Strings.isNullOrEmpty(userId)){
+            if(!Strings.isNullOrEmpty(user_name)){
+                User user = SessionSupport.checkoutUserFromSession();
+                if(user.getUser_name().equals(user_name)){
+                    userId = String.valueOf(user.getUser_id());
+                }else{
+                    user = userService.getUserByUserNm(user_name);
+                    if(user!=null){
+                        userId = String.valueOf(user.getUser_id());
+                    }else{
+                        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "用户未找到", "用户未找到",
+                                "USER_NOT_NULL");
+                        return response;
+                    }
+                }
+            }else{
+                JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "用户为空", "用户为空",
+                        "USER_NULL");
+                return response;
+            }
+        }
+
+        if(Strings.isNullOrEmpty(origin_type)){
+            JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "请选择企业类型", "请选择企业类型",
+                    "ORIGIN_TYPE_NULL");
+            return response;
+        }
+
+        cqnyUserService.selectOriginType(userId,origin_type);
+
+        User user = SessionSupport.checkoutUserFromSession();
+        user.setUser_status(String.valueOf(UserStatus.NORMAL.getStatus()));
+
+        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "修改成功",
+                null, JsonResult.RESULT.SUCCESS);
+        return response;
+    }
+
+    @RequestMapping("changeSelfOriginType")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult changeSelfOriginType(String origin_type){
+        User currUser = SessionSupport.checkoutUserFromSession();
+        Map<String,Object> selectOriginMap = new HashMap<>();
+        selectOriginMap.put("userId",String.valueOf(currUser.getUser_id()));
+        selectOriginMap.put("origin_type",origin_type);
+        return this.selectOriginType(selectOriginMap);
+    }
+
+    @RequestMapping("getCurrUserOrigin")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult getCurrUserOrigin(){
+        User user = SessionSupport.checkoutUserFromSession();
+        Origin origin = originService.getOriginByUser(user.getUser_id());
+        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功",
+                null, origin);
+        return response;
+    }
+
+    @RequestMapping("getUserInfo")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult getUserInfo(String user_name){
+        User userInfo = userService.getUserByUserNm(user_name);
+        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功",
+                null, userInfo);
         return response;
     }
 }

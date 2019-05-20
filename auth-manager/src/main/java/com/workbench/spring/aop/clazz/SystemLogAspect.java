@@ -63,6 +63,7 @@ public class SystemLogAspect {
             return joinPoint.proceed();
         }catch(Exception e){
             e.printStackTrace();
+            logger.error(e.getMessage());
             Signature signature =  joinPoint.getSignature();
             Class returnType = ((MethodSignature) signature).getReturnType();
 

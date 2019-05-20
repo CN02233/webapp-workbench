@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.service;
 
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.webapp.support.page.PageResult;
+import com.workbench.auth.user.entity.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,4 +30,10 @@ public interface OriginService {
     List<Origin> getOriginByName(String searchOriginName);
 
     Origin getOriginTree(List<Integer> childrenOrigins, List<Origin> allOrigins);
+
+    List<User> getUsersByOrigin(Integer originId);
+
+    void updateOrigin(Origin origin);
+
+
 }

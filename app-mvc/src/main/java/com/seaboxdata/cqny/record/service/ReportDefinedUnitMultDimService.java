@@ -45,4 +45,6 @@ public interface ReportDefinedUnitMultDimService {
 
     List<CopyReportDefinedTmp> copyDims(Map<Integer, UnitDefined> fromAndToUnits);
 
+    List<GridColumDefined> getColumByUnitOutUninon(String unitId);
+
 }

@@ -11,6 +11,7 @@ public class Submitauthority {
     private String origin_name;
     private Integer parent_origin_id;
     private String origin_status;
+    private String origin_type;
     private Date create_date;
     private String create_user;
 
@@ -61,5 +62,13 @@ public class Submitauthority {
 
     public void setCreate_user(String create_user) {
         this.create_user = create_user;
+    }
+
+    public String getOrigin_type() {
+        return origin_type;
+    }
+
+    public void setOrigin_type(String origin_type) {
+        this.origin_type = origin_type;
     }
 }

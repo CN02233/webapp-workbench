@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 @Service("reportCustomerService")
@@ -71,12 +72,25 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 //        return null;
     }
 
+
     /**
      * 获取报送报表信息：报表定义信息、报表填写信息
      */
     public ReportUnitCustomerContext getUnitContext(String reportId, String unitId, String unitType){
         List definedColums = reportDefinedUnitService.getDefinedColums(unitId, unitType);
         List<ReportCustomerData> columDatas = reportCustomerDao.getColumDatas(reportId,unitId);
+
+        if(columDatas!=null&&columDatas.size()>0){
+            for (ReportCustomerData columData : columDatas) {
+                if(!Strings.isNullOrEmpty(columData.getReport_data())){
+                    if(columData.getReport_data().replace(".","_").indexOf("_")>0){
+                        BigDecimal bigData = new BigDecimal(columData.getReport_data());
+                        bigData = bigData.setScale(2, RoundingMode.HALF_UP);
+                        columData.setReport_data(bigData.toString());
+                    }
+                }
+            }
+        }
 
         ReportUnitCustomerContext reportUnitCustomerContext = new ReportUnitCustomerContext();
         reportUnitCustomerContext.setDefinedColums(definedColums);
@@ -132,6 +146,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                     fomularTmpEntity.setColumId(columnId);
                     fomularTmpEntity.setDimensionsId(dimensionsId);
                     fomularTmpEntity.setReportGroupId(columData.getReport_group_id());
+                    fomularTmpEntity.setOld_report_data(columData.getReport_data());
 
                     String fomularScriptVal = fomularsTmp.get(unitId + "_" + dimensionsId) != null ?
                             fomularsTmp.get(unitId + "_" + dimensionsId).getColum_formula() :
@@ -218,6 +233,9 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
 
         for (ReportCustomerData columData : custDataArray) {
             if(isUpdate){
+                logger.info("{}",columData);
+                List<ReportCustomerData> reportCustData =
+                        reportCustomerDao.getColumDatas(columData.getReport_id().toString(), columData.getUnit_id().toString());
                 reportCustomerDao.updateUnitContext(columData);
             }else{
                 reportCustomerDao.insertUnitContext(columData);
@@ -497,6 +515,7 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
         Map<String,Object> baseInfoMap = new HashMap<>();
         List<String> passApproveOriginNames = new ArrayList<>();
         List<String> passReviewOriginNames = new ArrayList<>();
+        List<Map<String,String>> allSubOrigins = new ArrayList<>();
         int count=0;
         for (ReportCustomer reportCustomer : allReportCustomer) {
             String reportStartDate = reportCustomer.getReport_start_date_str();
@@ -510,6 +529,10 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 baseInfoMap.put("reportDataEnd",reportDataEnd);
             }
             count++;
+            Map<String,String> originInfo = new HashMap<>();
+            originInfo.put("originId",reportCustomer.getReport_origin().toString());
+            originInfo.put("originName",reportCustomer.getReport_origin_name());
+            allSubOrigins.add(originInfo);
             if("Y".equals(reportCustomer.getPass_approve())){
                 passApproveOriginNames.add(reportCustomer.getReport_origin_name());
             }
@@ -517,9 +540,34 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
                 passReviewOriginNames.add(reportCustomer.getReport_origin_name());
             }
         }
+        baseInfoMap.put("allSubOrigins",allSubOrigins);
         baseInfoMap.put("passApproveOriginNames",passApproveOriginNames);
         baseInfoMap.put("passReviewOriginNames",passReviewOriginNames);
         return baseInfoMap;
+    }
+
+    @Override
+    public Map<String, Object> getGridContext(String reportId, String unitId) {
+        ReportCustomer reportCust = reportCustomerDao.getReportCustomerByReportID(reportId);
+        Integer reportDefinedId = reportCust.getReport_defined_id();
+        List<GridColumDefined> columDefineds = reportCustomerDao.getGridColumDefiend(unitId);
+        List<GridColumDefined> dimDefineds = reportCustomerDao.getGridDimDefiend(unitId);
+        List<GridColumDefined> multDefiends = reportCustomerDao.getGridMultDefiend(unitId);
+
+        List<ReportCustomerData> reportCustDatas = reportCustomerDao.getColumDatas(reportId, unitId);
+
+        Map<String,Object> gridContext = new HashMap<>();
+        gridContext.put("columDefineds",columDefineds);
+        gridContext.put("dimDefineds",dimDefineds);
+        gridContext.put("multDefiends",multDefiends);
+        gridContext.put("reportCustDatas",reportCustDatas);
+
+        return gridContext;
+    }
+
+    @Override
+    public List<ReportCustomer> allReportForOrigin(String originId) {
+        return reportCustomerDao.getAllReportInfoByOrigin(new Integer(originId));
     }
 
     @Override

@@ -11,4 +11,5 @@ public interface CqnyUserService {
 
     public PageResult pageCqnyUser(Integer currPage, Integer pageSize,String user_name,String user_type, List<Integer> originList);
 
+    void selectOriginType(String userId, String originType);
 }

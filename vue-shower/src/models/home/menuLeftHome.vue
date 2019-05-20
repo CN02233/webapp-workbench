@@ -34,6 +34,11 @@
                 <div class="fullscreen-icon-quit"></div>
               </el-tooltip>
             </div>
+            <div @click="showModalPage=true" class="icon-mount">
+              <el-tooltip class="item" effect="dark" content="修改密码" placement="bottom-end">
+                <div class="changepwd-icon"></div>
+              </el-tooltip>
+            </div>
 
             <div class="icon-mount">
               <div class="login-user">当前登陆用户:{{loginUserInfo.user_name_cn}}</div>
@@ -49,7 +54,7 @@
         <div class="container-root-menu">
           <el-menu :collapse="isCollapse" class="menu-style">
             <el-menu-item v-on:click.native="collapseMenu">
-              <div class="sprit-menu" v-bind:class="{'coll-menu':!isCollapse,'open-menu':isCollapse}"></div><span class="title-style">收起菜单</span>
+              <div class="sprit-menu" v-bind:class="{'coll-menu':!isCollapse,'open-menu':isCollapse}"></div><span><div class="title-style-hide">收起菜单</div></span>
             </el-menu-item>
             <WorkLeftMenu v-for="(menuObj,menuIndex) in menuList"
                           :key="menuObj.id"
@@ -66,6 +71,30 @@
 
 
       </div>
+
+
+      <el-dialog title="修改密码" :visible.sync="showModalPage" >
+        <el-form  style="margin:0 100px 0 100px" class="modal-form" :label-position="left" label-width="100px" :model="formData">
+          <!--<h3 class="title">欢迎！</h3>-->
+          <el-form-item :size="small" label="原密码" >
+            <el-input  name="old_user_pwd" type="text" v-model="changePwdForm.old_user_pwd" show-password  placeholder="请输入原密码"/>
+          </el-form-item>
+          <el-form-item :size="small" label="新密码" >
+            <el-input placeholder="请输入密码" v-model="changePwdForm.user_pwd" show-password></el-input>
+            <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
+          </el-form-item>
+          <el-form-item :size="small" label="确认密码" >
+            <el-input placeholder="请确认密码" v-model="changePwdForm.validate_user_pwd" show-password></el-input>
+            <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
+          </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="showModalPage=false">取 消</el-button>
+          <el-button type="primary" @click="changePwd()">确 定</el-button>
+        </div>
+      </el-dialog>
+
+
     </div>
 </template>
 
@@ -90,7 +119,13 @@
     data() {
       return {
         isCollapse:false,
-        fullScreen:false
+        fullScreen:false,
+        showModalPage:false,
+        changePwdForm: {
+          old_user_pwd: '',
+          user_pwd: '',
+          validate_user_pwd: ''
+        }
       }
     },
     components: {
@@ -133,6 +168,37 @@
       },
       gotoWelcome(){
         this.$router.push({'path':'/'})
+      },
+      changePwd(){
+        if(this.changePwdForm.old_user_pwd&&this.changePwdForm.old_user_pwd&&this.changePwdForm.old_user_pwd){
+
+        }else{
+          this.Message.error("请输入密码信息")
+          return
+        }
+
+        if(this.changePwdForm.user_pwd!=this.changePwdForm.validate_user_pwd){
+          this.Message.error("两次输入密码不一致")
+          this.changePwdForm.user_pwd = ""
+          this.changePwdForm.validate_user_pwd = ""
+        }else{
+          this.BaseRequest({
+            url:"sys/user/currUserPwdChange",
+            method:"post",
+            data:this.changePwdForm
+          })
+            .then(response=>{
+              if('SUCCESS'==response){
+                this.Message.success("密码修改成功")
+                this.showModalPage = false
+              }else{
+                this.Message.error(response)
+              }
+            })
+            .catch(errorMsg=>{
+              //console.log("response ......")
+            });
+        }
       },
       changeScreen(){
         let isFullScreen = document.fullscreenElement || document.mozFullScreenElement||document.webkitFullscreenElement
@@ -393,5 +459,9 @@
     margin:0 !important;
   }
 
+  .title-style-hide{
+    color: #b1b4c3 !important;
+    padding-top:2px;
+  }
 
 </style>

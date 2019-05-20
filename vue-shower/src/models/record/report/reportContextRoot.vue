@@ -136,7 +136,7 @@
 <style lang="css">
   .el-step__main>div{
     font-size:13px !important;
-    font-weight: normal !important;
+    font-weight: normal;
   }
 </style>
 

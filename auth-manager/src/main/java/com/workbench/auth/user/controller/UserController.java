@@ -1,6 +1,7 @@
 package com.workbench.auth.user.controller;
 
 import com.github.pagehelper.Page;
+import com.google.common.base.Strings;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.session.SessionSupport;
 import com.webapp.support.jsonp.JsonResult;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pc on 2017/6/30.
@@ -166,5 +168,30 @@ public class UserController {
                 null, JsonResult.RESULT.SUCCESS.toString());
 
         return jsonResult;
+    }
+
+
+
+    @RequestMapping("currUserPwdChange")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult currUserPwdChange(@RequestBody Map<String,Object> changePwdInfo){
+        User user = SessionSupport.checkoutUserFromSession();
+        String oldPwd = (String) changePwdInfo.get("old_user_pwd");
+        String newPwd = (String) changePwdInfo.get("user_pwd");
+        if(Strings.isNullOrEmpty(oldPwd)){
+            JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "旧密码为空", "旧密码输入错误", "旧密码为空");
+            return response;
+        }else{
+            User userDb = userService.checkUser(user.getUser_name(), oldPwd);
+            if(userDb==null){
+                JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "旧密码输入错误", "旧密码输入错误", "旧密码输入错误");
+                return response;
+            }
+        }
+        userService.changePwd(user.getUser_id(),newPwd);
+
+        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, JsonResult.RESULT.SUCCESS);
+        return response;
     }
 }

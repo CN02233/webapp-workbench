@@ -41,6 +41,8 @@ public class ReportCustomer {
     private String origin_city;
     private String origin_province;
 
+    private String report_type;
+
 
     public Integer getReport_id() {
         return report_id;
@@ -245,5 +247,13 @@ public class ReportCustomer {
 
     public void setOrigin_province(String origin_province) {
         this.origin_province = origin_province;
+    }
+
+    public String getReport_type() {
+        return report_type;
+    }
+
+    public void setReport_type(String report_type) {
+        this.report_type = report_type;
     }
 }

@@ -31,4 +31,9 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
 
     public void testPagerReport1() {
     }
+
+    @Test
+    public void testGetGridContext() {
+        System.out.println (reportCustomerService.getGridContext("1","244"));
+    }
 }

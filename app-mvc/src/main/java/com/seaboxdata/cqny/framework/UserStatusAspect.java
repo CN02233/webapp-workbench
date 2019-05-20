@@ -29,7 +29,10 @@ public class UserStatusAspect {
 
         Object targer = joinPoint.getTarget();
         String sigName = joinPoint.getSignature().getName();
-        if(!(targer instanceof AbstractLoginController)&&!"changePwd".equals(sigName)){
+        if(!(targer instanceof AbstractLoginController)&&!"changePwd".equals(sigName)
+        &&!(targer instanceof AbstractLoginController)&&!"selectOriginType".equals(sigName)
+        &&!(targer instanceof AbstractLoginController)&&!"getUserInfo".equals(sigName)
+        ){
 
             Object user = SessionSupport.checkoutUserFromSession();
             if(user!=null){
@@ -47,6 +50,30 @@ public class UserStatusAspect {
                     }
                     return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD,
                             "登陆成功,密码过期需要修改", LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString(),
+                            LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
+                }else if(UserStatus.NEVER_LOGIN.equal(new Integer(userStatus))){
+                    Signature signature =  joinPoint.getSignature();
+                    Class returnType = ((MethodSignature) signature).getReturnType();
+
+                    if(returnType==JsonResult.class){
+                        return JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD,
+                                "登陆成功,用户从未登陆过", LoginResult.LOGIN_RESULT.NEVER_LOGIN.toString(),
+                                LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
+                    }
+                    return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD,
+                            "登陆成功,用户从未登陆过", LoginResult.LOGIN_RESULT.NEVER_LOGIN.toString(),
+                            LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
+                }else if(UserStatus.NOT_NOMAL_TAG.equal(new Integer(userStatus))){
+                    Signature signature =  joinPoint.getSignature();
+                    Class returnType = ((MethodSignature) signature).getReturnType();
+
+                    if(returnType==JsonResult.class){
+                        return JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD,
+                                "登陆成功,用户状态非正常", LoginResult.LOGIN_RESULT.USER_STATS_NOT_NORMAL.toString(),
+                                LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
+                    }
+                    return JsonSupport.makeJsonResultStr(JsonResult.RESULT.FAILD,
+                            "登陆成功,用户状态非正常", LoginResult.LOGIN_RESULT.USER_STATS_NOT_NORMAL.toString(),
                             LoginResult.LOGIN_RESULT.PWD_EXPIRED.toString());
                 }
             }

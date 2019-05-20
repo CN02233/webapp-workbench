@@ -23,4 +23,9 @@ public class CqnyUserServiceImpTest extends AbstractTestService {
         orginLIst.add(new Integer("1100000"));
 //        cqnyUserService.pageCqnyUser(1,10,null,orginLIst);
     }
+
+    @Test
+    public void testSelectOriginType() {
+        cqnyUserService.selectOriginType("5566352","2");
+    }
 }

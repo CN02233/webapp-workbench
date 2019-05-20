@@ -81,9 +81,12 @@
   }
 </script>
 
+<style lang="css">
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   .el-menu-item ,.title-style{
-    color: #b1b4c3;
+    color: #b1b4c3 !important;
   }
   .sub-menu{
     background-color: #3E3958 !important;

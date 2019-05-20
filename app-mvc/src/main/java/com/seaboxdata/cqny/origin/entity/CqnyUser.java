@@ -16,6 +16,7 @@ public class CqnyUser {
 
     private int user_id;
     private String user_pwd;
+    private String old_user_pwd;
     private String user_name;
     private String user_name_cn;
     private String user_type;
@@ -132,5 +133,13 @@ public class CqnyUser {
 
     public void setLast_login_time(Date last_login_time) {
         this.last_login_time = last_login_time;
+    }
+
+    public String getOld_user_pwd() {
+        return old_user_pwd;
+    }
+
+    public void setOld_user_pwd(String old_user_pwd) {
+        this.old_user_pwd = old_user_pwd;
     }
 }

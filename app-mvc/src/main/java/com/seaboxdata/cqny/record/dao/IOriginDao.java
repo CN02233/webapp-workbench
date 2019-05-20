@@ -1,7 +1,9 @@
 package com.seaboxdata.cqny.record.dao;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.origin.entity.Submitauthority;
 import com.seaboxdata.cqny.record.entity.Origin;
+import com.workbench.auth.user.entity.User;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.Map;
 
 public interface IOriginDao {
 
-    @Select("select origin_id,origin_name,parent_origin_id,origin_status,create_date,create_user from sys_origin")
+    @Select("select origin_id,origin_name,parent_origin_id,origin_status,create_date,create_user,origin_type from sys_origin")
     List<Origin> listAllOrigin();
 
     @Select("select origin_id,origin_name,parent_origin_id,origin_status,create_date,create_user from sys_origin")
@@ -47,4 +49,27 @@ public interface IOriginDao {
 
     @Select("select * from sys_origin where origin_name like concat('%',#{searchOriginName},'%')")
     List<Origin> getOriginByName(String searchOriginName);
+
+    @Select("select u.* from user u ,user_origin_assign uoa where u.user_id = uoa.user_id and uoa.origin_id = #{originId}")
+    List<User> getUsersByOrigin(Integer originId);
+
+    @Update("<script>update sys_origin <set>"
+            +"<if test='origin_name!=null'>"
+            +"origin_name=#{origin_name} ,"
+            +"</if>"
+            +"<if test='parent_origin_id!=null'>"
+            +"parent_origin_id=#{parent_origin_id} ,"
+            +"</if>"
+            +"<if test='origin_status!=null'>"
+            +"origin_status=#{origin_status} ,"
+            +"</if>"
+            +"<if test='origin_type!=null'>"
+            +"origin_type=#{origin_type} ,"
+            +"</if>"
+            +"<if test='create_user!=null'>"
+            +"create_user=#{create_user} ,"
+            +"</if>"
+            +"create_date=sysdate() "
+            +"</set>where origin_id = #{origin_id}</script>")
+    void updateOrigin(Origin origin);
 }

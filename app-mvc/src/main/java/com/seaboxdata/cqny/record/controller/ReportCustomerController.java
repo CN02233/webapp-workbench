@@ -237,6 +237,16 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+
+    @RequestMapping("getGridContext")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getGridContext(String reportId, String unitId){
+        Map<String,Object> gridContextINfo = reportCustomerService.getGridContext(reportId,unitId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,gridContextINfo);
+        return jsonResult;
+    }
+
     @RequestMapping("saveSimpleUnitContext")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")

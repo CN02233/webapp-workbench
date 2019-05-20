@@ -20,11 +20,12 @@ public interface IReportStatementsDao {
             "\tcreate_date,\n" +
             "\tcreate_user,\n" +
             "\torigin_id,\n" +
+            "\treport_type,\n" +
             "\tstatus\n" +
             ")\n" +
             "VALUES\n" +
             "\t(\n" +
-            "\t#{ defined_id },#{ defined_name },sysdate(),#{ create_user },#{ origin_id },#{ status }\n" +
+            "\t#{ defined_id },#{ defined_name },sysdate(),#{ create_user },#{ origin_id },#{report_type},#{ status }\n" +
             "\t)")
     @Options(useGeneratedKeys = true, keyProperty = "defined_id", keyColumn = "defined_id")
     void addReportStatements(ReportDefinedEntity reportDefined);
@@ -41,6 +42,9 @@ public interface IReportStatementsDao {
             +"</if>"
             +"<if test='status!=null'>"
             +"status=#{status} ,"
+            +"</if>"
+            +"<if test='report_type!=null'>"
+            +"report_type=#{report_type} ,"
             +"</if>"
             +"<if test='create_user!=null'>"
             +"create_user=#{create_user} ,"
@@ -60,6 +64,7 @@ public interface IReportStatementsDao {
             "\ta.`status`,\n" +
             "\ta.defined_id,\n" +
             "\ta.defined_name,\n" +
+            "\ta.report_type,\n" +
             "\tb.origin_name,\n" +
             "\tc.user_name,\n" +
             "\tb.create_user,\n" +
@@ -80,6 +85,7 @@ public interface IReportStatementsDao {
             " a.`status`," +
             " a.defined_id," +
             " a.defined_name," +
+            " a.report_type," +
             " b.origin_name," +
             " c.user_name," +
             " b.create_user," +

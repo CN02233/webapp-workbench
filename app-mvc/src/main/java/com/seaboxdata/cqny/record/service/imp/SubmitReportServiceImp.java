@@ -41,6 +41,13 @@ public class SubmitReportServiceImp implements SubmitReportService {
     @Autowired
     private OriginService originService;
 
+    private ThreadLocal<List<Origin>> reportDefinedOrgs = new ThreadLocal<>();
+
+    /**
+     * 按照报送定义对应的全量机构发布报表
+     * @param submitReportEntity
+     * @throws ParseException
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void doSubmit(SubmitReportRequestEntity submitReportEntity) throws ParseException {
@@ -59,15 +66,10 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
             logger.info("报表发布->{}：获取报表对应机构列表",reportDefinedId);
             List<String> alOrigin = getAllOrigin(reportDefinedId);
+            submitReportEntity.setSubmit_origins(alOrigin);
             logger.info("报表发布->{}：机构列表获取成功=>{}",reportDefinedId,alOrigin);
-            logger.info("报表发布->{}：过滤省市机构,过滤前机构数量{}",reportDefinedId,alOrigin.size());
-            alOrigin = this.filterOrigins(alOrigin);
-            logger.info("报表发布->{}：过滤后剩余机构数量{},分别为{}",reportDefinedId,alOrigin.size(),alOrigin);
-            logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
-            List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin,submitReportEntity);
-            logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
-            logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
-            createReportDefaultData(reportDefined,reportIds);
+
+            this.createDatas(submitReportEntity,reportDefined);
 
             logger.info("更新报表状态为发布完成-->{}",reportDefinedId);
             reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.SUBMIT);
@@ -77,8 +79,80 @@ public class SubmitReportServiceImp implements SubmitReportService {
         }finally {
 
         }
+    }
 
+    /**
+     * 单独为特定机构发布报表
+     * @param submitReportEntity
+     * @throws ParseException
+     */
+    @Override
+    public void doSubmitForOrigins(SubmitReportRequestEntity submitReportEntity) throws ParseException {
+        String reportDefinedId = submitReportEntity.getDefined_id();
+        try {
+            logger.info("报表发布->{}：获取报表定义中",reportDefinedId);
+            ReportDefinedEntity reportDefined = getReportDefined(reportDefinedId);
+            logger.info("报表发布->{}：报表定义数据获取成功=>{}",reportDefinedId,reportDefined);
+            if(reportDefined==null){
+                return;
+            }
 
+            List<Origin> allOrigins = originService.listAllOrigin();
+            reportDefinedOrgs.set(allOrigins);
+
+            if(submitReportEntity.getSubmit_origins()!=null&&submitReportEntity.getSubmit_origins().size()>0){
+
+            }else{
+                logger.error("报表发布->{}：发布失败,报送机构为空:{}",reportDefinedId,submitReportEntity);
+                throw new RuntimeException("报送机构为空");
+            }
+
+            this.createDatas(submitReportEntity,reportDefined);
+
+            String currStatus = reportDefined.getStatus();
+            if(!ReportDefinedStatus.SUBMIT.compareWith(new Integer(currStatus))){
+                logger.info("更新报表状态为发布完成-->{}",reportDefinedId);
+                reportStatementsService.changeDeindStatus(reportDefinedId, ReportDefinedStatus.SUBMIT);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }finally {
+
+        }
+    }
+
+    /**
+     * 过滤省市机构 创建报送数据
+     */
+    public void createDatas(SubmitReportRequestEntity submitReportEntity,ReportDefinedEntity reportDefined)
+            throws ParseException {
+        String reportDefinedId = submitReportEntity.getDefined_id();
+        try {
+
+            List<String> alOrigin = submitReportEntity.getSubmit_origins();
+
+            logger.info("报表发布->{}：过滤省市机构,过滤前机构数量{}",reportDefinedId,alOrigin.size());
+            alOrigin = this.filterOrigins(alOrigin);
+            logger.info("报表发布->{}：过滤后剩余机构数量{},分别为{}",reportDefinedId,alOrigin.size(),alOrigin);
+
+//            logger.info("报表发布->{}：檢查当前报表类型与机构类型是否相符，检查前机构数量{}",reportDefinedId,alOrigin.size());
+//            alOrigin = this.checkOrginType(alOrigin,reportDefined.getReport_type());
+//            logger.info("报表发布->{}：檢查当前报表类型与机构类型后剩余机构数量{},分别为{}",reportDefinedId,alOrigin.size(),alOrigin);
+
+            logger.info("报表发布->{}：生成报表基础信息",reportDefinedId);
+            List<Integer> reportIds = createReportBaseData(reportDefined, alOrigin,submitReportEntity);
+            logger.info("报表发布->{}：报表基础信息生成完毕，生成的报表id列别为=>{}",reportDefinedId,reportIds);
+            logger.info("报表发布->{}：生成报表缺省数据中",reportDefinedId);
+            createReportDefaultData(reportDefined,reportIds);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }finally {
+
+        }
     }
 
     /**
@@ -110,8 +184,16 @@ public class SubmitReportServiceImp implements SubmitReportService {
     }
 
     private List<String> getAllOrigin(String reportDefindId){
-        List<String> originList = reportStatementsService.getDefinedAndOriginAssignById(reportDefindId);
-        return originList;
+        List<String> originIdList = new ArrayList<>();
+        List<Origin> originObjList = reportStatementsService.getDefinedOriginsById(reportDefindId);
+        if(originObjList!=null){
+            reportDefinedOrgs.set(originObjList);
+            for (Origin origin : originObjList) {
+                originIdList.add(origin.getOrigin_id().toString());
+            }
+        }
+
+        return originIdList;
     }
 
     /**
@@ -122,7 +204,7 @@ public class SubmitReportServiceImp implements SubmitReportService {
      */
     private List<Integer> createReportBaseData(ReportDefinedEntity reportDefined, List<String> allOrigin, SubmitReportRequestEntity submitReportEntity) throws ParseException {
         List<Integer> reportBaseIds = new ArrayList<>();
-//        List<String> passAuthList = submitReportEntity.getCheck_origins();
+//        List<String> passAuthList = submitReportEntity.getSubmit_origins();
         List<String> approvePassAuth = submitReportEntity.getApprove_check_origins();
         List<String> reviewPassAuth = submitReportEntity.getReview_check_origins();
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
@@ -131,12 +213,36 @@ public class SubmitReportServiceImp implements SubmitReportService {
         reportCustomer.setReport_name(reportDefined.getDefined_name());
         reportCustomer.setReport_origin(0);
         reportCustomer.setCreate_date(new Date());
-        reportCustomer.setReport_status(ReportStatus.NORMAL.getValue());
 
         reportCustomer.setReport_data_start(format.parse(submitReportEntity.getReport_data_start()));
         reportCustomer.setReport_data_end(format.parse(submitReportEntity.getReport_data_end()));
 
+        List<Origin> fullOrigin = reportDefinedOrgs.get();
+        Map<String,Origin> originsCacheMap = new HashMap<>();
+        if(fullOrigin!=null){
+            for (Origin originCache : fullOrigin) {
+                originsCacheMap.put(originCache.getOrigin_id().toString(),originCache);
+            }
+        }
+
+        String reportType = reportDefined.getReport_type();
+        reportCustomer.setReport_type(reportType);
+
         for (String origin : allOrigin) {
+            Origin originObj = originsCacheMap.get(origin);
+            String originObjType = originObj.getOrigin_type();
+            if("0".equals(reportType)){
+                reportCustomer.setReport_status(ReportStatus.NORMAL.getValue());
+            }else if("0".equals(originObjType)){
+                reportCustomer.setReport_status(ReportStatus.NORMAL.getValue());
+            }else{
+                if(reportType.equals(originObjType)){
+                    reportCustomer.setReport_status(ReportStatus.NORMAL.getValue());
+                }else{
+                    reportCustomer.setReport_status(ReportStatus.REMOVE.getValue());
+                }
+            }
+
             reportCustomer.setReport_origin(new Integer(origin));
             reportCustomer.setActive_unit(reportDefined.getUnits().get(0).getUnit_id());
             reportCustomer.setReport_start_date(format.parse(submitReportEntity.getReport_start_date()));
@@ -176,23 +282,30 @@ public class SubmitReportServiceImp implements SubmitReportService {
                 logger.info("报表发布->{}：报送单元【{}】为【一维报送】单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
                 ArrayList<SimpleColumDefined> oneColumDefinedsList = (ArrayList<SimpleColumDefined>) unitDefind.getColums();
                 ArrayList<ReportCustomerData> dataList = createOneDimDatas(oneColumDefinedsList, reportIds);
-                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.debug("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕",reportDefined.getDefined_id(),unitDefind.getUnit_name());
+
             }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
                 ArrayList<SimpleColumDefined> oneColumDefinedsList = (ArrayList<SimpleColumDefined>) unitDefind.getColums();
                 ArrayList<ReportCustomerData> dataList = createOneDimDynDatas(oneColumDefinedsList, reportIds);
-                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.debug("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕",reportDefined.getDefined_id(),unitDefind.getUnit_name());
+
             }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
                 logger.info("报表发布->{}：报送单元【{}】为【多维静态】报送单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
                 ArrayList<GridColumDefined> gridColumDefinedsList = (ArrayList<GridColumDefined>) unitDefind.getColums();
                 ArrayList<ReportCustomerData> dataList = createGridDimDatas(gridColumDefinedsList,reportIds);
 
-                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.debug("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕",reportDefined.getDefined_id(),unitDefind.getUnit_name());
+
 
             }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
                 logger.info("报表发布->{}：报送单元【{}】为【多维树状】报送单元,生成缺省数据中",reportDefined.getDefined_id(),unitDefind.getUnit_name());
                 ArrayList<SimpleColumDefined> oneColumDefinedsList = (ArrayList<SimpleColumDefined>) unitDefind.getColums();
                 ArrayList<ReportCustomerData> dataList = createTreeDimDatas(oneColumDefinedsList,reportIds);
-                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.debug("报表发布->{}：报送单元【{}】缺省数据生成完毕=>{}",reportDefined.getDefined_id(),unitDefind.getUnit_name(),dataList);
+                logger.info("报表发布->{}：报送单元【{}】缺省数据生成完毕",reportDefined.getDefined_id(),unitDefind.getUnit_name());
             }else{
                 logger.info("报表发布->{}：报送单元【{}】,生成失败，未找到对应的报送单元类型{}",unitTypeInt);
             }
@@ -207,14 +320,18 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
             for (GridColumDefined columDefined : gridColumDefinedsList) {
                 for (Integer reportId : reportIds) {
-                    ReportCustomerData reportCustomerData = new ReportCustomerData();
-                    reportCustomerData.setColum_id(columDefined.getColum_id().toString());
-                    reportCustomerData.setDimensions_id(columDefined.getDim_id().toString());
-                    reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
-                    reportCustomerData.setReport_id(reportId);
-                    reportCustomerData.setReport_data(columDefined.getDefault_value()!=null?columDefined.getDefault_value():"0");
-                    reportCustomerData.setReport_group_id(reportGroupId);
-                    columDatas.add(reportCustomerData);
+//                    logger.info("{}",columDefined);
+                    if("1".equals(columDefined.getColum_meta_type())){
+                        ReportCustomerData reportCustomerData = new ReportCustomerData();
+                        reportCustomerData.setColum_id(columDefined.getColum_id().toString());
+                        reportCustomerData.setDimensions_id(columDefined.getDim_id().toString());
+                        reportCustomerData.setUnit_id(columDefined.getUnit_id().toString());
+                        reportCustomerData.setReport_id(reportId);
+                        reportCustomerData.setReport_data(columDefined.getDefault_value()!=null?columDefined.getDefault_value():"0");
+                        reportCustomerData.setReport_group_id(reportGroupId);
+                        columDatas.add(reportCustomerData);
+                    }
+
                 }
 
             }
@@ -391,4 +508,5 @@ public class SubmitReportServiceImp implements SubmitReportService {
 
         return finalOrigin;
     }
+
 }

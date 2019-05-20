@@ -11,6 +11,7 @@ public class Origin {
     private String origin_status;
     private Date create_date;
     private String create_user;
+    private String origin_type;
 
     private List<Origin> children;
 
@@ -69,5 +70,13 @@ public class Origin {
 
     public void setChildren(List<Origin> children) {
         this.children = children;
+    }
+
+    public String getOrigin_type() {
+        return origin_type;
+    }
+
+    public void setOrigin_type(String origin_type) {
+        this.origin_type = origin_type;
     }
 }

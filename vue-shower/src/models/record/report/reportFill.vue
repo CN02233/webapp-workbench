@@ -3,7 +3,7 @@
     <div class="fill-root">
       <div class="fill-steps">
         <el-steps process-status="finish"	direction="vertical" :active="activeStepNum">
-          <el-step :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
+          <el-step :class="{'bold-step':activeStepNum==unitNum}" style="font-weight: bold;font-color:black" :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
                    @click.native="e => stepClick(e, unitNum) "
                    v-for="(unitEntity,unitNum) in unitEntities"
                    :title="unitEntity.unit_name"></el-step>
@@ -31,9 +31,9 @@
           <!--<el-button  @click="saveContext" type="danger">保存</el-button>-->
           <el-button  @click="doSaveContext" type="danger">保存</el-button>
           <!--<el-button  @click="validateContext" type="success">校验</el-button>-->
-          <el-button  @click="doSaveAndValidate('SAVE')" type="success">校验</el-button>
+          <el-button  @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
-          <el-button  @click="doSubmitContext('SAVE')" type="warning">提交</el-button>
+          <el-button  @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>
         </div>
 
       </div>
@@ -61,7 +61,7 @@
         reportId:"",
         reportDefinedId:"",
         isView:'N',
-        activeStepNum:1,
+        activeStepNum:0,
         currUnitId:'',
         reportCust:{},
         unitEntities:[],
@@ -221,7 +221,7 @@
           })
         }
 
-        if(processName=='VALIDATE'){
+        if(processName=='SAVE'){
           doSubmit()
         }else{
           this.$confirm('提交操作将使该报送报表进入审批流程，进入审批流程后将无法修改填报数据。请确认数据正确性！', '提示', {
@@ -315,9 +315,9 @@
             //console.log(processName+"---"+this.doneCount)
 
             if(processName=="SAVE"){
-              this.doSaveAndValidate("VALIDATE")
-            }else if(processName=="VALIDATE"){
               this.doRefreshFomular()
+            }else if(processName=="VALIDATE"){
+              this.doSaveAndValidate("SAVE")
             }
 
           }
@@ -407,9 +407,9 @@
               message: processmessage
             });
             if(processName=="SAVE"){
-              this.doSubmitContext("VALIDATE")
-            }else if(processName=="VALIDATE"){
               this.doRefreshFomular("YES")
+            }else if(processName=="VALIDATE"){
+              this.doSubmitContext("SAVE")
             }
 
           }
@@ -459,7 +459,11 @@
 <style lang="css">
   .el-step__main>div{
     font-size:13px !important;
-    font-weight: normal !important;
+    /*font-weight: normal !important;*/
+  }
+
+  .bold-step div{
+    font-weight:900 !important;
   }
 </style>
 

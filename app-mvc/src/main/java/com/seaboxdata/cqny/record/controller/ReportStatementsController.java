@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -209,6 +210,18 @@ public class ReportStatementsController {
             }
         }).start();
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "已开始发布", null, null);
+        return jsonpResponse;
+    }
+
+
+    @RequestMapping("submitForOrigins")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult submitForOrigins(@RequestBody SubmitReportRequestEntity submitReportEntity) throws ParseException {
+
+        reportDefinedSubmitService.doSubmitForOrigins(submitReportEntity);
+
+        JsonResult jsonpResponse = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "已开始发布", null, null);
         return jsonpResponse;
     }
 

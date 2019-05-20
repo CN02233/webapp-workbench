@@ -3,7 +3,7 @@
   <div class="login-container" >
     <vue-particle-line>
       <div v-bind:class="loadingLogin" >
-        <el-form v-if="!resetPwd" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
+        <el-form v-if="!resetPwd&&!selectType" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
           <h3 class="title">天然气输配价格监管系统</h3>
           <!--<h3 class="title">欢迎！</h3>-->
           <el-form-item  prop="user_name">
@@ -47,6 +47,25 @@
             </el-button>
           </el-form-item>
         </el-form>
+
+        <el-form v-if="selectType" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
+          <h3 class="title">请选择企业类型</h3>
+          <!--<h3 class="title">欢迎！</h3>-->
+          <el-form-item  prop="origin_type">
+            <el-select  v-model="selectOriginType.origin_type" style="width:100%;" placeholder="请选择您的企业类型">
+              <el-option :key="key" v-for="(value, key) in originTypes" :label="value" :value="key"></el-option>
+            </el-select>
+
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" style="width:100%;" :loading="loading" @click="changeOriginType">
+              <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
+              确定
+            </el-button>
+          </el-form-item>
+        </el-form>
+
       </div>
     </vue-particle-line>
 
@@ -71,7 +90,16 @@
           user_pwd: '',
           validate_user_pwd: ''
         },
+        selectOriginType: {
+          origin_type:'1',
+          user_name:''
+        },
+        originTypes:{
+          '1':'燃气企业',
+          '2':'管输企业'
+        },
         resetPwd:false,
+        selectType:false,
         loading: false,
         loadingLogin:{
           'loading-login':true
@@ -101,6 +129,12 @@
             }else if('PWD_EXPIRED'==response){
               $this.resetPwd = true
               this.changePwdForm.user_name = this.loginForm.user_name
+            }else if('NEVER_LOGIN'==response){
+              $this.selectType = true
+              this.selectOriginType.user_name = this.loginForm.user_name
+            }else if('USER_STATS_NOT_NORMAL'==response){
+              $this.selectType = true
+              this.selectOriginType.user_name = this.loginForm.user_name
             }
         })
         .catch(errorMsg=>{
@@ -145,9 +179,56 @@
       }else{
         this.Message.error("请输入用户名以及密码")
       }
+    },
+    changeOriginType(){
+
+      this.$confirm('确定您的企业类型为【'+this.originTypes[this.selectOriginType.origin_type]+'】？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        dangerouslyUseHTMLString:true,
+        type: 'warning'
+      }).then(() => {
+        const loading = this.$loading({
+          lock: true,
+          text: '设定中',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+
+        this.BaseRequest({
+          url:"cqnyUser/selectOriginType",
+          method:"post",
+          data:this.selectOriginType
+        })
+          .then(response=>{
+            // debugger
+            loading.close()
+            if(!response){
+              this.selectType = false
+              this.resetPwd = false
+            }
+
+            if('SUCCESS'==response){
+              this.forwardToHome()
+            }else{
+              if(response.faild_reason){
+                this.Message.error(response.faild_reason)
+
+              }else if(response.result_msg){
+                this.Message.error(response.result_msg)
+
+              }else{
+                this.Message.error("登陆失败")
+              }
+            }
+          })
+          .catch(errorMsg=>{
+            //console.log("response ......")
+          });
+      }).catch(() => {
+      });
 
 
-        // sys/user/changePwd
     },
     forwardToHome:function(){
       this.$router.push({'path':'/home'})
@@ -169,14 +250,15 @@
         if (res.result !== 'SUCCESS') {
           if (res.faild_reason === 'USER_NOT_LOGIN') {
             freeLoading()
-          }else if(res.faild_reason === 'FORWARD_CAS'){
-            let forwardUrl = res.resultData
-            window.location = forwardUrl
           }else{
             freeLoading()
           }
         }else{
           if(res.resultData=='PWD_EXPIRED'){
+            //console.log("重定向到修改密码页面")
+          }else if(res.resultData=='NEVER_LOGIN'){//用户首次登陆
+            //console.log("重定向到修改密码页面")
+          }else if(res.resultData=='USER_STATS_NOT_NORMAL'){//用户需要选择企业类型
             //console.log("重定向到修改密码页面")
           }else{
             freeLoading()
