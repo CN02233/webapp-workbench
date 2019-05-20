@@ -50,71 +50,9 @@ const routes = [
             component: () => import('@/models/sys/user/userMain')
           },
           {
-            name: 'supervisionUser',
-            path: '/sys/supervisionUser',
-            component: () => import('@/models/sys/user/supervisionUserMain')
-          },
-          {
             name: 'role',
             path: '/sys/role',
             component: () => import('@/models/sys/role/roleMain')
-          },
-          {
-            name: 'origin',
-            path: '/sys/origin',
-            component: () => import('@/models/sys/origin/originMain')
-          }
-
-        ]
-      },
-      {
-        name: 'record',
-        path: '/record',
-        component: () => import('@/models/record/main'),
-        children: [
-          {
-            name: 'reportDefined',
-            path: '/record/reportDefined',
-            component: () => import('@/models/record/reportDefined'),
-            children: [
-              {
-                name: 'reportStatements',
-                path: '/record/reportStatements',
-                component: () => import('@/models/record/reportDefined/unit/reportstatements'),
-                children: []
-              },
-              {
-                name: 'reportUnit',
-                path: '/record/reportUnit',
-                component: () => import('@/models/record/reportDefined/unit/reportunit'),
-                children: []
-              },
-              {
-                name: 'oneDimensionsStatic',
-                path: '/record/reportDefined/oneDimensionsStatic',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsStatic/main'),
-                children: []
-              }
-              ,
-              {
-                name: 'oneDimensionsDynamic',
-                  path: '/record/reportDefined/oneDimensionsDynamic',
-                component: () => import('@/models//record/reportDefined/unit/oneDimensionsDynamic/main'),
-                children: []
-              },
-              {
-                name: 'multDimensionsStatic',
-                path: '/record/reportDefined/multDimensionsStatic',
-                component: () => import('@/models//record/reportDefined/unit/multDimensionsStatic/main'),
-                children: []
-              },
-              {
-                name: 'treeMultDiensionsDynamic',
-                path: '/record/reportDefined/treeMultDiensionsDynamic',
-                component: () => import('@/models//record/reportDefined/unit/treeMultDiensionsDynamic/main'),
-                children: []
-              }
-            ]
           }
         ]
       }
