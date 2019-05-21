@@ -100,8 +100,9 @@ public class JobMgServiceImp implements JobMgService {
         else
             proxyServers = jobInfo.getProxyServerList();
         if(proxyServers!=null){
-            for(String proxyServerId:proxyServers){
-                iJobMgDao.saveProxyServer(proxyServerId,job_id,jobInfo.getUser_id());
+            for(Object proxyServerId:proxyServers){
+                String proxyServerIdStr = String.valueOf(proxyServerId);
+                iJobMgDao.saveProxyServer(proxyServerIdStr,job_id,jobInfo.getUser_id());
 
             }
         }

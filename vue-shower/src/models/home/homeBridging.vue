@@ -14,7 +14,7 @@
     components:{TopMenuHome,LeftMenuHome},
     data() {
       let menuList = [];
-      const sysNameStr = "天然气输配价格监管系统";
+      const sysNameStr = "网络信息采集平台管理系统";
       return {
         sysNameStr: sysNameStr,
         menuList : menuList,

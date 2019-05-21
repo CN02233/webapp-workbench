@@ -64,15 +64,16 @@ public class JobInfoBean {
     }
 
     public void setIs_valid(Integer is_valid) {
-
-        if(is_valid==0){
-            is_valid_cn = "无效";
-        }else if(is_valid==1){
-            is_valid_cn = "有效";
-        }else{
-            is_valid_cn = "未知";
+        if(is_valid!=null){
+            if(is_valid==0){
+                is_valid_cn = "无效";
+            }else if(is_valid==1){
+                is_valid_cn = "有效";
+            }else{
+                is_valid_cn = "未知";
+            }
+            this.is_valid = is_valid;
         }
-        this.is_valid = is_valid;
     }
 
     public String getIs_valid_cn() {

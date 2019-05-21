@@ -50,7 +50,7 @@ public interface IJobMgDao {
                                        @Param("host_id") Integer host_id,@Param("host_name") String host_name);
 
 
-    @Select("select max(start_time) max_start_time,cs.* from crawl_status cs where job_id = #{job_id}")
+    @Select("select cs.* from crawl_status cs where job_id = #{job_id} order by start_time desc limit 1")
     @Options(useCache = false)
     JobStatus getJobStatus(int job_id);
 

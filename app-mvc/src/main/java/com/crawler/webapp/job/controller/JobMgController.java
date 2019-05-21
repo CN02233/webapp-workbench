@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -40,7 +41,11 @@ public class JobMgController {
     @RequestMapping("pagingList")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String pagingCrawlList(int currPage,int pageSize, JobInfoBean jobInfoBean){
+    public String pagingCrawlList(Integer currPage,Integer pageSize, Integer job_id,String job_name,Integer is_valid){
+        JobInfoBean jobInfoBean= new JobInfoBean();
+        jobInfoBean.setJob_id(job_id);
+        jobInfoBean.setJob_name(job_name);
+        jobInfoBean.setIs_valid(is_valid);
         Page<JobInfoBean> crawListPage = jobMgService.pagingCrawlList(currPage, pageSize, jobInfoBean);
         PageResult pageResult = PageResult.pageHelperList2PageResult(crawListPage);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,pageResult);
@@ -106,15 +111,27 @@ public class JobMgController {
         return result;
     }
 
+//    @RequestMapping("saveNewJob")
+//    @ResponseBody
+//    @CrossOrigin(allowCredentials="true")
+//    public String saveNewJob(@JsonMsgParam(jsonName = "jobInfo",jsonObjTypes={JobInfoBean.class}) JobInfoBean jobInfo,
+//                             @JsonMsgParam(jsonName = "proxyServers",jsonObjTypes={String.class}) ArrayList<String> proxyServers){
+//
+//        User user = SessionSupport.checkoutUserFromSession();
+//        jobInfo.setUser_id(user.getUser_id());
+//        jobMgService.saveNewJob(jobInfo,proxyServers);
+//        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
+//        return result;
+//    }
+
     @RequestMapping("saveNewJob")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String saveNewJob(@JsonMsgParam(jsonName = "jobInfo",jsonObjTypes={JobInfoBean.class}) JobInfoBean jobInfo,
-                             @JsonMsgParam(jsonName = "proxyServers",jsonObjTypes={String.class}) ArrayList<String> proxyServers){
+    public String saveNewJob(@RequestBody JobInfoBean jobInfo){
 
         User user = SessionSupport.checkoutUserFromSession();
         jobInfo.setUser_id(user.getUser_id());
-        jobMgService.saveNewJob(jobInfo,proxyServers);
+        jobMgService.saveNewJob(jobInfo,jobInfo.getProxyServerList());
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
         return result;
     }

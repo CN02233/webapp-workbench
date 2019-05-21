@@ -55,6 +55,23 @@ const routes = [
             component: () => import('@/models/sys/role/roleMain')
           }
         ]
+      },
+      {
+        name: 'jobManage',
+        path: '/jobManage',
+        component: () => import('@/models/spider/job/jobMain'),
+        children:[
+          {
+            name: 'jobList',
+            path: '/jobManage/jobList',
+            component: () => import('@/models/spider/job/jobList')
+          },
+          {
+            name: 'jobEdit',
+            path: '/jobManage/jobEdit',
+            component: () => import('@/models/spider/job/jobEdit')
+          }
+        ]
       }
     ]
   }
