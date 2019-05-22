@@ -73,6 +73,19 @@ const routes = [
           }
         ]
       }
+      ,
+      {
+        name: 'resourceManage',
+        path: '/resourceManage',
+        component: () => import('@/models/spider/resource/resourceMain'),
+        children:[
+          {
+            name: 'resourceList',
+            path: '/resourceManage/resourceList',
+            component: () => import('@/models/spider/resource/resourceList')
+          }
+        ]
+      }
     ]
   }
 ]
