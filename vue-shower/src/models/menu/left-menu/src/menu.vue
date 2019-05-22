@@ -4,7 +4,7 @@
                 :key="menuData.id"
                 :index="'M'+menuData.id">
       <template slot="title">
-        <div class="sprit-menu" v-bind:class="[spritBaseClass,spritBaseClass+'_'+menuIndex]"></div>
+        <div class="sprit-menu" ></div>
         <!--<i :class="menuIcon[menuData.name]"></i>-->
         <!--<icon name="record-checked"></icon>-->
         <span class="title-style" slot="title">{{menuData.name}}</span>
@@ -52,7 +52,7 @@
         type: Object
       },
       menuIndex:{
-        type: String
+        type: Number
       },
       spritBaseClass:{
         type:String
