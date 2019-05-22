@@ -72,6 +72,18 @@ const routes = [
             component: () => import('@/models/spider/job/jobEdit')
           }
         ]
+      },
+      {
+        name: 'jobStatus',
+        path: '/jobStatus',
+        component: () => import('@/models/spider/jobStatus/jobStatusMain'),
+        children:[
+          {
+            name: 'jobStatusList',
+            path: '/jobStatus/jobStatusList',
+            component: () => import('@/models/spider/jobStatus/jobStatusList')
+          },
+        ]
       }
     ]
   }

@@ -54,7 +54,7 @@
             <WorkLeftMenu v-for="(menuObj,menuIndex) in menuList"
                           :key="menuObj.id"
                           :menuData="menuObj"
-                          :menuIndex="menuIndex+1" :spritBaseClass="'sprit-menu'+(menuIndex+1)"></WorkLeftMenu>
+                          :menuIndex="(menuIndex+1)+''" :spritBaseClass="'sprit-menu'+(menuIndex+1)"></WorkLeftMenu>
           </el-menu>
         </div>
 

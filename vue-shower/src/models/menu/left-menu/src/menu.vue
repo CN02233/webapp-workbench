@@ -32,7 +32,7 @@
     data() {
         return {
           menuIcon:{
-            '权限管理':'el-icon-setting',
+            '系统管理':'el-icon-setting',
             '功能查看':'el-icon-more',
             '用户管理':'el-icon-service',
             '角色管理':'el-icon-tickets',
@@ -53,7 +53,7 @@
         type: Object
       },
       menuIndex:{
-        type:Number
+        type: String
       },
       spritBaseClass:{
         type:String
