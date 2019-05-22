@@ -52,6 +52,15 @@
   margin:0 10px 0 10px;
 }
 
+.changepwd-icon{
+  background: url("changepwd.png") no-repeat 0px 0px;
+  background-size: 25px 25px;
+  width:25px;
+  height:25px;
+  float: right;
+  margin:0 10px 0 10px;
+}
+
 .sprit-menu{
   width:18px;
   height:18px;
@@ -74,6 +83,18 @@
 }
 
 .sprit-menu2{
+  background-image: url("auth-menu-sprit.png");
+}
+.sprit-menu3{
+  background-image: url("auth-menu-sprit.png");
+}
+.sprit-menu4{
+  background-image: url("auth-menu-sprit.png");
+}
+.sprit-menu5{
+  background-image: url("auth-menu-sprit.png");
+}
+.sprit-menu6{
   background-image: url("auth-menu-sprit.png");
 }
 
@@ -121,6 +142,29 @@
 .sprit-menu2_2_6{
   background-position: 0px -58px;
 }
+
+.sprit-menu3_3{
+  background-position: 0px -4px;
+  margin:19px 10px 19px 0;
+}
+
+.sprit-menu4_4{
+  background-position: 0px -4px;
+  margin:19px 10px 19px 0;
+}
+
+
+.sprit-menu5_5{
+  background-position: 0px -4px;
+  margin:19px 10px 19px 0;
+}
+
+
+.sprit-menu6_6{
+  background-position: 0px -4px;
+  margin:19px 10px 19px 0;
+}
+
 
 .report-sprit-menu:hover{
   background-image: url("report-menu-sprit-checked.png");
