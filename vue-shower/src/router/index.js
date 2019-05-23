@@ -80,9 +80,14 @@ const routes = [
         component: () => import('@/models/spider/resource/resourceMain'),
         children:[
           {
-            name: 'resourceList',
-            path: '/resourceManage/resourceList',
-            component: () => import('@/models/spider/resource/resourceList')
+            name: 'offlinePage',
+            path: '/resourceManage/offlinePage',
+            component: () => import('@/models/spider/resource/offlinePage')
+          },
+          {
+            name: 'offlinePageDetail',
+            path: '/resourceManage/offlinePageDetail',
+            component: () => import('@/models/spider/resource/offlinePageDetail')
           }
         ]
       }

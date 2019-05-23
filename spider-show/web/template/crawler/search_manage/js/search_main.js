@@ -107,7 +107,8 @@ function doSearch(){
             }
         });
 
-        var jobSearchBean = new Object();
+        var
+            jobSearchBean = new Object();
         jobSearchBean.jobIds = JSON.stringify(sendNodeArray);
         jobSearchBean.pagingMap = pagingsData;
         jobSearchBean.rows = eachPageNum;

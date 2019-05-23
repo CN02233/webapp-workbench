@@ -7,6 +7,7 @@ import com.crawler.webapp.job.dao.IJobMgDao;
 import com.crawler.webapp.job.service.JobMgService;
 import com.crawler.webapp.proxyserver.bean.ProxyServer;
 import com.github.pagehelper.Page;
+import com.webapp.support.httpClient.HttpClientSupport;
 import com.webapp.support.httpClient.HttpSendMessage;
 import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
@@ -15,7 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -157,32 +161,42 @@ public class JobMgServiceImp implements JobMgService {
 
     @Override
     public String startJob(int job_id, int user_id){
-        String crawlerServer = crawlerServers.getCrawlerServer();
-        String resultMsg = callJob(crawlerServer, "start", job_id, user_id);
+//        String resultMsg = callJob(crawlerServer, "start", job_id, user_id);
+        String resultMsg = doCallJob("start",job_id,user_id);
+
+
         return resultMsg;
     }
     @Override
     public String stopJob(int job_id, int user_id){
-        String crawlerServer = crawlerServers.getCrawlerServer();
-        String resultMsg = callJob(crawlerServer, "stop", job_id, user_id);
+        String resultMsg = doCallJob("stop",job_id,user_id);
+
         return resultMsg;
     }
     @Override
     public String updateJob(int job_id, int user_id){
-        String crawlerServer = crawlerServers.getCrawlerServer();
-        String resultMsg = callJob(crawlerServer, "update", job_id, user_id);
+        String resultMsg = doCallJob("update",job_id,user_id);
         return resultMsg;
     }
 
+    private String doCallJob(String callType,int job_id, int user_id){
+        HttpClientSupport server = HttpClientSupport.getSingleInstance(new StringBuilder().append(
+                crawlerServers.getSpiderHost()).append(":").append(crawlerServers.getSpiderPort()).toString());
 
-    private String callJob(String url,String callType,int job_id, int user_id){
         Map<String,Object> paramMap = new HashMap<>();
         paramMap.put("command",callType);
         paramMap.put("job_id",job_id);
         paramMap.put("user_id",user_id);
-        String resultMsg = HttpSendMessage.postHttpRequest4Str(url, paramMap);
-        logger.debug("send to crawler start msg,response value is --->{}<---",resultMsg);
 
-        return resultMsg;
+        try {
+            String response = server.sendRequest(crawlerServers.getSpiderServiceName(), paramMap, RequestMethod.POST, false);
+            return response;
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

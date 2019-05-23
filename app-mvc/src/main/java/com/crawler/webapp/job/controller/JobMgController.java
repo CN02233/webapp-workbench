@@ -172,6 +172,11 @@ public class JobMgController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String startJob(Integer job_id, Integer user_id){
+        if(user_id==null){
+            User currUser = SessionSupport.checkoutUserFromSession();
+            user_id= currUser.getUser_id();
+        }
+
         String startResult = jobMgService.startJob(job_id, user_id);
         if(!Strings.isNullOrEmpty(startResult)&&"DONE".equals(startResult)){
             String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"启动成功",null,null);

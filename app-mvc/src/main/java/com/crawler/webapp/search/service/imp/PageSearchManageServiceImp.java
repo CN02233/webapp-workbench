@@ -7,6 +7,7 @@ import com.crawler.webapp.search.dao.PageSearchManageDao;
 import com.crawler.webapp.search.service.PageSearchManageService;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.webapp.support.httpClient.HttpClientSupport;
 import com.webapp.support.httpClient.HttpSendMessage;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.session.SessionSupport;
@@ -15,7 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -62,10 +66,7 @@ public class PageSearchManageServiceImp implements PageSearchManageService {
                     continue;
                 }
 
-                String solrServerAddres = crawlerServers.getSolrAddres();
-                StringBuilder builder = new StringBuilder();
 //                builder.append(solrServerAddres).append("/job_").append("1").append("_").append(jobId).append("/select");
-                builder.append(solrServerAddres).append("/job_").append(user.getUser_id()).append("_").append(jobId).append("/select");
 
                 Map<String,Object> paramMap = new IdentityHashMap<>();
                 if(!Strings.isNullOrEmpty(searchBean.getSearchContent())){
@@ -79,7 +80,7 @@ public class PageSearchManageServiceImp implements PageSearchManageService {
                 if(Strings.isNullOrEmpty(searchBean.getVersion())){
                     searchAll(searchBean,paramMap);
                     Map<String, String> pagingMap = searchBean.getPagingMap();
-                    paramMap.put("start",pagingMap.get(jobId.toString()));
+                     paramMap.put("start",pagingMap.get(jobId.toString()));
                     paramMap.put("rows",searchBean.getRows());
                 }else{
                     searchDetail(searchBean,paramMap);
@@ -89,14 +90,29 @@ public class PageSearchManageServiceImp implements PageSearchManageService {
                 }
 
 
-                String response = HttpSendMessage.postHttpRequest4Str(builder.toString(), paramMap);
-                logger.debug("send to solr service,param-->{} #### solr service response-->{}",paramMap.toString(),response);
-                if(Strings.isNullOrEmpty(response)){
-                    responseMap.put(jobId.toString(), Lists.newArrayList());
-                    continue;
+                HttpClientSupport httpClient = HttpClientSupport.getSingleInstance(
+                        new StringBuilder()
+                                .append(crawlerServers.getSolrHost())
+                                .append(":")
+                                .append(crawlerServers.getSolrPort()).toString());
+                String requestUrl = new StringBuilder().append(
+                        crawlerServers.getSolrServiceName()).append("/job_").append(user.getUser_id()).append("_").append(jobId).append("/select/").toString();
+                try {
+                    String response = httpClient.sendRequest(requestUrl, paramMap, RequestMethod.GET, false);
+                    logger.debug("send to solr service,param-->{} #### solr service response-->{}",paramMap.toString(),response);
+                    if(Strings.isNullOrEmpty(response)){
+                        responseMap.put(jobId.toString(), Lists.newArrayList());
+                        continue;
+                    }
+
+                    checkOutResponse(response,jobId,responseMap,fullData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
                 }
 
-                checkOutResponse(response,jobId,responseMap,fullData);
+
 
             }
         }

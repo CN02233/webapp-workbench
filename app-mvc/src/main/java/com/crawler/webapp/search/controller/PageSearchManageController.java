@@ -5,10 +5,10 @@ import com.crawler.webapp.search.bean.SearchBean;
 import com.crawler.webapp.search.service.PageSearchManageService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
-import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -50,24 +50,24 @@ public class PageSearchManageController {
     @RequestMapping("doSearch")
     @CrossOrigin(allowCredentials="true")
     @ResponseBody
-    public String doSearch(SearchBean searchBean){
+    public JsonResult doSearch(@RequestBody SearchBean searchBean){
         Map<String, Object> reponseFromSolr = pageSearchManageService.doSearch(searchBean);
-        String responseStr = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, reponseFromSolr);
-        return responseStr;
+        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, reponseFromSolr);
+        return response;
     }
 
     @RequestMapping("searchDetail")
     @CrossOrigin(allowCredentials="true")
     @ResponseBody
-    public String searchDetail(String job_id,String version){
+    public JsonResult searchDetail(String job_id, String version){
         SearchBean searchBean = new SearchBean();
         List<Object> jobList = new ArrayList<>();
         jobList.add(new Integer(job_id));
         searchBean.setJobIdList(jobList);
         searchBean.setVersion(version);
         Map<String, Object> reponseFromSolr = pageSearchManageService.doSearch(searchBean);
-        String responseStr = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, reponseFromSolr);
-        return responseStr;
+        JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, reponseFromSolr);
+        return response;
     }
 
 }
