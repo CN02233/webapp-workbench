@@ -6,8 +6,8 @@
         <el-input placeholder="请输入采集编号" v-model="job_id" style="width:180px" ></el-input>
         <el-input placeholder="请输入采集名称" v-model="job_name" style="width:180px" ></el-input>
         <el-select clearable placeholder="请选择是否有效" v-model="is_valid" style="width:180px" >
-          <el-option value="0" label="是"></el-option>
-          <el-option value="1" label="否"></el-option>
+          <el-option value="1" label="是"></el-option>
+          <el-option value="0" label="否"></el-option>
         </el-select>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
         <el-button @click="viewEdit(null,'new')" type="info">新增</el-button>
@@ -19,7 +19,6 @@
           :data="dataList"
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
-          row-style="height:20px"
           style="width: 100%;">
           <el-table-column
             prop="job_id" width="80"
@@ -29,7 +28,6 @@
           <el-table-column
             prop="job_name"
             align="left" width="180"
-            :formatter="getOriginName"
             label="采集名称">
           </el-table-column>
           <el-table-column
@@ -44,7 +42,7 @@
           </el-table-column>
           <el-table-column
             prop="is_valid" width="80"
-            :formatter="getReportStatus"
+            :formatter="getStatus"
             label="是否有效">
           </el-table-column>
           <el-table-column
@@ -95,7 +93,8 @@
         totalPage: 1,
         job_id: '',
         job_name: '',
-        is_valid: ''
+        is_valid: '',
+        rowStyle:{height:'20px'}
       }
     },
     methods:{
@@ -209,6 +208,9 @@
           })
         }).catch(() => {
         });
+      },
+      getStatus(is_valid){
+        return is_valid == '1' ? '是' : '否';
       }
     },
     mounted() {

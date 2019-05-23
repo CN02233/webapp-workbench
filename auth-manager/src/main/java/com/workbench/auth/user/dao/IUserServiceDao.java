@@ -43,15 +43,11 @@ public interface IUserServiceDao {
     @Options(useCache = false)
     List<User> listAllUser();
 
-    @Select("<script>"+query_user_columns + ",so.origin_id,so.origin_name FROM "+TABLE_NAME +
-            "  , user_origin_assign uoa,sys_origin so where u.user_name like concat('%',#{user_name},'%')"+
+    @Select("<script>"+query_user_columns + " FROM "+TABLE_NAME +
+            "  where u.user_name like concat('%',#{user_name},'%')"+
             "  <if test=\"user_id != 0\"> and u.user_id = #{user_id} </if> " +
             "  <if test=\"user_type != null\">   and u.user_type=#{user_type}  </if> " +
             "  <if test=\"user_type == null\">   and (u.user_type=1 or u.user_type=0)  </if> " +
-            " and u.user_id = uoa.user_id " +
-            " and so.origin_id = uoa.origin_id"+
-            " and so.origin_id = uoa.origin_id"+
-            "  <if test=\"originId != null\"> and uoa.origin_id = #{originId} </if> " +
             "</script>" )
     @Options(useCache = false)
     Page<User> listUsersForPage(@Param("currPage") int currPage, @Param("pageSize") int pageSize

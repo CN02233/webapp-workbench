@@ -45,6 +45,10 @@
 		<property name="prefix" value="/template/" />
 		<property name="suffix" value=".html" />
 	</bean>
+	<mvc:resources location="/" mapping="/**/*.html"/>
+	<mvc:resources location="/" mapping="/**/*.js"/>
+	<mvc:resources location="/" mapping="/**/*.css"/>
+	<mvc:resources location="/" mapping="/**/*.png"/>
 	<!--<mvc:interceptors>-->
 		<!--<mvc:interceptor>-->
 			<!--<mvc:mapping path="/**/main.do" />-->

@@ -4,7 +4,7 @@
                 :key="menuData.id"
                 :index="'M'+menuData.id">
       <template slot="title">
-        <div class="sprit-menu" v-bind:class="[spritBaseClass,spritBaseClass+'_'+menuIndex]"></div>
+        <div class="sprit-menu" ></div>
         <!--<i :class="menuIcon[menuData.name]"></i>-->
         <!--<icon name="record-checked"></icon>-->
         <span class="title-style" slot="title">{{menuData.name}}</span>
@@ -31,7 +31,7 @@
     data() {
         return {
           menuIcon:{
-            '权限管理':'el-icon-setting',
+            '系统管理':'el-icon-setting',
             '功能查看':'el-icon-more',
             '用户管理':'el-icon-service',
             '角色管理':'el-icon-tickets',
@@ -52,7 +52,7 @@
         type: Object
       },
       menuIndex:{
-        type:Number
+        type: Number
       },
       spritBaseClass:{
         type:String
