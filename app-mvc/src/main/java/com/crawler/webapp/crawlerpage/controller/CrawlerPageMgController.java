@@ -4,6 +4,8 @@ import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
 import com.crawler.webapp.crawlerpage.bean.PageField;
 import com.crawler.webapp.crawlerpage.bean.PageLink;
 import com.crawler.webapp.crawlerpage.service.CrawlerPageMgService;
+import com.crawler.webapp.util.URIEncoder;
+import com.github.pagehelper.Page;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
@@ -14,6 +16,7 @@ import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -35,8 +38,13 @@ public class CrawlerPageMgController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String listCrawlerPageByPaging(int currPage, int pageSize){
-        PageResult pageResult = PageResult.pageHelperList2PageResult(
-                crawlerPageMgService.listCrawlerPageByPaging(currPage, pageSize));
+        Page<CrawlerPage> list = crawlerPageMgService.listCrawlerPageByPaging(currPage, pageSize);
+        //转义表达式
+        for(CrawlerPage page : list){
+            encoderPage(page);
+        }
+        PageResult pageResult = PageResult.pageHelperList2PageResult(list);
+
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,pageResult);
         return result;
     }
@@ -54,9 +62,24 @@ public class CrawlerPageMgController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String craPageData(int page_id, int job_id, int user_id){
-        return  JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,
-                crawlerPageMgService.craPageData(page_id, job_id, user_id));
+        CrawlerPage page = crawlerPageMgService.craPageData(page_id, job_id, user_id);
+        encoderPage(page);
+        return  JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null, page);
 
+    }
+
+    /**
+     * 转义表达式
+     */
+    private void encoderPage(CrawlerPage page){
+        String paginate_element = page.getPaginate_element();
+        String load_indicator = page.getLoad_indicator();
+        if(paginate_element != null && !"".equals(paginate_element)){
+            page.setPaginate_element(URIEncoder.encodeURIComponent(paginate_element));
+        }
+        if(load_indicator != null && !"".equals(load_indicator)){
+            page.setLoad_indicator(URIEncoder.encodeURIComponent(load_indicator));
+        }
     }
 
     @RequestMapping("listPageLink")
@@ -82,7 +105,7 @@ public class CrawlerPageMgController {
     @RequestMapping("newSaveCrawlerPage")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String newSaveCrawlerPage(CrawlerPage crawlerPage){
+    public String newSaveCrawlerPage(@RequestBody CrawlerPage crawlerPage){
         User user = SessionSupport.checkoutUserFromSession();
         crawlerPage.setUser_id(user.getUser_id());
 
@@ -118,7 +141,7 @@ public class CrawlerPageMgController {
     @RequestMapping("updateCrawlerPage")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String updateCrawlerPage(CrawlerPage crawlerPage){
+    public String updateCrawlerPage(@RequestBody CrawlerPage crawlerPage){
         crawlerPageMgService.updateCrawlerPage(crawlerPage);
         return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
     }

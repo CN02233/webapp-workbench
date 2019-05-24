@@ -64,7 +64,8 @@ failedProcess.checkWorkbenchResult = function(response,withMessage){
       router.push("/login");
       hasOpenLogoutMessageBox = false
     }else{
-      Message.error(res.result_msg)
+      console.error('parse error:'+(res.result_msg || res))
+      Message.error(res.result_msg || res)
     }
     return false
   } else {

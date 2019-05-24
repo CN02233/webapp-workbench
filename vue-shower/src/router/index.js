@@ -84,8 +84,7 @@ const routes = [
             component: () => import('@/models/spider/jobStatus/jobStatusList')
           },
         ]
-      }
-      ,
+      },
       {
         name: 'resourceManage',
         path: '/resourceManage',
@@ -100,6 +99,40 @@ const routes = [
             name: 'offlinePageDetail',
             path: '/resourceManage/offlinePageDetail',
             component: () => import('@/models/spider/resource/offlinePageDetail')
+          }
+        ]
+      },
+      {
+        name: 'pageManage',
+        path: '/pageManage',
+        component: () => import('@/models/spider/page/pageMain'),
+        children:[
+          {
+            name: 'pageList',
+            path: '/pageManage/pageList',
+            component: () => import('@/models/spider/page/pageList')
+          },
+          {
+            name: 'pageEdit',
+            path: '/pageManage/pageEdit',
+            component: () => import('@/models/spider/page/pageEdit')
+          }
+        ]
+      },
+      {
+        name: 'pageField',
+        path: '/pageField',
+        component: () => import('@/models/spider/pageField/pageFieldMain'),
+        children:[
+          {
+            name: 'pageFieldList',
+            path: '/pageField/pageFieldList',
+            component: () => import('@/models/spider/pageField/pageFieldList')
+          },
+          {
+            name: 'pageFieldEdit',
+            path: '/pageField/pageFieldEdit',
+            component: () => import('@/models/spider/pageField/pageFieldEdit')
           }
         ]
       }

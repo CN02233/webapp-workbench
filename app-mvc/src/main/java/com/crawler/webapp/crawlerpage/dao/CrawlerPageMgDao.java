@@ -40,7 +40,7 @@ public interface CrawlerPageMgDao {
     @Options(useCache = false)
     PageFieldLocate getPageFieldLocate(int field_locate_id);
 
-    @Select("SELECT max(page_id) max_page_id FROM spider_db.crawl_page_config where job_id=#{job_id} and user_id=#{user_id}")
+    @Select("SELECT max(page_id) max_page_id FROM crawl_page_config where job_id=#{job_id} and user_id=#{user_id}")
     @Options(useCache = false)
     Integer getMaxPageId(@Param("job_id") int job_id, @Param("user_id") int user_id);
 

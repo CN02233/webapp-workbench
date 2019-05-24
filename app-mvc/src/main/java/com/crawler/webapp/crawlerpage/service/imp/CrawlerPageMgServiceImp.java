@@ -58,9 +58,8 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
                 crawlerPage.getUser_id());
         if(maxPageId==null)
             maxPageId = 0;
-        crawlerPage.setPage_id(maxPageId|1);
-
-
+        maxPageId = (maxPageId|1) + 1;
+        crawlerPage.setPage_id(maxPageId);
 
         crawlerPageMgDao.newSaveCrawlerPage(crawlerPage);
     }
@@ -68,11 +67,7 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
     @Override
     @Transactional(rollbackFor=Exception.class)
     public void updateCrawlerPage(CrawlerPage crawlerPage){
-
         crawlerPageMgDao.updateCrawlerPage(crawlerPage);
-        if(true){
-            throw new RuntimeException(".......");
-        }
     }
 
     @Override
