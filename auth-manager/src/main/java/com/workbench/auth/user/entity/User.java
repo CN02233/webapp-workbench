@@ -12,7 +12,6 @@ import java.util.List;
  * Created by pc on 2017/6/29.
  */
 public class User {
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private int user_id;
     private String user_pwd;
     private String user_name;
@@ -23,6 +22,11 @@ public class User {
     private Date last_login_time;
     private Integer  origin_id;
     private String  origin_name;
+    private String office_phone;
+    private String mobile_phone;
+    private String email;
+    private String social_code;
+
 
     public int getUser_id()
     {
@@ -54,6 +58,7 @@ public class User {
 
     public String getReg_date() {
         try{
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Preconditions.checkNotNull(this.reg_date);
             return dateFormat.format(this.reg_date);
         }catch (NullPointerException e){
@@ -75,6 +80,7 @@ public class User {
 
     public String getLast_login_time() {
         try{
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Preconditions.checkNotNull(this.last_login_time);
             return dateFormat.format(this.last_login_time);
         }catch (NullPointerException e){
@@ -125,5 +131,37 @@ public class User {
 
     public void setOrigin_id(Integer origin_id) {
         this.origin_id = origin_id;
+    }
+
+    public String getOffice_phone() {
+        return office_phone;
+    }
+
+    public void setOffice_phone(String office_phone) {
+        this.office_phone = office_phone;
+    }
+
+    public String getMobile_phone() {
+        return mobile_phone;
+    }
+
+    public void setMobile_phone(String mobile_phone) {
+        this.mobile_phone = mobile_phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSocial_code() {
+        return social_code;
+    }
+
+    public void setSocial_code(String social_code) {
+        this.social_code = social_code;
     }
 }

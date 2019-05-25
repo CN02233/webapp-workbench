@@ -48,4 +48,6 @@ public interface ReportCustomerService {
     Map<String, Object> getGridContext(String reportId, String unitId);
 
     List<ReportCustomer> allReportForOrigin(String originId);
+
+    void updateReportCustomerSubmitUser(String reportId, int user_id);
 }

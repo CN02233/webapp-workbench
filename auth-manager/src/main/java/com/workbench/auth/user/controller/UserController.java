@@ -121,7 +121,7 @@ public class UserController {
         return jsonResult.toString();
     }
 
-    @RequestMapping("getUserByUserId")
+    @RequestMapping("")
     @ResponseBody
     @JsonpCallback
     @CrossOrigin(allowCredentials="true")

@@ -571,6 +571,11 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
+    public void updateReportCustomerSubmitUser(String reportId, int user_id) {
+        reportCustomerDao.updateReportCustomerSubmitUser(reportId,user_id);
+    }
+
+    @Override
     public Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
 
         Map<String,List<String>> dataTmp = new HashMap<>();

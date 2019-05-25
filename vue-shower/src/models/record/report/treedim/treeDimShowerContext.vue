@@ -2,7 +2,7 @@
   <!--title-->
   <div >
     <div>
-      <el-col :span="colNum" v-for="forTime in totalColNum">
+      <el-col :key="forTime" :span="colNum" v-for="forTime in totalColNum">
         <el-input v-if="columGroupData[forTime-1]" :placeholder="columGroupData[forTime-1].colum_name_cn"></el-input>
         <span v-else> -- </span>
       </el-col>

@@ -14,7 +14,7 @@
         style="width: 100%">
         <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
         <el-table-column label="项目" prop="colum_name_cn"></el-table-column>
-        <el-table-column v-for="col in definedDimensions" :label="col.colum_name_cn" width="160" >
+        <el-table-column :key="col" v-for="col in definedDimensions" :label="col.colum_name_cn" width="160" >
           <template slot-scope="scope">
             <el-form-item label-width="0"	style="width:100%;" size="mini" :error="scope.row[col.dim_id+'-validateErrpr']">
               <el-tooltip class="item" effect="dark" :content="scope.row.colum_desc" placement="top">

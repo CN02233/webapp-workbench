@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-form ref="form"  label-width="40%">
-      <el-form-item size="mini" v-for="dataColum in dataObject" :label="dataColum.colum_name_cn" :error="dataColum.validate_error">
+      <el-form-item :key="dataColum" size="mini" v-for="dataColum in dataObject" :label="dataColum.colum_name_cn" :error="dataColum.validate_error">
         <el-col :span="23">
             <el-tooltip class="item" effect="dark" :content="dataColum.colum_desc" placement="top">
               <el-input v-model="dataColum.report_data"

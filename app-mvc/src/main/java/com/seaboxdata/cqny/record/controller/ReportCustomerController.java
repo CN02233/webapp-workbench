@@ -352,6 +352,7 @@ public class ReportCustomerController {
 
         String passApprove = reportCustomer.getPass_approve();
         String passReview = reportCustomer.getPass_review();
+        User currUser = SessionSupport.checkoutUserFromSession();
         if("Y".equals(passApprove)){
             if("Y".equals(passReview)){
                 reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REPORT_DONE);
@@ -361,6 +362,8 @@ public class ReportCustomerController {
         }else{
             reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
         }
+
+        reportCustomerService.updateReportCustomerSubmitUser(reportId,currUser.getUser_id());
 
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 

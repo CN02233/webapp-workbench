@@ -43,6 +43,10 @@ public class ReportCustomer {
 
     private String report_type;
 
+    private String user_name_cn;
+    private String user_mobile_phone;
+    private String user_office_phone;
+
 
     public Integer getReport_id() {
         return report_id;
@@ -255,5 +259,29 @@ public class ReportCustomer {
 
     public void setReport_type(String report_type) {
         this.report_type = report_type;
+    }
+
+    public String getUser_name_cn() {
+        return user_name_cn;
+    }
+
+    public void setUser_name_cn(String user_name_cn) {
+        this.user_name_cn = user_name_cn;
+    }
+
+    public String getUser_mobile_phone() {
+        return user_mobile_phone;
+    }
+
+    public void setUser_mobile_phone(String user_mobile_phone) {
+        this.user_mobile_phone = user_mobile_phone;
+    }
+
+    public String getUser_office_phone() {
+        return user_office_phone;
+    }
+
+    public void setUser_office_phone(String user_office_phone) {
+        this.user_office_phone = user_office_phone;
     }
 }

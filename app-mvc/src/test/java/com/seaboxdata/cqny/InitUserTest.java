@@ -1,6 +1,9 @@
 package com.seaboxdata.cqny;
 
 import com.AbstractTestService;
+import com.google.common.base.Strings;
+import com.seaboxdata.cqny.origin.service.CqnyUserService;
+import com.seaboxdata.cqny.origin.service.impl.CqnyUserServiceImp;
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.webapp.support.encryption.MD5;
@@ -19,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class InitUserTest extends AbstractTestService {
     @Resource
@@ -44,7 +48,7 @@ public class InitUserTest extends AbstractTestService {
 
 //    @Test
     public void loadUserFromDisk() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader("/home/song/myfiles/jobfiles/DFJX/user.csv"));//换成你的文件名
+        BufferedReader reader = new BufferedReader(new FileReader("/home/song/myfiles/jobfiles/DFJX/usermoreinfos.csv"));//换成你的文件名
         reader.readLine();//第一行信息，为标题信息，不用，如果需要，注释掉
         String line = null;
         User user = new User();
@@ -75,7 +79,82 @@ public class InitUserTest extends AbstractTestService {
         }
     }
 
-//    @Test
+    @Test
+    public void updateUserInfos() throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader("/home/song/myfiles/jobfiles/DFJX/usermoreinfos.csv"));//换成你的文件名
+        reader.readLine();//第一行信息，为标题信息，不用，如果需要，注释掉
+        String line = null;
+        while((line=reader.readLine())!=null) {
+            String item[] = line.split(",");//CSV格式文件为逗号分隔符文件，这里根据逗号切分
+            String userName = item[1];
+
+            String MOBILE = null;
+            String tel = null;
+            String email = null;
+            if (item.length == 9) {//没有任何联系信息
+                continue;
+            } else if (item.length == 10) {
+                MOBILE = item[9];
+            } else if (item.length == 11) {
+                MOBILE = item[9];
+                tel = item[10];
+            } else if (item.length == 12) {
+                MOBILE = item[9];
+                tel = item[10];
+                email = item[11];
+            }
+
+            if("13935352368".equals(MOBILE)){
+                System.out.println("debuge");
+            }
+
+            if(!Strings.isNullOrEmpty(MOBILE)){
+
+                MOBILE = MOBILE.replaceAll(" ", "");
+                if(MOBILE.length()!=11){
+                    String[] splitReslut = MOBILE.split("/");
+                    if(splitReslut.length>1){
+                        MOBILE = splitReslut[0];
+                        System.out.println("手机号码格式不符:"+userName+"---"+MOBILE);
+                        if(Strings.isNullOrEmpty(tel)){
+                            tel = splitReslut[1];
+                        }else{
+                            tel = tel+" "+splitReslut[1];
+                        }
+                        System.out.println("处理后的座机号:"+userName+"---"+tel);
+                    }else{
+                        System.out.println("手机号码格式不符:"+userName+"---"+MOBILE);
+                        if(Strings.isNullOrEmpty(tel)){
+                            tel = MOBILE;
+                        }else{
+                            tel = tel+" "+MOBILE;
+                        }
+                        System.out.println("处理后的座机号:"+userName+"---"+tel);
+                    }
+                    MOBILE = null;
+                }
+            }
+
+            User userInfo = userService.getUserByUserNm(userName);
+            if(userInfo!=null){
+                userInfo.setMobile_phone(MOBILE);
+                userInfo.setOffice_phone(tel);
+                userInfo.setEmail(email);
+                userService.updateUser(userInfo);
+
+            }
+
+        }
+
+    }
+
+    public static boolean checkMobile(String mobile) {
+        String regex = "(\\+\\d+)?1[3458]\\d{9}$";
+        return Pattern.matches(regex,mobile);
+    }
+
+
+    //    @Test
     public void getManagerUsers(){
         List<Origin> originList = originService.listAllOrigin();
         List<Integer> managerOrigins = new ArrayList<>();

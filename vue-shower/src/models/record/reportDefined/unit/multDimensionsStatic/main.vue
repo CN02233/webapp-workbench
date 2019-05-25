@@ -75,7 +75,7 @@
                   </el-form-item>
                 </template>
               </el-table-column>
-              <el-table-column v-for="col in editModel.dimData" :prop="col.dim_name" :label="col.dim_name_cn" width="160" >
+              <el-table-column :key="col.dim_name"  v-for="col in editModel.dimData" :prop="col.dim_name" :label="col.dim_name_cn" width="160" >
                 <!--<template slot="header" slot-scope="scope">
                   <el-button type="text" @click="openDimAdd(index,col)">{{col.dim_name_cn}}</el-button>
                   <el-button icon="el-icon-delete" size="mini" circle @click="deleteDimRow(index, col)"></el-button>

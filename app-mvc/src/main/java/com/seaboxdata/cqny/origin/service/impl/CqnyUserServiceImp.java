@@ -13,6 +13,7 @@ import com.webapp.support.page.PageResult;
 import com.workbench.auth.user.entity.User;
 import com.workbench.auth.user.entity.UserStatus;
 import com.workbench.auth.user.service.UserService;
+import com.workbench.auth.user.service.imp.UserServiceImp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

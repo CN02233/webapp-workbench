@@ -128,6 +128,8 @@ public class CqnyUserController {
         String userId = selectOriginMap.containsKey("userId")?(String)selectOriginMap.get("userId"):null;
         String user_name = selectOriginMap.containsKey("user_name")?(String)selectOriginMap.get("user_name"):null;
         String origin_type = selectOriginMap.containsKey("origin_type")?(String)selectOriginMap.get("origin_type"):null;
+
+
         if(Strings.isNullOrEmpty(userId)){
             if(!Strings.isNullOrEmpty(user_name)){
                 User user = SessionSupport.checkoutUserFromSession();
@@ -158,8 +160,7 @@ public class CqnyUserController {
 
         cqnyUserService.selectOriginType(userId,origin_type);
 
-        User user = SessionSupport.checkoutUserFromSession();
-        user.setUser_status(String.valueOf(UserStatus.NORMAL.getStatus()));
+        changeUserInfo(selectOriginMap,userId);
 
         JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "修改成功",
                 null, JsonResult.RESULT.SUCCESS);
@@ -169,12 +170,13 @@ public class CqnyUserController {
     @RequestMapping("changeSelfOriginType")
     @ResponseBody
     @CrossOrigin(allowCredentials = "true")
-    public JsonResult changeSelfOriginType(String origin_type){
+    public JsonResult changeSelfOriginType(@RequestBody Map<String,Object> requestMap){
+        String origin_type = (String) requestMap.get("origin_type");
         User currUser = SessionSupport.checkoutUserFromSession();
-        Map<String,Object> selectOriginMap = new HashMap<>();
-        selectOriginMap.put("userId",String.valueOf(currUser.getUser_id()));
-        selectOriginMap.put("origin_type",origin_type);
-        return this.selectOriginType(selectOriginMap);
+//        Map<String,Object> selectOriginMap = new HashMap<>();
+        requestMap.put("userId",String.valueOf(currUser.getUser_id()));
+        requestMap.put("origin_type",origin_type);
+        return this.selectOriginType(requestMap);
     }
 
     @RequestMapping("getCurrUserOrigin")
@@ -182,9 +184,13 @@ public class CqnyUserController {
     @CrossOrigin(allowCredentials = "true")
     public JsonResult getCurrUserOrigin(){
         User user = SessionSupport.checkoutUserFromSession();
+        user = userService.getUserByUserId(user.getUser_id());
         Origin origin = originService.getOriginByUser(user.getUser_id());
+        Map<String,Object> responeMap = new HashMap<>();
+        responeMap.put("origin",origin);
+        responeMap.put("user",user);
         JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功",
-                null, origin);
+                null, responeMap);
         return response;
     }
 
@@ -196,5 +202,22 @@ public class CqnyUserController {
         JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功",
                 null, userInfo);
         return response;
+    }
+
+    private void changeUserInfo(Map<String,Object> selectOriginMap,String userId){
+        String user_name_cn = selectOriginMap.containsKey("user_name_cn")?(String)selectOriginMap.get("user_name_cn"):null;
+        String mobile_phone = selectOriginMap.containsKey("mobile_phone")?(String)selectOriginMap.get("mobile_phone"):null;
+        String office_phone = selectOriginMap.containsKey("office_phone")?(String)selectOriginMap.get("office_phone"):null;
+        String email = selectOriginMap.containsKey("email")?(String)selectOriginMap.get("email"):null;
+        String social_code = selectOriginMap.containsKey("social_code")?(String)selectOriginMap.get("social_code"):null;
+        User userFromDb = userService.getUserByUserId(new Integer(userId));
+        userFromDb.setUser_name_cn(user_name_cn);
+        userFromDb.setMobile_phone(mobile_phone);
+        userFromDb.setOffice_phone(office_phone);
+        userFromDb.setEmail(email);
+        userFromDb.setSocial_code(social_code);
+        userService.updateUser(userFromDb);
+
+        SessionSupport.addUserToSession(userFromDb);
     }
 }

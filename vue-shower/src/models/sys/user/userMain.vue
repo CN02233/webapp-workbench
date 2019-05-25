@@ -101,9 +101,27 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="真实姓名"  prop="office_phone">
+          <el-input  :disabled="true" v-model="formData.user_name_cn"></el-input>
+        </el-form-item>
+        <el-form-item label="办公电话"   prop="office_phone">
+          <el-input  :disabled="true" v-model="formData.office_phone"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile_phone">
+          <el-input  :disabled="true" v-model="formData.mobile_phone"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱地址"  prop="email">
+          <el-input  :disabled="true" v-model="formData.email"></el-input>
+        </el-form-item>
+        <el-form-item label="统一社保代码" prop="social_code">
+          <el-input  :disabled="true" v-model="formData.social_code"></el-input>
+        </el-form-item>
+
         <el-form-item :size="small" label="所属机构" >
           <treeselect v-model="formData.origin_id"  :options="options" />
         </el-form-item>
+
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
@@ -165,6 +183,10 @@
           user_type: null,
           user_status: null,
           origin_id: null,
+          mobile_phone:'',
+          office_phone:'',
+          email:'',
+          social_code:''
         },
         options:[]
 
@@ -307,6 +329,13 @@
         this.formData.user_id = row.user_id
         this.formData.user_status = row.user_status
         this.formData.user_type = row.user_type
+        this.formData.user_name_cn = row.user_name_cn
+        this.formData.mobile_phone = row.mobile_phone
+        this.formData.office_phone = row.office_phone
+        this.formData.email = row.email
+        this.formData.social_code = row.social_code
+
+
         // set options value
         this.BaseRequest({
           url: 'origin/getOriginByUser',
@@ -359,7 +388,8 @@
             data: {'user_name': this.formData.user_name,
               'user_id': this.formData.user_id,
               'user_type': this.formData.user_type,
-              'user_status': this.formData.user_status}
+              'user_status': this.formData.user_status
+            }
           }).then(() => {
             this.Message.success('保存成功')
             // add user——origin relation
@@ -374,7 +404,8 @@
             params: {'user_name': this.formData.user_name,
               'user_id': this.formData.user_id,
               'user_type': this.formData.user_type,
-              'user_status': this.formData.user_status}
+              'user_status': this.formData.user_status
+            }
           }).then((response) => {
             this.Message.success('保存成功')
             // add user——origin relation

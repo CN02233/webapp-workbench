@@ -48,14 +48,32 @@
           </el-form-item>
         </el-form>
 
-        <el-form v-if="selectType" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
-          <h3 class="title">请选择企业类型</h3>
+        <el-form v-if="selectType" class="login-form-selecttype"
+                 :model="selectOriginType"
+                 autoComplete="on" ref="selectTypeForm" label-position="left">
+          <h3 class="title">请完善您的信息</h3>
           <!--<h3 class="title">欢迎！</h3>-->
           <el-form-item  prop="origin_type">
             <el-select  v-model="selectOriginType.origin_type" style="width:100%;" placeholder="请选择您的企业类型">
               <el-option :key="key" v-for="(value, key) in originTypes" :label="value" :value="key"></el-option>
             </el-select>
 
+          </el-form-item>
+
+          <el-form-item :error="selectOriginTypeError.user_name_cn" prop="office_phone">
+            <el-input placeholder="请输入真实姓名" v-model="selectOriginType.user_name_cn"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.office_phone" prop="office_phone">
+            <el-input placeholder="请输入办公电话" v-model="selectOriginType.office_phone"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.mobile_phone" prop="mobile_phone">
+            <el-input placeholder="请输入手机号" v-model="selectOriginType.mobile_phone"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.email" prop="email">
+            <el-input placeholder="请输入邮箱地址" v-model="selectOriginType.email"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.social_code" prop="social_code">
+            <el-input placeholder="请输入统一社保代码" v-model="selectOriginType.social_code"></el-input>
           </el-form-item>
 
           <el-form-item>
@@ -80,6 +98,41 @@
   export default {
   name: 'login',
   data() {
+
+    // var phoneValidator = (rule, value, callback) => {
+    //   let regFormat = /^[1][3578][0-9]{9}$/; //正确手机号
+    //
+    //
+    //   if (!value) {
+    //     console.log(value+"why")
+    //     return callback(new Error('请输入手机号'));
+    //   }
+    //   if (!(regFormat.test(value))) {
+    //     callback(new Error('请输入正确手机号'));
+    //   } else {
+    //     if (value < 18) {
+    //       callback(new Error('必须大于18岁'));
+    //     }else {
+    //       callback();
+    //     }
+    //   }
+    // };
+
+    var emailValidator = (rule, value, callback)  => {
+      let mal = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+      console.log(value+"???")
+
+      if (!value) {
+        console.log(value+"yes")
+
+        return callback(new Error('请输入邮箱地址'));
+      }
+      if(!(mal.test(value))) {
+        callback(new Error('请输入正确邮箱'));
+      }else{
+        callback();
+      }
+    };
     return {
         loginForm: {
             user_name: '',
@@ -92,7 +145,21 @@
         },
         selectOriginType: {
           origin_type:'1',
-          user_name:''
+          user_name:'',
+          user_name_cn:'',
+          mobile_phone:'',
+          office_phone:'',
+          email:'',
+          social_code:''
+        },
+        selectOriginTypeError:{
+          origin_type:'1',
+          user_name:'',
+          user_name_cn:'',
+          mobile_phone:'',
+          office_phone:'',
+          email:'',
+          social_code:''
         },
         originTypes:{
           '1':'燃气企业',
@@ -129,13 +196,17 @@
             }else if('PWD_EXPIRED'==response){
               $this.resetPwd = true
               this.changePwdForm.user_name = this.loginForm.user_name
+              this.checkUser()
             }else if('NEVER_LOGIN'==response){
               $this.selectType = true
               this.selectOriginType.user_name = this.loginForm.user_name
+              this.checkUser()
             }else if('USER_STATS_NOT_NORMAL'==response){
               $this.selectType = true
               this.selectOriginType.user_name = this.loginForm.user_name
+              this.checkUser()
             }
+
         })
         .catch(errorMsg=>{
           //console.log("response ......")
@@ -143,6 +214,25 @@
       }catch(e){
         //console.log("catch ......"+e)
       }
+    },
+    checkUser(){
+      this.BaseRequest({
+        url:"cqnyUser/getUserInfo",
+        method:"get",
+        params:{'user_name':this.loginForm.user_name}
+      })
+        .then(response=>{
+          if(response){
+            this.selectOriginType.mobile_phone = response.mobile_phone
+            this.selectOriginType.user_name_cn = response.user_name_cn
+            this.selectOriginType.email = response.email
+            this.selectOriginType.office_phone = response.office_phone
+            this.selectOriginType.social_code = response.social_code
+          }
+        })
+        .catch(errorMsg=>{
+          //console.log("response ......")
+        });
     },
     changePwd(){
       if(this.changePwdForm&&this.changePwdForm.user_name&&this.changePwdForm.user_pwd&&this.changePwdForm.validate_user_pwd){
@@ -181,6 +271,64 @@
       }
     },
     changeOriginType(){
+      let errorTag = false
+      this.selectOriginTypeError.mobile_phone = ""
+      this.selectOriginTypeError.office_phone = ""
+      this.selectOriginTypeError.email = ""
+      this.selectOriginTypeError.social_code = ""
+      this.selectOriginTypeError.user_name_cn = ""
+
+      if(this.selectOriginType.mobile_phone==null||this.selectOriginType.mobile_phone==''||(this.selectOriginType.mobile_phone==undefined) ){
+        this.selectOriginTypeError.mobile_phone='手机号不允许为空'
+        errorTag = true
+      }
+      if(this.selectOriginType.user_name_cn==null||this.selectOriginType.user_name_cn==''||(this.selectOriginType.user_name_cn==undefined) ){
+        this.selectOriginTypeError.user_name='姓名不允许为空'
+        errorTag = true
+      }
+      if(this.selectOriginType.office_phone==null||this.selectOriginType.office_phone==''||(this.selectOriginType.office_phone==undefined) ){
+        this.selectOriginTypeError.office_phone='办公电话不允许为空'
+        errorTag = true
+      }
+      if(this.selectOriginType.email==null||this.selectOriginType.email==''||(this.selectOriginType.email==undefined) ){
+        this.selectOriginTypeError.email='邮箱地址不允许为空'
+        errorTag = true
+      }
+      if(this.selectOriginType.social_code==null||this.selectOriginType.social_code==''||(this.selectOriginType.social_code==undefined) ){
+        this.selectOriginTypeError.social_code='统一社会信用代码不允许为空'
+        errorTag = true
+      }
+
+      if(errorTag){
+        return
+      }
+
+      let regFormat = /^[1][3578][0-9]{9}$/; //正确手机号
+
+      if (!(regFormat.test(this.selectOriginType.mobile_phone))) {
+        this.selectOriginTypeError.mobile_phone = "请输入正确的手机号"
+        errorTag = true
+      }
+
+      let mal = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+      if(!(mal.test(this.selectOriginType.email))) {
+        this.selectOriginTypeError.email = "请输入正确的邮箱地址"
+        errorTag = true
+      }
+
+      if(errorTag){
+        return
+      }
+
+
+      this.$refs['selectTypeForm'].validate((valid) => {
+        if (valid) {
+          return true
+        } else {
+          return false;
+        }
+      });
 
       this.$confirm('确定您的企业类型为【'+this.originTypes[this.selectOriginType.origin_type]+'】？', '提示', {
         confirmButtonText: '确定',
@@ -200,31 +348,31 @@
           method:"post",
           data:this.selectOriginType
         })
-          .then(response=>{
-            // debugger
-            loading.close()
-            if(!response){
-              this.selectType = false
-              this.resetPwd = false
-            }
+        .then(response=>{
+          // debugger
+          loading.close()
+          if(!response){
+            this.selectType = false
+            this.resetPwd = false
+          }
 
-            if('SUCCESS'==response){
-              this.forwardToHome()
+          if('SUCCESS'==response){
+            this.forwardToHome()
+          }else{
+            if(response.faild_reason){
+              this.Message.error(response.faild_reason)
+
+            }else if(response.result_msg){
+              this.Message.error(response.result_msg)
+
             }else{
-              if(response.faild_reason){
-                this.Message.error(response.faild_reason)
-
-              }else if(response.result_msg){
-                this.Message.error(response.result_msg)
-
-              }else{
-                this.Message.error("登陆失败")
-              }
+              this.Message.error("登陆失败")
             }
-          })
-          .catch(errorMsg=>{
-            //console.log("response ......")
-          });
+          }
+        })
+        .catch(errorMsg=>{
+          //console.log("response ......")
+        });
       }).catch(() => {
       });
 
@@ -254,6 +402,7 @@
             freeLoading()
           }
         }else{
+          // cqnyUser/getUserInfo
           if(res.resultData=='PWD_EXPIRED'){
             //console.log("重定向到修改密码页面")
           }else if(res.resultData=='NEVER_LOGIN'){//用户首次登陆
@@ -332,6 +481,15 @@
           width: 300px;
           padding: 35px 35px 15px 35px;
           margin: 120px auto;
+        }
+        .login-form-selecttype{
+          position: absolute;
+          z-index: 10086;
+          left: 0;
+          right: 0;
+          width: 300px;
+          padding: 35px 35px 15px 35px;
+          margin: 60px auto;
         }
         .tips {
             font-size: 14px;

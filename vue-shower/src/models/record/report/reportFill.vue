@@ -5,6 +5,7 @@
         <el-steps process-status="finish"	direction="vertical" :active="activeStepNum">
           <el-step :class="{'bold-step':activeStepNum==unitNum}" style="font-weight: bold;font-color:black" :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
                    @click.native="e => stepClick(e, unitNum) "
+                   :key="unitNum"
                    v-for="(unitEntity,unitNum) in unitEntities"
                    :title="unitEntity.unit_name"></el-step>
         </el-steps>
@@ -19,21 +20,23 @@
             @validateReportsCallBack="validateReportsCallBack"
             @submitReportsCallBack="submitReportsCallBack"
             @saveAndValidateCallBack="saveAndValidateCallBack"
-            class="fill-context-child"
+            class="fill-context-child" :key="unitEntity.unit_id"
             v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
             v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
           ></ReportContextRoot>
         </div>
         <!--<div v-if="isView!='Y'" class="fill-context-options">-->
-        <div v-if="isView!='Y'" class="fill-context-options">
+        <div  class="fill-context-options">
           <!--当前步骤是最后一步显示提交，已点下一步的步骤不显示下一步只显示保存-->
 
           <!--<el-button  @click="saveContext" type="danger">保存</el-button>-->
-          <el-button  @click="doSaveContext" type="danger">保存</el-button>
+          <el-button v-if="isView!='Y'" @click="doSaveContext" type="danger">保存</el-button>
           <!--<el-button  @click="validateContext" type="success">校验</el-button>-->
-          <el-button  @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
+          <el-button v-if="isView!='Y'" @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
-          <el-button  @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>
+          <el-button v-if="isView!='Y'" @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>
+          <el-button v-if="auth=='Y'"  @click="handlePass" type="warning">通过</el-button>
+          <el-button v-if="auth=='Y'"  @click="handleReject" type="warning">驳回</el-button>
         </div>
 
       </div>
@@ -61,6 +64,8 @@
         reportId:"",
         reportDefinedId:"",
         isView:'N',
+        auth:'N',//是否为审批用户查看
+        reportStats:'',
         activeStepNum:0,
         currUnitId:'',
         reportCust:{},
@@ -441,13 +446,56 @@
             path: "/record/report/reportMain"
           });
         });
-      }
+      },
+      handlePass () { // 通过
+        let url = 'ReportReviewOperator'
+        let returnUrl = 'reportApproval'
+        if(this.reportStats=='1'){
+          url = 'ReportApprovalOperator'
+          returnUrl = 'reportApproval'
+        }else if(this.reportStats=='2'){
+          url = 'ReportReviewOperator'
+          returnUrl = 'reportReview'
+        }else{
+          this.Message.error("任务状态丢失")
+          return
+        }
+
+        this.BaseRequest({
+          url: '/reportApproval/'+url,
+          method: 'get',
+          params: {'reportId': this.reportId, 'reportStatus': 'pass'}
+        }).then(() => {
+          this.Message.success("审批成功")
+          this.$router.push({
+            path: "/record/"+returnUrl
+          });
+        })
+      },
+      handleReject () { // 驳回
+        this.BaseRequest({
+          url: '/reportApproval/'+url,
+          method: 'get',
+          params: {'reportId': this.reportId, 'reportStatus': 'reject'}
+        }).then(() => {
+          this.Message.success('驳回成功')
+          this.$router.push({
+            path: "/record/"+returnUrl
+          });
+        })
+      },
     },
 
     mounted() {
       this.reportId = this.$route.query.reportId
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
+      }
+      if(this.$route.query.auth!=null&&this.$route.query.auth!=''){
+        this.auth = this.$route.query.auth
+      }
+      if(this.$route.query.reportStats!=null&&this.$route.query.reportStats!=''){
+        this.reportStats = this.$route.query.reportStats
       }
       this.checkUnitStep()
     },

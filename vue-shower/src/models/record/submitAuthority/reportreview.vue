@@ -40,6 +40,16 @@
             label="所属市">
           </el-table-column>
           <el-table-column
+            prop="user_name_cn"
+            align="left"
+            label="填报人">
+          </el-table-column>
+          <el-table-column
+            align="left"
+            :formatter="checkPhone"
+            label="联系方式">
+          </el-table-column>
+          <el-table-column
             prop="report_status"
             align="left" width="100"
             :formatter="getReportStatus"
@@ -67,6 +77,9 @@
             align="left"
           >
             <template slot-scope="scope">
+              <el-button
+                size="mini"
+                @click="viewReportFill(scope.row.report_id,scope.row.report_status)">查看</el-button>
               <el-button
                 size="mini"
                 @click="handlePass(scope.$index, scope.row)">通过</el-button>
@@ -205,6 +218,11 @@ export default {
       this.showModalPage = false
       this.isEditModal = false
     },
+    viewReportFill(reportId,reportStats){
+      this.$router.push({
+        path: "/record/report/reportFill?reportId="+reportId+"&isView=Y&auth=Y&reportStats="+reportStats
+      });
+    },
     handlePass (index, row) { // 通过
       this.BaseRequest({
         url: '/reportApproval/ReportReviewOperator',
@@ -280,6 +298,13 @@ export default {
 
     formattOriginName(reportData){
       return this.origins[reportData.report_origin]
+    },
+    checkPhone(rowData){
+      if(rowData.user_mobile_phone&&rowData.user_mobile_phone!=''){
+        return rowData.user_mobile_phone
+      }else{
+        return rowData.user_office_phone
+      }
     },
     fomartterReportDataDate(rowData){
       return rowData.report_data_start_str+'~'+rowData.report_data_end_str

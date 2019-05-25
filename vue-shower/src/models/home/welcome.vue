@@ -76,7 +76,7 @@
                 align="left"
                 label="机构名称">
               </el-table-column>
-              <el-table-column v-for="(value,key) in reportStatus"
+              <el-table-column v-for="(value,key) in reportStatus" :key="key"
                                :prop="key"
                                align="left" width="100"
                                :label="value">

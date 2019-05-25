@@ -202,4 +202,6 @@ public interface IReportCustomerDao {
     @Select("select * from report_defined_unit_multdim  where unit_id = #{unitId}")
     List<GridColumDefined> getGridMultDefiend(String unitId);
 
+    @Update("update report_customer set last_modify_user=#{user_id} where report_id = #{reportId}")
+    void updateReportCustomerSubmitUser(@Param("reportId") String reportId,@Param("user_id") int user_id);
 }

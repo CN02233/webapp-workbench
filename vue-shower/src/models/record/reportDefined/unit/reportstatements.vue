@@ -338,14 +338,14 @@
           <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需审核机构</el-col>
             <el-col align="left" :span="15">
-              <el-tag v-for="originName in submitedParams.passApproveOriginNames">{{originName}}</el-tag>
+              <el-tag :key="originName" v-for="originName in submitedParams.passApproveOriginNames">{{originName}}</el-tag>
 
             </el-col>
           </el-row>
           <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需复核机构</el-col>
             <el-col align="left" :span="15">
-              <el-tag v-for="originName in submitedParams.passReviewOriginNames">{{originName}}</el-tag>
+              <el-tag :key="originName" v-for="originName in submitedParams.passReviewOriginNames">{{originName}}</el-tag>
 
             </el-col>
           </el-row>

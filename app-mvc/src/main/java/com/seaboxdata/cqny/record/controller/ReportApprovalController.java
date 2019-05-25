@@ -391,14 +391,17 @@ public class ReportApprovalController {
     public JsonResult ReportApprovalOperator( String reportId,String reportStatus){
         ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
 
-        if("pass".equals(reportStatus)){
-            String passReview = reportCust.getPass_review();
-            if("Y".equals(passReview)){
+        String passReview = reportCust.getPass_review();
+
+        if("Y".equals(passReview)){
+            if("pass".equals(reportStatus)){
                 reportCustomerService.updateReportCustomerStatus(reportId,ReportStatus.REPORT_DONE);
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "审核成功", null,null);
+                return jsonResult;
             }
-        }else{
-            reportApprovalService.reportApprovalOperator(reportId,reportStatus);
         }
+
+        reportApprovalService.reportApprovalOperator(reportId,reportStatus);
 
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "审核成功", null,null);
         return jsonResult;
