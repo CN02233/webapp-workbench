@@ -358,7 +358,6 @@
           }
 
           const groupIds =  Object.keys(this.definedColumsGroup)
-          debugger
           groupIds.forEach(groupId=>{
             const groupContext = this.definedColumsGroup[groupId]
             const columDatas = groupContext.columDatas

@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.origin.dao;
 
 import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.origin.entity.Administrative;
+import com.seaboxdata.cqny.record.entity.Origin;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -82,4 +83,9 @@ public interface IAdministrativeDao {
 
     @Delete("delete from organization_origin_assign where organization_id = #{organizationId}")
     void delOrganizationAndOriginAssign(@Param("organizationId")String organizationId);
+
+    @Select("select so.* from sys_origin so ,organization_origin_assign ooa,user_organizations_assign uoa where\n" +
+            "so.origin_id = ooa.origin_id and ooa.organization_id=uoa.organization_id and \n" +
+            "uoa.user_id = #{userId}")
+    List<Origin> listAllOriginForOrganization(Integer userId);
 }

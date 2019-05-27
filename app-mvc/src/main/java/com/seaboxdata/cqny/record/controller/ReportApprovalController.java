@@ -65,15 +65,21 @@ public class ReportApprovalController {
             return jsonpResponse;
         }else{
             Origin originUser = originService.getOriginByUser(currUserId);
-
-            Integer parentOriginId = originUser.getParent_origin_id();
-
             PageResult emptyResult = new PageResult();
             emptyResult.setCurrPage(currPage);
             emptyResult.setPageSize(pageSize);
             emptyResult.setTotalNum(1);
             emptyResult.setTotalPage(1);
             emptyResult.setDataList(null);
+
+            if(originUser==null){
+                String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
+                return jsonpResponse;
+            }
+
+            Integer parentOriginId = originUser.getParent_origin_id();
+
+
 
             if(parentOriginId == 1){//省级机构 无权限
                 String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
@@ -186,15 +192,20 @@ public class ReportApprovalController {
             return jsonpResponse;
         }else{
             Origin originUser = originService.getOriginByUser(currUserId);
-
-            Integer parentOriginId = originUser.getParent_origin_id();
-
             PageResult emptyResult = new PageResult();
             emptyResult.setCurrPage(currPage);
             emptyResult.setPageSize(pageSize);
             emptyResult.setTotalNum(1);
             emptyResult.setTotalPage(1);
             emptyResult.setDataList(null);
+
+            if(originUser==null){
+                String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
+                return jsonpResponse;
+            }
+
+            Integer parentOriginId = originUser.getParent_origin_id();
+
 
             if(parentOriginId == 1){//省级机构 有权限
             }else{//市级机构 无权限
@@ -304,6 +315,14 @@ public class ReportApprovalController {
         }
 
         List<String> allReportOriginIds = submitauthorityService.getReportOriginForOrganizationUser(currUserId);
+
+        if(allReportOriginIds!=null&&allReportOriginIds.size()>0){
+
+        }else{
+            JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
+            return response;
+        }
+
         //根据行政机构获取报送机构
 
         List<Origin> allReportOrigins = originService.listAllOrigin();

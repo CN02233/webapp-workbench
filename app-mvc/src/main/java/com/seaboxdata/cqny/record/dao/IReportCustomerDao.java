@@ -21,7 +21,12 @@ public interface IReportCustomerDao {
 //                                    @Param("userId") Integer userId);
 
     @Select("<script>" +
-            "select rc.* from report_customer rc where rc.report_status!='4' and rc.report_origin in " +
+            "select rc.*," +
+            "u.user_name_cn user_name_cn,u.mobile_phone user_mobile_phone,u.office_phone user_office_phone " +
+            " from report_customer rc" +
+            " left join user u on " +
+            " rc.last_modify_user=u.user_id " +
+            "where rc.report_status!='4' and rc.report_origin in " +
             "<foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> " +
             "#{item}" +
             "</foreach>" +

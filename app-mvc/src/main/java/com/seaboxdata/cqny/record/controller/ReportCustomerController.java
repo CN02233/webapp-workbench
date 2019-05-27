@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.controller;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.seaboxdata.cqny.origin.service.AdministrativeService;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
@@ -33,6 +34,9 @@ public class ReportCustomerController {
     @Autowired
     private OriginService originService;
 
+    @Autowired
+    private AdministrativeService administrativeService;
+
 
     /**
      * 获取当前用户权限下报送列表
@@ -48,6 +52,10 @@ public class ReportCustomerController {
         int currUserId = currUser.getUser_id();
 
         Origin userOrigin = originService.getOriginByUser(currUserId);
+        if(userOrigin==null){
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+            return jsonResult;
+        }
         Integer userOriginId = userOrigin.getOrigin_id();
 
         List<Origin> allOrigins = originService.listAllOrigin();
@@ -157,6 +165,29 @@ public class ReportCustomerController {
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
 
+        String userType = currUser.getUser_type();
+
+        if("2".equals(userType)){//监管用户
+            List<Origin> organizationOrigins  = administrativeService.listAllOriginForOrganization(currUserId);
+            List<Origin> allOrigins = originService.listAllOrigin();
+            if(organizationOrigins!=null&&organizationOrigins.size()>0){
+                List<Integer> originParams = new ArrayList<>();
+                for (Origin originObj : organizationOrigins) {
+                    originParams.add(originObj.getOrigin_id());
+                    Integer userOriginId = originObj.getOrigin_id();
+                    List<Origin> childrenOrigin =  originService.checkoutSons(userOriginId,allOrigins);
+                    if(childrenOrigin!=null){
+                        for (Origin origin : childrenOrigin) {
+                            originParams.add(origin.getOrigin_id());
+                        }
+                    }
+                }
+                PageResult reportInfos = reportCustomerService.getChildrenReportInfos(currPage, pageSize,originParams);
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,reportInfos);
+                return jsonResult;
+            }
+        }
+        
         Origin userOrigin = originService.getOriginByUser(currUserId);
         if(userOrigin!=null){
             Integer userOriginId = userOrigin.getOrigin_id();

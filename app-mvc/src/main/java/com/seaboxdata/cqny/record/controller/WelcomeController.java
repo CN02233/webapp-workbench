@@ -1,7 +1,5 @@
 package com.seaboxdata.cqny.record.controller;
 
-import com.seaboxdata.cqny.record.entity.Origin;
-import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.WelcomeService;
 import com.webapp.support.json.JsonSupport;
@@ -71,6 +69,35 @@ public class WelcomeController {
         responseMap.put("userType",userType);
 
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,responseMap);
+
+        return jsonResult;
+    }
+
+    @RequestMapping("getReportSumInfo")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getReportSumInfo(){
+        User currUser = SessionSupport.checkoutUserFromSession();
+//        1：填报用户
+//        2：监管用户
+//        0：审核用户
+        String userType = currUser.getUser_type();
+
+        //只有监管用户和审核用户有数据
+        if("0".equals(userType)){
+
+        }else if("1".equals(userType)){
+            Map<String,Object> responseMap = new HashMap<>();
+
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,responseMap);
+            return jsonResult;
+        }else if("2".equals(userType)){
+
+        }
+
+        List<Map<String, Integer>> resultLIst = welcomeService.getReportSumInfo(currUser.getUser_id());
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,resultLIst);
 
         return jsonResult;
     }

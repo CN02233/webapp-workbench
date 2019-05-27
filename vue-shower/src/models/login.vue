@@ -281,6 +281,13 @@
       if(this.selectOriginType.mobile_phone==null||this.selectOriginType.mobile_phone==''||(this.selectOriginType.mobile_phone==undefined) ){
         this.selectOriginTypeError.mobile_phone='手机号不允许为空'
         errorTag = true
+      }else{
+        let regFormat = /^[1][3578][0-9]{9}$/; //正确手机号
+
+        if (!(regFormat.test(this.selectOriginType.mobile_phone))) {
+          this.selectOriginTypeError.mobile_phone = "请输入正确的手机号"
+          errorTag = true
+        }
       }
       if(this.selectOriginType.user_name_cn==null||this.selectOriginType.user_name_cn==''||(this.selectOriginType.user_name_cn==undefined) ){
         this.selectOriginTypeError.user_name='姓名不允许为空'
@@ -293,7 +300,15 @@
       if(this.selectOriginType.email==null||this.selectOriginType.email==''||(this.selectOriginType.email==undefined) ){
         this.selectOriginTypeError.email='邮箱地址不允许为空'
         errorTag = true
+      }else{
+        let mal = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+
+        if(!(mal.test(this.selectOriginType.email))) {
+          this.selectOriginTypeError.email = "请输入正确的邮箱地址"
+          errorTag = true
+        }
       }
+
       if(this.selectOriginType.social_code==null||this.selectOriginType.social_code==''||(this.selectOriginType.social_code==undefined) ){
         this.selectOriginTypeError.social_code='统一社会信用代码不允许为空'
         errorTag = true
@@ -302,25 +317,6 @@
       if(errorTag){
         return
       }
-
-      let regFormat = /^[1][3578][0-9]{9}$/; //正确手机号
-
-      if (!(regFormat.test(this.selectOriginType.mobile_phone))) {
-        this.selectOriginTypeError.mobile_phone = "请输入正确的手机号"
-        errorTag = true
-      }
-
-      let mal = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-
-      if(!(mal.test(this.selectOriginType.email))) {
-        this.selectOriginTypeError.email = "请输入正确的邮箱地址"
-        errorTag = true
-      }
-
-      if(errorTag){
-        return
-      }
-
 
       this.$refs['selectTypeForm'].validate((valid) => {
         if (valid) {

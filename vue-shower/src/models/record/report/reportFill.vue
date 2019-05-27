@@ -13,17 +13,17 @@
       <div class="fill-context">
         <div class="fill-context-children">
           <ReportContextRoot :ref="'reportContextRef'+unitEntity.unit_id"
-            :reportId="reportId"
-            :unitEntity="unitEntity"
-            :isView="isView"
-            @saveReportsCallBack="saveReportsCallBack"
-            @validateReportsCallBack="validateReportsCallBack"
-            @submitReportsCallBack="submitReportsCallBack"
-            @saveAndValidateCallBack="saveAndValidateCallBack"
-            class="fill-context-child" :key="unitEntity.unit_id"
-            v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
-            v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
-          ></ReportContextRoot>
+                             :reportId="reportId"
+                             :unitEntity="unitEntity"
+                             :isView="isView"
+                             @saveReportsCallBack="saveReportsCallBack"
+                             @validateReportsCallBack="validateReportsCallBack"
+                             @submitReportsCallBack="submitReportsCallBack"
+                             @saveAndValidateCallBack="saveAndValidateCallBack"
+                             class="fill-context-child" :key="unitEntity.unit_id"
+                             v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
+                             v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
+            ></ReportContextRoot>
         </div>
         <!--<div v-if="isView!='Y'" class="fill-context-options">-->
         <div  class="fill-context-options">
@@ -35,12 +35,95 @@
           <el-button v-if="isView!='Y'" @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
           <el-button v-if="isView!='Y'" @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>
-          <el-button v-if="auth=='Y'"  @click="handlePass" type="warning">通过</el-button>
-          <el-button v-if="auth=='Y'"  @click="handleReject" type="warning">驳回</el-button>
+          <!--<el-button v-if="isView!='Y'" @click="confirmSubmit" type="warning">新提交</el-button>-->
+          <el-button v-if="auth=='Y'" @click="handlePass" type="danger">通过</el-button>
+          <el-button v-if="auth=='Y'" @click="handleReject" type="success">驳回</el-button>
         </div>
 
       </div>
     </div>
+
+
+    <el-dialog
+      title="请阅读以下内容并确认"
+      :visible.sync="showSignInfos">
+      <div class="sign-readme">
+        <span>
+          这是一段信息 <br>
+          条款之类的在这列显示 <br>
+          条款之类的在这列显示 <br>
+          条款之类的在这列显示 <br>
+          条款之类的在这列显示 <br>
+          条款之类的在这列显示 <br>
+          条款之类的在这列显示
+        </span>
+      </div>
+
+      <span slot="footer" class="dialog-footer">
+         <el-row style="text-align:left;">
+          <el-col :span="24">
+            <el-checkbox v-model="checked">
+              <span class="sign-readme-checkinfo">
+                我已阅读以上条款，并保证提交数据的真实性以及准确性。
+              </span>
+            </el-checkbox>
+          </el-col>
+        </el-row>
+        <el-row style="text-align:left;">
+          <el-col :span="24">
+            <el-checkbox v-model="checked">
+              <span class="sign-readme-checkinfo">
+                不同意以上条款
+              </span>
+            </el-checkbox>
+          </el-col>
+        </el-row>
+
+        <el-button type="primary" @click="showSignInfos = false">确 认</el-button>
+
+      </span>
+
+      <div class="sign-customers">
+        <el-form v-if="selectType" class="login-form-selecttype"
+                 :model="selectOriginType"
+                 autoComplete="on" ref="selectTypeForm" label-position="left">
+          <h3 class="title">请完善您的信息</h3>
+          <!--<h3 class="title">欢迎！</h3>-->
+          <el-form-item  prop="origin_type">
+            <el-select  v-model="selectOriginType.origin_type" style="width:100%;" placeholder="请选择您的企业类型">
+              <el-option :key="key" v-for="(value, key) in originTypes" :label="value" :value="key"></el-option>
+            </el-select>
+
+          </el-form-item>
+
+          <el-form-item :error="selectOriginTypeError.user_name_cn" prop="office_phone">
+            <el-input placeholder="请输入真实姓名" v-model="selectOriginType.user_name_cn"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.office_phone" prop="office_phone">
+            <el-input placeholder="请输入办公电话" v-model="selectOriginType.office_phone"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.mobile_phone" prop="mobile_phone">
+            <el-input placeholder="请输入手机号" v-model="selectOriginType.mobile_phone"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.email" prop="email">
+            <el-input placeholder="请输入邮箱地址" v-model="selectOriginType.email"></el-input>
+          </el-form-item>
+          <el-form-item :error="selectOriginTypeError.social_code" prop="social_code">
+            <el-input placeholder="请输入统一社保代码" v-model="selectOriginType.social_code"></el-input>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" style="width:100%;" :loading="loading" @click="changeOriginType">
+              <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
+              确定
+            </el-button>
+          </el-form-item>
+        </el-form>
+
+      </div>
+
+
+    </el-dialog>
 
 
 
@@ -74,7 +157,8 @@
         doSomethinLoading:null,
         doneCount:0,
         doneExcetionMessage:null,
-        validateResult:{}
+        validateResult:{},
+        showSignInfos:false
       }
     },
     methods:{
@@ -206,6 +290,10 @@
             message: error
           });
         });
+      },
+      confirmSubmit(){
+        this.showSignInfos = true
+        // console.log(this.showSignInfos)
       },
       doSubmitContext(processName){
         // this.validateResult = {}
@@ -448,41 +536,78 @@
         });
       },
       handlePass () { // 通过
-        let url = 'ReportReviewOperator'
-        let returnUrl = 'reportApproval'
-        if(this.reportStats=='1'){
-          url = 'ReportApprovalOperator'
-          returnUrl = 'reportApproval'
-        }else if(this.reportStats=='2'){
-          url = 'ReportReviewOperator'
-          returnUrl = 'reportReview'
-        }else{
-          this.Message.error("任务状态丢失")
-          return
-        }
 
-        this.BaseRequest({
-          url: '/reportApproval/'+url,
-          method: 'get',
-          params: {'reportId': this.reportId, 'reportStatus': 'pass'}
+        this.$confirm('确认【通过】审批该报表？', '提示', {
+          confirmButtonText: '确定提交',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
         }).then(() => {
-          this.Message.success("审批成功")
-          this.$router.push({
-            path: "/record/"+returnUrl
-          });
-        })
+          let url = 'ReportReviewOperator'
+          let returnUrl = 'reportApproval'
+          if(this.reportStats=='1'){
+            url = 'ReportApprovalOperator'
+            returnUrl = 'reportApproval'
+          }else if(this.reportStats=='2'){
+            url = 'ReportReviewOperator'
+            returnUrl = 'reportReview'
+          }else{
+            this.Message.error("任务状态丢失")
+            return
+          }
+
+          this.BaseRequest({
+            url: '/reportApproval/'+url,
+            method: 'get',
+            params: {'reportId': this.reportId, 'reportStatus': 'pass'}
+          }).then(() => {
+            this.Message.success("审批成功")
+            this.$router.push({
+              path: "/record/"+returnUrl
+            });
+          })
+        }).catch(() => {
+
+        });
+
+
       },
       handleReject () { // 驳回
-        this.BaseRequest({
-          url: '/reportApproval/'+url,
-          method: 'get',
-          params: {'reportId': this.reportId, 'reportStatus': 'reject'}
+        this.$confirm('确认【驳回】审批该报表？', '提示', {
+          confirmButtonText: '确定提交',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
         }).then(() => {
-          this.Message.success('驳回成功')
-          this.$router.push({
-            path: "/record/"+returnUrl
-          });
-        })
+          let url = 'ReportReviewOperator'
+          let returnUrl = 'reportApproval'
+          if(this.reportStats=='1'){
+            url = 'ReportApprovalOperator'
+            returnUrl = 'reportApproval'
+          }else if(this.reportStats=='2'){
+            url = 'ReportReviewOperator'
+            returnUrl = 'reportReview'
+          }else{
+            this.Message.error("任务状态丢失")
+            return
+          }
+
+          this.BaseRequest({
+            url: '/reportApproval/'+url,
+            method: 'get',
+            params: {'reportId': this.reportId, 'reportStatus': 'reject'}
+          }).then(() => {
+            this.Message.success('驳回成功')
+            this.$router.push({
+              path: "/record/"+returnUrl
+            });
+          })
+        }).catch(() => {
+
+        });
+
+
+
       },
     },
 
@@ -561,6 +686,15 @@
 
   .el-step{
     cursor: pointer;
+  }
+
+  .sign-readme{
+    border:1px solid #1f69c8;
+    min-height: 200px;
+  }
+
+  .sign-readme-checkinfo{
+    font-size: 12px;
   }
 
 </style>
