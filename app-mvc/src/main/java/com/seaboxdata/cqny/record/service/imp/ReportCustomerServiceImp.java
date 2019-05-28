@@ -587,6 +587,12 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
+    public Map<String, Object> reportSignInfos(String reportId) {
+        Map<String, Object> reportSiginInfos = reportCustomerDao.reportSignInfos(reportId);
+        return reportSiginInfos;
+    }
+
+    @Override
     public Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
 
         Map<String,List<String>> dataTmp = new HashMap<>();

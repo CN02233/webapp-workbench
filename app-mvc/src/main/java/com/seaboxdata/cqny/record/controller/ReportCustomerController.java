@@ -414,7 +414,7 @@ public class ReportCustomerController {
                     Strings.isNullOrEmpty(report_account_name)||
                     Strings.isNullOrEmpty(report_leader_name)
             ){
-                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息缺失", "签名信息缺失","JsonResult.RESULT.FAILD");
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息缺失", "签名信息缺失",JsonResult.RESULT.FAILD);
                 return jsonResult;
             }
 
@@ -424,6 +424,30 @@ public class ReportCustomerController {
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "签名成功", null,JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
+    }
+
+    @RequestMapping("reportSignInfos")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult reportSignInfos(String reportId){
+        if(reportId!=null){
+
+            if(Strings.isNullOrEmpty(reportId)){
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息获取失败", "签名信息获取失败",JsonResult.RESULT.FAILD);
+                return jsonResult;
+            }
+            Map<String,Object> siginInfos = reportCustomerService.reportSignInfos(reportId);
+
+
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "签名成功", null,siginInfos);
+
+            return jsonResult;
+        }
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息获取失败", "签名信息获取失败",JsonResult.RESULT.FAILD);
+        return jsonResult;
+
+
     }
 
     class SaveSimpleUnitContext{

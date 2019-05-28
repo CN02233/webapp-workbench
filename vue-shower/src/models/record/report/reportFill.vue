@@ -105,22 +105,28 @@
       <div v-if="!showReadMe" class="sign-customers">
         <el-form label-position="right" label-width="30%" ref="siginForm">
           <el-form-item  label="填报人签名" :error="signInfomationsError.reportCustName" prop="reportCustName">
-            <el-input placeholder="请输入填报人姓名" v-model="signInfomations.reportCustName"></el-input>
+            <el-col :span="18">
+              <el-input placeholder="请输入填报人姓名" v-model="signInfomations.reportCustName"></el-input>
+            </el-col>
           </el-form-item>
           <el-form-item label="财务人员签名" :error="signInfomationsError.reportAccountName" prop="reportAccountName">
-            <el-input placeholder="请输入财务人员姓名" v-model="signInfomations.reportAccountName"></el-input>
+            <el-col :span="18">
+              <el-input placeholder="请输入财务人员姓名" v-model="signInfomations.reportAccountName"></el-input>
+            </el-col>
           </el-form-item>
           <el-form-item label="公司领导签名" :error="signInfomationsError.reportLeaderName" prop="reportLeaderName">
-            <el-input placeholder="请输入公司领导姓名" v-model="signInfomations.reportLeaderName"></el-input>
+            <el-col :span="18">
+              <el-input placeholder="请输入公司领导姓名" v-model="signInfomations.reportLeaderName"></el-input>
+            </el-col>
           </el-form-item>
 
 
-          <el-form-item>
+          <div slot="footer" class="dialog-footer">
             <el-button type="primary" style="width:100%;"  @click="doSign">
               <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
               确定
             </el-button>
-          </el-form-item>
+          </div>
         </el-form>
 
       </div>

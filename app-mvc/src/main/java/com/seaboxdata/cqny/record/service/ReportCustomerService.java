@@ -52,4 +52,6 @@ public interface ReportCustomerService {
     void updateReportCustomerSubmitUser(String reportId, int user_id);
 
     void signReport( Map<String,String> signInfos);
+
+    Map<String, Object> reportSignInfos(String reportId);
 }

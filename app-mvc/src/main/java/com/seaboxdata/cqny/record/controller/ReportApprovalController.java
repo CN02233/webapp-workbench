@@ -503,7 +503,7 @@ public class ReportApprovalController {
 
         reportApprovalService.batchReportReviewOperator(reportIdStrLIst,operator);
 
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "批量审核完成", null,JsonResult.RESULT.SUCCESS);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "批量复核完成", null,JsonResult.RESULT.SUCCESS);
         return jsonResult;
     }
 }

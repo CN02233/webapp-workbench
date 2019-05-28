@@ -90,6 +90,9 @@
                 @click="viewReportFill(scope.row.report_id,scope.row.report_status)">查看</el-button>
               <el-button
                 size="mini"
+                @click="viewReportSign(scope.row.report_id)">签字信息</el-button>
+              <el-button
+                size="mini"
                 @click="handlePass(scope.$index, scope.row)">通过</el-button>
               <el-button
                 size="mini"
@@ -113,6 +116,33 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
         <el-button type="primary" @click="handleInsert">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 新增、编辑 弹窗-->
+    <el-dialog class="table-options-modal" title="签字信息" :visible.sync="showSignModalPage" >
+      <el-form label-position="right" label-width="30%" ref="siginForm">
+        <el-form-item  label="填报人签名"  prop="reportCustName">
+          <el-col :span="18">
+            <el-input :disabled="true"  v-model="signInfomations.report_cust_name"></el-input>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="财务人员签名"  prop="reportAccountName">
+          <el-col :span="18">
+            <el-input  :disabled="true"  v-model="signInfomations.report_account_name"></el-input>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="公司领导签名"  prop="reportLeaderName">
+          <el-col :span="18">
+            <el-input  :disabled="true"  v-model="signInfomations.report_leader_name"></el-input>
+          </el-col>
+        </el-form-item>
+
+
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary"  @click="showSignModalPage=false">确定</el-button>
       </div>
     </el-dialog>
   </WorkMain>
@@ -151,9 +181,15 @@
         eachPageNum: 10,
         totalPage: 1,
         showModalPage: false,
+        showSignModalPage:false,
         isEditModal: false,
         dialogTitle: '',
-        multipleSelection:[]
+        multipleSelection:[],
+        signInfomations:{
+          report_cust_name:'',
+          report_account_name:'',
+          report_leader_name:''
+        }
       }
     },
     validations: {
@@ -237,6 +273,16 @@
           query:{"reportId":reportId,"isView":'Y',"reportStats":reportStats},
           params:{'auth':'Y'}
         });
+      },
+      viewReportSign(reportId){
+        this.BaseRequest({
+          url: '/reportCust/reportSignInfos',
+          method: 'get',
+          params: {'reportId': reportId}
+        }).then((response) => {
+            this.showSignModalPage = true
+            this.signInfomations = response
+        })
       },
       handlePass (index, row) { // 通过
         const loading = this.$loading({

@@ -48,4 +48,10 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
         siginInfos.put("report_leader_name","测21");
         reportCustomerService.signReport(siginInfos);
     }
+
+    @Test
+    public void testReportSignInfos() {
+        Map<String, Object> aa = reportCustomerService.reportSignInfos("1");
+        System.out.println(aa);
+    }
 }

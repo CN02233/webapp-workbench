@@ -10,6 +10,7 @@ import org.omg.PortableInterceptor.INACTIVE;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 public interface IReportCustomerDao {
 
@@ -221,4 +222,7 @@ public interface IReportCustomerDao {
             @Param("report_account_name") String report_account_name,
             @Param("report_leader_name") String report_leader_name
                       );
+
+    @Select("select * from report_customer_signature where report_id = #{report_id} limit 1")
+    Map<String, Object> reportSignInfos(String reportId);
 }
