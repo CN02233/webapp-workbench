@@ -18,6 +18,7 @@ import com.workbench.spring.aop.annotation.JsonpCallback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -440,16 +441,69 @@ public class ReportApprovalController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult reportReviewOperator( String reportId,String reportStatus){
         ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
-        if("reject".equals(reportStatus)) {
-            String passApprove = reportCust.getPass_approve();
-            if("Y".equals(passApprove)){
+        String passApprove = reportCust.getPass_approve();
+        if("Y".equals(passApprove)){//免审核，驳回需要直接回退到填报中
+            if("reject".equals(reportStatus)) {
                 reportCustomerService.updateReportCustomerStatus(reportId,ReportStatus.NORMAL);
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "复核成功", null,null);
+                return jsonResult;
             }
-        }else{
-            reportApprovalService.reportReviewOperator(reportId,reportStatus);
         }
+        reportApprovalService.reportReviewOperator(reportId,reportStatus);
+
 
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "复核成功", null,null);
+        return jsonResult;
+    }
+
+
+    @RequestMapping("batchReportApprovalOperator")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult batchReportApprovalOperator(@RequestBody Map<String,Object> approveParams){
+        List<Double> reportIdList = null;
+        String operator = null;
+        if(approveParams.containsKey("report_id_list")){
+            reportIdList = (List<Double>) approveParams.get("report_id_list");
+        }
+
+        if(approveParams.containsKey("operator")){
+            operator = (String) approveParams.get("operator");
+        }
+
+        List<String> reportIdStrLIst =new ArrayList<>();
+        for (Double reportIdDouble : reportIdList) {
+            reportIdStrLIst.add(reportIdDouble.toString());
+        }
+
+        reportApprovalService.batchReportApprovalOperator(reportIdStrLIst,operator);
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "批量审核完成", null,JsonResult.RESULT.SUCCESS);
+        return jsonResult;
+    }
+
+    @RequestMapping("batchReportReviewOperator")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult batchReportReviewOperator(@RequestBody Map<String,Object> reviewParams){
+        List<Double> reportIdList = null;
+        String operator = null;
+        if(reviewParams.containsKey("report_id_list")){
+            reportIdList = (List<Double>) reviewParams.get("report_id_list");
+        }
+
+        if(reviewParams.containsKey("operator")){
+            operator = (String) reviewParams.get("operator");
+        }
+
+        List<String> reportIdStrLIst =new ArrayList<>();
+        for (Double reportIdDouble : reportIdList) {
+            reportIdStrLIst.add(reportIdDouble.toString());
+        }
+
+        reportApprovalService.batchReportReviewOperator(reportIdStrLIst,operator);
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "批量审核完成", null,JsonResult.RESULT.SUCCESS);
         return jsonResult;
     }
 }

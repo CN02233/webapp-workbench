@@ -5,6 +5,8 @@ import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ReportCustomerServiceImpTest extends AbstractTestService {
 
@@ -35,5 +37,15 @@ public class ReportCustomerServiceImpTest extends AbstractTestService {
     @Test
     public void testGetGridContext() {
         System.out.println (reportCustomerService.getGridContext("1","244"));
+    }
+
+    @Test
+    public void testSignReport() {
+        Map<String,String> siginInfos = new HashMap<>();
+        siginInfos.put("report_id","1");
+        siginInfos.put("report_cust_name","测试2");
+        siginInfos.put("report_account_name","测试11");
+        siginInfos.put("report_leader_name","测21");
+        reportCustomerService.signReport(siginInfos);
     }
 }

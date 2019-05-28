@@ -35,7 +35,7 @@
           <el-button v-if="isView!='Y'" @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
           <el-button v-if="isView!='Y'" @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>
-          <!--<el-button v-if="isView!='Y'" @click="confirmSubmit" type="warning">新提交</el-button>-->
+          <el-button v-if="isView!='Y'" @click="confirmSubmit" type="warning">新提交</el-button>
           <el-button v-if="auth=='Y'" @click="handlePass" type="danger">通过</el-button>
           <el-button v-if="auth=='Y'" @click="handleReject" type="success">驳回</el-button>
         </div>
@@ -45,75 +45,78 @@
 
 
     <el-dialog
-      title="请阅读以下内容并确认"
+      :title="showReadMe?'请阅读以下内容并确认':'请签名'"
       :visible.sync="showSignInfos">
-      <div class="sign-readme">
-        <span>
+      <div v-if="showReadMe" class="sign-readme">
+        <div class="readme-context">
           这是一段信息 <br>
-          条款之类的在这列显示 <br>
-          条款之类的在这列显示 <br>
-          条款之类的在这列显示 <br>
-          条款之类的在这列显示 <br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示
+          条款之类的在这列显示 条款之类的在这列显示 条款之类的在这列显示<br>
           条款之类的在这列显示 <br>
           条款之类的在这列显示
-        </span>
+        </div>
+
+        <div  class="readme-footer">
+          <el-row style="text-align:left;margin:5px 0 0 10px;">
+            <el-col :span="24">
+              <el-checkbox @change="notAgreeReadMe=!agreeReadMe" v-model="agreeReadMe">
+                <span class="sign-readme-checkinfo">
+                  我已阅读以上条款，并保证提交数据的真实性以及准确性。
+                </span>
+              </el-checkbox>
+            </el-col>
+          </el-row>
+          <el-row style="text-align:left;margin:5px 0 0 10px;">
+            <el-col :span="24">
+              <el-checkbox @change="agreeReadMe=!notAgreeReadMe" v-model="notAgreeReadMe">
+                <span class="sign-readme-checkinfo">
+                  不同意以上条款
+                </span>
+              </el-checkbox>
+            </el-col>
+          </el-row>
+          <el-row style="text-align: right">
+            <el-button type="primary" @click="confirmReadMe">确 认</el-button>
+          </el-row>
+        </div>
       </div>
 
-      <span slot="footer" class="dialog-footer">
-         <el-row style="text-align:left;">
-          <el-col :span="24">
-            <el-checkbox v-model="checked">
-              <span class="sign-readme-checkinfo">
-                我已阅读以上条款，并保证提交数据的真实性以及准确性。
-              </span>
-            </el-checkbox>
-          </el-col>
-        </el-row>
-        <el-row style="text-align:left;">
-          <el-col :span="24">
-            <el-checkbox v-model="checked">
-              <span class="sign-readme-checkinfo">
-                不同意以上条款
-              </span>
-            </el-checkbox>
-          </el-col>
-        </el-row>
 
-        <el-button type="primary" @click="showSignInfos = false">确 认</el-button>
 
-      </span>
-
-      <div class="sign-customers">
-        <el-form v-if="selectType" class="login-form-selecttype"
-                 :model="selectOriginType"
-                 autoComplete="on" ref="selectTypeForm" label-position="left">
-          <h3 class="title">请完善您的信息</h3>
-          <!--<h3 class="title">欢迎！</h3>-->
-          <el-form-item  prop="origin_type">
-            <el-select  v-model="selectOriginType.origin_type" style="width:100%;" placeholder="请选择您的企业类型">
-              <el-option :key="key" v-for="(value, key) in originTypes" :label="value" :value="key"></el-option>
-            </el-select>
-
+      <div v-if="!showReadMe" class="sign-customers">
+        <el-form label-position="right" label-width="30%" ref="siginForm">
+          <el-form-item  label="填报人签名" :error="signInfomationsError.reportCustName" prop="reportCustName">
+            <el-input placeholder="请输入填报人姓名" v-model="signInfomations.reportCustName"></el-input>
+          </el-form-item>
+          <el-form-item label="财务人员签名" :error="signInfomationsError.reportAccountName" prop="reportAccountName">
+            <el-input placeholder="请输入财务人员姓名" v-model="signInfomations.reportAccountName"></el-input>
+          </el-form-item>
+          <el-form-item label="公司领导签名" :error="signInfomationsError.reportLeaderName" prop="reportLeaderName">
+            <el-input placeholder="请输入公司领导姓名" v-model="signInfomations.reportLeaderName"></el-input>
           </el-form-item>
 
-          <el-form-item :error="selectOriginTypeError.user_name_cn" prop="office_phone">
-            <el-input placeholder="请输入真实姓名" v-model="selectOriginType.user_name_cn"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.office_phone" prop="office_phone">
-            <el-input placeholder="请输入办公电话" v-model="selectOriginType.office_phone"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.mobile_phone" prop="mobile_phone">
-            <el-input placeholder="请输入手机号" v-model="selectOriginType.mobile_phone"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.email" prop="email">
-            <el-input placeholder="请输入邮箱地址" v-model="selectOriginType.email"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.social_code" prop="social_code">
-            <el-input placeholder="请输入统一社保代码" v-model="selectOriginType.social_code"></el-input>
-          </el-form-item>
 
           <el-form-item>
-            <el-button type="primary" style="width:100%;" :loading="loading" @click="changeOriginType">
+            <el-button type="primary" style="width:100%;"  @click="doSign">
               <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
               确定
             </el-button>
@@ -158,7 +161,20 @@
         doneCount:0,
         doneExcetionMessage:null,
         validateResult:{},
-        showSignInfos:false
+        showSignInfos:false,
+        signInfomationsError:{
+          reportCustName:'',
+          reportAccountName:'',
+          reportLeaderName:''
+        }, 
+        agreeReadMe:true,
+        notAgreeReadMe:false,
+        showReadMe:true,
+        signInfomations:{
+          reportCustName:'',
+          reportAccountName:'',
+          reportLeaderName:''
+        }
       }
     },
     methods:{
@@ -294,6 +310,53 @@
       confirmSubmit(){
         this.showSignInfos = true
         // console.log(this.showSignInfos)
+      },
+      confirmReadMe(){
+        debugger
+        if(this.agreeReadMe&&!this.notAgreeReadMe){
+          this.showReadMe = false
+        }else{
+          this.Message("请勾选下方同意选项")
+        }
+      },
+      doSign(){
+        let errorTag =false
+        if(this.signInfomations.reportCustName==null||this.signInfomations.reportCustName==''||(this.signInfomations.reportCustName==undefined) ){
+          this.signInfomationsError.reportCustName='填报人不允许为空'
+          errorTag = true
+        }
+        if(this.signInfomations.reportAccountName==null||this.signInfomations.reportAccountName==''||(this.signInfomations.reportAccountName==undefined) ){
+          this.signInfomationsError.reportAccountName='财务人员不允许为空'
+          errorTag = true
+        }
+        if(this.signInfomations.reportLeaderName==null||this.signInfomations.reportLeaderName==''||(this.signInfomations.reportLeaderName==undefined) ){
+          this.signInfomationsError.reportLeaderName='公司负责人不允许为空'
+          errorTag = true
+        }
+
+        if(errorTag){
+          return
+        }
+
+        this.BaseRequest({
+          url:"/reportCust/signReport",
+          method:"post",
+          data:{
+            report_id:this.reportId,
+            report_cust_name:this.signInfomations.reportCustName,
+            report_account_name:this.signInfomations.reportAccountName,
+            report_leader_name:this.signInfomations.reportLeaderName
+          }
+        }).then(response=>{
+          console.log(response)
+          if(response&&response=='SUCCESS'){
+            this.showSignInfos = false
+            this.showReadMe = true
+            this.doSubmitContext('VALIDATE')
+          }else{
+            this.Message.error("签名失败")
+          }
+        });
       },
       doSubmitContext(processName){
         // this.validateResult = {}
@@ -691,8 +754,21 @@
   }
 
   .sign-readme{
-    border:1px solid #1f69c8;
-    min-height: 200px;
+    /*border:1px solid #1f69c8;*/
+    height: 380px;
+    padding:0 10px 0 10px;
+    text-align: left;
+  }
+
+  .readme-context{
+    width:100%;
+    height:300px;
+    overflow: auto;
+  }
+
+  .readme-footer{
+    width:100%;
+    height:80px;
   }
 
   .sign-readme-checkinfo{

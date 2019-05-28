@@ -8,6 +8,8 @@
 
         <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
+        <el-button @click="batchApprove('pass')" type="warning">批量通过</el-button>
+        <el-button @click="batchApprove('reject')" type="info">批量驳回</el-button>
       </el-col>
     </el-row>
     <el-row class="table-page-root-outoptions">
@@ -17,7 +19,13 @@
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
           row-style="height:20px"
+          @selection-change="selectChange"
           style="width: 100%;">
+
+          <el-table-column
+            type="selection"
+            width="55">
+          </el-table-column>
           <el-table-column
             prop="report_name"
             align="left"
@@ -144,7 +152,8 @@
         totalPage: 1,
         showModalPage: false,
         isEditModal: false,
-        dialogTitle: ''
+        dialogTitle: '',
+        multipleSelection:[]
       }
     },
     validations: {
@@ -317,6 +326,37 @@
       },
       fomartterReportDataDate(rowData){
         return rowData.report_data_start_str+'~'+rowData.report_data_end_str
+      },
+      selectChange(selection){
+        // if(selection!=null&&selection.length>0){
+        //   const checkReportId = row.report_id
+        // }
+        this.multipleSelection = selection;
+      },
+      batchApprove(proccess){
+        if(this.multipleSelection!=null&&this.multipleSelection.length>0){
+          const sendReportIds = []
+
+          this.multipleSelection.forEach(multipleSelectionObj=>{
+            const reportId = multipleSelectionObj.report_id
+            sendReportIds.push(reportId)
+          })
+
+          this.BaseRequest({
+            url: 'reportApproval/batchReportApprovalOperator',
+            method: 'post',
+            data:{
+              report_id_list:sendReportIds,
+              operator:proccess
+            }
+          }).then(response => {
+            this.Message.success("批量审核完成")
+            this.getTableData(1)
+          })
+
+        }else{
+          this.Message("请勾选需要审核的报表")
+        }
       }
     },
     mounted: function () { // 初始化

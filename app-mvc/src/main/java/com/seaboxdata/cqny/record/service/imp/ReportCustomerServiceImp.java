@@ -576,6 +576,17 @@ public class ReportCustomerServiceImp implements ReportCustomerService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void signReport( Map<String,String> signInfos) {
+        String report_id = signInfos.get("report_id");
+        String report_cust_name = signInfos.get("report_cust_name");
+        String report_account_name = signInfos.get("report_account_name");
+        String report_leader_name = signInfos.get("report_leader_name");
+        reportCustomerDao.removeOldSign(report_id);
+        reportCustomerDao.saveSignInfo(report_id,report_cust_name,report_account_name,report_leader_name);
+    }
+
+    @Override
     public Map<String,String> validateSimpleUnitByColum(ArrayList<SimpleColumDefined> definedColums, ArrayList<ReportCustomerData> columDatas) {
 
         Map<String,List<String>> dataTmp = new HashMap<>();

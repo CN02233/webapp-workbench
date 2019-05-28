@@ -50,4 +50,6 @@ public interface ReportCustomerService {
     List<ReportCustomer> allReportForOrigin(String originId);
 
     void updateReportCustomerSubmitUser(String reportId, int user_id);
+
+    void signReport( Map<String,String> signInfos);
 }

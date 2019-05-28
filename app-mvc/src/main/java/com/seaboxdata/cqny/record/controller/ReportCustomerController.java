@@ -401,6 +401,31 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+    @RequestMapping("signReport")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult signReport(@RequestBody Map<String,String> signInfos){
+        if(signInfos!=null){
+            String report_cust_name = signInfos.get("report_cust_name");
+            String report_account_name = signInfos.get("report_account_name");
+            String report_leader_name = signInfos.get("report_leader_name");
+
+            if(Strings.isNullOrEmpty(report_cust_name)||
+                    Strings.isNullOrEmpty(report_account_name)||
+                    Strings.isNullOrEmpty(report_leader_name)
+            ){
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息缺失", "签名信息缺失","JsonResult.RESULT.FAILD");
+                return jsonResult;
+            }
+
+            reportCustomerService.signReport(signInfos);
+        }
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "签名成功", null,JsonResult.RESULT.SUCCESS);
+
+        return jsonResult;
+    }
+
     class SaveSimpleUnitContext{
         private ArrayList<ReportCustomerData> columDatas;
         private ArrayList<SimpleColumDefined> definedColums;

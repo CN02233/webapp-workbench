@@ -15,4 +15,7 @@ public interface ReportApprovalService {
     void reportApprovalOperator(String reportId, String reportStatus);
 
     Set getChildrenOriginsTree(int userId);
+
+    void batchReportApprovalOperator(List<String> reportIdList, String operator);
+    void batchReportReviewOperator(List<String> reportIdList, String operator);
 }

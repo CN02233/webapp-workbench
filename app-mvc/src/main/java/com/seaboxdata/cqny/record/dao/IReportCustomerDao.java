@@ -209,4 +209,16 @@ public interface IReportCustomerDao {
 
     @Update("update report_customer set last_modify_user=#{user_id} where report_id = #{reportId}")
     void updateReportCustomerSubmitUser(@Param("reportId") String reportId,@Param("user_id") int user_id);
+
+    @Delete("delete from report_customer_signature where report_id = #{report_id}")
+    void removeOldSign(String report_id);
+
+    @Insert("insert into report_customer_signature (report_id,report_cust_name,report_account_name,report_leader_name) " +
+            "values (#{report_id},#{report_cust_name},#{report_account_name},#{report_leader_name})")
+    void saveSignInfo(
+            @Param("report_id") String report_id,
+            @Param("report_cust_name") String report_cust_name,
+            @Param("report_account_name") String report_account_name,
+            @Param("report_leader_name") String report_leader_name
+                      );
 }
