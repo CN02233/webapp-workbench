@@ -259,7 +259,7 @@
     text-color:"#ffffff";
     /*active-text-color:"#3f8aff";*/
     height:95%;
-    width: 200px;
+    width: 183px;
   }
 
   .el-menu--collapse:not(.el-menu--collapse){

@@ -7,6 +7,7 @@ import com.crawler.webapp.crawlerpage.bean.PageLink;
 import com.crawler.webapp.crawlerpage.dao.CrawlerPageMgDao;
 import com.crawler.webapp.crawlerpage.service.CrawlerPageMgService;
 import com.github.pagehelper.Page;
+import com.crawler.webapp.util.tree.EntityTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by SongCQ on 2017/7/25.
@@ -28,8 +30,8 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
     private CrawlerPageMgDao crawlerPageMgDao;
 
     @Override
-    public Page<CrawlerPage> listCrawlerPageByPaging(int currPage, int pageSize) {
-        Page<CrawlerPage> resultList = crawlerPageMgDao.listCrawlerPageByPaging(currPage, pageSize);
+    public Page<CrawlerPage> listCrawlerPageByPaging(int currPage, int pageSize, CrawlerPage bean) {
+        Page<CrawlerPage> resultList = crawlerPageMgDao.listCrawlerPageByPaging(currPage, pageSize, bean);
         return resultList;
     }
 
@@ -53,13 +55,14 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
 
     @Override
     public void newSaveCrawlerPage(CrawlerPage crawlerPage) {
-        Integer maxPageId = crawlerPageMgDao.getMaxPageId(
+        Integer maxId = crawlerPageMgDao.getMaxPageId(
                 crawlerPage.getJob_id(),
                 crawlerPage.getUser_id());
-        if(maxPageId==null)
-            maxPageId = 0;
-        maxPageId = (maxPageId|1) + 1;
-        crawlerPage.setPage_id(maxPageId);
+        if(maxId==null)
+            maxId = 1;
+        else
+            maxId++;
+        crawlerPage.setPage_id(maxId);
 
         crawlerPageMgDao.newSaveCrawlerPage(crawlerPage);
     }
@@ -83,8 +86,15 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
     public void newSavePageFields(List<PageField> pageFields) {
 
         logger.debug("pageFields list value is {}",pageFields);
+        PageField newField = pageFields.get(0);
+        Integer maxId = crawlerPageMgDao.getMaxFieldId(newField.getPage_id(), newField.getJob_id(), newField.getUser_id());
+        if(maxId==null)
+            maxId = 1;
+        else
+            maxId++;
 
         for(PageField pageField : pageFields){
+            pageField.setField_id(maxId++);
             crawlerPageMgDao.savePageField(pageField);
             int fieldId = pageField.getField_id();
             int relationId = new Integer(new StringBuilder().append(pageField.getPage_id()).
@@ -103,7 +113,14 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
     @Override
     @Transactional(rollbackFor=Exception.class)
     public void newSavePageLinks(List<PageLink> pageLinks) {
+        PageLink newLink = pageLinks.get(0);
+        Integer maxId = crawlerPageMgDao.getMaxLinkId(newLink.getPage_id(), newLink.getJob_id(), newLink.getUser_id());
+        if(maxId==null)
+            maxId = 1;
+        else
+            maxId++;
         for (PageLink pageLink:pageLinks){
+            pageLink.setLink_id(maxId++);
             crawlerPageMgDao.savePageLink(pageLink);
         }
     }
@@ -144,8 +161,8 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
 
     @Override
     public void removeAllPageFields(int page_id, int job_id, int user_id){
+        crawlerPageMgDao.removeLocates(page_id, job_id, user_id);
         crawlerPageMgDao.removeLocateRelation(page_id, job_id, user_id);
-
         crawlerPageMgDao.removePageFields(0,page_id,job_id,user_id);
     }
 
@@ -158,6 +175,64 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
     public List<CrawlerPage> listCrawlerPage() {
         List<CrawlerPage> list = crawlerPageMgDao.listCrawlerPage();
         return list;
+    }
+
+    @Override
+    public PageField craFieldData(int field_id, int page_id, int job_id, int user_id) {
+        PageField pageField = crawlerPageMgDao.craFieldData(field_id, page_id, job_id, user_id);
+        return pageField;
+    }
+
+    @Override
+    public PageLink craLinkData(int link_id, int page_id, int job_id, int user_id) {
+        PageLink pageLink = crawlerPageMgDao.craLinkData(link_id, page_id, job_id, user_id);
+        return pageLink;
+    }
+
+    @Override
+    public List<EntityTree> treePageField(int page_id, int job_id, int user_id) {
+        List<EntityTree> resultList = crawlerPageMgDao.treePageField(page_id, job_id, user_id);
+        return resultList;
+    }
+
+    @Override
+    @Transactional(rollbackFor=Exception.class)
+    public void saveAllPageFields(Map<String, List<PageField>> maps) {
+        if(maps.containsKey("edit")){
+            List<PageField> list = maps.get("edit");
+            if(list.size()>0)
+                this.updatePageFields(list);
+        }
+        if(maps.containsKey("add")){
+            List<PageField> list = maps.get("add");
+            if(list.size()>0)
+                this.newSavePageFields(list);
+        }
+        /*if(maps.containsKey("del")){
+            for(PageField mod3 : maps.get("del")){
+                int field_id = mod3.getField_id();
+                int job_id = mod3.getJob_id();
+                int page_id = mod3.getPage_id();
+                int user_id = mod3.getUser_id();
+                if(field_id > 0 && job_id > 0 && page_id > 0 && user_id > 0)
+                    this.removePageFields(field_id, page_id,job_id, user_id);
+            }
+        }*/
+    }
+
+    @Override
+    @Transactional(rollbackFor=Exception.class)
+    public void saveAllPageLinks(Map<String, List<PageLink>> maps) {
+        if(maps.containsKey("edit")){
+            List<PageLink> list = maps.get("edit");
+            if(list.size()>0)
+                this.updatePageLinks(list);
+        }
+        if(maps.containsKey("add")){
+            List<PageLink> list = maps.get("add");
+            if(list.size()>0)
+                this.newSavePageLinks(list);
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
 import com.crawler.webapp.crawlerpage.bean.PageField;
 import com.crawler.webapp.crawlerpage.bean.PageFieldLocate;
 import com.crawler.webapp.crawlerpage.bean.PageLink;
+import com.crawler.webapp.util.tree.EntityTree;
 import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
@@ -14,9 +15,13 @@ import java.util.List;
  */
 public interface CrawlerPageMgDao {
 
-    @Select("select * from crawl_page_config")
+    @Select("<script>" +
+            "select c.*,u.user_name_cn,j.job_name from crawl_page_config c left join user u on c.user_id=u.user_id left join crawl_job j on c.job_id=j.job_id"+
+            "<if test='bean.page_id>0'> and c.page_id = #{bean.page_id} </if>" +
+            "<if test='bean.job_name!=null'>  and j.job_name like concat('%',#{bean.job_name},'%') </if>" +
+            "</script>")
     @Options(useCache = false)
-    Page<CrawlerPage> listCrawlerPageByPaging(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
+    Page<CrawlerPage> listCrawlerPageByPaging(@Param("currPage") int currPage, @Param("pageSize") int pageSize, @Param("bean") CrawlerPage bean);
 
     @Select("select * from crawl_page_config where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}")
     @Options(useCache = false)
@@ -44,6 +49,15 @@ public interface CrawlerPageMgDao {
     @Options(useCache = false)
     Integer getMaxPageId(@Param("job_id") int job_id, @Param("user_id") int user_id);
 
+    @Select("SELECT max(field_id) max_field_id FROM page_field where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}")
+    @Options(useCache = false)
+    Integer getMaxFieldId(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
+
+    @Select("SELECT max(link_id) max_link_id FROM page_link where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}")
+    @Options(useCache = false)
+    Integer getMaxLinkId(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
+
+
     @Insert("insert into crawl_page_config " +
             "(page_id,job_id,user_id,page_name,page_type,data_format,is_multi_page,paginate_element,load_indicator," +
             "page_interval,max_page_num,save_page_source,data_file) " +
@@ -58,17 +72,16 @@ public interface CrawlerPageMgDao {
     void savePageFiledLocateRelation(@Param("field_id") int field_id,@Param("page_id") int page_id,@Param("job_id") int job_id,
                                      @Param("user_id") int user_id, @Param("field_locate_id") int field_locate_id);
 
-    @Insert("insert into page_field (page_id,job_id,user_id,field_name,field_datatype,parent_field_id,combine_field_value) " +
-            "values (#{page_id},#{job_id},#{user_id},#{field_name},#{field_datatype},#{parent_field_id},#{combine_field_value})")
-    @Options(useGeneratedKeys = true,keyProperty = "field_id")
+    @Insert("insert into page_field (field_id,page_id,job_id,user_id,field_name,field_datatype,parent_field_id,combine_field_value) " +
+            "values (#{field_id}, #{page_id},#{job_id},#{user_id},#{field_name},#{field_datatype},#{parent_field_id},#{combine_field_value})")
     void savePageField(PageField pageField);
 
     @Insert("insert into page_field_locate (field_locate_id,field_locate_pattern,field_ext_pattern) " +
             "values (#{field_locate_id},#{field_locate_pattern},#{field_ext_pattern}) ")
     void savePageFieldLocate(PageFieldLocate pageFieldLocate);
 
-    @Insert("insert into page_link (page_id,job_id,user_id,link_locate_pattern,link_ext_pattern,next_page_id) " +
-            "values (#{page_id},#{job_id},#{user_id},#{link_locate_pattern},#{link_ext_pattern},#{next_page_id})")
+    @Insert("insert into page_link (link_id,page_id,job_id,user_id,link_locate_pattern,link_ext_pattern,next_page_id) " +
+            "values (#{link_id},#{page_id},#{job_id},#{user_id},#{link_locate_pattern},#{link_ext_pattern},#{next_page_id})")
     void savePageLink(PageLink pageLinks);
 
     @Delete("<script>delete from page_link where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id} " +
@@ -92,8 +105,26 @@ public interface CrawlerPageMgDao {
     @Delete("delete from page_field_locate_relation where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}")
     void removeLocateRelation(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
 
+    @Delete("delete from page_field_locate where field_locate_id in (select field_locate_id from page_field_locate_relation where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id})")
+    void removeLocates(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
+
     @Select("select * from crawl_page_config")
     @Options(useCache = false)
     List<CrawlerPage> listCrawlerPage();
 
+    @Select("select * from page_field where field_id=#{field_id} and page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}")
+    @Options(useCache = false)
+    PageField craFieldData(@Param("field_id") int field_id,@Param("page_id") int page_id,@Param("job_id") int job_id,@Param("user_id") int user_id);
+
+    @Select("select * from page_link where link_id=#{link_id} and page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}")
+    @Options(useCache = false)
+    PageLink craLinkData(@Param("link_id") int link_id,@Param("page_id") int page_id,@Param("job_id") int job_id,@Param("user_id") int user_id);
+
+    @Select("SELECT  " +
+            " field_id id,  " +
+            " field_name label,  " +
+            " parent_field_id parentId  " +
+            " FROM  " +
+            " page_field pf where pf.page_id=#{page_id} and pf.job_id=#{job_id} and pf.user_id=#{user_id} ")
+    List<EntityTree> treePageField(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
 }

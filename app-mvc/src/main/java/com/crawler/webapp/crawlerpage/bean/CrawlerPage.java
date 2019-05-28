@@ -31,6 +31,10 @@ public class CrawlerPage {
 
     private String data_file;
 
+    private String user_name_cn;
+
+    private String job_name;
+
     public int getPage_id() {
         return page_id;
     }
@@ -133,5 +137,21 @@ public class CrawlerPage {
 
     public void setData_file(String data_file) {
         this.data_file = data_file;
+    }
+
+    public String getUser_name_cn() {
+        return user_name_cn;
+    }
+
+    public void setUser_name_cn(String user_name_cn) {
+        this.user_name_cn = user_name_cn;
+    }
+
+    public String getJob_name() {
+        return job_name;
+    }
+
+    public void setJob_name(String job_name) {
+        this.job_name = job_name;
     }
 }

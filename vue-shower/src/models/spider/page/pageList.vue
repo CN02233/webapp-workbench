@@ -31,7 +31,7 @@
             label="采集名称">
           </el-table-column>
           <el-table-column width="100"
-            prop="user.user_name_cn"
+            prop="user_name_cn"
             align="left"
             label="用户">
           </el-table-column>
@@ -53,6 +53,8 @@
               <el-button type="primary" @click="viewEdit(scope.row,'view')" size="mini" >查看</el-button>
               <el-button type="primary" @click="viewEdit(scope.row,'edit')" size="mini" >编辑</el-button>
               <el-button type="primary" @click="delPage(scope.row)" size="mini" >删除</el-button>
+              <el-button type="primary" @click="viewGo(scope.row,'pageFieldList')" size="mini" >字段列表</el-button>
+              <el-button type="primary" @click="viewGo(scope.row,'pageLinkList')" size="mini" >链接列表</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -126,6 +128,16 @@
             "page_id": row.page_id,
             "user_id": row.user_id,
             "view_type": viewType
+          }
+        });
+      },
+      viewGo(row,viewName){
+        this.$router.push({
+          name: viewName,
+          query: {
+            "job_id": row.job_id,
+            "page_id": row.page_id,
+            "user_id": row.user_id,
           }
         });
       },

@@ -1,10 +1,8 @@
 <template>
-  <WorkMain :headerItems="['采集页面管理','页面管理','页面字段管理']">
+  <WorkMain :headerItems="['采集页面管理','页面管理','页面链接管理']">
     <el-form :rules="rules" :model="this"  ref="form">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
-        <el-input placeholder="请输入采集名称" v-model="job_name" style="width:180px" ></el-input>
-        <el-button @click="getTableData(1)" type="success">查询</el-button>
         <el-button @click="addRow()" type="info">新增</el-button>
         <el-button @click="save()" type="info">保存</el-button>
       </el-col>
@@ -20,50 +18,25 @@
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
           style="width: 100%;">
-          <el-table-column label="序号"  type="index" width="40" fixed align="center"></el-table-column>
-          <el-table-column align="left" width="120" label="字段名称">
+          <el-table-column label="序号"  type="index" width="60" fixed align="center"></el-table-column>
+          <el-table-column align="left" width="450" label="链接定位表达式">
             <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.field_name'" :rules='rules.field_name'>
-                <el-input v-model="scope.row.field_name"></el-input>
+              <el-form-item :prop="'dataList.' + scope.$index + '.link_locate_pattern'">
+                <el-input type="textarea" autosize v-model="scope.row.link_locate_pattern"></el-input>
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="120" label="上级字段">
+          <el-table-column align="left" width="120" label="链接扩展表达式">
             <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.parent_field_id'">
-                <el-tree-select :checkedKeys="[scope.row.parent_field_id]" :data="fieldList" :height="150"></el-tree-select>
+              <el-form-item :prop="'dataList.' + scope.$index + '.link_ext_pattern'">
+                <el-input v-model="scope.row.link_ext_pattern"></el-input>
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="120" label="字段类型">
+          <el-table-column align="left" width="120" label="下一页面编号">
             <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.field_datatype'" :rules='rules.field_datatype'>
-                <el-select v-model="scope.row.field_datatype" style="width:100%;" placeholder="请选择字段类型">
-                  <el-option :key="key" v-for="(key, value) in dataTypes" :label="value" :value="key"></el-option>
-                </el-select>
-              </el-form-item>
-            </template>
-          </el-table-column>
-          <el-table-column align="left" width="80" label="合并元素数据">
-            <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.combine_field_value'">
-                <el-select v-model="scope.row.combine_field_value" style="width:100%;" placeholder="是否合并元素数据">
-                  <el-option :key="key" v-for="(key, value) in yesNo" :label="value" :value="key"></el-option>
-                </el-select>
-              </el-form-item>
-            </template>
-          </el-table-column>
-          <el-table-column align="left" width="350" label="字段定位表达式">
-            <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.pageFieldLocate.field_locate_pattern'">
-                <el-input type="textarea" autosize v-model="scope.row.pageFieldLocate.field_locate_pattern"></el-input>
-              </el-form-item>
-            </template>
-          </el-table-column>
-          <el-table-column align="left" width="120" label="字段抽取">
-            <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.pageFieldLocate.field_ext_pattern'">
-                <el-input v-model="scope.row.pageFieldLocate.field_ext_pattern"></el-input>
+              <el-form-item :prop="'dataList.' + scope.$index + '.next_page_id'">
+                <el-input v-model="scope.row.next_page_id"></el-input>
               </el-form-item>
             </template>
           </el-table-column>
@@ -93,7 +66,7 @@
   import ElTreeSelect from '@/models/public/ElTreeSelect.vue'
 
   export default {
-    name: "PageFieldList",
+    name: "PageLinkList",
     describe:"页面管理页面",
     components: {
       WorkTablePager,
@@ -113,10 +86,6 @@
         job_name: '',
         fieldList:[],
         saveList:{add:[],edit:[],del:[]},
-        rules:{
-          field_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
-          field_locate_pattern:{ type:"string",required:true,message:"必填字段",trigger:"change"}
-        },
         dataTypes:{
           "字符串":0,
           "数字":1
@@ -126,19 +95,13 @@
           "是":1
         },
         formData:{
-          field_id:0,
+          link_id:0,
           page_id:0,
           job_id:0,
           user_id:0,
-          field_name:'',
-          field_datatype:0,
-          parent_field_id:0,
-          combine_field_value:0,
-          pageFieldLocate:{
-            field_locate_id:0,
-            field_locate_pattern:'',
-            field_ext_pattern:'text'
-          }
+          next_page_id:2,
+          link_locate_pattern:'',
+          link_ext_pattern:'',
         },
       }
     },
@@ -152,7 +115,7 @@
 
         const $this = this
         this.BaseRequest({
-          url: "crawler/pageMg/listPageField",
+          url: "crawler/pageMg/listPageLink",
           method: 'get',
           params: {
             currPage: pageNum,
@@ -165,8 +128,8 @@
         }).then(response => {
           $this.dataList = response
           $this.dataList.forEach(x=>{
-            if(x.pageFieldLocate.field_locate_pattern){
-              x.pageFieldLocate.field_locate_pattern = decodeURIComponent(x.pageFieldLocate.field_locate_pattern)
+            if(x.link_locate_pattern){
+              x.link_locate_pattern = decodeURIComponent(x.link_locate_pattern)
             }
           })
           //$this.totalPage = response.totalPage
@@ -235,7 +198,7 @@
           else
             $this.saveList.edit.push(x)
         })
-        this.subSave(this.saveList,'crawler/pageMg/saveAllFields')
+        this.subSave(this.saveList,'crawler/pageMg/saveAllLinks')
       },
       subCheck(){
         let checkRow = true
@@ -287,8 +250,5 @@
 
   .search-row{
     margin:5px 0 0 0;
-  }
-  .el-textarea__inner{
-    height:40px;
   }
 </style>

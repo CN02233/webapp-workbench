@@ -4,15 +4,17 @@ import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
 import com.crawler.webapp.crawlerpage.bean.PageField;
 import com.crawler.webapp.crawlerpage.bean.PageLink;
 import com.github.pagehelper.Page;
+import com.crawler.webapp.util.tree.EntityTree;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by SongCQ on 2017/7/25.
  */
 public interface CrawlerPageMgService {
-    Page<CrawlerPage> listCrawlerPageByPaging(int currPage, int pageSize);
+    Page<CrawlerPage> listCrawlerPageByPaging(int currPage, int pageSize, CrawlerPage bean);
 
     CrawlerPage craPageData(int page_id,int job_id,int user_id);
 
@@ -43,4 +45,14 @@ public interface CrawlerPageMgService {
     void removePageFields(int field_id, int page_id, int job_id, int user_id);
 
     List<CrawlerPage> listCrawlerPage();
+
+    PageField craFieldData(int field_id, int page_id, int job_id, int user_id);
+
+    PageLink craLinkData(int link_id,int page_id, int job_id, int user_id);
+
+    List<EntityTree> treePageField(int page_id, int job_id, int user_id);
+
+    void saveAllPageFields(Map<String, List<PageField>> maps);
+
+    void saveAllPageLinks(Map<String, List<PageLink>> maps);
 }

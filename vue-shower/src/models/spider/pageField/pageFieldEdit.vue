@@ -1,59 +1,24 @@
 <template>
-  <WorkMain :headerItems="['页面字段管理','页面字段编辑']">
+  <WorkMain :headerItems="['采集页面管理','页面管理','页面字段编辑']">
     <div class="job-edit-root">
       <el-form :model="formData" :rules="validateRules" ref="formData" label-width="150px">
-        <!--<el-form-item label="页面编号" prop="page_id">
-          <el-input :disabled="view_type=='view' || view_type=='edit'" v-model.number="formData.page_id" ></el-input>
-        </el-form-item>-->
-        <el-form-item label="页面名称" prop="page_name">
-          <el-input :disabled="view_type=='view'" v-model="formData.page_name" ></el-input>
+        <el-form-item label="字段名称" prop="field_name">
+          <el-input :disabled="view_type=='view'" v-model="formData.field_name" ></el-input>
         </el-form-item>
-        <el-form-item a label="采集任务" prop="job_id">
-          <el-select :disabled="view_type=='view' || view_type=='edit'" STYLE="width: 100%" v-model="formData.job_id" placeholder="请选择采集任务">
-            <el-option :key="r.job_id" v-for="r in jobList" :label="r.job_name" :value="r.job_id"></el-option>
+        <el-form-item label="上级字段名称" prop="parent_field_id">
+          <treeselect :disabled="view_type=='view'" v-model="formData.parent_field_id" :options="fieldList" />
+        </el-form-item>
+        <el-form-item label="数据类型"  prop="field_datatype">
+          <el-select :disabled="view_type=='view'" v-model.number="formData.field_datatype.toString()" style="width:100%;" placeholder="请选择数据类型">
+            <el-option label="字符串" value="0"></el-option>
+            <el-option label="数字" value="1"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item a label="用户" prop="user_id">
-          <el-select :disabled="view_type=='view' || view_type=='edit'" STYLE="width: 100%" v-model="formData.user_id" placeholder="请选择用户">
-            <el-option :key="r.user_id" v-for="r in userList" :label="r.user_name" :value="r.user_id"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="页面类型"  prop="page_type">
-          <el-select :disabled="view_type=='view'" v-model.number="formData.page_type.toString()" style="width:100%;" placeholder="请选择页面类型">
-            <el-option label="静态页面" value="0"></el-option>
-            <el-option label="动态页面" value="1"></el-option>
-            <el-option label="JSON页面" value="2"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="数据类型"  prop="data_format">
-          <el-select :disabled="view_type=='view'" v-model.number="formData.data_format.toString()" style="width:100%;" placeholder="请选择数据类型">
-            <el-option label="TABLE" value="0"></el-option>
-            <el-option label="JSON" value="1"></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="是否多页"  prop="is_multi_page">
-          <el-select :disabled="view_type=='view'" v-model="formData.is_multi_page.toString()" style="width:100%;" placeholder="是否多页">
-            <el-option label="否" value="0"></el-option>
+        <el-form-item label="合并元素数据"  prop="combine_field_value">
+          <el-select :disabled="view_type=='view'" v-model.number="formData.combine_field_value.toString()" style="width:100%;" placeholder="请选择数据类型">
             <el-option label="是" value="1"></el-option>
+            <el-option label="否" value="0"></el-option>
           </el-select>
-        </el-form-item>
-        <el-form-item label="翻页元素">
-          <el-input :disabled="view_type=='view'" v-model="formData.paginate_element" ></el-input>
-        </el-form-item>
-        <el-form-item label="加载完成标志元素">
-          <el-input :disabled="view_type=='view'" v-model="formData.load_indicator" ></el-input>
-        </el-form-item>
-        <el-form-item label="翻页间隔时间">
-          <el-input :disabled="view_type=='view'" v-model.number="formData.page_interval" ></el-input>
-        </el-form-item>
-        <el-form-item label="最大页数">
-          <el-input :disabled="view_type=='view'" v-model.number="formData.max_page_num" ></el-input>
-        </el-form-item>
-        <el-form-item label="保存页面源码">
-          <el-input :disabled="view_type=='view'" v-model="formData.save_page_source" ></el-input>
-        </el-form-item>
-        <el-form-item label="数据文件">
-          <el-input :disabled="view_type=='view'" v-model="formData.data_file" ></el-input>
         </el-form-item>
         <el-form-item label-width="0" style="text-align: right">
           <el-button v-if="view_type!='view'" type="success" @click="save" size="small">保存</el-button>
@@ -71,59 +36,34 @@
 
 <script>
   import WorkMain from '@/models/public/WorkMain'
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
   export default {
     name: "PageFieldEdit",
     describe:"页面编辑页面",
     components: {
-      WorkMain
+      WorkMain,
+      Treeselect
     },
     data(){
       return {
         view_type: 'view',//view edit new
         pageTitle:'',
-        userList:[],
-        jobList:[],
+        fieldList:[],
         formData:{
+          field_id:0,
           page_id:0,
           job_id:0,
           user_id:0,
-          page_name:'',
-          page_type:0,
-          data_format:0,
-          is_multi_page:0,
-          paginate_element:'',
-          load_indicator:'',
-          page_interval:0,
-          max_page_num:0,
-          save_page_source:0,
-          data_file:''
+          field_name:'',
+          field_datatype:'',
+          parent_field_id:'',
+          combine_field_value:''
         },
         validateRules:{
-          page_id: [
-            { required: true, message: '请输入页面编号', trigger: 'blur' },
-            { type: 'number', message: '必须为数字'}
-          ],
-          job_id: [
-            { required: true, message: '请选择采集任务', trigger: 'blur' }
-          ],
-          user_id: [
-            { required: true, message: '请选择用户', trigger: 'blur' }
-          ],
-          page_name: [
-            { required: true, message: '请输入页面名称', trigger: 'blur' }
-          ],
-          page_interval: [
-            { required: false, message: '可为空', trigger: 'blur' },
-            { type: 'number', message: '必须为数字'}
-          ],
-          max_page_num: [
-            { required: false, message: '可为空', trigger: 'blur' },
-            { type: 'number', message: '必须为数字'}
-          ],
-          save_page_source: [
-            { required: false, message: '可为空', trigger: 'blur' },
-            { type: 'number', message: '必须为数字'}
+          field_name: [
+            { required: true, message: '请输入字段名称', trigger: 'blur' }
           ]
         }
       }
@@ -131,9 +71,10 @@
     methods:{
       getInfo(){
         this.BaseRequest({
-          url: "crawler/pageMg/craPageData",
+          url: "crawler/pageMg/craFieldData",
           method: 'get',
           params: {
+            field_id: this.formData.field_id,
             job_id: this.formData.job_id,
             page_id: this.formData.page_id,
             user_id: this.formData.user_id
@@ -176,39 +117,41 @@
           });
         })
       },
-      getUserList(){
+      getFieldList(){
         const $this = this
         $this.BaseRequest({
-          url: "sys/user/listAllUser",
+          url: "crawler/pageMg/treePageField",
           method: 'get',
           params: {
+            job_id:this.formData.job_id,
+            page_id:this.formData.page_id,
+            user_id:this.formData.user_id
           }
         }).then(response => {
-          $this.userList = response
-        })
-      },
-      getJobList(){
-        const $this = this
-        $this.BaseRequest({
-          url: "crawler/jobMg/listAllCraw",
-          method: 'get',
-          params: {
-          }
-        }).then(response => {
-          $this.jobList = response
+          $this.fieldList = response
         })
       },
       goBack(){
         this.$router.push({
-          name: "pageList"
+          name: "pageFieldList",
+          query: {
+            "job_id": this.formData.job_id,
+            "page_id": this.formData.page_id,
+            "user_id": this.formData.user_id
+          }
         });
       }
     },
     mounted() {
-      this.formData.page_id = this.$route.params.page_id
-      this.formData.job_id = this.$route.params.job_id
-      this.formData.user_id = this.$route.params.user_id
-      this.view_type = this.$route.params.view_type
+      this.formData.field_id = this.$route.query.field_id
+      this.formData.page_id = this.$route.query.page_id
+      this.formData.job_id = this.$route.query.job_id
+      this.formData.user_id = this.$route.query.user_id
+      this.view_type = this.$route.query.view_type
+      if(!this.formData.field_id && !this.formData.page_id){
+        this.view_type=='view'
+        return
+      }
       if(this.view_type=='edit'||this.view_type=='view'){
         this.getInfo()
       }
@@ -220,8 +163,7 @@
       }else if(this.view_type=='new'){
         this.pageTitle = "新增"
       }
-      this.getUserList()
-      this.getJobList()
+      this.getFieldList()
     }
   }
 </script>

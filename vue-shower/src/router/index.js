@@ -128,11 +128,18 @@ const routes = [
             name: 'pageFieldList',
             path: '/pageField/pageFieldList',
             component: () => import('@/models/spider/pageField/pageFieldList')
-          },
+          }
+        ]
+      },
+      {
+        name: 'pageLink',
+        path: '/pageLink',
+        component: () => import('@/models/spider/pageLink/pageLinkMain'),
+        children:[
           {
-            name: 'pageFieldEdit',
-            path: '/pageField/pageFieldEdit',
-            component: () => import('@/models/spider/pageField/pageFieldEdit')
+            name: 'pageLinkList',
+            path: '/pageLink/pageLinkList',
+            component: () => import('@/models/spider/pageLink/pageLinkList')
           }
         ]
       }
