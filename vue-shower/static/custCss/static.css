@@ -1,0 +1,19 @@
+.wx-image-area{
+  position:relative;
+}
+
+.wx-image{
+  position:absolute;
+  bottom:50px;
+  right:50px;
+  color:red;
+}
+
+
+.wx-image>div{
+  background: url("../image/logo.png") no-repeat 0px 5px;
+  background-size: 100px 100px;
+  width:100px;
+  height:105px;
+  float: left;
+}

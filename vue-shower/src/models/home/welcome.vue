@@ -47,8 +47,8 @@
               <template slot-scope="scope">
 
                 <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
-                <el-button size="mini" v-if="scope.row.report_status == 1" @click="reportApprove(scope.row.report_id)">审批</el-button>
-                <el-button size="mini" v-if="scope.row.report_status == 2" @click="reportReview(scope.row.report_id)">审核</el-button>
+                <el-button size="mini" v-if="scope.row.report_status == 1" @click="reportApprove(scope.row.report_id)">审核</el-button>
+                <el-button size="mini" v-if="scope.row.report_status == 2" @click="reportReview(scope.row.report_id)">复核</el-button>
               </template>
             </el-table-column>
           </el-table>

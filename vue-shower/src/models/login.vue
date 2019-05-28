@@ -1,99 +1,117 @@
 <template>
 
   <div class="login-container" >
-    <vue-particle-line>
-      <div v-bind:class="loadingLogin" >
-        <el-form v-if="!resetPwd&&!selectType" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
-          <h3 class="title">天然气输配价格监管系统</h3>
-          <!--<h3 class="title">欢迎！</h3>-->
-          <el-form-item  prop="user_name">
-            <el-input  name="user_name" type="text" v-model="loginForm.user_name" autoComplete="on"
-                       placeholder="请输入用户名"/>
-          </el-form-item>
-          <el-form-item  prop="user_pwd">
-            <el-input placeholder="请输入密码" v-model="loginForm.user_pwd" show-password></el-input>
-            <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
-          </el-form-item>
+    <vue-particle-line class="back-root">
+      <div class="login-root" v-bind:class="loadingLogin" >
+        <div class="cust-input-area">
+          <el-form v-if="!resetPwd&&!selectType" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
+            <h3 class="title">天然气输配价格监管系统</h3>
+            <!--<h3 class="title">欢迎！</h3>-->
+            <el-form-item  prop="user_name">
+              <el-input  name="user_name" type="text" v-model="loginForm.user_name" autoComplete="on"
+                         placeholder="请输入用户名"/>
+            </el-form-item>
+            <el-form-item  prop="user_pwd">
+              <el-input placeholder="请输入密码" v-model="loginForm.user_pwd" show-password></el-input>
+              <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
+            </el-form-item>
 
-          <el-form-item>
-            <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">
-              <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
-              登入系统
-            </el-button>
-          </el-form-item>
-        </el-form>
+            <el-form-item>
+              <el-button type="primary" style="width:100%;" :loading="loading" @click.native.prevent="handleLogin">
+                <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
+                登入系统
+              </el-button>
+            </el-form-item>
+          </el-form>
 
-        <el-form v-if="resetPwd" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
-          <h3 class="title">您的密码已过期,请输入您的密码</h3>
-          <!--<h3 class="title">欢迎！</h3>-->
-          <el-form-item  prop="user_name">
-            <el-input  name="user_name" type="text" v-model="changePwdForm.user_name" autoComplete="on"
-                       placeholder="请输入用户名"/>
-          </el-form-item>
-          <el-form-item  prop="user_pwd">
-            <el-input placeholder="请输入密码" v-model="changePwdForm.user_pwd" show-password></el-input>
-            <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
-          </el-form-item>
-          <el-form-item  prop="user_pwd">
-            <el-input placeholder="请确认密码" v-model="changePwdForm.validate_user_pwd" show-password></el-input>
-            <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
-          </el-form-item>
+          <el-form v-if="resetPwd" class="login-form" autoComplete="on" ref="loginForm" label-position="left">
+            <h3 class="title">您的密码已过期,请输入您的密码</h3>
+            <!--<h3 class="title">欢迎！</h3>-->
+            <el-form-item  prop="user_name">
+              <el-input  name="user_name" type="text" v-model="changePwdForm.user_name" autoComplete="on"
+                         placeholder="请输入用户名"/>
+            </el-form-item>
+            <el-form-item  prop="user_pwd">
+              <el-input placeholder="请输入密码" v-model="changePwdForm.user_pwd" show-password></el-input>
+              <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
+            </el-form-item>
+            <el-form-item  prop="user_pwd">
+              <el-input placeholder="请确认密码" v-model="changePwdForm.validate_user_pwd" show-password></el-input>
+              <!--<span class="show-pwd" @click="showPwd"><svg-icon icon-class="eye" /></span>-->
+            </el-form-item>
 
 
-          <el-form-item>
-            <el-button type="primary" style="width:100%;" :loading="loading" @click="changePwd">
-              <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
-              确定
-            </el-button>
-          </el-form-item>
-        </el-form>
+            <el-form-item>
+              <el-button type="primary" style="width:100%;" :loading="loading" @click="changePwd">
+                <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
+                确定
+              </el-button>
+            </el-form-item>
+          </el-form>
 
-        <el-form v-if="selectType" class="login-form-selecttype"
-                 :model="selectOriginType"
-                 autoComplete="on" ref="selectTypeForm" label-position="left">
-          <h3 class="title">请完善您的信息</h3>
-          <!--<h3 class="title">欢迎！</h3>-->
-          <el-form-item  prop="origin_type">
-            <el-select  v-model="selectOriginType.origin_type" style="width:100%;" placeholder="请选择您的企业类型">
-              <el-option :key="key" v-for="(value, key) in originTypes" :label="value" :value="key"></el-option>
-            </el-select>
+          <el-form v-if="selectType" class="login-form-selecttype"
+                   :model="selectOriginType"
+                   autoComplete="on" ref="selectTypeForm" label-position="left">
+            <h3 class="title">请完善您的信息</h3>
+            <!--<h3 class="title">欢迎！</h3>-->
+            <el-form-item  prop="origin_type">
+              <el-select  v-model="selectOriginType.origin_type" style="width:100%;" placeholder="请选择您的企业类型">
+                <el-option :key="key" v-for="(value, key) in originTypes" :label="value" :value="key"></el-option>
+              </el-select>
 
-          </el-form-item>
+            </el-form-item>
 
-          <el-form-item :error="selectOriginTypeError.user_name_cn" prop="office_phone">
-            <el-input placeholder="请输入真实姓名" v-model="selectOriginType.user_name_cn"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.office_phone" prop="office_phone">
-            <el-input placeholder="请输入办公电话" v-model="selectOriginType.office_phone"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.mobile_phone" prop="mobile_phone">
-            <el-input placeholder="请输入手机号" v-model="selectOriginType.mobile_phone"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.email" prop="email">
-            <el-input placeholder="请输入邮箱地址" v-model="selectOriginType.email"></el-input>
-          </el-form-item>
-          <el-form-item :error="selectOriginTypeError.social_code" prop="social_code">
-            <el-input placeholder="请输入统一社保代码" v-model="selectOriginType.social_code"></el-input>
-          </el-form-item>
+            <el-form-item :error="selectOriginTypeError.user_name_cn" prop="office_phone">
+              <el-input placeholder="请输入真实姓名" v-model="selectOriginType.user_name_cn"></el-input>
+            </el-form-item>
+            <el-form-item :error="selectOriginTypeError.office_phone" prop="office_phone">
+              <el-input placeholder="请输入办公电话" v-model="selectOriginType.office_phone"></el-input>
+            </el-form-item>
+            <el-form-item :error="selectOriginTypeError.mobile_phone" prop="mobile_phone">
+              <el-input placeholder="请输入手机号" v-model="selectOriginType.mobile_phone"></el-input>
+            </el-form-item>
+            <el-form-item :error="selectOriginTypeError.email" prop="email">
+              <el-input placeholder="请输入邮箱地址" v-model="selectOriginType.email"></el-input>
+            </el-form-item>
+            <el-form-item :error="selectOriginTypeError.social_code" prop="social_code">
+              <el-input placeholder="请输入统一社保代码" v-model="selectOriginType.social_code"></el-input>
+            </el-form-item>
 
-          <el-form-item>
-            <el-button type="primary" style="width:100%;" :loading="loading" @click="changeOriginType">
-              <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
-              确定
-            </el-button>
-          </el-form-item>
-        </el-form>
+            <el-form-item>
+              <el-button type="primary" style="width:100%;" :loading="loading" @click="changeOriginType">
+                <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
+                确定
+              </el-button>
+            </el-form-item>
+          </el-form>
+        </div>
+
+
 
       </div>
+
+
+
+
+
     </vue-particle-line>
+
+    <div class="wx-image-area">
+      <div class="wx-image">
+        <div></div>
+      </div>
+    </div>
 
 
   </div>
+
+
 </template>
 
 <script>
-  import workbenchReponse from '@/utils/workbenchResponseFailed'
   import { Loading } from 'element-ui';
+
+  import staticCss from '../../static/custCss/static.css'
 
   export default {
   name: 'login',
@@ -461,6 +479,7 @@
 </style>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
+
     $bg: #2d3a4b;
     $dark_gray: #889aa4;
     $light_gray: #eee;
@@ -528,4 +547,32 @@
   .loading-login{
     visibility:hidden;
   }
+
+  .vue-particle-line>div{
+    width:100%;
+    height: 100% !important;
+  }
+
+  .login-root{
+    width:100%;
+    height: 100%;
+  }
+
+  .cust-input-area{
+    width:100%;
+    height:calc(100% - 200px) !important;
+    float:left;
+    /*border:1px solid black;*/
+  }
+
+
+
+  /*.wx-image {*/
+    /*position:absolute;*/
+    /*bottom:0;*/
+    /*right:0;*/
+  /*}*/
+
+
+
 </style>

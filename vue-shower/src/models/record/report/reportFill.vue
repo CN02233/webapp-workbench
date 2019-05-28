@@ -616,8 +616,10 @@
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
       }
-      if(this.$route.query.auth!=null&&this.$route.query.auth!=''){
-        this.auth = this.$route.query.auth
+      console.log(this.$route.params)
+
+      if(this.$route.params.auth!=null&&this.$route.params.auth!=''){
+        this.auth = this.$route.params.auth
       }
       if(this.$route.query.reportStats!=null&&this.$route.query.reportStats!=''){
         this.reportStats = this.$route.query.reportStats

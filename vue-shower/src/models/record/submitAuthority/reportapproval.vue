@@ -224,7 +224,9 @@
       },
       viewReportFill(reportId,reportStats){
         this.$router.push({
-          path: "/record/report/reportFill?reportId="+reportId+"&isView=Y&auth=Y&reportStats="+reportStats
+          name: "reportFill",
+          query:{"reportId":reportId,"isView":'Y',"reportStats":reportStats},
+          params:{'auth':'Y'}
         });
       },
       handlePass (index, row) { // 通过
