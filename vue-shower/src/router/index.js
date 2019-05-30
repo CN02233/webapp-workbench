@@ -74,6 +74,45 @@ const routes = [
         ]
       },
       {
+        name: 'jobConfigManage',
+        path: '/jobConfigManage',
+        component: () => import('@/models/spider/Jobconfig/jobConfigMain'),
+        children:[
+          {
+            name: 'jobConfigList',
+            path: '/jobConfigManage/jobConfigList',
+            component: () => import('@/models/spider/jobconfig/jobConfigList')
+          },
+          {
+            name: 'jobConfigEdit',
+            path: '/jobConfigManage/jobConfigEdit',
+            component: () => import('@/models/spider/jobconfig/jobConfigEdit')
+          }
+        ]
+      },
+      {
+        name: 'jobScheduleManage',
+        path: '/jobScheduleManage',
+        component: () => import('@/models/spider/jobSchedule/jobScheduleMain'),
+        children: [
+          {
+            name: 'jobScheduleList',
+            path: '/jobScheduleManage/jobScheduleList',
+            component: () => import('@/models/spider/jobSchedule/jobScheduleList')
+          },
+          {
+            name: 'jobScheduleAdd',
+            path: '/jobScheduleManage/jobScheduleAdd',
+            component: () => import('@/models/spider/jobSchedule/jobScheduleAdd')
+          },
+          {
+            name: 'jobScheduleEdit',
+            path: '/jobScheduleManage/jobScheduleEdit',
+            component: () => import('@/models/spider/jobSchedule/jobScheduleEdit')
+          }
+        ]
+      },
+      {
         name: 'jobStatus',
         path: '/jobStatus',
         component: () => import('@/models/spider/jobStatus/jobStatusMain'),
