@@ -208,7 +208,41 @@ const routes = [
             component: () => import('@/models/spider/dataField/dataFieldSql')
           }
         ]
-      }
+      },
+      {
+        name: 'crawlServer',
+        path: '/crawlServer',
+        component: () => import('@/models/spider/crawlServer/crawlServerMain'),
+        children:[
+          {
+            name: 'crawlServerList',
+            path: '/crawlServer/crawlServerList',
+            component: () => import('@/models/spider/crawlServer/crawlServerList')
+          },
+          {
+            name: 'crawlServerEdit',
+            path: '/crawlServer/crawlServerEdit',
+            component: () => import('@/models/spider/crawlServer/crawlServerEdit')
+          }
+        ]
+      },
+      {
+        name: 'proxyServer',
+        path: '/proxyServer',
+        component: () => import('@/models/spider/proxyServer/proxyServerMain'),
+        children:[
+          {
+            name: 'proxyServerList',
+            path: '/proxyServer/proxyServerList',
+            component: () => import('@/models/spider/proxyServer/proxyServerList')
+          },
+          {
+            name: 'proxyServerEdit',
+            path: '/proxyServer/proxyServerEdit',
+            component: () => import('@/models/spider/proxyServer/proxyServerEdit')
+          }
+        ]
+      },
     ]
   }
 ]

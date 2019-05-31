@@ -209,7 +209,7 @@
               return {
                 field_name: x.field_name,
                 data_type: x.field_datatype == 0 ? 'varchar' : 'decimal',
-                data_size: x.field_datatype == 0 ? 256 : 16,
+                data_size: x.field_datatype == 0 ? 255 : 16,
                 data_scale:x.field_datatype == 0 ? null : 2,
                 data_default:null,
                 nullable:i==0?false:true,
@@ -233,7 +233,7 @@
         let newObj = {
           field_name: 'col'+(this.fieldList.length + 1),
           data_type: 'varchar',
-          data_size: 256,
+          data_size: 255,
           data_scale:null,
           data_default:null,
           nullable:true,

@@ -40,7 +40,7 @@
         </el-form-item>
         <el-form-item v-if="view_type!='view'" label-width="0" style="text-align: right">
           <el-button type="success" @click="saveJob" :size="small">保存</el-button>
-          <el-button type="primary" :size="small">放弃</el-button>
+          <el-button type="primary" @click="goBack" :size="small">放弃</el-button>
         </el-form-item>
       </el-form>
 
@@ -240,6 +240,11 @@
       },
       updateJob(){
 
+      },
+      goBack(){
+        this.$router.push({
+          name: "jobList"
+        });
       }
     },
     mounted() {
