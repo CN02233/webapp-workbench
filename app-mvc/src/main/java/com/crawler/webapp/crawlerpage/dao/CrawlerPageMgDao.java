@@ -1,14 +1,12 @@
 package com.crawler.webapp.crawlerpage.dao;
 
-import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
-import com.crawler.webapp.crawlerpage.bean.PageField;
-import com.crawler.webapp.crawlerpage.bean.PageFieldLocate;
-import com.crawler.webapp.crawlerpage.bean.PageLink;
+import com.crawler.webapp.crawlerpage.bean.*;
 import com.crawler.webapp.util.tree.EntityTree;
 import com.github.pagehelper.Page;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by SongCQ on 2017/7/25.
@@ -33,17 +31,25 @@ public interface CrawlerPageMgDao {
 
 //    @Select("select pf.*,pfl.* from page_field pf inner join page_field_locate_relation pflr on" +
 
-    @Select("select pf.*,pflr.field_locate_id from page_field pf inner join page_field_locate_relation pflr on " +
-            " pf.page_id=pflr.page_id and pf.job_id=pflr.job_id and pf.user_id=pflr.user_id and pf.field_id=pflr.field_id and " +
+    @Select("select pf.* from page_field pf where " +
             " pf.page_id=#{page_id} and pf.job_id=#{job_id} and pf.user_id=#{user_id}")
-    @Results({@Result(property = "pageFieldLocate",column = "field_locate_id",
-            many = @Many(select="com.crawler.webapp.crawlerpage.dao.CrawlerPageMgDao.getPageFieldLocate"))})
+    @Results({
+            @Result(property = "page_id", column = "page_id"),
+            @Result(property = "job_id", column = "job_id"),
+            @Result(property = "user_id", column = "user_id"),
+            @Result(property = "field_id", column = "field_id"),
+            @Result(property = "pageFieldLocate",javaType = List.class,column = "{page_id=page_id,job_id=job_id,user_id=user_id,field_id=field_id}",
+            many = @Many(select="com.crawler.webapp.crawlerpage.dao.CrawlerPageMgDao.listPageFieldLocate"))})
     @Options(useCache = false)
     List<PageField> listPageField(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
 
     @Select("select * from page_field_locate where field_locate_id = #{field_locate_id}")
     @Options(useCache = false)
     PageFieldLocate getPageFieldLocate(int field_locate_id);
+
+    @Select("select * from page_field_locate where field_locate_id in (select field_locate_id from page_field_locate_relation where field_id=#{field_id} and page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id} )")
+    @Options(useCache = false)
+    List<PageFieldLocate> listPageFieldLocate(Map<String,Object> param);
 
     @Select("SELECT max(page_id) max_page_id FROM crawl_page_config where job_id=#{job_id} and user_id=#{user_id}")
     @Options(useCache = false)
@@ -127,4 +133,50 @@ public interface CrawlerPageMgDao {
             " FROM  " +
             " page_field pf where pf.page_id=#{page_id} and pf.job_id=#{job_id} and pf.user_id=#{user_id} ")
     List<EntityTree> treePageField(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
+
+    @Insert("insert into data_field " +
+            "(table_name, table_name_cn, field_id, field_name, field_name_cn) " +
+            "values " +
+            "(#{table_name},#{table_name_cn},#{field_id},#{field_name},#{field_name_cn})")
+    @Options(useCache = false)
+    void newSaveDataField(DataField dataField);
+
+    @Update("update data_field set table_name_cn=#{table_name_cn} where " +
+            "table_name=#{table_name}")
+    void updateTableNameCn(DataField crawlerPage);
+
+    @Update("update data_field set table_name_cn=#{table_name_cn},field_id=#{field_id},field_name_cn=#{field_name_cn} where " +
+            "table_name=#{table_name} and field_name=#{field_name}")
+    void updateDataField(DataField crawlerPage);
+
+    @Delete("delete from data_field where table_name=#{table_name} and field_name=#{field_name}")
+    void deleteDataField(@Param("table_name") String table_name, @Param("field_name") String field_name);
+
+
+    @Select("select * from data_field where table_name=#{table_name} and field_name=#{field_name}")
+    @Options(useCache = false)
+    DataField craDataField(@Param("table_name") String table_name,@Param("field_name") String field_name);
+
+    @Select("<script>" +
+            "select c.* from data_field c"+
+            "<if test='bean.table_name!=null'>  and c.table_name like concat('%',#{bean.table_name},'%') </if>" +
+            "</script>")
+    @Options(useCache = false)
+    Page<DataField> listDataFieldByPaging(@Param("currPage") int currPage, @Param("pageSize") int pageSize, @Param("bean") DataField bean);
+
+    @Select("select distinct data_file table_name,table_name_cn from crawl_page_config t left join data_field d on t.data_file=d.table_name " +
+            " where (data_file is not null and data_file != '')")
+    @Options(useCache = false)
+    List<DataField> listAllTableName();
+
+    @Select("<script>" +
+            "select pf.* from page_field pf where " +
+            " pf.page_id=#{page_id} and pf.job_id=#{job_id} and pf.user_id=#{user_id}" +
+            "<if test='noadd!=0'> and pf.field_id not in (select field_id from data_field where table_name in (select data_file from crawl_page_config where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id}) )</if>" +
+            "</script>")
+    @Options(useCache = false)
+    List<PageField> listAllTaleField(@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id, @Param("noadd") int noadd);
+
+    @Update("${sql}")
+    void execute(@Param("sql") String sql);
 }

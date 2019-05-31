@@ -20,7 +20,7 @@
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
           style="width: 100%;">
-          <el-table-column label="序号"  type="index" width="40" fixed align="center"></el-table-column>
+          <el-table-column label="序号" prop="field_id" width="80" fixed align="center"></el-table-column>
           <el-table-column align="left" width="120" label="字段名称">
             <template slot-scope="scope">
               <el-form-item :prop="'dataList.' + scope.$index + '.field_name'" :rules='rules.field_name'>
@@ -37,14 +37,14 @@
           </el-table-column>
           <el-table-column align="left" width="120" label="字段类型">
             <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.field_datatype'" :rules='rules.field_datatype'>
+              <el-form-item :prop="'dataList.' + scope.$index + '.field_datatype'">
                 <el-select v-model="scope.row.field_datatype" style="width:100%;" placeholder="请选择字段类型">
                   <el-option :key="key" v-for="(key, value) in dataTypes" :label="value" :value="key"></el-option>
                 </el-select>
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="80" label="合并元素数据">
+          <el-table-column align="left" width="120" label="合并元素数据">
             <template slot-scope="scope">
               <el-form-item :prop="'dataList.' + scope.$index + '.combine_field_value'">
                 <el-select v-model="scope.row.combine_field_value" style="width:100%;" placeholder="是否合并元素数据">
@@ -53,17 +53,12 @@
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="350" label="字段定位表达式">
+          <el-table-column align="left" width="150" label="字段定位(个)">
             <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.pageFieldLocate.field_locate_pattern'">
-                <el-input type="textarea" autosize v-model="scope.row.pageFieldLocate.field_locate_pattern"></el-input>
-              </el-form-item>
-            </template>
-          </el-table-column>
-          <el-table-column align="left" width="120" label="字段抽取">
-            <template slot-scope="scope">
-              <el-form-item :prop="'dataList.' + scope.$index + '.pageFieldLocate.field_ext_pattern'">
-                <el-input v-model="scope.row.pageFieldLocate.field_ext_pattern"></el-input>
+              <el-form-item>
+                <el-input v-model="scope.row.pageFieldLocate.length" readonly="readonly">
+                  <el-button slot="append" icon="el-icon-edit-outline" @click="openLocate(scope.$index,scope.row)"></el-button>
+                </el-input>
               </el-form-item>
             </template>
           </el-table-column>
@@ -83,6 +78,42 @@
     <WorkTablePager @refreshData="getTableData"
                     :pageCount="totalPage">
     </WorkTablePager>
+    <!-- 字段定位 -->
+    <el-dialog title="字段定位关系" :close-on-press-escape='false' :show-close='false'	:visible.sync="isLocateEditor" >
+      <el-form :model="this" ref="lform" class="modal-form" label-position="right" label-width="0" style="margin:0;" >
+        <el-table
+          :data="locateList"
+          ref="ltable"
+          header-row-class-name="table-header-style"
+          row-class-name="mini-font-size" stripe
+          style="width: 100%;">
+          <el-table-column label="定位编号" prop="field_locate_id" width="80"></el-table-column>
+          <el-table-column align="left" width="350" label="定位表达式">
+            <template slot-scope="scope">
+              <el-form-item :prop="'locateList.' + scope.$index + '.field_locate_pattern'">
+                <el-input type="textarea" autosize v-model="scope.row.field_locate_pattern"></el-input>
+              </el-form-item>
+            </template>
+          </el-table-column>
+          <el-table-column align="left" width="150" label="扩展表达式">
+            <template slot-scope="scope">
+              <el-form-item :prop="'locateList.' + scope.$index + '.field_ext_pattern'">
+                <el-input v-model="scope.row.field_ext_pattern"></el-input>
+              </el-form-item>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-form>
+      <el-row>
+        <el-col :span="7">
+          <el-button type="primary" @click="addLocate()">新增</el-button>
+        </el-col>
+        <el-col :span="17">
+          <el-button @click="isLocateEditor = false">取消</el-button>
+          <el-button type="primary" @click="addLocateList()">确定</el-button>
+        </el-col>
+      </el-row>
+    </el-dialog>
   </WorkMain>
 
 </template>
@@ -112,7 +143,6 @@
         user_id: '',
         job_name: '',
         fieldList:[],
-        saveList:{add:[],edit:[],del:[]},
         rules:{
           field_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
           field_locate_pattern:{ type:"string",required:true,message:"必填字段",trigger:"change"}
@@ -134,12 +164,11 @@
           field_datatype:0,
           parent_field_id:0,
           combine_field_value:0,
-          pageFieldLocate:{
-            field_locate_id:0,
-            field_locate_pattern:'',
-            field_ext_pattern:'text'
-          }
+          pageFieldLocate:[]
         },
+        isLocateEditor:false,
+        locateIndex:0,
+        locateList:[]
       }
     },
     methods:{
@@ -165,9 +194,12 @@
         }).then(response => {
           $this.dataList = response
           $this.dataList.forEach(x=>{
-            if(x.pageFieldLocate.field_locate_pattern){
-              x.pageFieldLocate.field_locate_pattern = decodeURIComponent(x.pageFieldLocate.field_locate_pattern)
-            }
+            x.pageFieldLocate.forEach(y =>{
+              if(y.field_locate_pattern)
+                y.field_locate_pattern = decodeURIComponent(y.field_locate_pattern)
+              if(y.field_ext_pattern)
+                y.field_ext_pattern = decodeURIComponent(y.field_ext_pattern)
+            })
           })
           //$this.totalPage = response.totalPage
         })
@@ -190,9 +222,6 @@
       },
       delField(i,row){
         let x = this.dataList.splice(i, 1)
-        if(row.field_id){
-          this.saveList.del.push(x)
-        }
       },
       goBack(){
         this.$router.push({
@@ -228,14 +257,7 @@
         if(!this.subCheck()){
           return false
         }
-        const $this = this
-        $this.dataList.forEach(x=>{
-          if(x.field_id=='')
-            $this.saveList.add.push(x)
-          else
-            $this.saveList.edit.push(x)
-        })
-        this.subSave(this.saveList,'crawler/pageMg/saveAllFields')
+        this.subSave(this.dataList,'crawler/pageMg/saveAllFields')
       },
       subCheck(){
         let checkRow = true
@@ -266,6 +288,23 @@
           loading.close()
           $this.Message.success("保存失败:"+error)
         });
+      },
+      openLocate(i, row){
+        this.isLocateEditor = true
+        this.locateIndex = i
+        this.locateList = Object.assign([],row.pageFieldLocate)
+      },
+      addLocate(){
+        let newObj = {
+          field_locate_pattern:'',
+          field_ext_pattern:'text',
+          field_locate_id:0
+        }
+        this.locateList.push(newObj)
+      },
+      addLocateList(){
+        this.dataList[this.locateIndex].pageFieldLocate = Object.assign([],this.locateList)
+        this.isLocateEditor = false
       }
     },
     mounted() {

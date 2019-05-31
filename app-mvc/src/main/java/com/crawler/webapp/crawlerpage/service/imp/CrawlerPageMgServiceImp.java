@@ -1,11 +1,10 @@
 package com.crawler.webapp.crawlerpage.service.imp;
 
-import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
-import com.crawler.webapp.crawlerpage.bean.PageField;
-import com.crawler.webapp.crawlerpage.bean.PageFieldLocate;
-import com.crawler.webapp.crawlerpage.bean.PageLink;
+import com.crawler.webapp.crawlerpage.bean.*;
 import com.crawler.webapp.crawlerpage.dao.CrawlerPageMgDao;
 import com.crawler.webapp.crawlerpage.service.CrawlerPageMgService;
+import com.crawler.webapp.util.sql.DataTableMeta;
+import com.crawler.webapp.util.sql.ISqlUitl;
 import com.github.pagehelper.Page;
 import com.crawler.webapp.util.tree.EntityTree;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +26,8 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
 
     @Autowired
     private CrawlerPageMgDao crawlerPageMgDao;
+    @Autowired
+    private ISqlUitl sqlUitl;
 
     @Override
     public Page<CrawlerPage> listCrawlerPageByPaging(int currPage, int pageSize, CrawlerPage bean) {
@@ -97,15 +97,20 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
             pageField.setField_id(maxId++);
             crawlerPageMgDao.savePageField(pageField);
             int fieldId = pageField.getField_id();
-            int relationId = new Integer(new StringBuilder().append(pageField.getPage_id()).
-                    append(pageField.getJob_id()).append(pageField.getUser_id()).append(fieldId).
-                    toString());
-            crawlerPageMgDao.savePageFiledLocateRelation(fieldId,pageField.getPage_id(),pageField.getJob_id(),pageField.getUser_id(),relationId);
 
-            PageFieldLocate pageFieldLocate = pageField.getPageFieldLocate();
-            if(pageFieldLocate!=null){
-                pageFieldLocate.setField_locate_id(relationId);
-                crawlerPageMgDao.savePageFieldLocate(pageFieldLocate);
+
+            List<PageFieldLocate> pageFieldLocates = pageField.getPageFieldLocate();
+            if(pageFieldLocates!=null && pageFieldLocates.size()>0){
+                Integer x = 1;
+                for(PageFieldLocate pageFieldLocate : pageFieldLocates) {
+                    int relationId = new Integer(new StringBuilder().append(pageField.getPage_id()).
+                            append(pageField.getJob_id()).append(pageField.getUser_id()).append(fieldId).
+                            toString() + x.toString());
+                    crawlerPageMgDao.savePageFiledLocateRelation(fieldId, pageField.getPage_id(), pageField.getJob_id(), pageField.getUser_id(), relationId);
+                    pageFieldLocate.setField_locate_id(relationId);
+                    crawlerPageMgDao.savePageFieldLocate(pageFieldLocate);
+                    x++;
+                }
             }
         }
     }
@@ -197,27 +202,14 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
 
     @Override
     @Transactional(rollbackFor=Exception.class)
-    public void saveAllPageFields(Map<String, List<PageField>> maps) {
-        if(maps.containsKey("edit")){
-            List<PageField> list = maps.get("edit");
-            if(list.size()>0)
-                this.updatePageFields(list);
-        }
-        if(maps.containsKey("add")){
-            List<PageField> list = maps.get("add");
-            if(list.size()>0)
-                this.newSavePageFields(list);
-        }
-        /*if(maps.containsKey("del")){
-            for(PageField mod3 : maps.get("del")){
-                int field_id = mod3.getField_id();
-                int job_id = mod3.getJob_id();
-                int page_id = mod3.getPage_id();
-                int user_id = mod3.getUser_id();
-                if(field_id > 0 && job_id > 0 && page_id > 0 && user_id > 0)
-                    this.removePageFields(field_id, page_id,job_id, user_id);
-            }
-        }*/
+    public void saveAllPageFields(List<PageField> list) {
+        if(list == null || list.size() == 0)
+            return;
+        PageField field = list.get(0);
+        if(field.getPage_id() == 0 || field.getJob_id() == 0 || field.getUser_id() == 0 )
+            return;
+        this.removeAllPageFields(field.getPage_id(), field.getJob_id(), field.getUser_id());
+        this.newSavePageFields(list);
     }
 
     @Override
@@ -232,6 +224,67 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
             List<PageLink> list = maps.get("add");
             if(list.size()>0)
                 this.newSavePageLinks(list);
+        }
+    }
+
+    @Override
+    public Page<DataField> listDataFieldByPaging(int currPage, int pageSize, DataField bean) {
+        Page<DataField> resultList = crawlerPageMgDao.listDataFieldByPaging(currPage, pageSize, bean);
+        return resultList;
+    }
+
+    @Override
+    public DataField craDataField(String table_name, String field_name) {
+        DataField dataField = crawlerPageMgDao.craDataField(table_name, field_name);
+        return dataField;
+    }
+
+    @Override
+    @Transactional(rollbackFor=Exception.class)
+    public void newSaveAllDataField(List<DataField> list) {
+        for(DataField dataField : list){
+            this.newSaveDataField(dataField);
+        }
+    }
+
+    @Override
+    public void newSaveDataField(DataField dataField) {
+        crawlerPageMgDao.newSaveDataField(dataField);
+    }
+
+    @Override
+    public void updateDataField(DataField dataField) {
+        crawlerPageMgDao.updateDataField(dataField);
+    }
+
+    @Override
+    public void deleteDataField(String table_name, String field_name) {
+        crawlerPageMgDao.deleteDataField(table_name, field_name);
+    }
+
+    @Override
+    public List<DataField> listAllTableName() {
+        return crawlerPageMgDao.listAllTableName();
+    }
+
+    @Override
+    public List<PageField> listAllTaleField(int page_id, int job_id, int user_id, int noadd) {
+        return crawlerPageMgDao.listAllTaleField(page_id, job_id, user_id, noadd);
+    }
+
+    @Override
+    public String createTable(DataTableMeta dataTable, boolean showSql) {
+        String sql = sqlUitl.createSql(dataTable);
+        if(showSql)
+            return sql;
+        else{
+            try{
+                crawlerPageMgDao.execute(sql);
+                return "";
+            }catch (Exception ex){
+                ex.printStackTrace();
+                return "执行失败，" + ex.getMessage();
+            }
         }
     }
 

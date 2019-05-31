@@ -181,6 +181,33 @@ const routes = [
             component: () => import('@/models/spider/pageLink/pageLinkList')
           }
         ]
+      },
+      {
+        name: 'dataField',
+        path: '/dataField',
+        component: () => import('@/models/spider/dataField/dataFieldMain'),
+        children:[
+          {
+            name: 'dataFieldList',
+            path: '/dataField/dataFieldList',
+            component: () => import('@/models/spider/dataField/dataFieldList')
+          },
+          {
+            name: 'dataFieldEdit',
+            path: '/dataField/dataFieldEdit',
+            component: () => import('@/models/spider/dataField/dataFieldEdit')
+          },
+          {
+            name: 'dataFieldAdd',
+            path: '/dataField/dataFieldAdd',
+            component: () => import('@/models/spider/dataField/dataFieldAdd')
+          },
+          {
+            name: 'dataFieldSql',
+            path: '/dataField/dataFieldSql',
+            component: () => import('@/models/spider/dataField/dataFieldSql')
+          }
+        ]
       }
     ]
   }

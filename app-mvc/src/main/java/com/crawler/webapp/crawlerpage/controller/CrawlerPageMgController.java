@@ -1,11 +1,9 @@
 package com.crawler.webapp.crawlerpage.controller;
 
-import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
-import com.crawler.webapp.crawlerpage.bean.PageField;
-import com.crawler.webapp.crawlerpage.bean.PageFieldLocate;
-import com.crawler.webapp.crawlerpage.bean.PageLink;
+import com.crawler.webapp.crawlerpage.bean.*;
 import com.crawler.webapp.crawlerpage.service.CrawlerPageMgService;
 import com.crawler.webapp.util.URIEncoder;
+import com.crawler.webapp.util.sql.DataTableMeta;
 import com.crawler.webapp.util.tree.TreeUtil;
 import com.github.pagehelper.Page;
 import com.crawler.webapp.util.tree.EntityTree;
@@ -62,6 +60,10 @@ public class CrawlerPageMgController {
     @CrossOrigin(allowCredentials="true")
     public String listCrawlerPage(){
         List<CrawlerPage> dataResult = crawlerPageMgService.listCrawlerPage();
+        //转义表达式
+        for(CrawlerPage page : dataResult){
+            encoderPage(page);
+        }
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,dataResult);
         return result;
     }
@@ -89,15 +91,17 @@ public class CrawlerPageMgController {
         }
     }
     private void encoderPageField(PageField field){
-        PageFieldLocate locate = field.getPageFieldLocate();
-        if(locate == null) return;
-        String field_locate_pattern = locate.getField_locate_pattern();
-        if(field_locate_pattern != null && !"".equals(field_locate_pattern)){
-            locate.setField_locate_pattern(URIEncoder.encodeURIComponent(field_locate_pattern));
-        }
-        String field_ext_pattern = locate.getField_ext_pattern();
-        if(field_ext_pattern != null && !"".equals(field_ext_pattern)){
-            locate.setField_ext_pattern(URIEncoder.encodeURIComponent(field_ext_pattern));
+        List<PageFieldLocate> locates = field.getPageFieldLocate();
+        if(locates == null || locates.size() == 0) return;
+        for(PageFieldLocate locate : locates) {
+            String field_locate_pattern = locate.getField_locate_pattern();
+            if (field_locate_pattern != null && !"".equals(field_locate_pattern)) {
+                locate.setField_locate_pattern(URIEncoder.encodeURIComponent(field_locate_pattern));
+            }
+            String field_ext_pattern = locate.getField_ext_pattern();
+            if (field_ext_pattern != null && !"".equals(field_ext_pattern)) {
+                locate.setField_ext_pattern(URIEncoder.encodeURIComponent(field_ext_pattern));
+            }
         }
     }
     private void encoderPageLink(PageLink link){
@@ -252,10 +256,6 @@ public class CrawlerPageMgController {
     @CrossOrigin(allowCredentials="true")
     public String treePageField(int page_id, int job_id, int user_id){
         List<EntityTree> list = crawlerPageMgService.treePageField(page_id, job_id, user_id);
-        /*EntityTree root = new EntityTree();
-        root.setId("0");
-        root.setLabel("无");
-        list.add(root);*/
         List<EntityTree> tree = TreeUtil.getTreeList("0", list);//调用工具类，第一个参数是默认传入的顶级id，和查询出来的数据
 
         String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, tree);
@@ -265,8 +265,8 @@ public class CrawlerPageMgController {
     @RequestMapping("saveAllFields")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String saveAllFields(@RequestBody Map<String,List<PageField>> maps){
-        crawlerPageMgService.saveAllPageFields(maps);
+    public String saveAllFields(@RequestBody List<PageField> list){
+        crawlerPageMgService.saveAllPageFields(list);
         return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
     }
     @RequestMapping("saveAllLinks")
@@ -275,5 +275,81 @@ public class CrawlerPageMgController {
     public String saveAllLinks(@RequestBody Map<String,List<PageLink>> maps){
         crawlerPageMgService.saveAllPageLinks(maps);
         return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
+    }
+
+    @RequestMapping("pagingDataField")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String listDataFieldByPaging(int currPage, int pageSize, String table_name){
+        DataField bean = new DataField();
+        if(table_name != null && !"".equals(table_name))
+            bean.setTable_name(table_name);
+        Page<DataField> list = crawlerPageMgService.listDataFieldByPaging(currPage, pageSize, bean);
+        PageResult pageResult = PageResult.pageHelperList2PageResult(list);
+
+        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,pageResult);
+        return result;
+    }
+    @RequestMapping("craDataField")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String craDataField(String table_name, String field_name){
+        DataField page = crawlerPageMgService.craDataField(table_name, field_name);
+        return  JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null, page);
+    }
+    @RequestMapping("deleteDataField")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String deleteDataField(String table_name, String field_name){
+        crawlerPageMgService.deleteDataField(table_name, field_name);
+        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"删除成功",null,null);
+    }
+    @RequestMapping("newSaveDataField")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String newSaveDataField(@RequestBody List<DataField> list){
+        crawlerPageMgService.newSaveAllDataField(list);
+        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
+    }
+    @RequestMapping("updateDataField")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String updateDataField(@RequestBody DataField dataField){
+        crawlerPageMgService.updateDataField(dataField);
+        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
+    }
+
+    @RequestMapping("listAllTableName")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String listAllTableName(){
+        List<DataField> dataResult = crawlerPageMgService.listAllTableName();
+        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,dataResult);
+        return result;
+    }
+
+    @RequestMapping("listAllTableField")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String listAllTableField(int page_id, int job_id, int user_id, int noadd){
+        List<PageField> dataResult = crawlerPageMgService.listAllTaleField(page_id, job_id, user_id, noadd);
+        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,dataResult);
+        return result;
+    }
+
+    @RequestMapping("createTable")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String createTable(@RequestBody DataTableMeta dataTable){
+        String msg = crawlerPageMgService.createTable(dataTable, false);
+        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"执行成功",null,msg);
+    }
+    @RequestMapping("createTableSql")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String createTableSql(@RequestBody DataTableMeta dataTable){
+        String sql = crawlerPageMgService.createTable(dataTable, true);
+        sql = URIEncoder.encodeURIComponent(sql);
+        return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"执行成功",null,sql);
     }
 }
