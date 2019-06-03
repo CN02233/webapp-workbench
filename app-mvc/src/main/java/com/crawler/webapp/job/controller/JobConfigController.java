@@ -4,6 +4,7 @@ import com.crawler.webapp.job.bean.CrawlerConfig;
 import com.crawler.webapp.job.bean.JobInfoBean;
 import com.crawler.webapp.job.service.JobConfigService;
 import com.crawler.webapp.job.service.JobMgService;
+import com.crawler.webapp.util.URIEncoder;
 import com.github.pagehelper.Page;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
@@ -50,6 +51,10 @@ public class JobConfigController {
         CrawlerConfig crawlerConfig = new CrawlerConfig();
         crawlerConfig.setParam_name(param_name);
         Page<CrawlerConfig> crawListPage = jobConfigService.pagingCrawlConfigList(currPage, pageSize,crawlerConfig);
+        //转义表达式
+        for (CrawlerConfig config:crawListPage){
+                  encoderConfig(config);
+        }
         PageResult pageResult = PageResult.pageHelperList2PageResult(crawListPage);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,pageResult);
 
@@ -73,6 +78,8 @@ public class JobConfigController {
 
         param_name = strToUtf8(param_name);
         CrawlerConfig crawlerConfig = jobConfigService.getCrawlerConfig(param_name,job_id,user_id);
+        //转义表达式
+        encoderConfig(crawlerConfig);
         Map<String,Object> resultMap = new HashMap();
         resultMap.put("userList",userList);
         resultMap.put("jobInfoBeans",jobInfoBeans);
@@ -132,6 +139,16 @@ public class JobConfigController {
         jobConfigService.delCrawlConfig(job_id,user_id,param_name);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"删除成功",null,null);
         return result;
+    }
+
+    /**
+     *  转义表达式
+     */
+    public void encoderConfig(CrawlerConfig config){
+        String param_value = config.getParam_value();
+        if (param_value != null && !"".equals(param_value)){
+            config.setParam_value(URIEncoder.encodeURIComponent(param_value));
+        }
     }
 
     public String strToUtf8(String str)throws Exception{
