@@ -131,6 +131,9 @@
           $this.fieldList = response
         })
       },
+      updateFieldList(){
+
+      },
       goBack(){
         this.$router.push({
           name: "pageFieldList",

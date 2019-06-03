@@ -1,9 +1,8 @@
 <template>
-  <WorkMain :headerItems="['采集页面管理','页面管理']">
+  <WorkMain :headerItems="['资源管理','代理服务器管理']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
-        <el-input placeholder="请输入页面编号" v-model="page_id" style="width:180px" ></el-input>
-        <el-input placeholder="请输入采集名称" v-model="job_name" style="width:180px" ></el-input>
+        <el-input placeholder="请输入代理名称" v-model="proxy_server_name" style="width:180px" ></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
         <el-button @click="viewEdit(null,'new')" type="info">新增</el-button>
       </el-col>
@@ -16,44 +15,33 @@
           row-class-name="mini-font-size" stripe
           style="width: 100%;">
           <el-table-column
-            prop="job_id" width="80"
+            prop="proxy_server_id" width="120"
             align="left"
-            label="采集编号">
+            label="代理服务器编号">
           </el-table-column>
           <el-table-column
-            prop="job_name"
+            prop="proxy_server_name"
             align="left" width="180"
-            label="采集名称">
+            label="代理服务器名称">
           </el-table-column>
-          <el-table-column width="100"
-            prop="user_name_cn"
+          <el-table-column width="120"
+            prop="proxy_server_ip"
             align="left"
-            label="用户">
+            label="代理服务器IP">
           </el-table-column>
           <el-table-column
-            prop="page_id" width="80"
+            prop="proxy_user_name" width="150"
             align="left"
-            label="页面编号">
-          </el-table-column>
-          <el-table-column
-            prop="page_name"
-            align="left" width="180"
-            label="页面名称">
-          </el-table-column>
-          <el-table-column
-            prop="max_page_num"
-            align="left" width="120"
-            label="最大采集数量">
+            label="代理服务器用户名">
           </el-table-column>
           <el-table-column
             label="操作"
             align="left"
           >
             <template slot-scope="scope">
+              <el-button type="primary" @click="viewEdit(scope.row,'view')" size="mini" >查看</el-button>
               <el-button type="primary" @click="viewEdit(scope.row,'edit')" size="mini" >编辑</el-button>
               <el-button type="primary" @click="delPage(scope.row)" size="mini" >删除</el-button>
-              <el-button type="primary" @click="viewGo(scope.row,'pageFieldList')" size="mini" >字段列表</el-button>
-              <el-button type="primary" @click="viewGo(scope.row,'pageLinkList')" size="mini" >链接列表</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -73,8 +61,8 @@
   import WorkMain from '@/models/public/WorkMain'
 
   export default {
-    name: "PageList",
-    describe:"页面管理页面",
+    name: "CrawlServerList",
+    describe:"代理服务器管理页面",
     components: {
       WorkTablePager,
       WorkMain
@@ -85,11 +73,7 @@
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1,
-        page_id:'',
-        job_id: '',
-        job_name: '',
-        user_id: '',
-        rowStyle:{height:'20px'}
+        proxy_server_name: ''
       }
     },
     methods:{
@@ -102,12 +86,12 @@
 
         const $this = this
         this.BaseRequest({
-          url: "crawler/pageMg/pagingCrawlerPage",
+          url: "/crawler/proxyServer/pagingProxyServers",
           method: 'get',
           params: {
             currPage: pageNum,
             pageSize: this.eachPageNum,
-            job_name:this.job_name,
+            proxy_server_name:this.proxy_server_name,
           }
         }).then(response => {
           $this.dataList = response.dataList
@@ -117,34 +101,18 @@
       },
       viewEdit(row,viewType){
         if(row == null){
-          row = {job_id:'',page_id:'',user_id:''}
+          row = {proxy_server_id:0}
         }
         this.$router.push({
-          name: "pageEdit",
+          name: "proxyServerEdit",
           params: {
-            "job_id": row.job_id,
-            "page_id": row.page_id,
-            "user_id": row.user_id,
+            "proxy_server_id": row.proxy_server_id,
             "view_type": viewType
           }
         });
       },
-      viewGo(row,viewName){
-        this.$router.push({
-          name: viewName,
-          query: {
-            "job_id": row.job_id,
-            "page_id": row.page_id,
-            "user_id": row.user_id,
-          }
-        });
-      },
       delPage(row){
-        if(row==null||row.page_id==null){
-          this.Error("请先选择要删除的页面")
-          return
-        }
-        this.$confirm('确定删除该页面？', '提示', {
+        this.$confirm('确定删除该代理服务器？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           dangerouslyUseHTMLString:true,
@@ -158,12 +126,10 @@
           });
 
           this.BaseRequest({
-            url:'crawler/pageMg/deleteCrawlerPage',
+            url:'crawler/proxyServer/delServer',
             method:'get',
             params:{
-              "job_id": row.job_id,
-              "page_id": row.page_id,
-              "user_id": row.user_id,
+              "proxy_server_id": row.proxy_server_id
             }
           }).then(response=>{
             this.Message.success("删除成功")

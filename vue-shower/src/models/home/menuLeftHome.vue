@@ -305,7 +305,7 @@
     color: #333;
   }
 
-  .el-menu-item a{
+  .el-menu-item,.el-menu-item a{
     text-decoration:none;
     color:#ffffff;
   }

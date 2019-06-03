@@ -1,11 +1,9 @@
 package com.crawler.webapp.crawlerpage.service;
 
-import com.crawler.webapp.crawlerpage.bean.CrawlerPage;
-import com.crawler.webapp.crawlerpage.bean.PageField;
-import com.crawler.webapp.crawlerpage.bean.PageLink;
+import com.crawler.webapp.crawlerpage.bean.*;
+import com.crawler.webapp.util.sql.DataTableMeta;
 import com.github.pagehelper.Page;
 import com.crawler.webapp.util.tree.EntityTree;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,25 @@ public interface CrawlerPageMgService {
 
     List<EntityTree> treePageField(int page_id, int job_id, int user_id);
 
-    void saveAllPageFields(Map<String, List<PageField>> maps);
+    void saveAllPageFields(List<PageField> list);
 
     void saveAllPageLinks(Map<String, List<PageLink>> maps);
+
+    Page<DataField> listDataFieldByPaging(int currPage, int pageSize, DataField bean);
+
+    DataField craDataField(String table_name, String field_name);
+
+    void newSaveAllDataField(List<DataField> list);
+
+    void newSaveDataField(DataField dataField);
+
+    void updateDataField(DataField dataField);
+
+    void deleteDataField(String table_name, String field_name);
+
+    List<DataField> listAllTableName();
+
+    List<PageField> listAllTaleField(int page_id, int job_id, int user_id, int noadd);
+
+    String createTable(DataTableMeta dataTable, boolean showSql);
 }

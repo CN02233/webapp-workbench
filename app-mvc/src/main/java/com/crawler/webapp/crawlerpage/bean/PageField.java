@@ -1,5 +1,7 @@
 package com.crawler.webapp.crawlerpage.bean;
 
+import java.util.List;
+
 /**
  * Created by SongCQ on 2017/7/26.
  */
@@ -22,7 +24,7 @@ public class PageField {
 
     private int field_locate_id;
 
-    private PageFieldLocate pageFieldLocate;
+    private List<PageFieldLocate> pageFieldLocate;
 
     public int getField_id() {
         return field_id;
@@ -96,11 +98,11 @@ public class PageField {
         this.field_locate_id = field_locate_id;
     }
 
-    public PageFieldLocate getPageFieldLocate() {
+    public List<PageFieldLocate> getPageFieldLocate() {
         return pageFieldLocate;
     }
 
-    public void setPageFieldLocate(PageFieldLocate pageFieldLocate) {
+    public void setPageFieldLocate(List<PageFieldLocate> pageFieldLocate) {
         this.pageFieldLocate = pageFieldLocate;
     }
 }

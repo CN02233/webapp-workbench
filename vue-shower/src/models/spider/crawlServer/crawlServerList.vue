@@ -1,9 +1,8 @@
 <template>
-  <WorkMain :headerItems="['采集页面管理','页面管理']">
+  <WorkMain :headerItems="['资源管理','采集服务器管理']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
-        <el-input placeholder="请输入页面编号" v-model="page_id" style="width:180px" ></el-input>
-        <el-input placeholder="请输入采集名称" v-model="job_name" style="width:180px" ></el-input>
+        <el-input placeholder="请输入主机名称" v-model="host_name" style="width:180px" ></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
         <el-button @click="viewEdit(null,'new')" type="info">新增</el-button>
       </el-col>
@@ -16,44 +15,33 @@
           row-class-name="mini-font-size" stripe
           style="width: 100%;">
           <el-table-column
-            prop="job_id" width="80"
+            prop="host_id" width="80"
             align="left"
-            label="采集编号">
+            label="主机编号">
           </el-table-column>
           <el-table-column
-            prop="job_name"
+            prop="host_name"
             align="left" width="180"
-            label="采集名称">
+            label="主机名称">
           </el-table-column>
           <el-table-column width="100"
-            prop="user_name_cn"
+            prop="host_ip"
             align="left"
-            label="用户">
+            label="主机IP">
           </el-table-column>
           <el-table-column
-            prop="page_id" width="80"
+            prop="host_status" width="80"
             align="left"
-            label="页面编号">
-          </el-table-column>
-          <el-table-column
-            prop="page_name"
-            align="left" width="180"
-            label="页面名称">
-          </el-table-column>
-          <el-table-column
-            prop="max_page_num"
-            align="left" width="120"
-            label="最大采集数量">
+            label="在线状态">
           </el-table-column>
           <el-table-column
             label="操作"
             align="left"
           >
             <template slot-scope="scope">
+              <el-button type="primary" @click="viewEdit(scope.row,'view')" size="mini" >查看</el-button>
               <el-button type="primary" @click="viewEdit(scope.row,'edit')" size="mini" >编辑</el-button>
               <el-button type="primary" @click="delPage(scope.row)" size="mini" >删除</el-button>
-              <el-button type="primary" @click="viewGo(scope.row,'pageFieldList')" size="mini" >字段列表</el-button>
-              <el-button type="primary" @click="viewGo(scope.row,'pageLinkList')" size="mini" >链接列表</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -73,8 +61,8 @@
   import WorkMain from '@/models/public/WorkMain'
 
   export default {
-    name: "PageList",
-    describe:"页面管理页面",
+    name: "CrawlServerList",
+    describe:"采集服务器管理页面",
     components: {
       WorkTablePager,
       WorkMain
@@ -85,11 +73,7 @@
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1,
-        page_id:'',
-        job_id: '',
-        job_name: '',
-        user_id: '',
-        rowStyle:{height:'20px'}
+        host_name: ''
       }
     },
     methods:{
@@ -102,12 +86,12 @@
 
         const $this = this
         this.BaseRequest({
-          url: "crawler/pageMg/pagingCrawlerPage",
+          url: "/crawler/server/pagingServer",
           method: 'get',
           params: {
             currPage: pageNum,
             pageSize: this.eachPageNum,
-            job_name:this.job_name,
+            host_name:this.host_name,
           }
         }).then(response => {
           $this.dataList = response.dataList
@@ -117,34 +101,18 @@
       },
       viewEdit(row,viewType){
         if(row == null){
-          row = {job_id:'',page_id:'',user_id:''}
+          row = {host_id:0}
         }
         this.$router.push({
-          name: "pageEdit",
+          name: "crawlServerEdit",
           params: {
-            "job_id": row.job_id,
-            "page_id": row.page_id,
-            "user_id": row.user_id,
+            "host_id": row.host_id,
             "view_type": viewType
           }
         });
       },
-      viewGo(row,viewName){
-        this.$router.push({
-          name: viewName,
-          query: {
-            "job_id": row.job_id,
-            "page_id": row.page_id,
-            "user_id": row.user_id,
-          }
-        });
-      },
       delPage(row){
-        if(row==null||row.page_id==null){
-          this.Error("请先选择要删除的页面")
-          return
-        }
-        this.$confirm('确定删除该页面？', '提示', {
+        this.$confirm('确定删除该主机？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           dangerouslyUseHTMLString:true,
@@ -158,12 +126,10 @@
           });
 
           this.BaseRequest({
-            url:'crawler/pageMg/deleteCrawlerPage',
+            url:'crawler/server/delServer',
             method:'get',
             params:{
-              "job_id": row.job_id,
-              "page_id": row.page_id,
-              "user_id": row.user_id,
+              "host_id": row.host_id
             }
           }).then(response=>{
             this.Message.success("删除成功")

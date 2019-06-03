@@ -1,11 +1,11 @@
 <template>
-  <WorkMain :headerItems="['采集页面管理','页面管理']">
+  <WorkMain :headerItems="['资源管理','信息存储']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
-        <el-input placeholder="请输入页面编号" v-model="page_id" style="width:180px" ></el-input>
-        <el-input placeholder="请输入采集名称" v-model="job_name" style="width:180px" ></el-input>
+        <el-input placeholder="请输入表名称" v-model="table_name" style="width:180px" ></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
-        <el-button @click="viewEdit(null,'new')" type="info">新增</el-button>
+        <el-button @click="viewAdd(null,'new')" type="info">新增</el-button>
+        <el-button @click="viewNewTable()" type="info">创建实体表</el-button>
       </el-col>
     </el-row>
     <el-row class="table-page-root-outoptions">
@@ -15,51 +15,24 @@
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
           style="width: 100%;">
-          <el-table-column
-            prop="job_id" width="80"
-            align="left"
-            label="采集编号">
-          </el-table-column>
-          <el-table-column
-            prop="job_name"
-            align="left" width="180"
-            label="采集名称">
-          </el-table-column>
-          <el-table-column width="100"
-            prop="user_name_cn"
-            align="left"
-            label="用户">
-          </el-table-column>
-          <el-table-column
-            prop="page_id" width="80"
-            align="left"
-            label="页面编号">
-          </el-table-column>
-          <el-table-column
-            prop="page_name"
-            align="left" width="180"
-            label="页面名称">
-          </el-table-column>
-          <el-table-column
-            prop="max_page_num"
-            align="left" width="120"
-            label="最大采集数量">
-          </el-table-column>
+          <el-table-column label="字段序号" prop="field_id" width="100" fixed align="center"></el-table-column>
+          <el-table-column label="表名" prop="table_name" align="left" width="150"></el-table-column>
+          <el-table-column label="表中文名" prop="table_name_cn" align="left" width="200"></el-table-column>
+          <el-table-column label="字段名" prop="field_name" align="left" width="150"></el-table-column>
+          <el-table-column label="字段中文名" prop="field_name_cn" align="left" width="200"></el-table-column>
           <el-table-column
             label="操作"
             align="left"
           >
             <template slot-scope="scope">
+              <el-button type="primary" @click="viewEdit(scope.row,'view')" size="mini" >查看</el-button>
               <el-button type="primary" @click="viewEdit(scope.row,'edit')" size="mini" >编辑</el-button>
-              <el-button type="primary" @click="delPage(scope.row)" size="mini" >删除</el-button>
-              <el-button type="primary" @click="viewGo(scope.row,'pageFieldList')" size="mini" >字段列表</el-button>
-              <el-button type="primary" @click="viewGo(scope.row,'pageLinkList')" size="mini" >链接列表</el-button>
+              <el-button type="primary" @click="delField(scope.$index, scope.row)" size="mini" >删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-col>
     </el-row>
-
     <!-- 分页 refreshData:点击页码上一页下一页时调用的方法、pageCount:总页数-->
     <WorkTablePager @refreshData="getTableData"
                     :pageCount="totalPage">
@@ -71,13 +44,15 @@
 <script>
   import WorkTablePager from '@/models/public/WorkTablePager'
   import WorkMain from '@/models/public/WorkMain'
+  import ElTreeSelect from '@/models/public/ElTreeSelect.vue'
 
   export default {
-    name: "PageList",
+    name: "PageFieldList",
     describe:"页面管理页面",
     components: {
       WorkTablePager,
-      WorkMain
+      WorkMain,
+      ElTreeSelect
     },
     data(){
       return {
@@ -85,11 +60,7 @@
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1,
-        page_id:'',
-        job_id: '',
-        job_name: '',
-        user_id: '',
-        rowStyle:{height:'20px'}
+        table_name: ''
       }
     },
     methods:{
@@ -102,49 +73,41 @@
 
         const $this = this
         this.BaseRequest({
-          url: "crawler/pageMg/pagingCrawlerPage",
+          url: "crawler/pageMg/pagingDataField",
           method: 'get',
           params: {
             currPage: pageNum,
             pageSize: this.eachPageNum,
-            job_name:this.job_name,
+            table_name:this.table_name
           }
         }).then(response => {
           $this.dataList = response.dataList
           $this.totalPage = response.totalPage
         })
-
       },
-      viewEdit(row,viewType){
-        if(row == null){
-          row = {job_id:'',page_id:'',user_id:''}
-        }
+      viewAdd(row,viewType){
         this.$router.push({
-          name: "pageEdit",
-          params: {
-            "job_id": row.job_id,
-            "page_id": row.page_id,
-            "user_id": row.user_id,
+          name: "dataFieldAdd",
+          query: {
             "view_type": viewType
           }
         });
       },
-      viewGo(row,viewName){
+      viewEdit(row,viewType){
+        if(row == null){
+          row = {table_name:'',field_name:''}
+        }
         this.$router.push({
-          name: viewName,
+          name: "dataFieldEdit",
           query: {
-            "job_id": row.job_id,
-            "page_id": row.page_id,
-            "user_id": row.user_id,
+            "table_name": row.table_name,
+            "field_name": row.field_name,
+            "view_type": viewType
           }
         });
       },
-      delPage(row){
-        if(row==null||row.page_id==null){
-          this.Error("请先选择要删除的页面")
-          return
-        }
-        this.$confirm('确定删除该页面？', '提示', {
+      delField(i,row){
+        this.$confirm('确定删除该字段？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           dangerouslyUseHTMLString:true,
@@ -158,12 +121,11 @@
           });
 
           this.BaseRequest({
-            url:'crawler/pageMg/deleteCrawlerPage',
+            url:'crawler/pageMg/deleteDataField',
             method:'get',
             params:{
-              "job_id": row.job_id,
-              "page_id": row.page_id,
-              "user_id": row.user_id,
+              "table_name": row.table_name,
+              "field_name": row.field_name
             }
           }).then(response=>{
             this.Message.success("删除成功")
@@ -174,6 +136,11 @@
             this.Message.error("删除失败"+error)
           })
         }).catch(() => {
+        });
+      },
+      viewNewTable(){
+        this.$router.push({
+          name: "dataFieldSql"
         });
       }
     },
@@ -189,5 +156,8 @@
 
   .search-row{
     margin:5px 0 0 0;
+  }
+  .el-textarea__inner{
+    height:40px;
   }
 </style>

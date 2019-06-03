@@ -1,9 +1,10 @@
 <template>
-  <WorkMain :headerItems="['采集监控','采集监控页面']">
+  <WorkMain :headerItems="['采集监控','采集页面浏览']">
     <el-row class="search-row" :gutter="20">
       <el-col class="align-left" :span="17">
         <el-input placeholder="请输入采集名称" v-model="job_name" style="width:180px" ></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
+        <el-button type="primary" @click="goBack">返回</el-button>
       </el-col>
     </el-row>
     <el-row class="table-page-root-outoptions">
@@ -23,40 +24,15 @@
             align="left" width="180"
             label="采集名称">
           </el-table-column>
-          <el-table-column
-            prop="start_time_str"
-            align="left" width="180"
-            label="启动时间">
-          </el-table-column>
-          <el-table-column
-            prop="run_status_cn"
-            align="left" width="80"
-            label="运行状态">
+          <el-table-column width="100"
+            prop="page_url"
+            align="left"
+            label="页面URL">
           </el-table-column>
           <el-table-column width="100"
-            prop="user.user_name_cn"
-            align="left"
-            label="用户">
-          </el-table-column>
-          <el-table-column
-            prop="download_page_num" width="80"
-            label="已抓取页面数">
-          </el-table-column>
-          <el-table-column
-            prop="pending_page_num" width="80"
-            label="待抓取页面数">
-          </el-table-column>
-          <el-table-column
-            prop="error_page_num" width="80"
-            label="抓取失败页面数">
-          </el-table-column>
-          <el-table-column
-            label="操作"
-            align="left"
-          >
-            <template slot-scope="scope">
-              <el-button type="primary" @click="viewEdit(scope.row,'view')" size="mini" >页面浏览</el-button>
-            </template>
+             prop="download_time"
+             align="left"
+             label="采集时间">
           </el-table-column>
         </el-table>
       </el-col>
@@ -75,8 +51,8 @@
   import WorkMain from '@/models/public/WorkMain'
 
   export default {
-    name: "JobStatusList",
-    describe:"采集监控页面",
+    name: "JobPageList",
+    describe:"采集页面浏览",
     components: {
       WorkTablePager,
       WorkMain
@@ -99,41 +75,33 @@
           pageNum = this.currPageNum
         }
 
-        let seachOriginId = null
-        if(this.seachOriginList!=null&&this.seachOriginList.length>0){
-          seachOriginId = this.seachOriginList[this.seachOriginList.length-1]
-        }
-
         const $this = this
         this.BaseRequest({
-          url: "crawler/jobStatus/pagingList",
+          url: "crawler/pageView/listCrawlerPage",
           method: 'get',
           params: {
             currPage: pageNum,
             pageSize: this.eachPageNum,
-            job_id:this.job_id,
-            job_name:this.job_name,
+            jobPage:{
+              job_id:this.job_id,
+              job_name:this.job_name,
+            }
           }
         }).then(response => {
           $this.dataList = response.dataList
-          // $this.origins = response.origins
           $this.totalPage = response.totalPage
 
         })
 
       },
-      viewEdit(row,viewType){
+      goBack(){
         this.$router.push({
-          name: "jobPageList",
-          params: {
-            "job_id": row.job_id,
-            "user_id": row.user_id,
-            "view_type": viewType
-          }
+          name: "jobStatusList"
         });
-      },
+      }
     },
     mounted() {
+      this.job_id = this.$route.params.job_id
       this.getTableData(1)
     }
   }

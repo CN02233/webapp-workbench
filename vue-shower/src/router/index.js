@@ -122,6 +122,11 @@ const routes = [
             path: '/jobStatus/jobStatusList',
             component: () => import('@/models/spider/jobStatus/jobStatusList')
           },
+          {
+            name: 'jobPageList',
+            path: '/jobPage/jobPageList',
+            component: () => import('@/models/spider/jobPage/jobPageList')
+          }
         ]
       },
       {
@@ -181,7 +186,68 @@ const routes = [
             component: () => import('@/models/spider/pageLink/pageLinkList')
           }
         ]
-      }
+      },
+      {
+        name: 'dataField',
+        path: '/dataField',
+        component: () => import('@/models/spider/dataField/dataFieldMain'),
+        children:[
+          {
+            name: 'dataFieldList',
+            path: '/dataField/dataFieldList',
+            component: () => import('@/models/spider/dataField/dataFieldList')
+          },
+          {
+            name: 'dataFieldEdit',
+            path: '/dataField/dataFieldEdit',
+            component: () => import('@/models/spider/dataField/dataFieldEdit')
+          },
+          {
+            name: 'dataFieldAdd',
+            path: '/dataField/dataFieldAdd',
+            component: () => import('@/models/spider/dataField/dataFieldAdd')
+          },
+          {
+            name: 'dataFieldSql',
+            path: '/dataField/dataFieldSql',
+            component: () => import('@/models/spider/dataField/dataFieldSql')
+          }
+        ]
+      },
+      {
+        name: 'crawlServer',
+        path: '/crawlServer',
+        component: () => import('@/models/spider/crawlServer/crawlServerMain'),
+        children:[
+          {
+            name: 'crawlServerList',
+            path: '/crawlServer/crawlServerList',
+            component: () => import('@/models/spider/crawlServer/crawlServerList')
+          },
+          {
+            name: 'crawlServerEdit',
+            path: '/crawlServer/crawlServerEdit',
+            component: () => import('@/models/spider/crawlServer/crawlServerEdit')
+          }
+        ]
+      },
+      {
+        name: 'proxyServer',
+        path: '/proxyServer',
+        component: () => import('@/models/spider/proxyServer/proxyServerMain'),
+        children:[
+          {
+            name: 'proxyServerList',
+            path: '/proxyServer/proxyServerList',
+            component: () => import('@/models/spider/proxyServer/proxyServerList')
+          },
+          {
+            name: 'proxyServerEdit',
+            path: '/proxyServer/proxyServerEdit',
+            component: () => import('@/models/spider/proxyServer/proxyServerEdit')
+          }
+        ]
+      },
     ]
   }
 ]
