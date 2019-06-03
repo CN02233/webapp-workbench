@@ -53,8 +53,6 @@ export default {
       visible: false,
       view_type: '', // edit new
       pageTitle: '',
-      param_name: '',
-      param_value: '',
       useAll: [],
       jobBeans: [],
       jobEditForm: {
@@ -91,6 +89,9 @@ export default {
         }
       }).then(response => {
         this.jobEditForm = response.crawlerConfig
+        if (this.jobEditForm.param_value) {
+          this.jobEditForm.param_value = decodeURIComponent(this.jobEditForm.param_value)
+        }
         this.useAll = response.userList
         this.jobBeans = response.jobInfoBeans
       })

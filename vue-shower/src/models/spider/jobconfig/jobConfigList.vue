@@ -74,7 +74,9 @@
         currPageNum: 1,
         eachPageNum: 10,
         totalPage: 1,
-        param_name: ''
+        param_name: '',
+        param_value: ''
+
       }
     },
     methods:{
@@ -101,6 +103,11 @@
           }
         }).then(response => {
           $this.dataList = response.dataList
+          $this.dataList.forEach(x => {
+               if (x.param_value) {
+                  x.param_value = decodeURIComponent(x.param_value)
+               }
+          })
           // $this.origins = response.origins
           $this.totalPage = response.totalPage
 
