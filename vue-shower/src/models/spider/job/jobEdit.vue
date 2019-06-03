@@ -248,7 +248,8 @@
       }
     },
     mounted() {
-      this.job_id = this.$route.params.job_id
+      this.jobPage.job_id = this.$route.params.job_id
+      this.jobPage.user_id = this.$route.params.user_id
       this.view_type = this.$route.params.view_type
       if(this.view_type=='edit'||this.view_type=='view'){
         this.getJobInfo()

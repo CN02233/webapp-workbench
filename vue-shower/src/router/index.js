@@ -122,6 +122,11 @@ const routes = [
             path: '/jobStatus/jobStatusList',
             component: () => import('@/models/spider/jobStatus/jobStatusList')
           },
+          {
+            name: 'jobPageList',
+            path: '/jobPage/jobPageList',
+            component: () => import('@/models/spider/jobPage/jobPageList')
+          }
         ]
       },
       {
