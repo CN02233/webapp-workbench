@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.service.imp;
 
 import com.github.pagehelper.Page;
 import com.google.common.collect.Lists;
+import com.seaboxdata.cqny.origin.service.AdministrativeService;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.dao.IWelcomeDao;
 import com.seaboxdata.cqny.record.entity.Origin;
@@ -9,6 +10,8 @@ import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportApprovalService;
 import com.seaboxdata.cqny.record.service.WelcomeService;
+import com.webapp.support.json.JsonSupport;
+import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,6 +32,9 @@ public class WelcomeServiceImp implements WelcomeService {
 
     @Autowired
     private ReportApprovalService reportApprovalService;
+
+    @Autowired
+    private AdministrativeService administrativeService;
 
     @Override
     public PageResult jobList(Integer currUserId, int currPage, int pageSize) {
@@ -88,6 +94,26 @@ public class WelcomeServiceImp implements WelcomeService {
     public List<Map<String, Integer>> getReportSumInfo(Integer currUserId) {
         Origin userOrigin = originService.getOriginByUser(currUserId);
         if(userOrigin==null){
+            List<Origin> organizationOrigins  = administrativeService.listAllOriginForOrganization(currUserId);
+            if(organizationOrigins!=null&&organizationOrigins.size()>0){
+                List<Origin> allOrigins = originService.listAllOrigin();
+                List<Integer> originParams = new ArrayList<>();
+                for (Origin originObj : organizationOrigins) {
+                    originParams.add(originObj.getOrigin_id());
+                    Integer userOriginId = originObj.getOrigin_id();
+                    List<Origin> childrenOrigin =  originService.checkoutSons(userOriginId,allOrigins);
+                    if(childrenOrigin!=null){
+                        for (Origin origin : childrenOrigin) {
+                            originParams.add(origin.getOrigin_id());
+                        }
+                    }
+                }
+
+                List<Map<String, Integer>> sumResult = welcomeDao.getReportSumInfo(originParams);
+                return sumResult;
+            }
+
+
             Map<String,Integer> resultMap = new HashMap<>();
             List<Map<String,Integer>> resultList =new ArrayList<>();
             resultList.add(resultMap);

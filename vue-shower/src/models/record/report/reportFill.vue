@@ -3,7 +3,8 @@
     <div class="fill-root">
       <div class="fill-steps">
         <el-steps process-status="finish"	direction="vertical" :active="activeStepNum">
-          <el-step :class="{'bold-step':activeStepNum==unitNum}" style="font-weight: bold;font-color:black" :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
+          <el-step v-if="checkUnitShow(unitEntity)"
+                   :class="{'bold-step':activeStepNum==unitNum}" style="font-weight: bold;font-color:black" :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
                    @click.native="e => stepClick(e, unitNum) "
                    :key="unitNum"
                    v-for="(unitEntity,unitNum) in unitEntities"
@@ -12,7 +13,8 @@
       </div>
       <div class="fill-context">
         <div class="fill-context-children">
-          <ReportContextRoot :ref="'reportContextRef'+unitEntity.unit_id"
+          <ReportContextRoot
+                             :ref="'reportContextRef'+unitEntity.unit_id"
                              :reportId="reportId"
                              :unitEntity="unitEntity"
                              :isView="isView"
@@ -34,8 +36,8 @@
           <!--<el-button  @click="validateContext" type="success">校验</el-button>-->
           <el-button v-if="isView!='Y'" @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
-          <el-button v-if="isView!='Y'" @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>
-          <el-button v-if="isView!='Y'" @click="confirmSubmit" type="warning">新提交</el-button>
+          <!--<el-button v-if="isView!='Y'" @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>-->
+          <el-button v-if="isView!='Y'" @click="confirmSubmit" type="warning">提交</el-button>
           <el-button v-if="auth=='Y'" @click="handlePass" type="danger">通过</el-button>
           <el-button v-if="auth=='Y'" @click="handleReject" type="success">驳回</el-button>
         </div>
@@ -121,16 +123,17 @@
           </el-form-item>
 
 
-          <div slot="footer" class="dialog-footer">
-            <el-button type="primary" style="width:100%;"  @click="doSign">
-              <!--<el-button type="primary" style="width:100%;" :loading="loading">-->
-              确定
-            </el-button>
-          </div>
+
         </el-form>
+
+
+
 
       </div>
 
+      <div v-if="!showReadMe" slot="footer" class="dialog-footer">
+        <el-button type="primary"  @click="doSign">确定</el-button>
+      </div>
 
     </el-dialog>
 
@@ -180,7 +183,8 @@
           reportCustName:'',
           reportAccountName:'',
           reportLeaderName:''
-        }
+        },
+        currUser:{}
       }
     },
     methods:{
@@ -207,6 +211,15 @@
             }
             // this.selectActiveStep(active_unit,true,'N')
 
+          }
+        });
+      },
+      getCurrUserInfo(){
+        this.BaseRequest({
+          url:"/cqnyUser/getCurrUserOrigin"
+        }).then(response=>{
+          if(response){
+            this.currUser = response.user
           }
         });
       },
@@ -678,6 +691,40 @@
 
 
       },
+      checkUnitShow(unitEntity){
+
+        // 对哪类用户展示该单元
+        // 0:填报人员
+        // 1:审核人员
+        // 2：监管人员
+        // 3：审核+监管人员
+        const unitShowTYpe = unitEntity.unit_show_type
+
+        // 1：填报用户
+        // 2：监管用户
+        // 0：审核用户
+        const userType = this.currUser.user_type
+        if(unitShowTYpe==0){
+          return true
+        }else{
+          if(unitShowTYpe==1){
+            if(userType==0){
+              return true
+            }
+          }
+          if(unitShowTYpe==2){
+            if(userType==2){
+              return true
+            }
+          }
+          if(unitShowTYpe==3){
+            if(userType==0||userType==2){
+              return true
+            }
+          }
+        }
+        return false
+      }
     },
 
     mounted() {
@@ -685,7 +732,6 @@
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
       }
-      console.log(this.$route.params)
 
       if(this.$route.params.auth!=null&&this.$route.params.auth!=''){
         this.auth = this.$route.params.auth
@@ -694,6 +740,7 @@
         this.reportStats = this.$route.query.reportStats
       }
       this.checkUnitStep()
+      this.getCurrUserInfo()
     },
     activated() {
     }
@@ -779,6 +826,10 @@
 
   .sign-readme-checkinfo{
     font-size: 12px;
+  }
+
+  .hide-root{
+    display: none;
   }
 
 </style>

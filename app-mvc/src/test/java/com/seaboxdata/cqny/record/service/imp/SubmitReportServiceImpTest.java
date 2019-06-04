@@ -19,7 +19,7 @@ public class SubmitReportServiceImpTest extends AbstractTestService {
     @Test
     public void testDoSubmit() throws ParseException {
         SubmitReportRequestEntity submitReportRequestEntity = new SubmitReportRequestEntity();
-        submitReportRequestEntity.setDefined_id("1");
+        submitReportRequestEntity.setDefined_id("26");
         submitReportRequestEntity.setReport_data_start("20190504");
         submitReportRequestEntity.setReport_data_end("20190518");
         submitReportRequestEntity.setReport_start_date("20190501");

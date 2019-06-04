@@ -91,6 +91,7 @@ public interface IReportCustomerDao {
             "rui.report_defined_id," +
             "rui.unit_type," +
             "rui.unit_order," +
+            "rui.unit_show_type," +
             "rui.origin_id " +
             " from report_unit_info rui where rui.report_defined_id = #{report_id} order by rui.unit_order")
     List<UnitDefined> getAllUnitEntityByReportId(String report_id);
