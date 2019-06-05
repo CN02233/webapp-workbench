@@ -33,10 +33,23 @@ public class JobScheduleController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String pagingJobScheduleList(int currPage,int pageSize){
-        Page<JobSchedule> crawListPage = jobScheduleService.pagingJobScheduleList(currPage, pageSize);
+        Page<JobScheduleParam> crawListPage = jobScheduleService.pagingJobScheduleList(currPage, pageSize);
         PageResult pageResult = PageResult.pageHelperList2PageResult(crawListPage);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"获取成功",null,pageResult);
         logger.debug("paging crawl list result :{}",result);
+        return result;
+    }
+
+
+    @RequestMapping("getScheduleInfo")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public String getScheduleInfo(int job_schedule_id,String param_name)throws Exception{
+         param_name = strToUtf8(param_name);
+        JobScheduleParam scheduleParamInfo = jobScheduleService.getScheduleParamInfo(job_schedule_id, param_name);
+        Map<String,Object> resultMap = new HashMap();
+        resultMap.put("scheduleParamInfo",scheduleParamInfo);
+        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,resultMap);
         return result;
     }
 
@@ -54,35 +67,20 @@ public class JobScheduleController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String saveNewScheduleParam(@RequestBody JobScheduleParam jobScheduleParam) {
-       int job_schedule_id = jobScheduleParam.getJob_schedule_id();
-       JobScheduleParam ScheduleParam = jobScheduleService.getJobScheduleParam(job_schedule_id);
-       if (ScheduleParam == null) {
-             //job_schedule_id未存在
-             jobScheduleService.saveNewScheduleParam(jobScheduleParam);
-       }
-       String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
+        jobScheduleService.saveNewScheduleParam(jobScheduleParam);
+        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
         return  result;
-    }
-
-    @RequestMapping("getScheduleInfo")
-    @ResponseBody
-    @CrossOrigin(allowCredentials="true")
-    public String getScheduleInfo(int job_schedule_id){
-        JobSchedule scheduleInfo = jobScheduleService.getScheduleInfo(job_schedule_id);
-        Map<String,Object> resultMap = new HashMap();
-        resultMap.put("scheduleInfo",scheduleInfo);
-        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,resultMap);
-        return result;
     }
 
 
     @RequestMapping("updateSchedule")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String updateSchedule(String param_name,String param_value,int job_schedule_id,int job_schedule_type,int schedule_id)throws Exception{
+    public String updateSchedule(String param_name,String param_value,int job_schedule_id,int job_schedule_type,int schedule_id,String pName)throws Exception{
         param_name = strToUtf8(param_name);
         param_value = strToUtf8(param_value);
-        jobScheduleService.updateScheduleAndSceduleParam(job_schedule_id,job_schedule_type,param_name,param_value,schedule_id);
+        pName = strToUtf8(pName);
+        jobScheduleService.updateScheduleAndSceduleParam(job_schedule_id,job_schedule_type,param_name,param_value,schedule_id,pName);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
         return  result;
     }
@@ -90,8 +88,9 @@ public class JobScheduleController {
     @RequestMapping("delSchedule")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String delSchedule(int job_schedule_id)throws Exception{
-         jobScheduleService.delSchedule(job_schedule_id);
+    public String delSchedule(int job_schedule_id,String param_name)throws Exception{
+         param_name = strToUtf8(param_name);
+        jobScheduleService.delSchedule(job_schedule_id,param_name);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"删除成功",null,null);
         return result;
     }

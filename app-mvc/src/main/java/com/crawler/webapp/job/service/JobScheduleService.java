@@ -8,19 +8,18 @@ import com.github.pagehelper.Page;
  * Created by SongCQ on 2017/10/10.
  */
 public interface JobScheduleService {
-    Page<JobSchedule> pagingJobScheduleList(int currPage, int pageSize);
 
-    JobScheduleParam getJobScheduleParam(int job_schedule_id);
+    Page<JobScheduleParam> pagingJobScheduleList(int currPage, int pageSize);
 
     void saveJobSchedule(JobSchedule jobSchedule);
 
     void saveNewScheduleParam(JobScheduleParam jobScheduleParam);
 
-    JobSchedule getScheduleInfo(int job_schedule_id);
+    JobScheduleParam getScheduleParamInfo(int job_schedule_id,String param_name);
 
-    void updateScheduleAndSceduleParam(int job_schedule_id,int job_schedule_type,String param_name,String param_value,int schedule_id);
+    void updateScheduleAndSceduleParam(int job_schedule_id,int job_schedule_type,String param_name,String param_value,int schedule_id,String pName);
 
-    void delSchedule(int job_schedule_id);
+    void delSchedule(int job_schedule_id,String param_name);
 
 
 }
