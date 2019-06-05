@@ -8,7 +8,7 @@
         <el-form-item label="调度类型编号" prop="job_schedule_type">
           <el-input v-model.number="jobEditForm.job_schedule_type"></el-input>
         </el-form-item>
-        <el-form-item label="调度类型名称" prop="param_name">
+        <el-form-item label="调度类型" prop="param_name">
           <el-input v-model="jobEditForm.param_name"></el-input>
         </el-form-item>
         <el-form-item label="调度参数值" prop="param_value">
@@ -54,7 +54,7 @@ export default {
           { type: 'number', message: '必须为数字'}
         ],
         param_name: [
-          {required: true, message: '请输入调度类型名称', trigger: 'blur'}
+          {required: true, message: '请输入调度类型', trigger: 'blur'}
         ]
       }
     }

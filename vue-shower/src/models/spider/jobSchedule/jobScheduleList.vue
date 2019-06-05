@@ -14,18 +14,19 @@
           row-style="height:20px"
           style="width: 100%;">
           <el-table-column width="200"
-             prop="job_schedule_id"
+             prop="jobSchedule.job_schedule_id"
              align="center"
              label="任务调度编号">
           </el-table-column>
           <el-table-column
-            prop="job_schedule_type"
+            prop="jobSchedule.job_schedule_type"
             align="center" width="200"
             :formatter="getOriginName"
             label="调度类型编号">
           </el-table-column>
           <el-table-column
-            prop="jobScheduleParam.param_name" width="230"
+            prop="param_name"
+            width="230"
             align="center"
             label="调度类型">
           </el-table-column>
@@ -34,8 +35,8 @@
             align="left"
           >
             <template slot-scope="scope">
-              <el-button type="primary" @click="viewEdit(scope.row.job_schedule_id)" size="mini" >编辑</el-button>
-              <el-button type="primary" @click="delJob(scope.row.job_schedule_id)" size="mini" >删除</el-button>
+              <el-button type="primary" @click="viewEdit(scope.row.job_schedule_id,scope.row.job_schedule_type,scope.row.param_name)" size="mini" >编辑</el-button>
+              <el-button type="primary" @click="delJob(scope.row.job_schedule_id,scope.row.param_name)" size="mini" >删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -63,6 +64,40 @@
     },
     data(){
       return {
+        tableData: [{
+          job_schedule_id: 1,
+          job_schedule_type: 1,
+          children: [{
+            job_schedule_id: 11,
+            param_name: 'grsfg',
+          }, {
+            job_schedule_id: 12,
+            param_name: '王小虎',
+          }]
+        },
+          {
+            job_schedule_id: 2,
+            job_schedule_type: 2,
+          children: [{
+            job_schedule_id: 21,
+            param_name: 'grsfg',
+          }, {
+            job_schedule_id: 12,
+            param_name: '王小虎',
+          }]
+        },
+          {
+            job_schedule_id: 3,
+            job_schedule_type: 3,
+            children: [{
+              job_schedule_id: 21,
+              param_name: '王小虎',
+            }, {
+              job_schedule_id: 22,
+              param_name: '虎',
+            }]
+          }],
+
         dataList: [],
         currPageNum: 1,
         eachPageNum: 10,
@@ -100,11 +135,13 @@
         })
 
       },
-      viewEdit(scheduleId){
+      viewEdit(scheduleId,type,name){
         this.$router.push({
           name: "jobScheduleEdit",
           params:{
-            'job_schedule_id': scheduleId
+            'job_schedule_id': scheduleId,
+            'job_schedule_type': type,
+            'param_name': name
           }
         });
       },
@@ -113,7 +150,7 @@
           name: "jobScheduleAdd"
         });
       },
-      delJob(scheduleId){
+      delJob(scheduleId,name){
         this.$confirm('确定删除该任务？', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -130,7 +167,7 @@
           this.BaseRequest({
             url:'job/jobSchedule/delSchedule',
             method:'get',
-            params:{'job_schedule_id': scheduleId}
+            params:{'job_schedule_id': scheduleId,'param_name': name}
           }).then(response=>{
             this.Message.success("删除成功")
             loading.close()

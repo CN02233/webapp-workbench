@@ -2,17 +2,17 @@
   <WorkMain :headerItems="['调度配置','调度编辑']">
     <div class="job-edit-root">
       <el-form :model="jobEditForm" :rules="validateRules" ref="jobEditForm" label-width="150px">
-        <el-form-item label="任务调度编号" prop="job_schedule_id">
-          <el-input  v-model.number="jobEditForm.job_schedule_id"></el-input>
+        <el-form-item label="任务调度编号" prop="jobSchedule.job_schedule_id">
+          <el-input  v-model.number="jobEditForm.jobSchedule.job_schedule_id"></el-input>
         </el-form-item>
-        <el-form-item label="调度类型编号" prop="job_schedule_type">
-          <el-input v-model.number="jobEditForm.job_schedule_type"></el-input>
+        <el-form-item label="调度类型编号" prop="jobSchedule.job_schedule_type">
+          <el-input v-model.number="jobEditForm.jobSchedule.job_schedule_type"></el-input>
         </el-form-item>
-        <el-form-item label="调度类型名称" prop="jobScheduleParam.param_name">
-          <el-input v-model="jobEditForm.jobScheduleParam.param_name"></el-input>
+        <el-form-item label="调度类型" prop="param_name">
+          <el-input v-model="jobEditForm.param_name"></el-input>
         </el-form-item>
-        <el-form-item label="调度参数值" prop="jobScheduleParam.param_value">
-          <el-input v-model="jobEditForm.jobScheduleParam.param_value"></el-input>
+        <el-form-item label="调度参数值" prop="param_value">
+          <el-input v-model="jobEditForm.param_value"></el-input>
         </el-form-item>
         <el-form-item v-if="view_type!='view'" label-width="0" style="text-align: right">
           <el-button type="success" @click="save" :size="small">保存</el-button>
@@ -42,20 +42,7 @@ export default {
         job_schedule_type: '',
         param_name: '',
         param_value: '',
-        jobScheduleParam: ''
-      },
-      validateRules: {
-        job_schedule_id: [
-          {required: true, message: '请输入任务调度编号', trigger: 'blur'},
-          { type: 'number', message: '必须为数字'}
-        ],
-        job_schedule_type: [
-          {required: true, message: '请输入调度类型编号', trigger: 'blur'},
-          { type: 'number', message: '必须为数字'}
-        ],
-        param_name: [
-          {required: true, message: '请输入调度类型名称', trigger: 'blur'}
-        ]
+        jobSchedule: ''
       }
     }
   },
@@ -65,10 +52,11 @@ export default {
         url: 'job/jobSchedule/getScheduleInfo',
         method: 'get',
         params: {
-          job_schedule_id: this.job_schedule_id
+          job_schedule_id: this.job_schedule_id,
+          param_name: this.param_name
         }
       }).then(response => {
-        this.jobEditForm = response.scheduleInfo
+        this.jobEditForm = response.scheduleParamInfo
       })
     },
     save () {
@@ -86,10 +74,11 @@ export default {
         method: 'get',
         params: {
           schedule_id: this.job_schedule_id,
-          job_schedule_id: this.jobEditForm.job_schedule_id,
-          job_schedule_type: this.jobEditForm.job_schedule_type,
-          param_name: this.jobEditForm.jobScheduleParam.param_name,
-          param_value: this.jobEditForm.jobScheduleParam.param_value
+          pName: this.param_name,
+          job_schedule_id: this.jobEditForm.jobSchedule.job_schedule_id,
+          job_schedule_type: this.jobEditForm.jobSchedule.job_schedule_type,
+          param_name: this.jobEditForm.param_name,
+          param_value: this.jobEditForm.param_value
         }
       }).then(response => {
         this.Message.success('保存成功')
@@ -107,6 +96,7 @@ export default {
   },
   mounted () {
     this.job_schedule_id = this.$route.params.job_schedule_id
+    this.param_name = this.$route.params.param_name
     this.getInfo()
   }
 }
