@@ -57,21 +57,14 @@ public class JobScheduleController {
     @RequestMapping("saveNewSchedule")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String saveJobSchedule(@RequestBody JobSchedule jobSchedule){
-        jobScheduleService.saveJobSchedule(jobSchedule);
+    public String saveJobSchedule(String param_name,String param_value,int job_schedule_id,int job_schedule_type)throws Exception{
+        param_name = strToUtf8(param_name);
+        param_value = strToUtf8(param_value);
+        jobScheduleService.saveJobSchedule(job_schedule_id,job_schedule_type);
+        jobScheduleService.saveNewScheduleParam(param_name,param_value,job_schedule_id);
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
         return  result;
     }
-
-   @RequestMapping("saveNewScheduleParam")
-    @ResponseBody
-    @CrossOrigin(allowCredentials="true")
-    public String saveNewScheduleParam(@RequestBody JobScheduleParam jobScheduleParam) {
-        jobScheduleService.saveNewScheduleParam(jobScheduleParam);
-        String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
-        return  result;
-    }
-
 
     @RequestMapping("updateSchedule")
     @ResponseBody

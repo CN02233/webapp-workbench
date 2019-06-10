@@ -20,40 +20,35 @@ public class JobScheduleServiceImp implements JobScheduleService {
     private IJobScheduleDao iJobScheduleDao;
 
     @Override
-    public Page<JobSchedule> pagingJobScheduleList(int currPage, int pageSize) {
-        Page<JobSchedule> result = iJobScheduleDao.pagingJobScheduleList(currPage, pageSize);
+    public Page<JobScheduleParam> pagingJobScheduleList(int currPage, int pageSize) {
+        Page<JobScheduleParam> result = iJobScheduleDao.pagingJobScheduleList(currPage, pageSize);
         return result;
     }
 
     @Override
-    public JobScheduleParam getJobScheduleParam(int job_schedule_id) {
-        return iJobScheduleDao.getJobScheduleParam(job_schedule_id);
+    public void saveJobSchedule(int job_schedule_id,int job_schedule_type) {
+        iJobScheduleDao.saveJobSchedule(job_schedule_id,job_schedule_type);
     }
 
     @Override
-    public void saveJobSchedule(JobSchedule jobSchedule) {
-        iJobScheduleDao.saveJobSchedule(jobSchedule);
+    public void saveNewScheduleParam(String param_name,String param_value,int job_schedule_id) {
+        iJobScheduleDao.saveNewScheduleParam(param_name,param_value,job_schedule_id);
     }
 
     @Override
-    public void saveNewScheduleParam(JobScheduleParam jobScheduleParam) {
-        iJobScheduleDao.saveNewScheduleParam(jobScheduleParam);
+    public JobScheduleParam getScheduleParamInfo(int job_schedule_id,String param_name) {
+        return iJobScheduleDao.getScheduleParamInfo(job_schedule_id,param_name);
     }
 
     @Override
-    public JobSchedule getScheduleInfo(int job_schedule_id) {
-        return iJobScheduleDao.getScheduleInfo(job_schedule_id);
-    }
-
-    @Override
-    public void updateScheduleAndSceduleParam(int job_schedule_id,int job_schedule_type,String param_name,String param_value,int schedule_id) {
-           iJobScheduleDao.updateScheduleAndSceduleParam(job_schedule_id,job_schedule_type,param_name,param_value,schedule_id);
+    public void updateScheduleAndSceduleParam(int job_schedule_id,int job_schedule_type,String param_name,String param_value,int schedule_id,String pName) {
+           iJobScheduleDao.updateScheduleAndSceduleParam(job_schedule_id,job_schedule_type,param_name,param_value,schedule_id,pName);
     }
 
 
     @Override
-    public void delSchedule(int job_schedule_id) {
-        iJobScheduleDao.delSchedule(job_schedule_id);
+    public void delSchedule(int job_schedule_id,String param_name) {
+        iJobScheduleDao.delSchedule(job_schedule_id,param_name);
     }
 
 }

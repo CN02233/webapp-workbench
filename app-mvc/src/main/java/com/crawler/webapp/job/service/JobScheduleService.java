@@ -11,9 +11,9 @@ public interface JobScheduleService {
 
     Page<JobScheduleParam> pagingJobScheduleList(int currPage, int pageSize);
 
-    void saveJobSchedule(JobSchedule jobSchedule);
+    void saveJobSchedule(int job_schedule_id,int job_schedule_type);
 
-    void saveNewScheduleParam(JobScheduleParam jobScheduleParam);
+    void saveNewScheduleParam(String param_name,String param_value,int job_schedule_id);
 
     JobScheduleParam getScheduleParamInfo(int job_schedule_id,String param_name);
 
