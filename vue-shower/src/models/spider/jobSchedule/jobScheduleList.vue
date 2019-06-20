@@ -64,40 +64,6 @@
     },
     data(){
       return {
-        tableData: [{
-          job_schedule_id: 1,
-          job_schedule_type: 1,
-          children: [{
-            job_schedule_id: 11,
-            param_name: 'grsfg',
-          }, {
-            job_schedule_id: 12,
-            param_name: '王小虎',
-          }]
-        },
-          {
-            job_schedule_id: 2,
-            job_schedule_type: 2,
-          children: [{
-            job_schedule_id: 21,
-            param_name: 'grsfg',
-          }, {
-            job_schedule_id: 12,
-            param_name: '王小虎',
-          }]
-        },
-          {
-            job_schedule_id: 3,
-            job_schedule_type: 3,
-            children: [{
-              job_schedule_id: 21,
-              param_name: '王小虎',
-            }, {
-              job_schedule_id: 22,
-              param_name: '虎',
-            }]
-          }],
-
         dataList: [],
         currPageNum: 1,
         eachPageNum: 10,
