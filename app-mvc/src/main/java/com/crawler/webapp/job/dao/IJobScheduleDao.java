@@ -25,10 +25,13 @@ public interface IJobScheduleDao {
 
 
     @Insert("insert into job_schedule (job_schedule_id,job_schedule_type) values (#{job_schedule_id},#{job_schedule_type})")
-    void saveJobSchedule(JobSchedule jobSchedule);
+    void saveJobSchedule(@Param("job_schedule_id") int job_schedule_id,@Param("job_schedule_type") int job_schedule_type);
+
+
 
     @Insert("insert into job_schedule_param (job_schedule_id,param_name,param_value) values (#{job_schedule_id},#{param_name},#{param_value})")
-    void saveNewScheduleParam(JobScheduleParam jobScheduleParam);
+    void saveNewScheduleParam(@Param("param_name") String param_name,@Param("param_value")
+            String param_value,@Param("job_schedule_id") int job_schedule_id);
 
 
     @Select("select *,job_schedule_id as jscheduleId from job_schedule_param where job_schedule_id = #{id} and param_name = #{name}" )

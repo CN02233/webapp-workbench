@@ -64,7 +64,6 @@ export default {
       this.$refs['jobEditForm'].validate((valid) => {
         if (valid) {
           this.saveNewSchedule()
-          this.saveNewScheduleParam()
         } else {
           return false
         }
@@ -74,19 +73,12 @@ export default {
       this.BaseRequest({
         url: 'job/jobSchedule/saveNewSchedule',
         method: 'post',
-        data: this.jobEditForm
-      }).then(response => {
-        this.Message.success('保存成功')
-        this.$router.push({
-          name: 'jobScheduleList'
-        })
-      })
-    },
-    saveNewScheduleParam () {
-      this.BaseRequest({
-        url: 'job/jobSchedule/saveNewScheduleParam',
-        method: 'post',
-        data: this.jobEditForm
+        params: {
+          job_schedule_id: this.jobEditForm.job_schedule_id,
+          job_schedule_type: this.jobEditForm.job_schedule_type,
+          param_name: this.jobEditForm.param_name,
+          param_value: this.jobEditForm.param_value
+        }
       }).then(response => {
         this.Message.success('保存成功')
         this.$router.push({
