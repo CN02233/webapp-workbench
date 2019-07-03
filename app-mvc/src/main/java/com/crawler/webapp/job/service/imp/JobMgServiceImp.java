@@ -92,7 +92,7 @@ public class JobMgServiceImp implements JobMgService {
         builder.append(format.format(Calendar.getInstance().getTime()));
         builder.append(new Random().nextInt(50));
         int job_id = new Integer(builder.toString());
-        job_id = (new Random().nextInt(1000));
+        job_id = (new Random().nextInt(10000));
         if(jobInfo.getIs_valid()==null)
             jobInfo.setIs_valid(1);
 
