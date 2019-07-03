@@ -170,8 +170,8 @@
             if(checkNOde['children']&&checkNOde['children'].length>0){
 
             }else{
-              // this.searchContext.jobIdList.push(checkNOde['id'])
-              this.searchContext.jobIdList.push("8")
+              this.searchContext.jobIdList.push(checkNOde['id'])
+              // this.searchContext.jobIdList.push("8")
 
               this.searchContext.pagingMap[checkNOde['id']] = 0
               this.searchContext.pagingMap["8"] = 0

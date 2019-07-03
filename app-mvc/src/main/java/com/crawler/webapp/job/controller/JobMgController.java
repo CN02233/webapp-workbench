@@ -139,9 +139,8 @@ public class JobMgController {
     @RequestMapping("updateJobInfo")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
-    public String updateJobInfo(@JsonMsgParam(jsonName = "jobInfo",jsonObjTypes={JobInfoBean.class}) JobInfoBean jobInfo,
-                                @JsonMsgParam(jsonName = "proxyServers",jsonObjTypes={String.class}) ArrayList<String> proxyServers){
-        jobMgService.updateJobInfo(jobInfo,proxyServers);
+    public String updateJobInfo(@RequestBody JobInfoBean jobInfo){
+        jobMgService.updateJobInfo(jobInfo,jobInfo.getProxyServerList());
         String result = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"保存成功",null,null);
         return result;
     }

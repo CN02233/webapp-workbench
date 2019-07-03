@@ -38,9 +38,9 @@
         <el-form-item label="采集服务器">
           <el-input :disabled="view_type=='view'" v-model.number="jobEditForm.host_id" ></el-input>
         </el-form-item>
-        <el-form-item v-if="view_type!='view'" label-width="0" style="text-align: right">
-          <el-button type="success" @click="saveJob" :size="small">保存</el-button>
-          <el-button type="primary" @click="goBack" :size="small">放弃</el-button>
+        <el-form-item label-width="0" style="text-align: right">
+          <el-button v-if="view_type!='view'" type="success" @click="saveJob" size="small">保存</el-button>
+          <el-button type="primary" @click="goBack" size="small">放弃</el-button>
         </el-form-item>
       </el-form>
 
@@ -49,7 +49,6 @@
         :data="proxyDataList"
         header-row-class-name="table-header-style"
         row-class-name="mini-font-size" stripe
-        row-style="height:20px"
         style="width: 100%;">
         <el-table-column
           prop="proxy_server_id"
@@ -115,7 +114,7 @@
         is_valid: '',
         jobEditForm:{
           job_name:'',
-          is_valid:'',
+          is_valid:'1',
           max_page_num:null,
           start_urls:null,
           page_life_cycle:null,
@@ -239,7 +238,26 @@
         })
       },
       updateJob(){
+        const checkAllProxyServers = []
 
+        this.proxyDataList.forEach(proxyData=>{
+          if(proxyData.selected=='Y'){
+            checkAllProxyServers.push(proxyData.proxy_server_id)
+          }
+        })
+
+        this.jobEditForm.proxyServerList = checkAllProxyServers
+
+        this.BaseRequest({
+          url: "crawler/jobMg/updateJobInfo",
+          method: 'post',
+          data: this.jobEditForm
+        }).then(response => {
+          this.Message.success("更新成功")
+          this.$router.push({
+            name: "jobList"
+          });
+        })
       },
       goBack(){
         this.$router.push({
@@ -248,8 +266,8 @@
       }
     },
     mounted() {
-      this.jobPage.job_id = this.$route.params.job_id
-      this.jobPage.user_id = this.$route.params.user_id
+      this.job_id = this.$route.params.job_id
+      this.jobEditForm.user_id = this.$route.params.user_id
       this.view_type = this.$route.params.view_type
       if(this.view_type=='edit'||this.view_type=='view'){
         this.getJobInfo()
