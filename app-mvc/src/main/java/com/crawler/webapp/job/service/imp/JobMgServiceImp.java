@@ -91,12 +91,16 @@ public class JobMgServiceImp implements JobMgService {
         StringBuilder builder = new StringBuilder();
         builder.append(format.format(Calendar.getInstance().getTime()));
         builder.append(new Random().nextInt(50));
-        int job_id = new Integer(builder.toString());
-        job_id = (new Random().nextInt(10000));
+        //int job_id = new Integer(builder.toString());
+        //job_id = (new Random().nextInt(10000));
+        Integer job_id = iJobMgDao.getjobInfoMaxId();
+         if (job_id == null){
+             jobInfo.setJob_id(1);
+         }else {
+             jobInfo.setJob_id(job_id+1);
+         }
         if(jobInfo.getIs_valid()==null)
             jobInfo.setIs_valid(1);
-
-        jobInfo.setJob_id(job_id);
 
         iJobMgDao.saveJobInfo(jobInfo);
         if(proxyServers!=null&&proxyServers.size()>0){}//do nothing}

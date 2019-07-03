@@ -115,4 +115,8 @@ public interface IJobMgDao {
     @Select("select * from crawl_job")
     @Options(useCache = false)
     List<JobInfoBean> listAllJob();
+
+    @Select("select max(job_id) from crawl_job")
+    @Options(useCache = false)
+    Integer getjobInfoMaxId();
 }
