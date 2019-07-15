@@ -19,20 +19,20 @@
           </el-select>
         </el-form-item>
         <el-form-item label="页面类型"  prop="page_type">
-          <el-select :disabled="view_type=='view'" v-model.number="formData.page_type.toString()" style="width:100%;" placeholder="请选择页面类型">
+          <el-select :disabled="view_type=='view'" v-model="formData.page_type" style="width:100%;" placeholder="请选择页面类型">
             <el-option label="静态页面" value="0"></el-option>
             <el-option label="动态页面" value="1"></el-option>
             <el-option label="JSON页面" value="2"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="数据类型"  prop="data_format">
-          <el-select :disabled="view_type=='view'" v-model.number="formData.data_format.toString()" style="width:100%;" placeholder="请选择数据类型">
+          <el-select :disabled="view_type=='view'" v-model="formData.data_format" style="width:100%;" placeholder="请选择数据类型">
             <el-option label="TABLE" value="0"></el-option>
             <el-option label="JSON" value="1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="是否多页"  prop="is_multi_page">
-          <el-select :disabled="view_type=='view'" v-model="formData.is_multi_page.toString()" style="width:100%;" placeholder="是否多页">
+          <el-select :disabled="view_type=='view'" v-model="formData.is_multi_page" style="width:100%;" placeholder="是否多页">
             <el-option label="否" value="0"></el-option>
             <el-option label="是" value="1"></el-option>
           </el-select>
@@ -63,8 +63,6 @@
 
     </div>
 
-
-
   </WorkMain>
 
 </template>
@@ -89,9 +87,9 @@
           job_id:0,
           user_id:0,
           page_name:'',
-          page_type:0,
-          data_format:0,
-          is_multi_page:0,
+          page_type: '0',
+          data_format: '0',
+          is_multi_page:'0',
           paginate_element:'',
           load_indicator:'',
           page_interval:0,
