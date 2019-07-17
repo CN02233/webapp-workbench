@@ -5,8 +5,8 @@
         <el-form-item a label="采集名称" prop="job_name">
           <el-input :disabled="view_type=='view'" v-model="jobEditForm.job_name" ></el-input>
         </el-form-item>
-        <el-form-item label="生效标志" prop="is_valid">
-          <el-select :disabled="view_type=='view'" STYLE="width: 100%" v-model="jobEditForm.is_valid" placeholder="是否有效">
+        <el-form-item label="生效标志" prop="is_valid_cn">
+          <el-select :disabled="view_type=='view'" STYLE="width: 100%" v-model="jobEditForm.is_valid_cn" placeholder="是否有效">
             <el-option label="有效" value="1"></el-option>
             <el-option label="无效" value="0"></el-option>
           </el-select>
@@ -114,7 +114,8 @@
         is_valid: '',
         jobEditForm:{
           job_name:'',
-          is_valid:'1',
+          is_valid:'',
+          is_valid_cn:'1',
           max_page_num:null,
           start_urls:null,
           page_life_cycle:null,
@@ -131,7 +132,7 @@
           job_name: [
             { required: true, message: '请输入任务名称', trigger: 'blur' }
           ],
-          is_valid: [
+          is_valid_cn: [
             { required: true, message: '请选择是否有效', trigger: 'blur' }
           ],
           max_page_num: [
@@ -226,6 +227,12 @@
 
         this.jobEditForm.proxyServerList = checkAllProxyServers
 
+        //设置是否有效
+        if (this.jobEditForm.is_valid_cn === '1'){
+          this.jobEditForm.is_valid = 1
+        } else if (this.jobEditForm.is_valid_cn === '0') {
+          this.jobEditForm.is_valid = 0
+        }
         this.BaseRequest({
           url: "crawler/jobMg/saveNewJob",
           method: 'post',
@@ -247,7 +254,12 @@
         })
 
         this.jobEditForm.proxyServerList = checkAllProxyServers
-
+        //设置是否有效
+        if (this.jobEditForm.is_valid_cn === '1'){
+          this.jobEditForm.is_valid = 1
+        } else if (this.jobEditForm.is_valid_cn === '0') {
+          this.jobEditForm.is_valid = 0
+        }
         this.BaseRequest({
           url: "crawler/jobMg/updateJobInfo",
           method: 'post',

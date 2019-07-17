@@ -22,27 +22,28 @@
           style="width: 100%;">
           <el-table-column
             prop="job_id" width="80"
-            align="left"
+            align="center"
             label="采集编号">
           </el-table-column>
           <el-table-column
             prop="job_name"
-            align="left" width="180"
+            align="center" width="180"
             label="采集名称">
           </el-table-column>
           <el-table-column
-            prop="start_urls"
-            align="left"
+            prop="entry_page_id"
+            align="center"
+            width="80"
             label="起始页面">
           </el-table-column>
           <el-table-column width="100"
             prop="user.user_name_cn"
-            align="left"
+            align="center"
             label="用户">
           </el-table-column>
           <el-table-column
-            prop="is_valid" width="80"
-            :formatter="getStatus"
+            prop="is_valid_cn" width="80"
+            align="center"
             label="是否有效">
           </el-table-column>
           <el-table-column
@@ -210,7 +211,7 @@
         });
       },
       getStatus(is_valid){
-        return is_valid == '1' ? '是' : '否';
+        return is_valid == 1 ? '是' : '否';
       }
     },
     mounted() {
