@@ -216,7 +216,7 @@ public class CrawlerPageMgController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public String deletePageField(int field_id,int page_id, int job_id, int user_id){
-        crawlerPageMgService.removePageFields(field_id, page_id, job_id, user_id);
+        crawlerPageMgService.removePageField(field_id, page_id, job_id, user_id);
         return JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS,"删除成功",null,null);
     }
 

@@ -17,32 +17,32 @@
           style="width: 100%;">
           <el-table-column
             prop="job_id" width="80"
-            align="left"
+            align="center"
             label="采集编号">
           </el-table-column>
           <el-table-column
             prop="job_name"
-            align="left" width="180"
+            align="center" width="180"
             label="采集名称">
           </el-table-column>
           <el-table-column width="100"
             prop="user_name_cn"
-            align="left"
+            align="center"
             label="用户">
           </el-table-column>
           <el-table-column
             prop="page_id" width="80"
-            align="left"
+            align="center"
             label="页面编号">
           </el-table-column>
           <el-table-column
             prop="page_name"
-            align="left" width="180"
+            align="center" width="180"
             label="页面名称">
           </el-table-column>
           <el-table-column
             prop="max_page_num"
-            align="left" width="120"
+            align="center" width="120"
             label="最大采集数量">
           </el-table-column>
           <el-table-column

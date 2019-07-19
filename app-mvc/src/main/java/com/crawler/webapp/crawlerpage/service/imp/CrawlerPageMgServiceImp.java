@@ -177,6 +177,13 @@ public class CrawlerPageMgServiceImp implements CrawlerPageMgService{
     }
 
     @Override
+    public void removePageField(int field_id, int page_id, int job_id, int user_id){
+        crawlerPageMgDao.removeLocate(field_id,page_id, job_id, user_id);
+        crawlerPageMgDao.removeLocateRelations(field_id,page_id, job_id, user_id);
+        crawlerPageMgDao.removePageFields(field_id,page_id,job_id,user_id);
+    }
+
+    @Override
     public List<CrawlerPage> listCrawlerPage() {
         List<CrawlerPage> list = crawlerPageMgDao.listCrawlerPage();
         return list;

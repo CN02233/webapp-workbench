@@ -179,4 +179,11 @@ public interface CrawlerPageMgDao {
 
     @Update("${sql}")
     void execute(@Param("sql") String sql);
+
+    @Delete("delete from page_field_locate where field_locate_id in (select field_locate_id from page_field_locate_relation where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id} and field_id=#{field_id})")
+    void removeLocate(@Param("field_id") int field_id,@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
+
+    @Delete("delete from page_field_locate_relation where page_id=#{page_id} and job_id=#{job_id} and user_id=#{user_id} and field_id=#{field_id}")
+    void removeLocateRelations(@Param("field_id") int field_id,@Param("page_id") int page_id, @Param("job_id") int job_id, @Param("user_id") int user_id);
+
 }

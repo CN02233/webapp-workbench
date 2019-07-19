@@ -152,10 +152,42 @@
         });
       },
       delField(i,row){
-        let x = this.dataList.splice(i, 1)
+        /*let x = this.dataList.splice(i, 1)
         if(row.field_id){
           this.saveList.del.push(x)
-        }
+        }*/
+        this.$confirm('确定删除该任务？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(() => {
+          const loading = this.$loading({
+            lock: true,
+            text: '删除中',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
+
+          this.BaseRequest({
+            url:'crawler/pageMg/deletePageLink',
+            method:'get',
+            params:{
+              'link_id':row.link_id,
+              'page_id':row.page_id,
+              'job_id':row.job_id,
+              'user_id':row.user_id,
+            }
+          }).then(response=>{
+            this.Message.success("删除成功")
+            loading.close()
+            this.getTableData(1)
+          }).catch(error=>{
+            loading.close()
+            this.Message.error("删除失败"+error)
+          })
+        }).catch(() => {
+        });
       },
       goBack(){
         this.$router.push({

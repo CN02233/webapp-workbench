@@ -21,21 +21,21 @@
           row-class-name="mini-font-size" stripe
           style="width: 100%;">
           <el-table-column label="序号" prop="field_id" width="80" fixed align="center"></el-table-column>
-          <el-table-column align="left" width="120" label="字段名称">
+          <el-table-column align="center" width="120" label="字段名称">
             <template slot-scope="scope">
               <el-form-item :prop="'dataList.' + scope.$index + '.field_name'" :rules='rules.field_name'>
                 <el-input v-model="scope.row.field_name"></el-input>
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="120" label="上级字段">
+          <el-table-column align="center" width="120" label="上级字段">
             <template slot-scope="scope">
               <el-form-item :prop="'dataList.' + scope.$index + '.parent_field_id'">
                 <el-tree-select :checkedKeys="[scope.row.parent_field_id]" :data="fieldList" :height="150"></el-tree-select>
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="120" label="字段类型">
+          <el-table-column align="center" width="120" label="字段类型">
             <template slot-scope="scope">
               <el-form-item :prop="'dataList.' + scope.$index + '.field_datatype'">
                 <el-select v-model="scope.row.field_datatype" style="width:100%;" placeholder="请选择字段类型">
@@ -44,7 +44,7 @@
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="120" label="合并元素数据">
+          <el-table-column align="center" width="120" label="合并元素数据">
             <template slot-scope="scope">
               <el-form-item :prop="'dataList.' + scope.$index + '.combine_field_value'">
                 <el-select v-model="scope.row.combine_field_value" style="width:100%;" placeholder="是否合并元素数据">
@@ -53,7 +53,7 @@
               </el-form-item>
             </template>
           </el-table-column>
-          <el-table-column align="left" width="150" label="字段定位(个)">
+          <el-table-column align="center" width="150" label="字段定位(个)">
             <template slot-scope="scope">
               <el-form-item>
                 <el-input v-model="scope.row.pageFieldLocate.length" readonly="readonly">
@@ -64,8 +64,7 @@
           </el-table-column>
           <el-table-column
             label="操作" width="100"
-            align="left"
-          >
+            align="left">
             <template slot-scope="scope">
               <el-button type="primary" @click="delField(scope.$index, scope.row)" size="mini" >删除</el-button>
             </template>
@@ -143,6 +142,7 @@
         user_id: '',
         job_name: '',
         fieldList:[],
+        saveList:{add:[],edit:[],del:[]},
         rules:{
           field_name:{ type:"string",required:true,message:"必填字段",trigger:"change"},
           field_locate_pattern:{ type:"string",required:true,message:"必填字段",trigger:"change"}
@@ -221,8 +221,42 @@
         });
       },
       delField(i,row){
-        let x = this.dataList.splice(i, 1)
+        //let x = this.dataList.splice(i)
+        this.$confirm('确定删除该任务？', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(() => {
+          const loading = this.$loading({
+            lock: true,
+            text: '删除中',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
+
+          this.BaseRequest({
+            url:'crawler/pageMg/deletePageField',
+            method:'get',
+            params:{
+              'field_id':row.field_id,
+              'page_id':row.page_id,
+              'job_id':row.job_id,
+              'user_id':row.user_id,
+            }
+          }).then(response=>{
+            this.Message.success("删除成功")
+            loading.close()
+            this.getTableData(1)
+          }).catch(error=>{
+            loading.close()
+            this.Message.error("删除失败"+error)
+          })
+        }).catch(() => {
+        });
       },
+
+
       goBack(){
         this.$router.push({
           name: "pageList"
