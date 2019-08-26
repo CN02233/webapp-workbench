@@ -16,6 +16,7 @@ public class CqnyUser {
 
     private int user_id;
     private String user_pwd;
+    private String old_user_pwd;
     private String user_name;
     private String user_name_cn;
     private String user_type;
@@ -24,6 +25,10 @@ public class CqnyUser {
     private Date last_login_time;
     private Integer  origin_id;
     private String  origin_name;
+    private String office_phone;
+    private String mobile_phone;
+    private String email;
+    private String social_code;
 
     public int getUser_id()
     {
@@ -132,5 +137,45 @@ public class CqnyUser {
 
     public void setLast_login_time(Date last_login_time) {
         this.last_login_time = last_login_time;
+    }
+
+    public String getOld_user_pwd() {
+        return old_user_pwd;
+    }
+
+    public void setOld_user_pwd(String old_user_pwd) {
+        this.old_user_pwd = old_user_pwd;
+    }
+
+    public String getOffice_phone() {
+        return office_phone;
+    }
+
+    public void setOffice_phone(String office_phone) {
+        this.office_phone = office_phone;
+    }
+
+    public String getMobile_phone() {
+        return mobile_phone;
+    }
+
+    public void setMobile_phone(String mobile_phone) {
+        this.mobile_phone = mobile_phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getSocial_code() {
+        return social_code;
+    }
+
+    public void setSocial_code(String social_code) {
+        this.social_code = social_code;
     }
 }

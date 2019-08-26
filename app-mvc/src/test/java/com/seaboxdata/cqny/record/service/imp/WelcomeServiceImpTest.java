@@ -6,6 +6,8 @@ import junit.framework.TestCase;
 import org.junit.Test;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 public class WelcomeServiceImpTest extends AbstractTestService {
 
@@ -19,4 +21,9 @@ public class WelcomeServiceImpTest extends AbstractTestService {
         welcomeService.jobList(55643376,1,20);
     }
 
+    @Test
+    public void testGetReportSumInfo() {
+        List<Map<String, Integer>> result = welcomeService.getReportSumInfo(3701432);
+        System.out.println(result);
+    }
 }

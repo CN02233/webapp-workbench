@@ -2,6 +2,7 @@ package com.seaboxdata.cqny.record.controller;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.seaboxdata.cqny.origin.service.AdministrativeService;
 import com.seaboxdata.cqny.record.config.ReportStatus;
 import com.seaboxdata.cqny.record.entity.*;
 import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
@@ -33,6 +34,9 @@ public class ReportCustomerController {
     @Autowired
     private OriginService originService;
 
+    @Autowired
+    private AdministrativeService administrativeService;
+
 
     /**
      * 获取当前用户权限下报送列表
@@ -48,6 +52,10 @@ public class ReportCustomerController {
         int currUserId = currUser.getUser_id();
 
         Origin userOrigin = originService.getOriginByUser(currUserId);
+        if(userOrigin==null){
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+            return jsonResult;
+        }
         Integer userOriginId = userOrigin.getOrigin_id();
 
         List<Origin> allOrigins = originService.listAllOrigin();
@@ -157,6 +165,29 @@ public class ReportCustomerController {
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
 
+        String userType = currUser.getUser_type();
+
+        if("2".equals(userType)){//监管用户
+            List<Origin> organizationOrigins  = administrativeService.listAllOriginForOrganization(currUserId);
+            List<Origin> allOrigins = originService.listAllOrigin();
+            if(organizationOrigins!=null&&organizationOrigins.size()>0){
+                List<Integer> originParams = new ArrayList<>();
+                for (Origin originObj : organizationOrigins) {
+                    originParams.add(originObj.getOrigin_id());
+                    Integer userOriginId = originObj.getOrigin_id();
+                    List<Origin> childrenOrigin =  originService.checkoutSons(userOriginId,allOrigins);
+                    if(childrenOrigin!=null){
+                        for (Origin origin : childrenOrigin) {
+                            originParams.add(origin.getOrigin_id());
+                        }
+                    }
+                }
+                PageResult reportInfos = reportCustomerService.getChildrenReportInfos(currPage, pageSize,originParams);
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,reportInfos);
+                return jsonResult;
+            }
+        }
+        
         Origin userOrigin = originService.getOriginByUser(currUserId);
         if(userOrigin!=null){
             Integer userOriginId = userOrigin.getOrigin_id();
@@ -237,6 +268,16 @@ public class ReportCustomerController {
         return jsonResult;
     }
 
+
+    @RequestMapping("getGridContext")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult getGridContext(String reportId, String unitId){
+        Map<String,Object> gridContextINfo = reportCustomerService.getGridContext(reportId,unitId);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null,gridContextINfo);
+        return jsonResult;
+    }
+
     @RequestMapping("saveSimpleUnitContext")
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
@@ -246,8 +287,9 @@ public class ReportCustomerController {
                 saveSimpleUnitContext.getDefinedColums(),
                 saveSimpleUnitContext.getColumDatas(),
                 true);
+
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }
@@ -256,7 +298,6 @@ public class ReportCustomerController {
     @ResponseBody
     @CrossOrigin(allowCredentials="true")
     public JsonResult validateSimpleUnitContext(@RequestBody SaveSimpleUnitContext saveSimpleUnitContext){
-
         Map<String, String> validateResult = reportCustomerService.validateSimpleUnitByColum(saveSimpleUnitContext.getDefinedColums(),saveSimpleUnitContext.getColumDatas());
 //        ReportUnitCustomerContext unitContext = reportCustomerService.getUnitContext(reportId, unitId, unitType);
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "校验完成", null,validateResult);
@@ -306,7 +347,7 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult saveGroupUnitContext(@RequestBody SaveSimpleUnitContext saveUnitContext){
         reportCustomerService.updateOrInsertGroupUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,JsonResult.RESULT.SUCCESS);
         return jsonResult;
     }
 
@@ -316,7 +357,8 @@ public class ReportCustomerController {
     public JsonResult saveGridUnitContext(@RequestBody SaveGridUnitContext saveUnitContext){
 
         reportCustomerService.updateOrInsertGridUnitContext(saveUnitContext.getDefinedColums(),saveUnitContext.getColumDatas(),true);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取欧成功", null,
+                JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }
@@ -326,7 +368,8 @@ public class ReportCustomerController {
     @CrossOrigin(allowCredentials="true")
     public JsonResult refreshFomular(String reportDefinedId,String reportId){
         reportCustomerService.refreshFomular(reportDefinedId,reportId);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "刷新成功", null,null);
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "刷新成功", null,
+                JsonResult.RESULT.SUCCESS);
 
         return jsonResult;
     }
@@ -339,8 +382,9 @@ public class ReportCustomerController {
         ReportCustomer reportCustomer = reportCustomerService.checkReportCustomer(reportId);
 
         String passApprove = reportCustomer.getPass_approve();
+        String passReview = reportCustomer.getPass_review();
+        User currUser = SessionSupport.checkoutUserFromSession();
         if("Y".equals(passApprove)){
-            String passReview = reportCustomer.getPass_approve();
             if("Y".equals(passReview)){
                 reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REPORT_DONE);
             }else{
@@ -350,9 +394,60 @@ public class ReportCustomerController {
             reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.SUBMIT);
         }
 
+        reportCustomerService.updateReportCustomerSubmitUser(reportId,currUser.getUser_id());
+
         JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "提交成功", null,null);
 
         return jsonResult;
+    }
+
+    @RequestMapping("signReport")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult signReport(@RequestBody Map<String,String> signInfos){
+        if(signInfos!=null){
+            String report_cust_name = signInfos.get("report_cust_name");
+            String report_account_name = signInfos.get("report_account_name");
+            String report_leader_name = signInfos.get("report_leader_name");
+
+            if(Strings.isNullOrEmpty(report_cust_name)||
+                    Strings.isNullOrEmpty(report_account_name)||
+                    Strings.isNullOrEmpty(report_leader_name)
+            ){
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息缺失", "签名信息缺失",JsonResult.RESULT.FAILD);
+                return jsonResult;
+            }
+
+            reportCustomerService.signReport(signInfos);
+        }
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "签名成功", null,JsonResult.RESULT.SUCCESS);
+
+        return jsonResult;
+    }
+
+    @RequestMapping("reportSignInfos")
+    @ResponseBody
+    @CrossOrigin(allowCredentials="true")
+    public JsonResult reportSignInfos(String reportId){
+        if(reportId!=null){
+
+            if(Strings.isNullOrEmpty(reportId)){
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息获取失败", "签名信息获取失败",JsonResult.RESULT.FAILD);
+                return jsonResult;
+            }
+            Map<String,Object> siginInfos = reportCustomerService.reportSignInfos(reportId);
+
+
+            JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "签名成功", null,siginInfos);
+
+            return jsonResult;
+        }
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.FAILD, "签名信息获取失败", "签名信息获取失败",JsonResult.RESULT.FAILD);
+        return jsonResult;
+
+
     }
 
     class SaveSimpleUnitContext{

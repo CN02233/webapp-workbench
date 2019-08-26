@@ -8,56 +8,44 @@
           <el-button type="success" size="small" v-if="isView!='Y'" @click="addRootNode(groupKey)">新增组</el-button>
         </el-col>
       </el-row>
-
-      <el-row >
-        <el-col class="tree_title" v-for="(elColumDefined,key) in groupDatas.elColumDefineds"
-                :span="Object.keys(groupDatas.elColumDefineds).length>1?groupDatas.colSpan:4">
-          <el-tooltip class="item" effect="dark" :content="elColumDefined.colum_point!=null?'单位:'+elColumDefined.colum_point:''" placement="top-start">
-            <span>{{elColumDefined.colum_name_cn}}</span>
-          </el-tooltip>
-
-        </el-col>
-        <el-col align="center" class="tree_title" v-if="Object.keys(groupDatas.elColumDefineds).length>1" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
-          操作
-        </el-col>
-      </el-row>
-
-
       <el-form ref="form"  label-width="0px">
-        <el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">
-          <el-col  align="left" class="tree_colum"
-                   :span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"
-                   v-for="elColData in elColDatas">
-            <el-form-item  v-if="elColData!=null" size="mini" :class="{'error_row':elColData.validate_error!=null}" :error="elColData.validate_error">
-              <el-input size="mini" style="width:100%" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>
-            </el-form-item>
-            <span v-else> -- </span>
-          </el-col>
+        <table>
+          <thead class="tree_title" >
+          <tr>
+            <td v-if="elColumDefined.colum_show=='Y'" v-for="(elColumDefined,key) in groupDatas.elColumDefineds">
+            <!--<td  v-for="(elColumDefined,key) in groupDatas.elColumDefineds">-->
+              <el-tooltip class="item" effect="dark"
+                          :content="elColumDefined.colum_point!=null?'单位:'+elColumDefined.colum_point:''"
+                          placement="top-start">
+                <span>{{elColumDefined.colum_name_cn}}</span>
+              </el-tooltip>
+            </td>
+            <td v-if="Object.keys(groupDatas.elColumDefineds).length>1">
+              操作
+            </td>
+          </tr>
+          </thead>
+          <tbody>
+          <tr v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">
 
-          <el-col align="center" v-if="groupDatas.elRowDatas.length>1&&isView!='Y'" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">
-            <el-button size="mini" @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
-            <!--<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>-->
-            <el-button size="mini" @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
-          </el-col>
-
-        </el-row>
-
+            <td v-if="elColData!=null?elColData.colum_show=='Y':true" v-for="elColData in elColDatas">
+            <!--<td v-for="elColData in elColDatas">-->
+              <el-form-item  v-if="elColData!=null" size="mini" :class="{'error_row':elColData.validate_error!=null}" :error="elColData.validate_error">
+                <el-input size="mini" style="width:100%" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>
+              </el-form-item>
+              <span v-else> -- </span>
+            </td>
+            <td v-if="checkOptionsShow(groupKey)">
+              <!--{{definedColumsGroup[groupKey].maxLevel}}&#45;&#45;{{dataRowNum}}-->
+              <el-button size="mini" v-if="checkRowLevel(elColDatas,groupKey)"  @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>
+              <!--<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>-->
+              <el-button size="mini" v-if="checkShowDelete(elColDatas,groupKey)"  @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </el-form>
 
-      <!--<el-row  v-for="(elColDatas,dataRowNum) in groupDatas.elRowDatas">-->
-        <!--<el-col  align="left" class="tree_colum"-->
-                 <!--:span="groupDatas.elRowDatas.length>1?groupDatas.colSpan:4"-->
-                 <!--v-for="elColData in elColDatas">-->
-          <!--<el-input size="mini" v-if="elColData!=null" :disabled="elColData.colum_type==0||isView=='Y'" v-model="elColData.report_data"></el-input>-->
-          <!--<span v-else> &#45;&#45; </span>-->
-        <!--</el-col>-->
-        <!--&lt;!&ndash;{{groupDatas.columNameLink[]}}&ndash;&gt;-->
-        <!--<el-col align="center" v-if="groupDatas.elRowDatas.length>1&&isView!='Y'" class="tree_colum" :span="(24-groupDatas.colSpan*groupDatas.definedColumsTotal)">-->
-          <!--<el-button size="mini" @click="addSonNode(elColDatas,dataRowNum,groupKey)">添加子项</el-button>-->
-          <!--&lt;!&ndash;<el-button @click="cpTmpNode(elColDatas,dataRowNum,groupKey)">复制</el-button>&ndash;&gt;-->
-          <!--<el-button size="mini" @click="delTmpNode(elColDatas,dataRowNum,groupKey)">删除</el-button>-->
-        <!--</el-col>-->
-      <!--</el-row>-->
     </div>
 
   </div>
@@ -99,6 +87,11 @@
       return {
         lastStep:false,
         colSpan:0,
+        groupLevelRowCount:{
+          "groupId":{
+            "level":0
+          }
+        },
         definedColumsGroup:{
           '123':{
             definedColumsTotal:0,
@@ -142,13 +135,13 @@
             loading.close();
           }
           if(response){
-            // console.log(justRefreshFomular)
+            // //console.log(justRefreshFomular)
 
             if(justRefreshFomular){
               const groups = Object.keys(this.definedColumsGroup)
               groups.forEach(groupKey=>{
                 const groupContext = this.definedColumsGroup[groupKey]
-                //console.log(groupContext)
+                ////console.log(groupContext)
                 const elColumDefineds = groupContext.elColumDefineds
                 response.columDatas.forEach(columData=>{
                   const unit_id = columData.unit_id
@@ -161,10 +154,10 @@
                       groupContext.elRowDatas.forEach(elRowData=>{
                         elRowData.forEach(elData=>{
                           if(elData){
-                            // debugger
+                            // //debugger
                             if(elData.dimensions_id==dimensions_id&&elData.unit_id==unit_id&&elData.colum_id==colum_id){
-                              // console.log("response "+unit_id+"--"+colum_id+"--"+dimensions_id)
-                              // console.log("el data "+elData.unit_id+"--"+elData.colum_id+"--"+elData.dimensions_id)
+                              // //console.log("response "+unit_id+"--"+colum_id+"--"+dimensions_id)
+                              // //console.log("el data "+elData.unit_id+"--"+elData.colum_id+"--"+elData.dimensions_id)
                               elData.report_data = columData.report_data
                             }
                           }
@@ -176,8 +169,6 @@
               })
               return
             }
-
-            //console.log(justRefreshFomular+"---over")
 
 
             this.definedColums = response.definedColums
@@ -222,7 +213,16 @@
             const groupKeys = Object.keys(definedColumsGroup)
             groupKeys.forEach(groupKey=>{
               const defineds = definedColumsGroup[groupKey]
-              const definedColumsTotal = defineds.length
+              let definedColumsTotal = 0
+              if(defineds){
+                defineds.forEach(definedColumsGroupDt=>{
+                  if(definedColumsGroupDt.colum_show=='Y'){
+                    definedColumsTotal++
+                  }
+                })
+              }
+
+
               const colSpan = Math.floor(24/(definedColumsTotal+1))
               const elColumDefineds = this.elColumDefined(defineds,0,0,treeDatasGroup[groupKey])
               treeDatasGroup[groupKey].definedColums = defineds
@@ -238,7 +238,7 @@
               const dimensions_id = columData['dimensions_id']
               response.definedColums.forEach(definedColum=>{
                 if(unit_id==definedColum['unit_id']&&dimensions_id==definedColum['colum_id']){
-                  //console.log(unit_id+"--"+dimensions_id+"--"+definedColum['unit_id']+"---"+definedColum['colum_id'])
+                  ////console.log(unit_id+"--"+dimensions_id+"--"+definedColum['unit_id']+"---"+definedColum['colum_id'])
                   treeDatasGroup[definedColum['group_id']].columDatas.push(columData)
                 }
               })
@@ -279,7 +279,7 @@
           const saveObjTmp={}
           const saveColumDatasTmp = []
           const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
-          //console.log(elRowDatas)
+          ////console.log(elRowDatas)
           elRowDatas.forEach((elRowData,rowNum)=>{
             elRowData.forEach(elColumCol=>{
               if(elColumCol!=null){
@@ -301,7 +301,11 @@
         }).then(response=>{
           // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
-          this.$emit("saveReportsCallBack",this.unitId,processName)
+          if(response){
+            this.$emit("saveReportsCallBack",this.unitId,processName)
+          }else{
+            this.$emit("saveReportsCallBack",this.unitId,processName,"保存失败")
+          }
         }).catch(error => {
           this.getUnitContext(false)
           this.$emit("saveReportsCallBack",this.unitId,processName,error)
@@ -314,6 +318,17 @@
           const saveObjTmp={}
           const saveColumDatasTmp = []
           const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
+          if(elRowDatas){
+            elRowDatas.forEach(elRowData=>{
+              if(elRowData){
+                elRowData.forEach(colData=>{
+                  if(colData){
+                    saveColumDatasTmp.push(colData)
+                  }
+                })
+              }
+            })
+          }
           saveObjTmp.groupId = groupId
           saveObjTmp.columDatas = saveColumDatasTmp
           saveObjTmp.definedColums = this.definedColumsGroup[groupId].definedColums
@@ -325,6 +340,13 @@
           method:'post',
           data:saveColums
         }).then(response=>{
+
+          if(response){
+          }else{
+            this.$emit("validateReportsCallBack",this.unitId,processName,"校验出现异常")
+          }
+
+
           let validateFailed = false
           if(response!=null){
             const validateFailedKeys = Object.keys(response)
@@ -371,7 +393,7 @@
           const saveObjTmp={}
           const saveColumDatasTmp = []
           const elRowDatas = this.definedColumsGroup[groupId].elRowDatas
-          //console.log(elRowDatas)
+          ////console.log(elRowDatas)
           elRowDatas.forEach((elRowData,rowNum)=>{
             elRowData.forEach(elColumCol=>{
               if(elColumCol!=null){
@@ -429,13 +451,13 @@
         });
       },
       checkStepAndSave(saveLink){
-        //console.log(saveLink.unit_id)
-        //console.log("data is "+JSON.stringify(this.definedColumsGroup))
+        ////console.log(saveLink.unit_id)
+        ////console.log("data is "+JSON.stringify(this.definedColumsGroup))
         this.$emit("checkStepAndSave",saveLink.nextUnit)
       },
       nextStep(){
-        //console.log('next step is running....'+this.unitId)
-        //console.log("data is "+JSON.stringify(this.definedColumsGroup))
+        ////console.log('next step is running....'+this.unitId)
+        ////console.log("data is "+JSON.stringify(this.definedColumsGroup))
 
         // this.saveUnitContext(true)
       },
@@ -467,7 +489,8 @@
 
         if(columDatas!=null&&columDatas.length>0){
           columDatas.forEach(columData=>{
-            const report_group_id = columData.report_group_id
+            let report_group_id = columData.report_group_id
+            report_group_id = report_group_id+'G'
             const unit_id = columData.unit_id
             const colum_id = columData.colum_id
             if(groupDataTmp[unit_id]==null)
@@ -476,6 +499,8 @@
 
 
             if(groupDataTmp[unit_id][report_group_id]==null){
+              //console.log(report_group_id)
+
               groupDataTmp[unit_id][report_group_id] = {}
             }
 
@@ -487,6 +512,9 @@
 
           })
         }
+        //console.log(groupDataTmp)
+
+
         return groupDataTmp
       },
       makeElRows(groupDatas,treeGroup){
@@ -500,15 +528,30 @@
         const elRows = new Array()
         const $this = this
         const groupIds = Object.keys(groupDatas)
+
+        const groupLevelCount = {}
+
         groupIds.forEach(groupId=>{
           const unitDatas = groupDatas[groupId]
           const unitDataKeys = Object.keys(unitDatas)
           unitDataKeys.forEach(unitDataKey=>{
+            //console.log("unitDataKey : "+unitDataKey)
+            if(groupLevelCount[unitDataKey]){
+
+            }else{
+              groupLevelCount[unitDataKey] = {}
+            }
+
+            //console.log(groupLevelCount)
+
+
             const rows = unitDatas[unitDataKey]
             const rowKeys = Object.keys(rows)
             rowKeys.forEach(rowKey=>{
               const rowData = rows[rowKey]
               const colArray =new Array(treeGroup.definedColumsTotal).fill(null);
+              let rowLevel = 0
+
               rowData.forEach(colData=>{
                 const report_id = colData['report_id']
                 const unit_id = colData['unit_id']
@@ -520,16 +563,37 @@
                   const elColumDefined = treeGroup.elColumDefineds[unit_id+'-'+dimensions_id]
                   const columOrder = elColumDefined['columOrder']
                   const colum_type = elColumDefined['colum_type']
+                  const colum_show = elColumDefined['colum_show']
+                  rowLevel = elColumDefined.level
+                  // groupLevelRowCount
+
                   colData.colum_type = colum_type
+                  colData.colum_show = colum_show
                   colArray[columOrder] = colData
                 }
 
               })
+              if(!groupLevelCount[unitDataKey][rowLevel]){
+                groupLevelCount[unitDataKey][rowLevel]= 0
+              }
+
+              groupLevelCount[unitDataKey][rowLevel] = groupLevelCount[unitDataKey][rowLevel]+1
 
               elRows.push(colArray)
+              // //console.log("groupId : "+groupId)
+              // if(!this.groupLevelRowCount[groupId]){
+              //   this.groupLevelRowCount[groupId] = {}
+              // }
+              // if(!this.groupLevelRowCount[groupId][rowLevel]){
+              //   this.groupLevelRowCount[groupId][rowLevel] = 0
+              // }
+              // this.groupLevelRowCount[groupId][rowLevel] = this.groupLevelRowCount[groupId][rowLevel]+1
             })
           })
         })
+
+        this.groupLevelRowCount = Object.assign(this.groupLevelRowCount ,groupLevelCount )
+
         return elRows
       },
 
@@ -622,10 +686,16 @@
       },
       addRootNode(groupKey){
         this.definedColumsGroup[groupKey].elRowDatas.splice(0,0,JSON.parse(JSON.stringify(this.definedColumsGroup[groupKey].elRowDatas[0])))
+        console.log(this.groupLevelRowCount[groupKey+"G"])
+
+        this.groupLevelRowCount[groupKey+"G"]["0"] = this.groupLevelRowCount[groupKey+"G"]["0"]+1
+
       },
 
       addSonNode(parentElRowData, parentRowNum,groupId){
+
         let parentRowLevel = 0
+        let parentColumNum = 0
         let sonRowLevel = 0
         let insertRowNum = 0
 
@@ -635,7 +705,8 @@
 
         const parentBaseInfo = {}
 
-        parentElRowData.forEach(parentElColData=>{
+        //检查当前增加子节点的节点信息
+        parentElRowData.forEach((parentElColData,index)=>{
           if(parentElColData!=null){
             const unit_id = parentElColData.unit_id
             const dimensions_id = parentElColData.dimensions_id
@@ -645,72 +716,109 @@
             parentBaseInfo.report_group_id = parentElColData.report_group_id
             parentBaseInfo.report_id = parentElColData.report_id
             parentBaseInfo.unit_id = parentElColData.unit_id
+            if(parentElColData.colum_show=='Y'){
+              parentColumNum++
+              //console.log(parentColumNum)
+
+            }
           }
         })
 
         let insertRowData = null
 
-        for(let rowIndex = 0;rowIndex<this.definedColumsGroup[groupId].elRowDatas.length;rowIndex++){
-          const checkRow = this.definedColumsGroup[groupId].elRowDatas[rowIndex]
-          let checkRowLevel = 0
-          for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
-            const elColTMp = checkRow[colIndex]
-            if (elColTMp != null) {
-              const report_group_id = elColTMp.report_group_id
-              const report_id = elColTMp.report_id
-              const unit_id = elColTMp.unit_id
-              const dimensions_id = elColTMp.dimensions_id
-              const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id + "-" + dimensions_id]
-              checkRowLevel = elColumDefined.level
-              if(report_group_id==parentBaseInfo.report_group_id&&
-                report_id==parentBaseInfo.report_id&&
-                unit_id==parentBaseInfo.unit_id&&
-                checkRowLevel == sonRowLevel
-              ){
-                insertRowData = JSON.parse(JSON.stringify(checkRow))
+        const definedColums =  this.definedColumsGroup[groupId].definedColums
+        definedColums.forEach(definedColum=>{
+          if(definedColum){
+            if(sonRowLevel==definedColum.level){
+              if(insertRowData==null){
+                insertRowData =new Array(parentColumNum).fill(null);
               }
-              break
+
+              insertRowData.push({
+                'colum_id':null,
+                'colum_show':definedColum.colum_show,
+                'colum_type':definedColum.colum_type,
+                'dimensions_id':definedColum.colum_id,
+                'report_data':"",
+                'report_group_id':groupId,
+                'report_id':this.reportId,
+                'unit_id':this.unitId,
+              })
             }
-          }
-        }
-
-        //循环找到第一个当前需要增加子节点的节点的行 在该行前面插入需要增加的子节点
-        for(let insertIndex = (parentRowNum+1);insertIndex<this.definedColumsGroup[groupId].elRowDatas.length;insertIndex++){
-          const checkRow = this.definedColumsGroup[groupId].elRowDatas[insertIndex]
-          //console.log(checkRow)
-
-          let checkRowLevel = 0
-          for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
-            const elColTMp = checkRow[colIndex]
-            if (elColTMp != null) {
-              const unit_id = elColTMp.unit_id
-              const dimensions_id = elColTMp.dimensions_id
-              const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id + "-" + dimensions_id]
-              checkRowLevel = elColumDefined.level
-              break
-            }
-          }
-
-          if(checkRowLevel == parentRowLevel){//前插
-            insertRowNum = insertIndex
-            break;
-          }else if(checkRowLevel < parentRowLevel){//前插
-            insertRowNum = insertIndex
-            break;
-          }else if(checkRowLevel==this.definedColumsGroup[groupId].maxLevel){//最后插
-            insertRowNum = insertIndex+1
-            break;
-          }
-        }
-
-        insertRowData.forEach(insertColData=>{
-          if(insertColData!=null){
-            insertColData.report_data = ""
-            insertColData.colum_id = null
           }
         })
 
-        this.definedColumsGroup[groupId].elRowDatas.splice((insertRowNum),0,insertRowData)
+        //直接在当前节点下加新节点
+        this.definedColumsGroup[groupId].elRowDatas.splice(parentRowNum+1,0,insertRowData)
+
+        this.groupLevelRowCount[groupId+"G"][sonRowLevel] = this.groupLevelRowCount[groupId+"G"][sonRowLevel]+1
+
+
+        //根据当前节点查找已存在的子节点 复制子节点内容
+        // for(let rowIndex = 0;rowIndex<this.definedColumsGroup[groupId].elRowDatas.length;rowIndex++){
+        //   const checkRow = this.definedColumsGroup[groupId].elRowDatas[rowIndex]
+        //   let checkRowLevel = 0
+        //   for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
+        //     const elColTMp = checkRow[colIndex]
+        //     if (elColTMp != null) {
+        //       const report_group_id = elColTMp.report_group_id
+        //       const report_id = elColTMp.report_id
+        //       const unit_id = elColTMp.unit_id
+        //       const dimensions_id = elColTMp.dimensions_id
+        //       const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id + "-" + dimensions_id]
+        //       checkRowLevel = elColumDefined.level
+        //       if(report_group_id==parentBaseInfo.report_group_id&&
+        //         report_id==parentBaseInfo.report_id&&
+        //         unit_id==parentBaseInfo.unit_id&&
+        //         checkRowLevel == sonRowLevel
+        //       ){
+        //         insertRowData = JSON.parse(JSON.stringify(checkRow))
+        //       }
+        //       break
+        //     }
+        //   }
+        // }
+
+
+
+        //循环找到第一个当前需要增加子节点的节点的行 在该行前面插入需要增加的子节点
+        // for(let insertIndex = (parentRowNum+1);insertIndex<this.definedColumsGroup[groupId].elRowDatas.length;insertIndex++){
+        //   const checkRow = this.definedColumsGroup[groupId].elRowDatas[insertIndex]
+        //   ////console.log(checkRow)
+        //
+        //   let checkRowLevel = 0
+        //   for(let colIndex = 0;colIndex<checkRow.length;colIndex++) {
+        //     const elColTMp = checkRow[colIndex]
+        //     if (elColTMp != null) {
+        //       const unit_id = elColTMp.unit_id
+        //       const dimensions_id = elColTMp.dimensions_id
+        //       const elColumDefined = this.definedColumsGroup[groupId].elColumDefineds[unit_id + "-" + dimensions_id]
+        //       checkRowLevel = elColumDefined.level
+        //       break
+        //     }
+        //   }
+        //
+        //   if(checkRowLevel == parentRowLevel){//前插
+        //     insertRowNum = insertIndex
+        //     break;
+        //   }else if(checkRowLevel < parentRowLevel){//前插
+        //     insertRowNum = insertIndex
+        //     break;
+        //   }else if(checkRowLevel==this.definedColumsGroup[groupId].maxLevel){//最后插
+        //     insertRowNum = insertIndex+1
+        //     break;
+        //   }
+        // }
+        // insertRowData.forEach(insertColData=>{
+        //   if(insertColData!=null){
+        //     insertColData.report_data = ""
+        //     insertColData.colum_id = null
+        //   }
+        // })
+        //
+        //
+        //
+        // this.definedColumsGroup[groupId].elRowDatas.splice((insertRowNum),0,insertRowData)
       },
 
       cpTmpNode(cpElRowData, cpRowNum,groupId){
@@ -743,10 +851,10 @@
           }
           if (cpRowLevel < checkRowLevel) {//需要复制
             cpArrayTmp.push(elRowDataTmp)
-            //console.log("need")
+            ////console.log("need")
           } else {
             endRowNum = cpIndex
-            //console.log("not need")
+            ////console.log("not need")
 
             break
           }
@@ -756,6 +864,84 @@
           this.definedColumsGroup[groupId].elRowDatas.splice((endRowNum+i+1),0,cpTmp)
         })
       },
+      checkOptionsShow(groupId){
+        const elColumDefineds = this.definedColumsGroup[groupId].elColumDefineds
+        // //console.log(groupId+" ---  "+this.definedColumsGroup[groupId])
+        //console.log(groupId+"  "+Object.keys(elColumDefineds).length)
+        if(Object.keys(elColumDefineds).length<2){
+          return false
+        }else
+          return true
+      },
+      checkRowLevel(elRowDatas,groupId){
+        const groupMaxLevel = this.definedColumsGroup[groupId].maxLevel
+        let showOrNot = true
+        if(elRowDatas){
+          elRowDatas.forEach(elColData=>{
+            if(elColData){
+              const unitId = elColData.unit_id
+              const dimensionsId = elColData.dimensions_id
+              const elColumDefineds = this.definedColumsGroup[groupId].elColumDefineds
+              const currLevel = elColumDefineds[unitId+'-'+dimensionsId].level
+              //console.log(currLevel>=groupMaxLevel)
+              if(currLevel>=groupMaxLevel){
+                showOrNot = false
+                return
+              }
+            }
+          })
+        }
+        return showOrNot
+      },
+
+      checkShowDelete(elColDatas,groupId){
+        const maxLevel = this.definedColumsGroup[groupId].maxLevel
+        if(this.definedColumsGroup[groupId].elRowDatas.length<=(maxLevel+1)){
+          return false
+        }else{
+          let checkGroupId = null
+
+          const levelCount = {}
+
+          let nowRowLevel = 0
+
+          elColDatas.forEach(elColData=>{
+            if(elColData){
+              const unitId = elColData.unit_id
+              const dimensions_id = elColData.dimensions_id
+              nowRowLevel = this.definedColumsGroup[groupId].elColumDefineds[unitId+'-'+dimensions_id].level
+            }
+          })
+
+          this.definedColumsGroup[groupId].elRowDatas.forEach(elRowData=>{
+            let checkRowLevel = 1000
+            if(elRowData){
+              elRowData.forEach(elColData=>{
+                if(elColData){
+                  const unitId = elColData.unit_id
+                  checkGroupId = elColData.report_group_id
+                  const dimensions_id = elColData.dimensions_id
+                  checkRowLevel = this.definedColumsGroup[groupId].elColumDefineds[unitId+'-'+dimensions_id].level
+                  return
+                }
+
+              })
+              if(!levelCount[checkRowLevel]){
+                levelCount[checkRowLevel] = 0
+              }
+              levelCount[checkRowLevel]++
+            }
+          })
+
+
+          if(levelCount[nowRowLevel]>1){
+            return true
+          }else{
+            return false
+          }
+        }
+      },
+
       delTmpNode(delElRowData, delRowNum,groupId){
         let delRowLevel = 0
         delElRowData.forEach(delColData=>{
@@ -793,6 +979,8 @@
         }else{
           this.definedColumsGroup[groupId].elRowDatas.splice(delRowNum,(endRowNum-delRowNum))
         }
+
+        this.groupLevelRowCount[groupId+"G"][delRowLevel] = this.groupLevelRowCount[groupId+"G"][delRowLevel] -1
 
       },
       setSaveFlag(saveFlag){

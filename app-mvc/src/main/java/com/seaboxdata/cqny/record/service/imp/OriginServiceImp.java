@@ -5,6 +5,7 @@ import com.seaboxdata.cqny.record.dao.IOriginDao;
 import com.seaboxdata.cqny.record.entity.Origin;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.webapp.support.page.PageResult;
+import com.workbench.auth.user.entity.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,6 +182,17 @@ public class OriginServiceImp implements OriginService {
         Origin originTree = makeOriginTree(checkoutOriginMap);
 
         return originTree;
+    }
+
+    @Override
+    public List<User> getUsersByOrigin(Integer originId) {
+        List<User> users = originDao.getUsersByOrigin(originId);
+        return users;
+    }
+
+    @Override
+    public void updateOrigin(Origin origin) {
+        originDao.updateOrigin(origin);
     }
 
     public Origin makeOriginTree(Map<Integer,Origin> originsMap){

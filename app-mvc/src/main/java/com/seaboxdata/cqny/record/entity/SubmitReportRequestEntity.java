@@ -1,12 +1,14 @@
 package com.seaboxdata.cqny.record.entity;
 
+import com.webapp.support.json.JsonSupport;
+
 import java.util.List;
 
 public class SubmitReportRequestEntity {
     private String defined_id;
     private String report_start_date;
     private String report_end_date;
-    private List<String> check_origins;
+    private List<String> submit_origins;
     private List<String> approve_check_origins;
     private List<String> review_check_origins;
 
@@ -37,12 +39,12 @@ public class SubmitReportRequestEntity {
         this.report_end_date = report_end_date;
     }
 
-    public List<String> getCheck_origins() {
-        return check_origins;
+    public List<String> getSubmit_origins() {
+        return submit_origins;
     }
 
-    public void setCheck_origins(List<String> check_origins) {
-        this.check_origins = check_origins;
+    public void setSubmit_origins(List<String> submit_origins) {
+        this.submit_origins = submit_origins;
     }
 
     public String getReport_data_start() {
@@ -75,5 +77,9 @@ public class SubmitReportRequestEntity {
 
     public void setReview_check_origins(List<String> review_check_origins) {
         this.review_check_origins = review_check_origins;
+    }
+
+    public String toString(){
+        return JsonSupport.objectToJson(this);
     }
 }

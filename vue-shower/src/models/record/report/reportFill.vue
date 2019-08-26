@@ -3,41 +3,108 @@
     <div class="fill-root">
       <div class="fill-steps">
         <el-steps process-status="finish"	direction="vertical" :active="activeStepNum">
-          <el-step :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
+          <el-step v-if="checkUnitShow(unitEntity)"
+                   :class="{'bold-step':activeStepNum==unitNum}" style="font-weight: bold;font-color:black"
+                   :status="validateResult[unitEntity.unit_id]!=null?validateResult[unitEntity.unit_id]:'finish'"
                    @click.native="e => stepClick(e, unitNum) "
+                   :key="unitNum"
                    v-for="(unitEntity,unitNum) in unitEntities"
                    :title="unitEntity.unit_name"></el-step>
         </el-steps>
       </div>
       <div class="fill-context">
         <div class="fill-context-children">
-          <ReportContextRoot :ref="'reportContextRef'+unitEntity.unit_id"
-            :reportId="reportId"
-            :unitEntity="unitEntity"
-            :isView="isView"
-            @saveReportsCallBack="saveReportsCallBack"
-            @validateReportsCallBack="validateReportsCallBack"
-            @submitReportsCallBack="submitReportsCallBack"
-            @saveAndValidateCallBack="saveAndValidateCallBack"
-            class="fill-context-child"
-            v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
-            v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
-          ></ReportContextRoot>
+          <ReportContextRoot
+                             :ref="'reportContextRef'+unitEntity.unit_id"
+                             :reportId="reportId"
+                             :unitEntity="unitEntity"
+                             :isView="isView"
+                             @saveReportsCallBack="saveReportsCallBack"
+                             @validateReportsCallBack="validateReportsCallBack"
+                             @submitReportsCallBack="submitReportsCallBack"
+                             @saveAndValidateCallBack="saveAndValidateCallBack"
+                             class="fill-context-child" :key="unitEntity.unit_id"
+                             v-bind:class="{'fill-context-hide':currUnitId!=unitEntity.unit_id}"
+                             v-for="unitEntity in unitEntities">{{unitEntity.unit_name}}
+            ></ReportContextRoot>
         </div>
         <!--<div v-if="isView!='Y'" class="fill-context-options">-->
-        <div v-if="isView!='Y'" class="fill-context-options">
+        <div  class="fill-context-options">
           <!--当前步骤是最后一步显示提交，已点下一步的步骤不显示下一步只显示保存-->
 
           <!--<el-button  @click="saveContext" type="danger">保存</el-button>-->
-          <el-button  @click="doSaveContext" type="danger">保存</el-button>
+          <el-button v-if="isView!='Y'" @click="doSaveContext" type="danger">保存</el-button>
           <!--<el-button  @click="validateContext" type="success">校验</el-button>-->
-          <el-button  @click="doSaveAndValidate('SAVE')" type="success">校验</el-button>
+          <el-button v-if="isView!='Y'" @click="doSaveAndValidate('VALIDATE')" type="success">校验</el-button>
           <!--<el-button  @click="submitContext" type="warning">提交</el-button>-->
-          <el-button  @click="doSubmitContext('SAVE')" type="warning">提交</el-button>
+          <!--<el-button v-if="isView!='Y'" @click="doSubmitContext('VALIDATE')" type="warning">提交</el-button>-->
+          <el-button v-if="isView!='Y'" @click="confirmSubmit" type="warning">提交</el-button>
+          <el-button v-if="auth=='Y'" @click="handlePass" type="success">通过</el-button>
+          <el-button v-if="auth=='Y'" @click="handleReject" type="danger">驳回</el-button>
         </div>
 
       </div>
     </div>
+
+
+    <el-dialog
+      :title="showReadMe?'真实性声明':'请签名'"
+      :visible.sync="showSignInfos">
+      <div v-if="showReadMe" class="sign-readme">
+        <div class="readme-context">
+          本人确保表中所有的数据和信息真实准确，应对其负责。
+        </div>
+
+        <div  class="readme-footer">
+          <el-row style="text-align:left;margin:5px 0 0 10px;">
+            <el-col :span="24">
+              <el-checkbox v-model="agreeReadMe">
+                <span class="sign-readme-checkinfo">
+                  我已阅读以上条款，并保证提交数据的真实性以及准确性。
+                </span>
+              </el-checkbox>
+            </el-col>
+          </el-row>
+          <el-row style="text-align: right">
+            <el-button type="primary" :disabled="!agreeReadMe" @click="confirmReadMe">确 认</el-button>
+          </el-row>
+        </div>
+      </div>
+
+
+
+      <div v-if="!showReadMe" class="sign-customers">
+        <el-form label-position="right" label-width="30%" ref="siginForm">
+          <el-form-item  label="填报人签名" :error="signInfomationsError.reportCustName" prop="reportCustName">
+            <el-col :span="18">
+              <el-input placeholder="请输入填报人姓名" v-model="signInfomations.reportCustName"></el-input>
+            </el-col>
+          </el-form-item>
+          <el-form-item label="财务人员签名" :error="signInfomationsError.reportAccountName" prop="reportAccountName">
+            <el-col :span="18">
+              <el-input placeholder="请输入财务人员姓名" v-model="signInfomations.reportAccountName"></el-input>
+            </el-col>
+          </el-form-item>
+          <el-form-item label="公司领导签名" :error="signInfomationsError.reportLeaderName" prop="reportLeaderName">
+            <el-col :span="18">
+              <el-input placeholder="请输入公司领导姓名" v-model="signInfomations.reportLeaderName"></el-input>
+            </el-col>
+          </el-form-item>
+
+
+
+        </el-form>
+
+
+
+
+      </div>
+
+      <div v-if="!showReadMe" slot="footer" class="dialog-footer">
+        <el-button type="primary"  @click="doSign">确定</el-button>
+      </div>
+
+    </el-dialog>
 
 
 
@@ -61,7 +128,9 @@
         reportId:"",
         reportDefinedId:"",
         isView:'N',
-        activeStepNum:1,
+        auth:'N',//是否为审批用户查看
+        reportStats:'',
+        activeStepNum:0,
         currUnitId:'',
         reportCust:{},
         unitEntities:[],
@@ -69,7 +138,22 @@
         doSomethinLoading:null,
         doneCount:0,
         doneExcetionMessage:null,
-        validateResult:{}
+        validateResult:{},
+        showSignInfos:false,
+        signInfomationsError:{
+          reportCustName:'',
+          reportAccountName:'',
+          reportLeaderName:''
+        },
+        agreeReadMe:true,
+        notAgreeReadMe:false,
+        showReadMe:true,
+        signInfomations:{
+          reportCustName:'',
+          reportAccountName:'',
+          reportLeaderName:''
+        },
+        currUser:{}
       }
     },
     methods:{
@@ -94,8 +178,18 @@
               this.currUnitId = this.unitEntities[0].unit_id
               this.reportDefinedId = this.unitEntities[0].report_defined_id
             }
+            loading.close()
             // this.selectActiveStep(active_unit,true,'N')
 
+          }
+        });
+      },
+      getCurrUserInfo(){
+        this.BaseRequest({
+          url:"/cqnyUser/getCurrUserOrigin"
+        }).then(response=>{
+          if(response){
+            this.currUser = response.user
           }
         });
       },
@@ -169,20 +263,29 @@
             reportId:this.reportId,
           }
         }).then(response=>{
-          this.doSomethinLoading.close();
-          this.$notify({
-            title: '公式刷新完毕',
-            type: 'success',
-            message: "动态计算项已按照您的填写更新"
-          });
-          if(needSubmit){
-            this.reportCommitAuth()
-          }else{//非提交，只校验 需要刷新页面公式的值
-            this.unitEntities.forEach(unitEntity=>{
-              const unitId = unitEntity.unit_id
-              const reportContextRef = this.$refs['reportContextRef'+unitId][0]
-              reportContextRef.getFolumarData()
-            })
+          if(response){
+            this.doSomethinLoading.close();
+            this.$notify({
+              title: '公式刷新完毕',
+              type: 'success',
+              message: "动态计算项已按照您的填写更新"
+            });
+            if(needSubmit){
+              this.reportCommitAuth()
+            }else{//非提交，只校验 需要刷新页面公式的值
+              this.unitEntities.forEach(unitEntity=>{
+                const unitId = unitEntity.unit_id
+                const reportContextRef = this.$refs['reportContextRef'+unitId][0]
+                reportContextRef.getFolumarData()
+              })
+            }
+          }else{
+            this.doSomethinLoading.close();
+            this.$notify({
+              title: '公式刷新失败',
+              type: 'error',
+              message: "刷新公式异常"
+            });
           }
         }).catch(error=>{
           this.doSomethinLoading.close();
@@ -191,6 +294,56 @@
             type: 'error',
             message: error
           });
+        });
+      },
+      confirmSubmit(){
+        this.showSignInfos = true
+        // console.log(this.showSignInfos)
+      },
+      confirmReadMe(){
+        if(this.agreeReadMe){
+          this.showReadMe = false
+        }else{
+          this.Message("请勾选下方同意选项")
+        }
+      },
+      doSign(){
+        let errorTag =false
+        if(this.signInfomations.reportCustName==null||this.signInfomations.reportCustName==''||(this.signInfomations.reportCustName==undefined) ){
+          this.signInfomationsError.reportCustName='填报人不允许为空'
+          errorTag = true
+        }
+        if(this.signInfomations.reportAccountName==null||this.signInfomations.reportAccountName==''||(this.signInfomations.reportAccountName==undefined) ){
+          this.signInfomationsError.reportAccountName='财务人员不允许为空'
+          errorTag = true
+        }
+        if(this.signInfomations.reportLeaderName==null||this.signInfomations.reportLeaderName==''||(this.signInfomations.reportLeaderName==undefined) ){
+          this.signInfomationsError.reportLeaderName='公司负责人不允许为空'
+          errorTag = true
+        }
+
+        if(errorTag){
+          return
+        }
+
+        this.BaseRequest({
+          url:"/reportCust/signReport",
+          method:"post",
+          data:{
+            report_id:this.reportId,
+            report_cust_name:this.signInfomations.reportCustName,
+            report_account_name:this.signInfomations.reportAccountName,
+            report_leader_name:this.signInfomations.reportLeaderName
+          }
+        }).then(response=>{
+          console.log(response)
+          if(response&&response=='SUCCESS'){
+            this.showSignInfos = false
+            this.showReadMe = true
+            this.doSubmitContext('VALIDATE')
+          }else{
+            this.Message.error("签名失败")
+          }
         });
       },
       doSubmitContext(processName){
@@ -212,7 +365,7 @@
           })
         }
 
-        if(processName=='VALIDATE'){
+        if(processName=='SAVE'){
           doSubmit()
         }else{
           this.$confirm('提交操作将使该报送报表进入审批流程，进入审批流程后将无法修改填报数据。请确认数据正确性！', '提示', {
@@ -306,9 +459,9 @@
             //console.log(processName+"---"+this.doneCount)
 
             if(processName=="SAVE"){
-              this.doSaveAndValidate("VALIDATE")
-            }else if(processName=="VALIDATE"){
               this.doRefreshFomular()
+            }else if(processName=="VALIDATE"){
+              this.doSaveAndValidate("SAVE")
             }
 
           }
@@ -398,9 +551,9 @@
               message: processmessage
             });
             if(processName=="SAVE"){
-              this.doSubmitContext("VALIDATE")
-            }else if(processName=="VALIDATE"){
               this.doRefreshFomular("YES")
+            }else if(processName=="VALIDATE"){
+              this.doSubmitContext("SAVE")
             }
 
           }
@@ -432,6 +585,114 @@
             path: "/record/report/reportMain"
           });
         });
+      },
+      handlePass () { // 通过
+
+        this.$confirm('确认【通过】审批该报表？', '提示', {
+          confirmButtonText: '确定提交',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(() => {
+          let url = 'ReportReviewOperator'
+          let returnUrl = 'reportApproval'
+          if(this.reportStats=='1'){
+            url = 'ReportApprovalOperator'
+            returnUrl = 'reportApproval'
+          }else if(this.reportStats=='2'){
+            url = 'ReportReviewOperator'
+            returnUrl = 'reportReview'
+          }else{
+            this.Message.error("任务状态丢失")
+            return
+          }
+
+          this.BaseRequest({
+            url: '/reportApproval/'+url,
+            method: 'get',
+            params: {'reportId': this.reportId, 'reportStatus': 'pass'}
+          }).then(() => {
+            this.Message.success("审批成功")
+            this.$router.push({
+              path: "/record/"+returnUrl
+            });
+          })
+        }).catch(() => {
+
+        });
+
+
+      },
+      handleReject () { // 驳回
+        this.$confirm('确认【驳回】审批该报表？', '提示', {
+          confirmButtonText: '确定提交',
+          cancelButtonText: '取消',
+          dangerouslyUseHTMLString:true,
+          type: 'warning'
+        }).then(() => {
+          let url = 'ReportReviewOperator'
+          let returnUrl = 'reportApproval'
+          if(this.reportStats=='1'){
+            url = 'ReportApprovalOperator'
+            returnUrl = 'reportApproval'
+          }else if(this.reportStats=='2'){
+            url = 'ReportReviewOperator'
+            returnUrl = 'reportReview'
+          }else{
+            this.Message.error("任务状态丢失")
+            return
+          }
+
+          this.BaseRequest({
+            url: '/reportApproval/'+url,
+            method: 'get',
+            params: {'reportId': this.reportId, 'reportStatus': 'reject'}
+          }).then(() => {
+            this.Message.success('驳回成功')
+            this.$router.push({
+              path: "/record/"+returnUrl
+            });
+          })
+        }).catch(() => {
+
+        });
+
+
+
+      },
+      checkUnitShow(unitEntity){
+
+        // 对哪类用户展示该单元
+        // 0:填报人员
+        // 1:审核人员
+        // 2：监管人员
+        // 3：审核+监管人员
+        const unitShowTYpe = unitEntity.unit_show_type
+
+        // 1：填报用户
+        // 2：监管用户
+        // 0：审核用户
+        const userType = this.currUser.user_type
+        if(unitShowTYpe==0){
+          return true
+        }else{
+          if(unitShowTYpe==1){
+            if(userType==0){
+              return true
+            }
+          }
+          if(unitShowTYpe==2){
+            if(userType==2){
+              return true
+            }
+          }
+          if(unitShowTYpe==3){
+            if(userType==0||userType==2){
+              return true
+            }
+          }
+        }
+        return false
       }
     },
 
@@ -440,7 +701,15 @@
       if(this.$route.query.isView!=null&&this.$route.query.isView!=''){
         this.isView = this.$route.query.isView
       }
+
+      if(this.$route.params.auth!=null&&this.$route.params.auth!=''){
+        this.auth = this.$route.params.auth
+      }
+      if(this.$route.query.reportStats!=null&&this.$route.query.reportStats!=''){
+        this.reportStats = this.$route.query.reportStats
+      }
       this.checkUnitStep()
+      this.getCurrUserInfo()
     },
     activated() {
     }
@@ -450,7 +719,11 @@
 <style lang="css">
   .el-step__main>div{
     font-size:13px !important;
-    font-weight: normal !important;
+    /*font-weight: normal !important;*/
+  }
+
+  .bold-step div{
+    font-weight:900 !important;
   }
 </style>
 
@@ -500,6 +773,32 @@
 
   .el-step{
     cursor: pointer;
+  }
+
+  .sign-readme{
+    /*border:1px solid #1f69c8;*/
+    height: 380px;
+    padding:0 10px 0 10px;
+    text-align: left;
+  }
+
+  .readme-context{
+    width:100%;
+    height:300px;
+    overflow: auto;
+  }
+
+  .readme-footer{
+    width:100%;
+    height:80px;
+  }
+
+  .sign-readme-checkinfo{
+    font-size: 12px;
+  }
+
+  .hide-root{
+    display: none;
   }
 
 </style>

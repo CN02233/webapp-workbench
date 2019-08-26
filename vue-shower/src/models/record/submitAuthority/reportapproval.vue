@@ -8,6 +8,8 @@
 
         <el-input placeholder="请输入机构名称" style="width:180px"  v-model="seachOriginName"></el-input>
         <el-button @click="getTableData(1)" type="success">查询</el-button>
+        <el-button @click="batchApprove('pass')" type="warning">批量通过</el-button>
+        <el-button @click="batchApprove('reject')" type="info">批量驳回</el-button>
       </el-col>
     </el-row>
     <el-row class="table-page-root-outoptions">
@@ -17,7 +19,13 @@
           header-row-class-name="table-header-style"
           row-class-name="mini-font-size" stripe
           row-style="height:20px"
+          @selection-change="selectChange"
           style="width: 100%;">
+
+          <el-table-column
+            type="selection"
+            width="55">
+          </el-table-column>
           <el-table-column
             prop="report_name"
             align="left"
@@ -38,6 +46,16 @@
             prop="origin_city"
             align="left"
             label="所属市">
+          </el-table-column>
+          <el-table-column
+            prop="user_name_cn"
+            align="left"
+            label="填报人">
+          </el-table-column>
+          <el-table-column
+            align="left"
+            :formatter="checkPhone"
+            label="联系方式">
           </el-table-column>
           <el-table-column
             prop="report_status"
@@ -69,6 +87,15 @@
             <template slot-scope="scope">
               <el-button
                 size="mini"
+                @click="viewReportFill(scope.row.report_id,scope.row.report_status)">查看</el-button>
+              <el-button
+                size="mini"
+                @click="exportExcel(scope.row.report_id,scope.row.report_name,scope.row.report_origin)">导出excel</el-button>
+              <el-button
+                size="mini"
+                @click="viewReportSign(scope.row.report_id)">签字信息</el-button>
+              <el-button
+                size="mini"
                 @click="handlePass(scope.$index, scope.row)">通过</el-button>
               <el-button
                 size="mini"
@@ -92,6 +119,33 @@
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
         <el-button type="primary" @click="handleInsert">确 定</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 新增、编辑 弹窗-->
+    <el-dialog class="table-options-modal" title="签字信息" :visible.sync="showSignModalPage" >
+      <el-form label-position="right" label-width="30%" ref="siginForm">
+        <el-form-item  label="填报人签名"  prop="reportCustName">
+          <el-col :span="18">
+            <el-input :disabled="true"  v-model="signInfomations.report_cust_name"></el-input>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="财务人员签名"  prop="reportAccountName">
+          <el-col :span="18">
+            <el-input  :disabled="true"  v-model="signInfomations.report_account_name"></el-input>
+          </el-col>
+        </el-form-item>
+        <el-form-item label="公司领导签名"  prop="reportLeaderName">
+          <el-col :span="18">
+            <el-input  :disabled="true"  v-model="signInfomations.report_leader_name"></el-input>
+          </el-col>
+        </el-form-item>
+
+
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary"  @click="showSignModalPage=false">确定</el-button>
       </div>
     </el-dialog>
   </WorkMain>
@@ -130,8 +184,15 @@
         eachPageNum: 10,
         totalPage: 1,
         showModalPage: false,
+        showSignModalPage:false,
         isEditModal: false,
-        dialogTitle: ''
+        dialogTitle: '',
+        multipleSelection:[],
+        signInfomations:{
+          report_cust_name:'',
+          report_account_name:'',
+          report_leader_name:''
+        }
       }
     },
     validations: {
@@ -209,6 +270,47 @@
         this.showModalPage = false
         this.isEditModal = false
       },
+      viewReportFill(reportId,reportStats){
+        this.$router.push({
+          name: "reportFill",
+          query:{"reportId":reportId,"isView":'Y',"reportStats":reportStats},
+          params:{'auth':'Y'}
+        });
+      },
+      exportExcel(reportId,reportName,report_origin){
+
+        const instance = this.$http.create({
+          baseURL: process.env.BASE_API,
+          timeout: 120000,
+          responseType: 'blob',
+          withCredentials:true
+        });
+
+        instance({
+          url: "/reportApproval/exportReportExcel",
+          method: 'GET',
+          params:{"reportId":reportId},
+          responseType: 'blob', // important
+        }).then((response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', reportName+'_'+this.origins[report_origin]+'.xls');
+          document.body.appendChild(link);
+          link.click();
+        });
+      },
+
+      viewReportSign(reportId){
+        this.BaseRequest({
+          url: '/reportCust/reportSignInfos',
+          method: 'get',
+          params: {'reportId': reportId}
+        }).then((response) => {
+            this.showSignModalPage = true
+            this.signInfomations = response
+        })
+      },
       handlePass (index, row) { // 通过
         const loading = this.$loading({
           lock: true,
@@ -278,6 +380,13 @@
       getReportStatus(rowData){
         return this.status_cn[rowData.report_status]
       },
+      checkPhone(rowData){
+        if(rowData.user_mobile_phone&&rowData.user_mobile_phone!=''){
+          return rowData.user_mobile_phone
+        }else{
+          return rowData.user_office_phone
+        }
+      },
       checkInputNull () {
         const checkResult = this.$v.$invalid
         if (checkResult) {
@@ -290,6 +399,37 @@
       },
       fomartterReportDataDate(rowData){
         return rowData.report_data_start_str+'~'+rowData.report_data_end_str
+      },
+      selectChange(selection){
+        // if(selection!=null&&selection.length>0){
+        //   const checkReportId = row.report_id
+        // }
+        this.multipleSelection = selection;
+      },
+      batchApprove(proccess){
+        if(this.multipleSelection!=null&&this.multipleSelection.length>0){
+          const sendReportIds = []
+
+          this.multipleSelection.forEach(multipleSelectionObj=>{
+            const reportId = multipleSelectionObj.report_id
+            sendReportIds.push(reportId)
+          })
+
+          this.BaseRequest({
+            url: 'reportApproval/batchReportApprovalOperator',
+            method: 'post',
+            data:{
+              report_id_list:sendReportIds,
+              operator:proccess
+            }
+          }).then(response => {
+            this.Message.success("批量审核完成")
+            this.getTableData(1)
+          })
+
+        }else{
+          this.Message("请勾选需要审核的报表")
+        }
       }
     },
     mounted: function () { // 初始化

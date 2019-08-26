@@ -13,7 +13,9 @@ public class EntityTree implements ITree<EntityTree> {
 	private String parentId;
 	
 	private String label;
-	
+
+	private String originType;
+
 	private List<EntityTree> children;
 
 	@Override
@@ -50,5 +52,13 @@ public class EntityTree implements ITree<EntityTree> {
 	@Override
 	public void setChildren(List<EntityTree> childList) {
 		this.children = childList;
+	}
+
+	public String getOriginType() {
+		return originType;
+	}
+
+	public void setOriginType(String originType) {
+		this.originType = originType;
 	}
 }

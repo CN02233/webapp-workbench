@@ -90,6 +90,20 @@
             </el-col>
           </el-row>
           <el-row>
+            <el-col :span="6" :offset="1">机构类型</el-col>
+            <el-col :span="17">
+              <el-select v-model="formSubmitData.origin_type" placeholder="请选择机构类型">
+                <el-option
+                  v-for="item in originType"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+
+              </el-select>
+            </el-col>
+          </el-row>
+          <el-row>
             <el-col :span="6" :offset="1">机构状态</el-col>
             <el-col :span="17">
               <el-select v-model="formSubmitData.origin_status" placeholder="请选择机构状态">
@@ -133,6 +147,7 @@ export default {
         origin_name: '',
         parent_origin_id: '',
         parent_origin_name: '',
+        origin_type: '0',
         origin_status: ''
       },
       search: '',
@@ -151,6 +166,16 @@ export default {
       }, {
         value: '9',
         label: '注销'
+      }],
+      originType: [{
+        value: '0',
+        label: '全部'
+      }, {
+        value: '1',
+        label: '燃气企业'
+      }, {
+        value: '2',
+        label: '管输企业'
       }]
     }
   },
@@ -162,6 +187,9 @@ export default {
   validations: {// 提交前的验证
     formSubmitData: {
       origin_name: {
+        required
+      },
+      origin_type: {
         required
       },
       origin_status: {
@@ -209,6 +237,7 @@ export default {
       this.clearData()
       this.dialogTitle = '新增机构'
       this.formSubmitData.origin_status = '1'
+      // this.formSubmitData.origin_type = 0
       this.getOriginList()
       this.showModalPage = true
       this.isEditModal = false
@@ -268,6 +297,7 @@ export default {
       this.formSubmitData.origin_id = row.origin_id
       this.formSubmitData.origin_name = row.origin_name
       this.formSubmitData.origin_status = row.origin_status
+      this.formSubmitData.origin_type = row.origin_type
       this.formSubmitData.parent_origin_id = row.parent_origin_id
       this.formSubmitData.parent_origin_name = this.formatterSuperName(row)
     },
@@ -306,7 +336,7 @@ export default {
       if (checkResult) {
         this.$notify({
           dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>机构名称、机构状态'
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>机构名称、机构类型、机构状态'
         })
       }
       return checkResult

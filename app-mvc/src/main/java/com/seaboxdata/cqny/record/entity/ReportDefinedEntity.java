@@ -35,6 +35,8 @@ public class ReportDefinedEntity {
     //add by SongChaoqun
     private List<UnitDefined> units;
 
+    private String report_type;
+
     public Integer getDefined_id() {
         return defined_id;
     }
@@ -153,5 +155,13 @@ public class ReportDefinedEntity {
 
     public void setReportDataEnd(String reportDataEnd) {
         this.reportDataEnd = reportDataEnd;
+    }
+
+    public String getReport_type() {
+        return report_type;
+    }
+
+    public void setReport_type(String report_type) {
+        this.report_type = report_type;
     }
 }

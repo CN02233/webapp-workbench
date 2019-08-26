@@ -7,6 +7,7 @@ public class FomularTmpEntity{
     private String dimensionsId;
     private String reportGroupId;
     private String fomularScript;
+    private String old_report_data;
 
     public Integer getReportId() {
         return reportId;
@@ -54,5 +55,13 @@ public class FomularTmpEntity{
 
     public void setFomularScript(String fomularScript) {
         this.fomularScript = fomularScript;
+    }
+
+    public String getOld_report_data() {
+        return old_report_data;
+    }
+
+    public void setOld_report_data(String old_report_data) {
+        this.old_report_data = old_report_data;
     }
 }

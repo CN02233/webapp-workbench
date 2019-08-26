@@ -1,6 +1,7 @@
 package com.seaboxdata.cqny.origin.service;
 
 import com.seaboxdata.cqny.origin.entity.Administrative;
+import com.seaboxdata.cqny.record.entity.Origin;
 import com.webapp.support.page.PageResult;
 
 import java.util.List;
@@ -23,4 +24,6 @@ public interface AdministrativeService {
     List<String> getOrganizationAndOriginAssignById(String organizationId);
 
     void delOrganizationAndOriginAssign(String organizationId);
+
+    List<Origin> listAllOriginForOrganization(Integer userId);
 }

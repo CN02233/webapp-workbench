@@ -41,6 +41,16 @@
             label="所属市">
           </el-table-column>
           <el-table-column
+            prop="user_name_cn"
+            align="left"
+            label="填报人">
+          </el-table-column>
+          <el-table-column
+            align="left"
+            :formatter="checkPhone"
+            label="联系方式">
+          </el-table-column>
+          <el-table-column
             prop="report_status"
             align="left" width="100"
             :formatter="getReportStatus"
@@ -68,8 +78,7 @@
             align="left"
           >
             <template slot-scope="scope">
-              <el-button size="mini" v-if="scope.row.report_status == 0 &&loginUserType=='1'" @click="reportFIll(scope.row.report_id)">填报</el-button>
-              <el-button size="mini" v-if="scope.row.report_status != 0||loginUserType=='0'" @click="viewReportFill(scope.row.report_id)">查看</el-button>
+              <el-button size="mini" @click="viewReportFill(scope.row.report_id)">查看</el-button>
               <!--<el-button size="mini" v-if="scope.row.report_status == 9" type="danger" @click="reportCommitAuth(scope.row.report_id)">提交</el-button>-->
               <!--<el-button size="mini" v-if="scope.row.report_status == 0" type="danger"  @click="reportCommitAuth( scope.row.report_id)">提交</el-button>-->
             </template>
@@ -308,6 +317,13 @@
       },
       formattOriginName(reportData){
         return this.origins[reportData.report_origin]
+      },
+      checkPhone(rowData){
+        if(rowData.user_mobile_phone&&rowData.user_mobile_phone!=''){
+          return rowData.user_mobile_phone
+        }else{
+          return rowData.user_office_phone
+        }
       },
       getReportStatus(rowData){
         return this.status_cn[rowData.report_status]

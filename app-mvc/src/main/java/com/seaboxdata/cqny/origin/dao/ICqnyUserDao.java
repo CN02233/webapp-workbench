@@ -1,10 +1,16 @@
 package com.seaboxdata.cqny.origin.dao;
 
 import com.github.pagehelper.Page;
+import com.seaboxdata.cqny.origin.entity.ChinaAreaCode;
 import com.seaboxdata.cqny.origin.entity.CqnyUser;
+import com.seaboxdata.cqny.origin.entity.OriginNature;
+import com.seaboxdata.cqny.record.entity.UserForgetPwdRecord;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ICqnyUserDao {
@@ -25,4 +31,43 @@ public interface ICqnyUserDao {
                                 @Param("user_name_cn") String user_name_cn,
                                 @Param("user_type") String user_type,
                                 @Param("seachOrigins") List<Integer> seachOrigins);
+
+    @Select("select id," +
+            "user_id," +
+            "validate_code," +
+            "sms_validate_code," +
+            "validate_code_time," +
+            "sms_validate_code_time from user_forget_pwd_record where user_id=#{userId}")
+    UserForgetPwdRecord getUserForgetPwdRecord(@Param("userId") Integer userId);
+
+
+    @Update("update user_forget_pwd_record set validate_code=#{valiteCode},validate_code_time=#{date} where user_id = #{user_id}")
+    void updateValidateCode(@Param("user_id") Integer user_id,@Param("valiteCode") String valiteCode,@Param("date") Date date);
+
+    @Insert("insert into user_forget_pwd_record " +
+            "(validate_code,validate_code_time,user_id) values (#{valiteCode},#{date},#{user_id})" )
+    void newValidateCode(@Param("user_id") Integer user_id,@Param("valiteCode") String valiteCode,@Param("date") Date date);
+
+    @Update("update user_forget_pwd_record set sms_validate_code=#{validateCode},sms_validate_code_time =#{date} where user_id = #{userId}")
+    void updateSmsValidateCode(@Param("userId") Integer userId,@Param("validateCode") String validateCode,@Param("date") Date date);
+
+    @Select("<script>" +
+            "SELECT id," +
+            "area_code," +
+            "super_area_code," +
+            "area_name," +
+            "area_level FROM china_area_code where " +
+            "<choose>" +
+            "<when test='parentId!=null and parentId!=\"\"'> " +
+            "super_area_code = #{parentId}" +
+            "</when> " +
+            "<otherwise>" +
+            "area_level = (select min(area_level) from china_area_code)" +
+            "</otherwise>" +
+            "</choose>" +
+            "</script>")
+    List<ChinaAreaCode> getAreaCodeList(@Param("parentId") String parentId);
+
+    @Select("select id ,origin_nature_code , origin_nature_name from sys_origin_nature")
+    List<OriginNature> getOriginNature();
 }

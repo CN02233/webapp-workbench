@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface IWelcomeDao {
@@ -37,4 +38,13 @@ public interface IWelcomeDao {
             @Param("originParams") List<Integer> originParams,
             @Param("submit_status") String submit_status,
             @Param("review_status") String review_status);
+
+    @Select("<script>select count(0) report_status_sum,report_status from report_customer " +
+            "where " +
+            "report_origin in " +
+            " <foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> "+
+            " #{item}" +
+            " </foreach> " +
+            "group by report_status</script>")
+    List<Map<String, Integer>> getReportSumInfo(@Param("originParams") List<Integer> originParams);
 }

@@ -26,9 +26,11 @@ public interface IReportApprovalDao {
             "\trc.report_name,\n" +
             "\trc.report_origin,\n" +
             "\t(select u.user_name from `user` u where u.user_id=rd.create_user) user_name,\n" +
+            "\t uutmp.user_name_cn user_name_cn,uutmp.mobile_phone user_mobile_phone,uutmp.office_phone user_office_phone,\n" +
             "\trc.report_start_date\n" +
             "FROM\n" +
             "\treport_customer rc  LEFT JOIN report_defined rd on rc.report_defined_id=rd.defined_id \n" +
+            " LEFT JOIN user uutmp on rc.last_modify_user = uutmp.user_id  " +
             "where \n" +
             " rc.report_status = #{status}\n" +
             "<if test='status==1'>" +

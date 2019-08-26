@@ -3,6 +3,7 @@ package com.seaboxdata.cqny.record.service.imp;
 import com.google.common.base.Strings;
 import com.googlecode.aviator.AviatorEvaluator;
 import com.googlecode.aviator.Expression;
+import com.googlecode.aviator.Options;
 import com.seaboxdata.cqny.record.config.ColumType;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.*;
 
 @Service("fomularService")
@@ -79,8 +81,10 @@ public class FomularServiceImp implements FomularService {
             logger.debug("剩余公式组数据：{}",allFomularColums);
             HashSet<Object> fomularColumRempved = new HashSet<>();
             Set<ColumDefined> fomularColums = allFomularColums.keySet();
+            String fomularCache = null;
             for (ColumDefined fomularColum : fomularColums) {
                 String fomular = fomularColum.getColum_formula();
+                fomularCache = fomular;
                 if(fomular.indexOf("SUM")<0){
                     List<String> fomularParams = fomularParamNames(fomular);
                     boolean refreshAfter = false;
@@ -96,16 +100,64 @@ public class FomularServiceImp implements FomularService {
                             String vars = "#" + col + "#";
                             fomular = fomular.replace(vars, vars.replace(".","_"));
                         }
+
                         fomular = fomular.replace("#","FL");
-                        Expression expression= AviatorEvaluator.compile(fomular);
-                        Set<String> groups = fomularGroups.keySet();
                         logger.info("刷新公式：{}",fomular);
                         logger.info("公式参数：{}",fomularGroups);
 
+                        if(fomular.indexOf("FL17_70_4FL")>=0){
+                            logger.debug("");
+                        }
+
+                        AviatorEvaluator.setOption(Options.ALWAYS_PARSE_FLOATING_POINT_NUMBER_INTO_DECIMAL, true);
+
+                        Expression expression= AviatorEvaluator.compile(fomular);
+
+                        Set<String> groups = fomularGroups.keySet();
+
+
+                        Map<String, Object> fomularContext = new HashMap<>();
+                        boolean mergeGroup = false;
                         for (String group : groups) {
-                            Map<String, Object> fomularContext = fomularGroups.get(group);
+                            Map<String, Object> fomularContextTmp = fomularGroups.get(group);
+                            if(fomularContextTmp.size()<2){
+                                if(!Strings.isNullOrEmpty(fomularCache)&&fomularCache.indexOf("SUM")>0){
+                                    Object result = expression.execute(fomularContextTmp);
+                                    fomularGroupResult.put(group,result);
+                                }else{
+                                    fomularContext.putAll(fomularContextTmp);
+                                    mergeGroup = true;
+                                }
+                            }else{
+                                for (String key : fomularContextTmp.keySet()) {
+                                    BigDecimal bigVal = new BigDecimal(String.valueOf(fomularContextTmp.get(key)));
+                                    fomularContextTmp.put(key,bigVal);
+                                }
+                                Object result = expression.execute(fomularContextTmp);
+                                if(result instanceof BigDecimal){
+                                    BigDecimal resultBIg = (BigDecimal) result;
+                                    resultBIg = resultBIg.setScale(6,BigDecimal.ROUND_HALF_UP);
+                                    fomularGroupResult.put(group, resultBIg.toString());
+                                }else{
+                                    fomularGroupResult.put(group,result);
+                                }
+                            }
+                        }
+                        if(mergeGroup){
+//                            Object result = expression.execute(fomularContext);
+                            for (String key : fomularContext.keySet()) {
+                                BigDecimal bigVal = new BigDecimal(String.valueOf(fomularContext.get(key)));
+                                fomularContext.put(key,bigVal);
+                            }
                             Object result = expression.execute(fomularContext);
-                            fomularGroupResult.put(group,result);
+                            if(result instanceof BigDecimal) {
+                                BigDecimal resultBIg = (BigDecimal) result;
+                                resultBIg = resultBIg.setScale(6,BigDecimal.ROUND_HALF_UP);
+                                fomularGroupResult.put("", resultBIg.toString());
+                            }
+                            else{
+                                fomularGroupResult.put("",result);
+                            }
                         }
                         fomularColumRempved.add(fomularColum);
                         logger.info("刷新组信息:{}",fomularGroups);
@@ -151,6 +203,15 @@ public class FomularServiceImp implements FomularService {
                         
                     }
                 }else{
+                    List<String> fomularParams = fomularParamNames(fomular.replace("SUM:",""));
+                    boolean refreshAfter = false;
+                    for (String fomularParam : fomularParams) {
+                        if(fomularKeyTmp.containsKey(fomularParam)){//当前公式中使用的其他项也是个公式
+                            refreshAfter = true;
+                        }
+                    }
+                    if(refreshAfter)
+                        continue;
                     logger.debug("刷新公式：{}",fomular);
                     FomularTmpEntity fomularTmpEntity = new FomularTmpEntity();
                     fomularTmpEntity.setFomularScript(fomularColum.getColum_formula());
@@ -159,6 +220,12 @@ public class FomularServiceImp implements FomularService {
                     Object sumValue = getSumValue(fomularTmpEntity);
                     logger.debug("刷新组信息:{}",sumValue);
                     fomularColumRempved.add(fomularColum);
+
+                    SimpleColumDefined fomularColumOne = (SimpleColumDefined) fomularColum;
+                    reportCustomerDao.updateReportCustomerData(
+                            reportId,
+                            fomularColum.getUnit_id().toString(),null,fomularColumOne.getColum_id().toString(),null,sumValue);
+
                 }
             }
 
@@ -402,6 +469,8 @@ public class FomularServiceImp implements FomularService {
             String columOrDimensionsIdDefined = infos[1];
             String dimensionsGridId = "";
 
+            logger.debug("NUll  unit {}",unitId);
+
             UnitDefined unitDefined = this.checkUnit(unitId);
             Integer unitType = unitDefined.getUnit_type();
 
@@ -430,6 +499,8 @@ public class FomularServiceImp implements FomularService {
             }
 
             for (ReportCustomerData customerData : reportCustomerDatas) {
+                if(customerData==null)
+                    continue;
                 String reportGroupId = customerData.getReport_group_id();
                 if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitType)){
                     reportGroupId = customerData.getDimensions_id();

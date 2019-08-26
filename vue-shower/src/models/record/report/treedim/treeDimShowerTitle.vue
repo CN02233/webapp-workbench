@@ -5,7 +5,7 @@
       {{columTemplateData.colum_name_cn}}
     </el-col>
 
-    <TreeDimShowerTitle :colNum="colNum" :columTemplateData="columTemplateDataChildren" v-for="columTemplateDataChildren in columTemplateData.children"></TreeDimShowerTitle>
+    <TreeDimShowerTitle :key="columTemplateDataChildren" :colNum="colNum" :columTemplateData="columTemplateDataChildren" v-for="columTemplateDataChildren in columTemplateData.children"></TreeDimShowerTitle>
   </div>
 
 </template>

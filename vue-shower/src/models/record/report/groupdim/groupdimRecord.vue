@@ -8,7 +8,7 @@
           <el-input style="width:50%;float: left;" :disabled="isView=='Y'" v-model="group.report_data" class="group" ></el-input>
 
         </el-form-item>
-        <el-form-item v-for="col in group.children" size="mini" :label="col.colum_name_cn" :error="col.validate_error">
+        <el-form-item :key="col" v-for="col in group.children" size="mini" :label="col.colum_name_cn" :error="col.validate_error">
           <el-tooltip class="item" effect="dark" :content="col.colum_desc" placement="top">
           <el-input  v-model="col.report_data" :disabled="col.colum_type==0||isView=='Y'" style="width:50%;float: left;" >
             <template v-if="col.colum_point!=null&&col.colum_point!=''" slot="append">{{col.colum_point}}</template>
@@ -197,7 +197,11 @@
           // loading.close();
           // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
-          this.$emit("saveReportsCallBack",this.unitId,processName)
+          if(response){
+            this.$emit("saveReportsCallBack",this.unitId,processName)
+          }else{
+            this.$emit("saveReportsCallBack",this.unitId,processName,"保存失败")
+          }
         }).catch(error => {
           this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
@@ -231,6 +235,12 @@
             columDatas:Object.values(this.columDatas)
           }
         }).then(response=>{
+
+          if(response){
+          }else{
+            this.$emit("validateReportsCallBack",this.unitId,processName,"校验出现异常")
+          }
+
           valloading.close();
 
           //console.log(this.columDatas)

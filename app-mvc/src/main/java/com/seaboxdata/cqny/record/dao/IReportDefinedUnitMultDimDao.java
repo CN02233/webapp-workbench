@@ -24,12 +24,12 @@ public interface IReportDefinedUnitMultDimDao {
 
     @Insert("insert into report_defined_unit_multdim " +
             "(unit_id,colum_id,dim_id,min_value,max_value ," +
-            "colum_formula,colum_formula_desc,colum_type,need_remember) values " +
+            "colum_formula,colum_formula_desc,colum_type,need_remember,default_value) values " +
             "(#{unit_id},#{colum_id},#{dim_id},#{min_value},#{max_value}," +
-            "#{colum_formula},#{colum_formula_desc},#{colum_type},#{need_remember})")
+            "#{colum_formula},#{colum_formula_desc},#{colum_type},#{need_remember},#{default_value})")
     void addSaveMultdim(GridColumDefined simpleColumDefined);
-    @Insert("insert into report_defined_unit_multdim_col(colum_name,colum_name_cn,unit_id,colum_point,colum_desc) values " +
-            "(#{colum_name},#{colum_name_cn},#{unit_id},#{colum_point},#{colum_desc})")
+    @Insert("insert into report_defined_unit_multdim_col(colum_name,colum_name_cn,unit_id,colum_point,colum_desc,colum_order) values " +
+            "(#{colum_name},#{colum_name_cn},#{unit_id},#{colum_point},#{colum_desc},#{colum_order})")
     @Options(useGeneratedKeys = true, keyProperty = "colum_id", keyColumn = "colum_id")
     void addSaveMultdim_col(GridColumDefined simpleColumDefined);
 
@@ -66,10 +66,36 @@ public interface IReportDefinedUnitMultDimDao {
 
     @Select("select distinct colum_id, colum_name, colum_name_cn, group_id dim_id, group_name dim_name, unit_id, colum_type, min_value, max_value, colum_point, colum_formula, colum_formula_desc, colum_desc,need_remember from report_defined_unit_onedim where unit_id = #{unitId}")
     List<GridColumDefined> getOneColumByUnit(String unitId);
-    @Select("<script>select a.*,aa.colum_name,aa.colum_name_cn,aa.colum_point,aa.colum_desc,'1' colum_meta_type from report_defined_unit_multdim a left join report_defined_unit_multdim_col aa on a.colum_id=aa.colum_id where a.unit_id=#{unitId}" +
-            "union select unit_id,colum_id,'','','','','','','N','','',colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type from report_defined_unit_multdim_col b where b.unit_id=#{unitId}" +
-            "union select unit_id,'',dim_id,'','','','','','N','','',dim_name,dim_name_cn,'','','3' colum_meta_type from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}</script>")
+    @Select("<script>" +
+            " select qq.* from (\n" +
+            "select tmp.* from (\n" +
+            "select a.*,aa.colum_name,aa.colum_name_cn,aa.colum_point,\n" +
+            "aa.colum_desc,'1' colum_meta_type,aa.colum_order from report_defined_unit_multdim a left join \n" +
+            "report_defined_unit_multdim_col aa on a.colum_id=aa.colum_id where a.unit_id=#{unitId} \n" +
+            "union \n" +
+            "select unit_id,colum_id,'','','','','','','N','','',\n" +
+            "colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type ,'10086' \n" +
+            "from report_defined_unit_multdim_col where unit_id=#{unitId} \n" +
+            "union \n" +
+            "select unit_id,'',dim_id,'','','','','','N','','',dim_name,dim_name_cn,'','','3' colum_meta_type,'20086' \n" +
+            "from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}  \n" +
+            ") tmp order by colum_order,dim_id asc) qq  " +
+            " </script>")
     List<GridColumDefined> getColumByUnit(String unitId);
+
+    @Select( "select a.*,aa.colum_name,aa.colum_name_cn,aa.colum_point,\n" +
+            "aa.colum_desc,'1' colum_meta_type,aa.colum_order from report_defined_unit_multdim a left join \n" +
+            "report_defined_unit_multdim_col aa on a.colum_id=aa.colum_id where a.unit_id=#{unitId} order by aa.colum_order,a.dim_id\n" )
+    List<GridColumDefined> getColumByUnit0(String unitId);
+
+    @Select( "select unit_id,colum_id,'','','','','','','N','','',\n" +
+            "colum_name,colum_name_cn,colum_point, colum_desc,'2' colum_meta_type ,colum_order \n" +
+            "from report_defined_unit_multdim_col where unit_id=#{unitId} order by colum_order\n" )
+    List<GridColumDefined> getColumByUnit1(String unitId);
+
+    @Select( "select unit_id,'',dim_id,'','','','','','N','','',dim_name,dim_name_cn,'','','3' colum_meta_type,'20086' \n" +
+            "from report_defined_unit_multdim_dim c where c.unit_id=#{unitId}  order by dim_id " )
+    List<GridColumDefined> getColumByUnit2(String unitId);
 
     @Select(
         "SELECT " +
@@ -119,7 +145,7 @@ public interface IReportDefinedUnitMultDimDao {
 
     @Select("select " +
             "rdum.*,rdumc.colum_name,rdumc.colum_name_cn," +
-            "rdumd.dim_name,rdumd.dim_name_cn "+
+            "rdumd.dim_name,rdumd.dim_name_cn,rdumc.colum_order  "+
             " from report_defined_unit_multdim rdum ,report_defined_unit_multdim_col rdumc ,report_defined_unit_multdim_dim rdumd" +
             " where rdum.unit_id = #{unit_id} and rdum.colum_id=rdumc.colum_id and rdum.dim_id = rdumd.dim_id ")
     List<GridColumDefined> getMultDefindByUnit(String unitId);

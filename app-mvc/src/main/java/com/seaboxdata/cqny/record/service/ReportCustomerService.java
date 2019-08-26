@@ -44,4 +44,14 @@ public interface ReportCustomerService {
     void refreshFomular(String reportDefindId,String reportId);
 
     Map<String, Object> getReportBaseInfo(String reportId,String reportDefinedId);
+
+    Map<String, Object> getGridContext(String reportId, String unitId);
+
+    List<ReportCustomer> allReportForOrigin(String originId);
+
+    void updateReportCustomerSubmitUser(String reportId, int user_id);
+
+    void signReport( Map<String,String> signInfos);
+
+    Map<String, Object> reportSignInfos(String reportId);
 }

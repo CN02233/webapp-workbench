@@ -1,0 +1,398 @@
+<template>
+  <div>
+    <el-form ref="form"  label-width="40%">
+      <el-form ref="form"  label-width="40%">
+
+      </el-form>
+
+
+      <table>
+        <thead>
+          <tr>
+            <td v-for="dimDefined in dimDefineds">
+              {{dimDefined.dim_name_cn}}
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="columDefined in columDefineds">
+            <td v-for="dimDefined in dimDefineds">
+                {{reportCustDatas[columDefined.colum_id+'-'+dimDefined.dim_id]}}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!--<el-table-->
+        <!--:data="definedCells"-->
+        <!--tooltip-effect="dark" size="mini"-->
+        <!--row-class-name="mini-font-size"-->
+        <!--border-->
+        <!--stripe-->
+        <!--style="width: 100%">-->
+        <!--<el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>-->
+        <!--<el-table-column label="项目" prop="colum_name_cn"></el-table-column>-->
+        <!--<el-table-column v-for="col in definedDimensions" :label="col.colum_name_cn" width="160" >-->
+          <!--<template slot-scope="scope">-->
+            <!--<el-form-item label-width="0"	style="width:100%;" size="mini" :error="scope.row[col.dim_id+'-validateErrpr']">-->
+              <!--<el-tooltip class="item" effect="dark" :content="scope.row.colum_desc" placement="top">-->
+                <!--<el-input size="mini" v-model="scope.row[col.dim_id]" :disabled="scope.row[col.dim_id+'_colum_type']==0||isView=='Y'" >-->
+                  <!--<template v-if="scope.row.colum_point!=null&&scope.row.colum_point!=''" slot="append">{{scope.row.colum_point}}</template>-->
+                <!--</el-input>-->
+              <!--</el-tooltip>-->
+            <!--</el-form-item>-->
+
+          <!--</template>-->
+
+
+
+        <!--</el-table-column>-->
+      <!--</el-table>-->
+    </el-form>
+  </div>
+</template>
+
+<script>
+  import WorkMain from "@/models/public/WorkMain"
+
+  export default {
+    name: "GriddimRecord",
+    describe:"多维静态报表填报单元",
+    components: {
+      WorkMain
+    },
+    props:{
+      reportId:{
+        type:String
+      },
+      unitId:{
+        type:Number
+      },
+      unitType:{
+        type:Number
+      },
+      isView:{
+        type:String
+      }
+    },
+    data() {
+      return {
+        lastStep:false,
+        definedIndexs:[],
+        definedDimensions:[],
+        definedCells:[],
+        definedColums:[],
+        columDatas:{},
+        hasMounted:false,
+        columDefineds : [],
+        dimDefineds : [],
+        multDefiends : [],
+        reportCustDatas : {}
+      }
+    },
+    methods:{
+      getUnitContext(justRefreshFomular){
+
+        let loading = null
+        if(this.saveFlag=='N') {
+          loading = this.$loading({
+            lock: true,
+            text: '获取填报单元信息中.......',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          })
+        }
+        this.BaseRequest({
+          url:"/reportCust/getGridContext",
+          params:{
+            reportId:this.reportId,
+            unitId:this.unitId,
+            unitType:this.unitType
+          }
+        }).then(response=>{
+          if(loading){
+            loading.close();
+          }
+          if(response) {
+            const columDefineds = response.columDefineds
+            const dimDefineds = response.dimDefineds
+            const multDefiends = response.multDefiends
+            const reportCustDatas = response.reportCustDatas
+            this.columDefineds = columDefineds
+            this.dimDefineds = dimDefineds
+            this.multDefiends = multDefiends
+            reportCustDatas.forEach(reportCustData=>{
+              const columId = reportCustData.colum_id
+              const dimId = reportCustData.dim_id
+              this.reportCustDatas[columId+"-"+dimId] = reportCustData
+            })
+          }
+        }).catch(error=>{
+            this.Message.success(error)
+            loading.close()
+          }
+        );
+      },
+      doSaveUnitContext(processName){
+        let validDatas = this.getValidContext()
+
+        this.BaseRequest({
+          url:"/reportCust/saveGridUnitContext",
+          method:'post',
+          data:validDatas
+        }).then(response=>{
+          // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          if(response){
+            this.$emit("saveReportsCallBack",this.unitId,processName)
+          }else{
+            this.$emit("saveReportsCallBack",this.unitId,processName,"保存失败")
+          }
+        }).catch(error => {
+          this.$emit("saveReportsCallBack",this.unitId,processName,error)
+        });
+      },
+      doValidateUnitContext(processName){
+        const $this = this
+        let validDatas = this.getValidContext()
+        // validateSimpleUnitContext
+        const valloading = this.$loading({
+          lock: true,
+          text: '数据校验中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url:"/reportCust/validateGridUnit",
+          method:'post',
+          data:{
+            definedColums:validDatas.definedColums,
+            columDatas:validDatas.columDatas
+          }
+        }).then(response=>{
+          valloading.close();
+
+          if(response){
+          }else{
+            this.$emit("validateReportsCallBack",this.unitId,processName,"校验出现异常")
+          }
+
+
+          let validateFailed = false
+          let failtMes = ""
+          if(response!=null){
+            const validateFailedKeys = Object.keys(response)
+            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
+              validateFailed = true
+              let yIndex = 0
+              const dimensionsLength = this.definedDimensions.length
+              const failTmp = {}
+
+              validateFailedKeys.forEach(validateFailedKey=>{
+                const failedReason = response[validateFailedKey]
+                const validateFailedKeyArray = validateFailedKey.split("_")
+                const failColumId = validateFailedKeyArray[0]
+                const failDimId = validateFailedKeyArray[1]
+                if(!failTmp[failColumId]){
+                  failTmp[failColumId] = {}
+                }
+                failTmp[failColumId][failDimId] = failedReason
+              })
+
+              this.definedCells.forEach(definedCell=>{
+                const colum_id = definedCell.colum_id
+
+                this.definedDimensions.forEach(definedDimension=>{
+                  const dimId = definedDimension.dim_id
+                  if(failTmp[colum_id]){
+                    if(failTmp[colum_id][dimId]){
+                      definedCell[dimId+"-validateErrpr"] = failTmp[colum_id][dimId]
+                    }else{
+                      definedCell[dimId+"-validateErrpr"] = null
+                    }
+                  }else{
+                    definedCell[dimId+"-validateErrpr"] = null
+                  }
+
+                })
+              })
+
+            }
+          }
+
+          // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
+          let failedMessage = null
+          if(validateFailed){
+            // this.$emit("refreshSaveLoading",this.unitId,"有输入错误")
+            failedMessage = "有输入错误"
+
+          }
+          const dataTmp = this.definedCells
+          this.definedCells = null
+          this.definedCells = dataTmp
+
+          this.$emit("validateReportsCallBack",this.unitId,processName,failedMessage)
+        });
+      },
+      saveUnitContext(needUpdateStep){
+        const $this = this
+        let validDatas = this.getValidContext()
+        // validateSimpleUnitContext
+        const valloading = this.$loading({
+          lock: true,
+          text: '数据校验中.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        this.BaseRequest({
+          url:"/reportCust/validateSimpleUnitContext",
+          method:'post',
+          data:{
+            definedColums:validDatas.definedColums,
+            columDatas:validDatas.columDatas
+          }
+        }).then(response=>{
+          valloading.close();
+          let validateFailed = false
+          if(response!=null){
+            const validateFailedKeys = Object.keys(response)
+            let failtMes = ""
+            if(validateFailedKeys!=null&&validateFailedKeys.length>0){
+              validateFailed = true
+              validateFailedKeys.forEach(validateFailedKey=>{
+                const failedReason = response[validateFailedKey]
+                failtMes+=(validateFailedKey+":"+failedReason+"<br><br>")
+              })
+
+              this.$notify({
+                dangerouslyUseHTMLString: true,
+                message: '<span style="font-size:15px;color:red;font-weight: bold">'+failtMes+'</span>'
+              })
+            }
+          }
+
+          if(!validateFailed){
+            const loading = this.$loading({
+              lock: true,
+              text: '保存报送信息中.......',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.7)'
+            });
+            this.BaseRequest({
+              url:"/reportCust/saveGridUnitContext",
+              method:'post',
+              data:{
+                definedColums:this.definedColums,
+                columDatas:Object.values(this.columDatas)
+              }
+            }).then(response=>{
+              loading.close();
+              $this.Message.success("保存成功")
+              if(needUpdateStep){
+                $this.updateStep()
+              }else{
+                $this.getUnitContext()
+              }
+            });
+          }
+        });
+
+
+
+      },
+      updateStep(){
+        const loading = this.$loading({
+          lock: true,
+          text: '更新报送步骤.......',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        const $this = this
+        this.BaseRequest({
+          url:"/reportCust/updateStep",
+          method:'get',
+          params:{
+            reportId:this.reportId
+          }
+        }).then(response=>{
+          loading.close();
+          $this.Message.success("更新成功")
+
+          this.$emit("refreshReportFill")
+          // this.$router.push({
+          //   path: '/record/report/reportFill',
+          //   query:{
+          //     'reportId':this.reportId
+          //   }
+          // });
+        });
+      },
+      nextStep(){
+        //console.log('next step is running....'+this.unitId)
+        //console.log("data is "+JSON.stringify(this.columDatas))
+
+        // this.saveUnitContext(true)
+      },
+      checkStepAndSave(saveLink){
+        //console.log(saveLink.unit_id)
+        //console.log("data is "+JSON.stringify(this.columDatas))
+        this.$emit("checkStepAndSave",saveLink.nextUnit)
+      },
+      getValidContext(){
+
+        const $t = this
+        $t.definedCells.forEach(x=>{
+          $t.definedDimensions.forEach(y=>{
+            const key = y.unit_id + '_' + x.colum_id + '_' + y.dim_id
+            $t.columDatas[key].report_data = x[y.dim_id]
+          })
+        })
+        let cols = [], ds = []
+        $t.definedColums.forEach((x,i)=>{
+          let xx = Object.assign({}, x)
+          xx.colum_name_cn = x.colum_name_cn + '-' + x.dim_name_cn
+          // xx.colum_id = i + 1
+          cols.push(xx)
+          let key = x.unit_id + '_' + x.colum_id + '_' + x.dim_id
+          let cc = Object.assign({}, $t.columDatas[key])
+          // cc.colum_id = xx.colum_id
+          ds.push(cc)
+        })
+        return {
+          definedColums:cols,
+          columDatas:ds
+        }
+      },
+      setSaveFlag(saveFlag){
+        this.saveFlag = saveFlag
+      }
+    },
+    mounted:function(){
+      this.getUnitContext()
+    },
+    activated(){
+      this.saveFlag = this.$route.params.saveFlag
+      if(this.hasMounted){
+        const lastStepTMp = this.lastStep
+        this.lastStep = null
+        this.lastStep = lastStepTMp
+        if(this.saveFlag!=null&&this.saveFlag!=undefined){
+          if(this.saveFlag=='Y'||this.saveFlag=='S-Y'){
+            this.$emit("refreshSaveLoading",this.unitId,"保存中....")
+            this.doSaveUnitContext()
+          }else if(this.saveFlag=='S'){
+
+          }else if(this.saveFlag=='V'||this.saveFlag=='S-V'){
+            this.doValidateUnitContext()
+          }
+        }
+      }
+    }
+  }
+</script>
+
+<style scoped>
+  .mini-font-size{
+    font-size:12px;
+  }
+</style>

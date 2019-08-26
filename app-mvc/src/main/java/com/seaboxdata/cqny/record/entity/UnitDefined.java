@@ -21,6 +21,9 @@ public class UnitDefined {
     private String user_name;
     private Integer unit_order;//填报顺序
 
+    //对哪类用户展示该单元 0:填报人员 1:审核人员 2：监管人员 3：审核+监管人员
+    private String unit_show_type;
+
 
     public Integer getUnit_id() {
         return unit_id;
@@ -124,5 +127,13 @@ public class UnitDefined {
 
     public void setUnit_order(Integer unit_order) {
         this.unit_order = unit_order;
+    }
+
+    public String getUnit_show_type() {
+        return unit_show_type;
+    }
+
+    public void setUnit_show_type(String unit_show_type) {
+        this.unit_show_type = unit_show_type;
     }
 }

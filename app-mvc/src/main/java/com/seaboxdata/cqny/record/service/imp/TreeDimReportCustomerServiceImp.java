@@ -1,5 +1,6 @@
 package com.seaboxdata.cqny.record.service.imp;
 
+import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.dao.IReportCustomerDao;
 import com.seaboxdata.cqny.record.entity.FomularTmpEntity;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +42,7 @@ public class TreeDimReportCustomerServiceImp implements TreeDimReportCustomerSer
     private RememberCustDataService rememberCustDataService;
 
     @Override
-    @Transactional(rollbackFor = Exception.class,propagation= Propagation.REQUIRED)
+    @Transactional(rollbackFor = Exception.class)
     public void saveTreeData(ArrayList<TreeUnitContext> treeUnitContexts) {
         int forTime = 0;
 
@@ -52,7 +54,7 @@ public class TreeDimReportCustomerServiceImp implements TreeDimReportCustomerSer
             ArrayList<SimpleColumDefined> definedColums = treeUnitContext.getDefinedColums();
 
             if(forTime==0){
-                reportCustomerDao.removeUnitContextData(columDatas.get(0).getUnit_id());
+                reportCustomerDao.removeUnitContextData(columDatas.get(0).getReport_id(),columDatas.get(0).getUnit_id());
             }
 
             Map<String, Object> custOrFomular = reportCustomerService.checkCustOrFomular(definedColums, columDatas);
@@ -72,13 +74,15 @@ public class TreeDimReportCustomerServiceImp implements TreeDimReportCustomerSer
 
         if(allFomulars!=null&&allFomulars.size()>0){
             for (FomularTmpEntity fomularTmpEntity : allFomulars) {
-                Object fomularDataResult = reportCustomerService.getSimpleFomularData(fomularTmpEntity);
+
+//                Object fomularDataResult = reportCustomerService.getSimpleFomularData(fomularTmpEntity);
                 ReportCustomerData comularData = new ReportCustomerData();
                 comularData.setReport_id(fomularTmpEntity.getReportId());
                 comularData.setUnit_id(fomularTmpEntity.getUnitId());
                 comularData.setColum_id(fomularTmpEntity.getColumId());
                 comularData.setDimensions_id(fomularTmpEntity.getDimensionsId());
-                comularData.setReport_data(String.valueOf(fomularDataResult));
+//                comularData.setReport_data(fomularDataResult.toString());
+                comularData.setReport_data("0");
                 comularData.setReport_group_id(fomularTmpEntity.getReportGroupId());
                 checkRefreshFomular.add(comularData);
 

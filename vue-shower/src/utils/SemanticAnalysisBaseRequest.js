@@ -38,9 +38,7 @@ service.interceptors.request.use(config => {
 service.interceptors.response.use(
   response => {
     const checkResult = workbenchReponse.checkWorkbenchResult(response)
-    if(checkResult){
-      return checkResult
-    }
+    return checkResult
   },
   error => {
     console.log('err' + error)// for debug

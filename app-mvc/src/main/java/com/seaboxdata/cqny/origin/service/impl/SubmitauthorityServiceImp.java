@@ -5,9 +5,13 @@ import com.seaboxdata.cqny.origin.dao.ISubmitauthorityDao;
 import com.seaboxdata.cqny.origin.entity.Submitauthority;
 import com.seaboxdata.cqny.origin.service.SubmitauthorityService;
 import com.seaboxdata.cqny.origin.tree.EntityTree;
+import com.seaboxdata.cqny.record.config.ReportStatus;
+import com.seaboxdata.cqny.record.entity.ReportCustomer;
+import com.seaboxdata.cqny.record.service.ReportCustomerService;
 import com.webapp.support.page.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +22,9 @@ public class SubmitauthorityServiceImp implements SubmitauthorityService {
 
     @Autowired
     private ISubmitauthorityDao submitauthorityDao;
+
+    @Autowired
+    private ReportCustomerService reportCustomerService;
 
     @Override
     public List<EntityTree> listAllSubmitauthority() {
@@ -32,9 +39,39 @@ public class SubmitauthorityServiceImp implements SubmitauthorityService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void addSubmitauthority(Submitauthority submitauthority) {
         if(submitauthority.getOrigin_id()!=null){
             submitauthorityDao.updateSubmitauthority(submitauthority);
+            String originType = submitauthority.getOrigin_type();
+            //检查该机构下的报表，如果报表类型与修改后的机构类型不符。将报表置为失效
+            List<Integer> origins = new ArrayList<>();
+            origins.add(submitauthority.getOrigin_id());
+            List<ReportCustomer> reportCustomers  = reportCustomerService.allReportForOrigin(submitauthority.getOrigin_id().toString());
+            if(reportCustomers!=null){
+                for (ReportCustomer reportCustomer : reportCustomers) {
+                    String oldStatus = reportCustomer.getReport_status();
+
+                    String reportType = reportCustomer.getReport_type();
+                    if(reportType.equals("0")){//所有企业都要填的报表
+                        if(ReportStatus.REMOVE.compareTo(oldStatus)){
+                            reportCustomerService.updateReportCustomerStatus(
+                                    reportCustomer.getReport_id().toString(), ReportStatus.NORMAL);
+                        }
+                    }else{
+                        if(!reportType.equals(originType)){
+                            reportCustomerService.updateReportCustomerStatus(
+                                    reportCustomer.getReport_id().toString(), ReportStatus.REMOVE);
+                        }else{
+                            if(ReportStatus.REMOVE.compareTo(oldStatus)){
+                                reportCustomerService.updateReportCustomerStatus(
+                                        reportCustomer.getReport_id().toString(), ReportStatus.NORMAL);
+                            }
+                        }
+                    }
+                }
+            }
+
         }else{
             submitauthorityDao.addSubmitauthority(submitauthority);
         }

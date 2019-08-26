@@ -7,7 +7,7 @@
         <div class="sprit-menu" v-bind:class="[spritBaseClass,spritBaseClass+'_'+menuIndex]"></div>
         <!--<i :class="menuIcon[menuData.name]"></i>-->
         <!--<icon name="record-checked"></icon>-->
-        <span class="title-style" slot="title">{{menuData.name}}</span>
+        <span class="title-style" slot="title">{{menuData.name}}</span>`
       </template>
       <WorkTopMenu class="sub-menu" v-for="(menuObj,childIndex) in menuData.children"
                    :key="'C-'+menuObj.id" :menuData="menuObj"
@@ -53,7 +53,7 @@
         type: Object
       },
       menuIndex:{
-        type:Number
+        type:String
       },
       spritBaseClass:{
         type:String
@@ -81,9 +81,12 @@
   }
 </script>
 
+<style lang="css">
+</style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
   .el-menu-item ,.title-style{
-    color: #b1b4c3;
+    color: #b1b4c3 !important;
   }
   .sub-menu{
     background-color: #3E3958 !important;

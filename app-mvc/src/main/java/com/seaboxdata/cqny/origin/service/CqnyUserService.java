@@ -1,14 +1,28 @@
 package com.seaboxdata.cqny.origin.service;
 
-import com.github.pagehelper.Page;
-import com.seaboxdata.cqny.origin.entity.CqnyUser;
+import com.seaboxdata.cqny.origin.entity.ChinaAreaCode;
+import com.seaboxdata.cqny.origin.entity.OriginNature;
+import com.seaboxdata.cqny.record.entity.UserForgetPwdRecord;
 import com.webapp.support.page.PageResult;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CqnyUserService {
 
     public PageResult pageCqnyUser(Integer currPage, Integer pageSize,String user_name,String user_type, List<Integer> originList);
 
+    void selectOriginType(String userId, String originType);
+
+    Map<String, String> getSmsValidateCode(Integer userId, String phone_num);
+
+    UserForgetPwdRecord getUserForgetPwdRecord(Integer userId);
+
+    String updateValidateCode(Integer user_id);
+
+    String newValidateCode(Integer user_id);
+
+    List<ChinaAreaCode> getAreaData(String parentId);
+
+    List<OriginNature> getOriginNature();
 }

@@ -64,6 +64,18 @@ public class ReportDefinedUnitMultDimServiceImp extends AbstractDimService imple
         return columList;
     }
 
+    @Override
+    public List<GridColumDefined> getColumByUnitOutUninon(String unitId) {
+        List<GridColumDefined> resultLIst = new ArrayList<>();
+        List<GridColumDefined> columList0 = reportDefinedUnitMultDimDao.getColumByUnit0(unitId);
+        List<GridColumDefined> columList1 = reportDefinedUnitMultDimDao.getColumByUnit1(unitId);
+        List<GridColumDefined> columList2 = reportDefinedUnitMultDimDao.getColumByUnit2(unitId);
+        resultLIst.addAll(columList0);
+        resultLIst.addAll(columList1);
+        resultLIst.addAll(columList2);
+        return resultLIst;
+    }
+
 
     @Override
     public GridColumDefined getOnedimColumn(String columId) {

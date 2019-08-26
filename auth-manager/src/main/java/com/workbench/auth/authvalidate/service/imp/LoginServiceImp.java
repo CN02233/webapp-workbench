@@ -56,6 +56,14 @@ public class LoginServiceImp implements LoginService{
             }else if(UserStatus.PWD_EXPIRED.equal(statusInt)){
                 loginResult.setResult_code(LoginResult.LOGIN_RESULT.PWD_EXPIRED);
                 loginResult.setValidate_result("用户密码过期");
+            }else if(UserStatus.NEVER_LOGIN.equal(statusInt)){
+                loginResult.setResult_code(LoginResult.LOGIN_RESULT.NEVER_LOGIN);
+                loginResult.setValidate_result(UserStatus.NEVER_LOGIN.getStatus_cn());
+                checkResult.setUser_status(String.valueOf(UserStatus.NOT_NOMAL_TAG.getStatus()));
+                userService.updateUser(checkResult);
+            }else if(UserStatus.NOT_NOMAL_TAG.equal(statusInt)){
+                loginResult.setResult_code(LoginResult.LOGIN_RESULT.USER_STATS_NOT_NORMAL);
+                loginResult.setValidate_result(UserStatus.NOT_NOMAL_TAG.getStatus_cn());
             }
             else{
                 loginResult.setResult_code(LoginResult.LOGIN_RESULT.SUCCESS);

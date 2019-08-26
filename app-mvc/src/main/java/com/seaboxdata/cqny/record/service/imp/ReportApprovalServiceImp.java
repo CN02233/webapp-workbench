@@ -10,11 +10,15 @@ import com.seaboxdata.cqny.record.dao.IReportApprovalDao;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportApprovalService;
+import com.seaboxdata.cqny.record.service.ReportCustomerService;
+import com.webapp.support.json.JsonSupport;
+import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -26,6 +30,10 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
     private IReportApprovalDao reportApprovalDao;
     @Autowired
     private ISubmitauthorityDao submitauthorityDao;
+
+    @Autowired
+    private ReportCustomerService reportCustomerService;
+
 
     @Override
     public PageResult listReportApproval(String reportStatus,int userId,int currPage, int pageSize,List<Integer> originIds) {
@@ -50,6 +58,43 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     public Set getChildrenOriginsTree(int user_id){
         return this.getOrigins(user_id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchReportApprovalOperator(List<String> reportIdList, String operator) {
+        for (String reportId : reportIdList) {
+            ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
+
+            String passReview = reportCust.getPass_review();
+
+            if("Y".equals(passReview)){//是否跳过复核
+                if("pass".equals(operator)){
+                    reportCustomerService.updateReportCustomerStatus(reportId,ReportStatus.REPORT_DONE);
+                    continue;
+                }
+            }
+
+            this.reportApprovalOperator(reportId,operator);
+        }
+    }
+
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void batchReportReviewOperator(List<String> reportIdList, String operator) {
+        for (String reportId : reportIdList) {
+            ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
+            String passApprove = reportCust.getPass_approve();
+            if("Y".equals(passApprove)){//免审核，驳回需要直接回退到填报中
+                if("reject".equals(operator)) {
+                    reportCustomerService.updateReportCustomerStatus(reportId,ReportStatus.NORMAL);
+                    continue;
+                }
+            }
+
+            this.reportReviewOperator(reportId,operator);
+        }
     }
 
     private Set getOrigins(int user_id) {
@@ -83,6 +128,7 @@ public class ReportApprovalServiceImp implements ReportApprovalService {
 
     @Override
     public void reportApprovalOperator(String reportId, String reportStatus) {
+        
         if(reportStatus.equals("pass")){
             reportApprovalDao.reportUpdateStatus(reportId,ReportStatus.REVIEW.getValue());
         }

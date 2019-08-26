@@ -54,7 +54,11 @@ public class SystemLogAspect {
             if(loginFilterLevel.getLevel()==0){//不过滤是否登录(Portal登陆的时候不走LOGINCTROLLER 需要特殊化处理)
             }else{
                 Object targer = joinPoint.getTarget();
-                if(!(targer instanceof AbstractLoginController)){
+                String sigName = joinPoint.getSignature().getName();
+                if(!(targer instanceof AbstractLoginController)&&!"getValidateCode".equals(sigName)
+                        &&!"getSmsValidateCode".equals(sigName)
+                        &&!"forgetPwd".equals(sigName)
+                ){
                     Object user = SessionSupport.checkoutUserFromSession();
                     Object[] allArgs = joinPoint.getArgs();
                     logger.info("User:-->{}<-- called method:-->{}<--,the param values-->{}<--",user,joinPoint.toString(),allArgs);
@@ -63,6 +67,7 @@ public class SystemLogAspect {
             return joinPoint.proceed();
         }catch(Exception e){
             e.printStackTrace();
+            logger.error(e.getMessage());
             Signature signature =  joinPoint.getSignature();
             Class returnType = ((MethodSignature) signature).getReturnType();
 

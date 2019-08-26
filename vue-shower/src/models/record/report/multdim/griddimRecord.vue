@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="width: 100%">
     <el-form ref="form"  label-width="40%">
       <el-form ref="form"  label-width="40%">
 
@@ -11,12 +11,12 @@
         row-class-name="mini-font-size"
         border
         stripe
-        style="width: 100%">
-        <el-table-column label="序号"  type="index" width="60" align="center"></el-table-column>
+        style="width: 100%;">
+        <el-table-column label="序号" type="index" width="60" align="center"></el-table-column>
         <el-table-column label="项目" prop="colum_name_cn"></el-table-column>
-        <el-table-column v-for="col in definedDimensions" :label="col.colum_name_cn" width="160" >
+        <el-table-column :key="col.dim_id" v-for="col in definedDimensions" :label="col.dim_name_cn" width="200" >
           <template slot-scope="scope">
-            <el-form-item label-width="0"	style="width:100%;" size="mini" :error="scope.row[col.dim_id+'-validateErrpr']">
+            <el-form-item label-width="0"	style="margin:auto auto" size="mini" :error="scope.row[col.dim_id+'-validateErrpr']">
               <el-tooltip class="item" effect="dark" :content="scope.row.colum_desc" placement="top">
                 <el-input size="mini" v-model="scope.row[col.dim_id]" :disabled="scope.row[col.dim_id+'_colum_type']==0||isView=='Y'" >
                   <template v-if="scope.row.colum_point!=null&&scope.row.colum_point!=''" slot="append">{{scope.row.colum_point}}</template>
@@ -160,6 +160,9 @@
               })
               return xx
             })
+
+
+
             response.columDatas.forEach(columData=>{
               const columKey = columData.unit_id + "_"+columData.colum_id + "_"+columData.dimensions_id
 
@@ -169,7 +172,7 @@
                   const colId = definedColum.colum_id
                   const unitId = definedColum.unit_id
                   const columType = definedColum.colum_type
-                  
+
                   if(columData.unit_id==unitId&&columData.dim_id==dimId&&columData.colum_id==colId&&columType=='0'){
 
                     $t.columDatas[columKey] = columData
@@ -198,7 +201,11 @@
         }).then(response=>{
           // this.$emit("refreshSaveLoading",this.unitId,"保存成功")
           // this.$emit("checkStepAndSave",this.unitId,this.saveFlag)
-          this.$emit("saveReportsCallBack",this.unitId,processName)
+          if(response){
+            this.$emit("saveReportsCallBack",this.unitId,processName)
+          }else{
+            this.$emit("saveReportsCallBack",this.unitId,processName,"保存失败")
+          }
         }).catch(error => {
           this.$emit("saveReportsCallBack",this.unitId,processName,error)
         });
@@ -222,6 +229,13 @@
           }
         }).then(response=>{
           valloading.close();
+
+          if(response){
+          }else{
+            this.$emit("validateReportsCallBack",this.unitId,processName,"校验出现异常")
+          }
+
+
           let validateFailed = false
           let failtMes = ""
           if(response!=null){
@@ -388,6 +402,7 @@
         $t.definedCells.forEach(x=>{
           $t.definedDimensions.forEach(y=>{
             const key = y.unit_id + '_' + x.colum_id + '_' + y.dim_id
+            console.log(key)
             $t.columDatas[key].report_data = x[y.dim_id]
           })
         })

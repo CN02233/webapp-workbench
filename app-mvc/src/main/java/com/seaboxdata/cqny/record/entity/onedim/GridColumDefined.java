@@ -16,6 +16,8 @@ public class GridColumDefined extends ColumDefined {
 
     private String default_value;
 
+    private Integer colum_order;
+
     public Integer getColum_id() {
         return colum_id;
     }
@@ -86,5 +88,13 @@ public class GridColumDefined extends ColumDefined {
 
     public void setDefault_value(String default_value) {
         this.default_value = default_value;
+    }
+
+    public Integer getColum_order() {
+        return colum_order;
+    }
+
+    public void setColum_order(Integer colum_order) {
+        this.colum_order = colum_order;
     }
 }

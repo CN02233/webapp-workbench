@@ -1,8 +1,8 @@
 <template>
   <div class="welcome-root">
 
-    <WorkMain :contextClass="'welcome-table-context'"
-              :class="{'full-height':userType==1,'self-report':userType==0||userType==2}"
+    <WorkMain v-if="userType!=2" :contextClass="'welcome-table-context'"
+              :class="{'full-height':userType==1&&userType!=4,'self-report':userType==0||userType==4}"
               :noNeedHome="true" :headerItems="['待办事项']">
 
       <el-row class="table-page-root-outoptions">
@@ -46,9 +46,9 @@
             >
               <template slot-scope="scope">
 
-                <el-button size="mini" v-if="scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
-                <el-button size="mini" v-if="scope.row.report_status == 1" @click="reportApprove(scope.row.report_id)">审批</el-button>
-                <el-button size="mini" v-if="scope.row.report_status == 2" @click="reportReview(scope.row.report_id)">审核</el-button>
+                <el-button size="mini" v-if="userType!=4 && scope.row.report_status == 0" @click="reportFIll(scope.row.report_id)">填报</el-button>
+                <el-button size="mini" v-if="userType!=4 && scope.row.report_status == 1" @click="reportApprove(scope.row.report_id)">审核</el-button>
+                <el-button size="mini" v-if="userType!=4 && scope.row.report_status == 2" @click="reportReview(scope.row.report_id)">复核</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -62,7 +62,10 @@
 
     </WorkMain>
 
-    <WorkMain v-if="userType==0||userType==2" :contextClass="'welcome-table-context'" class="self-report" :noNeedHome="true" :headerItems="['报表统计']">
+    <WorkMain v-if="userType==0||userType==2||userType==4" :contextClass="'welcome-table-context'"
+              class="self-report"
+              :class="{'full-height':userType==2,'self-report':userType==0}"
+              :noNeedHome="true" :headerItems="['报表统计']">
       <div class="self-report-chart">
        <echart ref="chart1" :options="pieOptions" ></echart>
       </div>
@@ -76,7 +79,7 @@
                 align="left"
                 label="机构名称">
               </el-table-column>
-              <el-table-column v-for="(value,key) in reportStatus"
+              <el-table-column v-for="(value,key) in reportStatus" :key="key"
                                :prop="key"
                                align="left" width="100"
                                :label="value">
@@ -114,8 +117,8 @@
             'REPORT_DONE':'填报完成',
           },
           status_cn:{
-            '0' : '正常',
-            '1':'审批中',
+            '0' : '待填写',
+            '1':'审核中',
             '2':'复核中',
             '3':'锁定',
             '4':'失效',
@@ -138,8 +141,8 @@
           pieOptions:{
             color:[ '#5f97ff', '#998ff3','#94cf87', '#ffe582', '#9aeedc'],
             tooltip: {
-              trigger: 'item',
-              formatter: "{a} <br/>{b}: {c} ({d}%)"
+              // trigger: 'item',
+              // formatter: "{a} <br/>{b}: {c} ({d}%)"
             },
             series: [
               {
@@ -149,18 +152,27 @@
                 avoidLabelOverlap: false,
                 label: {
                   normal: {
+                    position: 'center',
                     show: false,
-                    position: 'center'
+                    formatter:function(param,b){
+                      // debugger
+                      console.log(param)
+                      return param.seriesName;
+                    },
+                    textStyle: {
+                      fontSize: '15',
+                      color:'#5f97ff'
+                    }
                   },
                   emphasis: {
                     show: true,
-                    // formatter:function(param,b){
-                    //   // debugger
-                    //   return param.name+":"+param.value;
-                    // },
-                    formatter:'{b}:{c}\n占{d}%',
+                    formatter:function(param,b){
+                      // debugger
+                      return param.seriesName+"\n"+param.name+"占比"+param.percent+"%";
+                    },
+                    // formatter:'{b}:{c}\n占{d}%',
                     textStyle: {
-                      fontSize: '15',
+                      fontSize: '13',
                       fontWeight: 'bold'
                     }
                   }
@@ -254,34 +266,105 @@
             this.totalPage = response.totalPage
             this.childrenReportInfo = response.dataList
 
-            let chartDatas = []
-            const childrenReportInfoTmp = {}
-            if(this.childrenReportInfo!=null){
-              this.childrenReportInfo.forEach(childReportInfo=>{
-                const reportStatusCodes = Object.keys(childReportInfo)
-                reportStatusCodes.forEach(reportStatusCode=>{
-                  if(this.reportStatus[reportStatusCode]){
-                    const reportStatusCn = this.reportStatus[reportStatusCode]
-                    // debugger
-                    if(childrenReportInfoTmp[reportStatusCn])
-                      childrenReportInfoTmp[reportStatusCn] = childrenReportInfoTmp[reportStatusCn]+childReportInfo[reportStatusCode]
-                    else{
-                      childrenReportInfoTmp[reportStatusCn] = childReportInfo[reportStatusCode]
-                    }
-                  }
-
-                })
-              })
-            }
-            if(childrenReportInfoTmp!=null){
-              const statusCns = Object.keys(childrenReportInfoTmp)
-              statusCns.forEach(statusCn=>{
-                chartDatas.push({name:statusCn,value:childrenReportInfoTmp[statusCn]})
-              })
-            }
-            this.pieOptions.series[0].data = chartDatas
+            // let chartDatas = []
+            // const childrenReportInfoTmp = {}
+            // if(this.childrenReportInfo!=null){
+            //   this.childrenReportInfo.forEach(childReportInfo=>{
+            //     const reportStatusCodes = Object.keys(childReportInfo)
+            //     reportStatusCodes.forEach(reportStatusCode=>{
+            //       if(this.reportStatus[reportStatusCode]){
+            //         const reportStatusCn = this.reportStatus[reportStatusCode]
+            //         // debugger
+            //         if(childrenReportInfoTmp[reportStatusCn])
+            //           childrenReportInfoTmp[reportStatusCn] = childrenReportInfoTmp[reportStatusCn]+childReportInfo[reportStatusCode]
+            //         else{
+            //           childrenReportInfoTmp[reportStatusCn] = childReportInfo[reportStatusCode]
+            //         }
+            //       }
+            //
+            //     })
+            //   })
+            // }
+            // if(childrenReportInfoTmp!=null){
+            //   const statusCns = Object.keys(childrenReportInfoTmp)
+            //   statusCns.forEach(statusCn=>{
+            //     chartDatas.push({name:statusCn,value:childrenReportInfoTmp[statusCn]})
+            //   })
+            // }
+            // this.pieOptions.series[0].data = chartDatas
           }
         })
+      },
+      getReportSumInfo(){
+        this.BaseRequest({
+          url: "welcome/getReportSumInfo",
+          method: 'get'
+        }).then(response => {
+          let chartDatas = []
+
+          let chartDatasTmp = {
+            "0" : 0,
+            "1":0,
+            "2":0,
+            "9":0
+
+          }
+
+          let pieName = ""
+
+          if(response){
+            const statsCode = Object.keys(chartDatasTmp)
+
+            statsCode.forEach(statsCode=>{
+              response.forEach(statsObj=>{
+                const report_status_sum = statsObj.report_status_sum
+                const report_status = parseInt(statsObj.report_status)
+                if(statsCode==report_status){
+                  chartDatasTmp[report_status] = report_status_sum
+                }
+              })
+            })
+
+
+
+            // response.forEach(statsObj=>{
+            //   const report_status_sum = statsObj.report_status_sum
+            //   const report_status = parseInt(statsObj.report_status)
+            //   if(chartDatasTmp[report_status]){
+            //     chartDatasTmp[report_status] = report_status_sum
+            //   }
+            // })
+            let reportTotalCount = 1
+            let reportDoneCount = 0
+
+            const chartStatus = Object.keys(chartDatasTmp)
+            chartStatus.forEach((chartStatu,index)=>{
+              chartDatas.push({name:this.status_cn[chartStatu],value:chartDatasTmp[chartStatu]})
+
+              reportTotalCount+=chartDatasTmp[chartStatu]
+              if(index>0){
+                pieName+="\n"
+              }
+              pieName+=(this.status_cn[chartStatu]+":"+chartDatasTmp[chartStatu])
+
+              if(chartStatu==9){
+                reportDoneCount = chartDatasTmp[chartStatu]
+              }
+            })
+
+            // pieName+=("\n完成比例："+Math.round(reportDoneCount/reportTotalCount)*100+"%")
+          }
+
+          console.log(pieName)
+          this.pieOptions.series[0].name = pieName
+
+          this.pieOptions.series[0].data = chartDatas
+
+
+        })
+
+
+
       },
       getReportStatus(rowData){
         return this.status_cn[rowData.report_status]
@@ -312,6 +395,7 @@
       this.getJobReportList()
       // this.getSelfReportInfo()
       this.getChildenOriginReportInfo()
+      this.getReportSumInfo()
     }
 
   }

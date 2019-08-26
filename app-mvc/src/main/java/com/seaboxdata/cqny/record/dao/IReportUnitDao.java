@@ -17,11 +17,12 @@ public interface IReportUnitDao {
             " create_user, " +
             " unit_type, " +
             " unit_order, " +
+            " unit_show_type, " +
             " status " +
             ") " +
             "VALUES " +
             " ( " +
-            " #{report_defined_id},#{unit_name},sysdate(),#{create_user},#{unit_type},#{unit_order},#{status} " +
+            " #{report_defined_id},#{unit_name},sysdate(),#{create_user},#{unit_type},#{unit_order},#{unit_show_type},#{status} " +
             " )")
     @Options(useGeneratedKeys = true, keyProperty = "unit_id", keyColumn = "unit_id")
     void addReportUnit(UnitDefined reportUnit);
@@ -116,6 +117,7 @@ public interface IReportUnitDao {
             "a.report_defined_id," +
             "a.unit_type," +
             "a.unit_order," +
+            "a.unit_show_type," +
             "a.origin_id " +
             "FROM " +
             "report_unit_info a " +

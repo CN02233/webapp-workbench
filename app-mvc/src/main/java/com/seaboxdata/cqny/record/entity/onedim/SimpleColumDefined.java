@@ -15,6 +15,7 @@ public class SimpleColumDefined extends ColumDefined {
     private String default_value;//参数默认值设置（发布时会读取该默认值作为初始化参数值）
 
     private Integer colum_order;
+    private String colum_show;
 
 
     public Integer getColum_id() {
@@ -79,5 +80,13 @@ public class SimpleColumDefined extends ColumDefined {
 
     public void setColum_order(Integer colum_order) {
         this.colum_order = colum_order;
+    }
+
+    public String getColum_show() {
+        return colum_show;
+    }
+
+    public void setColum_show(String colum_show) {
+        this.colum_show = colum_show;
     }
 }

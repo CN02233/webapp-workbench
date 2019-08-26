@@ -16,6 +16,7 @@ public interface ISubmitauthorityDao {
     @Select("SELECT  " +
             " origin_id id,  " +
             " origin_name label,  " +
+            " origin_type originType,  " +
             " parent_origin_id parentId  " +
             "  " +
             "FROM  " +
@@ -26,12 +27,13 @@ public interface ISubmitauthorityDao {
             " origin_name,  " +
             " parent_origin_id,  " +
             " origin_status,  " +
+            " origin_type,  " +
             " create_date,  " +
             " create_user  " +
             ")  " +
             "VALUES  " +
             " (  " +
-            " #{ origin_name },#{ parent_origin_id },#{ origin_status },sysdate(),#{ create_user }  " +
+            " #{ origin_name },#{ parent_origin_id },#{ origin_status },#{origin_type},sysdate(),#{ create_user }  " +
             " )")
     void addSubmitauthority(Submitauthority submitauthority);
 
@@ -54,6 +56,9 @@ public interface ISubmitauthorityDao {
             +"<if test='origin_status!=null'>"
             +"origin_status=#{origin_status} ,"
             +"</if>"
+            +"<if test='origin_type!=null'>"
+            +"origin_type=#{origin_type} ,"
+            +"</if>"
             +"<if test='create_user!=null'>"
             +"create_user=#{create_user} ,"
             +"</if>"
@@ -61,7 +66,7 @@ public interface ISubmitauthorityDao {
             +"</set>where origin_id = #{origin_id}</script>")
     void updateSubmitauthority(Submitauthority submitauthority);
 
-    @Select("select origin_id,origin_name,parent_origin_id,origin_status,create_date,create_user from sys_origin where  origin_status!=3")
+    @Select("select origin_id,origin_name,parent_origin_id,origin_status,create_date,create_user,origin_type from sys_origin where  origin_status!=3")
     Page<Submitauthority> listSubmitauthority(@Param("currPage") int currPage, @Param("pageSize") int pageSize);
 
     @Select("select * from sys_origin where origin_id = #{origin_id} and origin_status!=3")

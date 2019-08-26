@@ -71,7 +71,13 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(String definedId) {
+        reportStatementsDao.deleteOneDim(definedId);
+        reportStatementsDao.deleteMulCol(definedId);
+        reportStatementsDao.deleteMulDim(definedId);
+        reportStatementsDao.deleteMul(definedId);
+        reportStatementsDao.deteteUnit(definedId);
         reportStatementsDao.deleteById(definedId);
     }
 
@@ -148,7 +154,7 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void copyReportDefined(String definedId) {
+    public Integer copyReportDefined(String definedId) {
         Integer fromDefindId = new Integer(definedId);
         Integer toDefinedId = copyReportStatement(fromDefindId);
 
@@ -170,6 +176,17 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
 
         this.updateSimpleDimFomular(newReportUnits,groupResult,copyUnits);
 
+        List<Origin> allOrigins = this.getDefinedOriginsById(definedId);
+        List<Integer> originIds = new ArrayList<>();
+        for (Origin originObj : allOrigins) {
+            Integer originId = originObj.getOrigin_id();
+            originIds.add(originId);
+        }
+
+        reportStatementsDao.delDefinedAndOriginAssign(toDefinedId.toString());
+        reportStatementsDao.saveDefinedAndOriginAssign(originIds,toDefinedId.toString());
+
+        return toDefinedId;
     }
 
     @Override
@@ -273,39 +290,72 @@ public class ReportStatementsServiceImp implements ReportStatementsService {
     private String getNewFomular(String oldFomular,
                                  Map<Integer,Map<String,String>> groupResult ,
                                  Map<Integer, UnitDefined> copyUnits){
-        StringBuilder newFomularSb = new StringBuilder();
-        String[] fomularParams = oldFomular.split("#");
-        for (String fomularParam : fomularParams) {
+
+        logger.debug("oldFomular is {}",oldFomular);
+
+        int columIndex = 0;
+        List<String> fomularParamsList = new ArrayList<>();
+
+        String oldFomularTmp = oldFomular;
+        while(columIndex>=0&&oldFomularTmp.length()>0){
+            int columIndexStart = oldFomularTmp.indexOf("#");
+            if(columIndexStart>=0){
+                oldFomularTmp = oldFomularTmp.replaceFirst("#","");
+            }
+            int columIndexEnd = oldFomularTmp.indexOf("#");
+            if(columIndexEnd>=0){
+                String fomularColum = oldFomularTmp.substring(columIndexStart, columIndexEnd);
+                oldFomularTmp = oldFomularTmp.substring(columIndexEnd+1);
+                fomularParamsList.add(fomularColum);
+            }
+            columIndex = oldFomularTmp.indexOf("#");
+
+        }
+        String newFomular = oldFomular;
+        for (String fomularParam : fomularParamsList) {
+            StringBuilder newFomularColumSB = new StringBuilder();
+
             int firstPoint = fomularParam.indexOf(".");
             if(firstPoint>=0){
                 String unitId = fomularParam.substring(0, firstPoint);
                 Integer unitIdInt = new Integer(unitId);
                 String othersId = fomularParam.substring(firstPoint+1);
                 Map<String, String> fromUnitGroup = groupResult.get(unitIdInt);
-
-                newFomularSb.append("#").append(copyUnits.get(unitIdInt).getUnit_id());
+                logger.debug("fromUnitGroup : {}",fromUnitGroup);
+                newFomularColumSB.append(copyUnits.get(unitIdInt).getUnit_id());
 
                 if(othersId.indexOf(".")>0){
                     String othersIdReplace = othersId.replace(".", "_");
                     String[] columAndDim = othersIdReplace.split("_");
                     String newColumValue = fromUnitGroup.get("colum_" + columAndDim[0]).replace("colum_","");
                     String newDimValue = fromUnitGroup.get("dim_" + columAndDim[1]).replace("dim_","");
-                    newFomularSb.append(".").append(newColumValue).append(".").append(newDimValue).append("#");
+                    newFomularColumSB.append(".").append(newColumValue).append(".").append(newDimValue);
                 }else{
                     String newColumId = fromUnitGroup.get("colum_" + othersId).replace("colum_", "");
-                    newFomularSb.append(".").append(newColumId).append("#");
+                    newFomularColumSB.append(".").append(newColumId);
                 }
             }else{
-                newFomularSb.append(fomularParam);
+                newFomularColumSB.append(fomularParam);
             }
+
+            newFomular = newFomular.replace(fomularParam,newFomularColumSB.toString());
+
         }
 
-        return newFomularSb.toString();
+        return newFomular;
     }
 
     private Integer copyReportStatement(Integer definedId){
         ReportDefinedEntity reportStatement = reportStatementsDao.getReportDefinedById(new Integer(definedId));
+        SimpleDateFormat format = new SimpleDateFormat("HHmmss");
         reportStatement.setDefined_id(null);
+        reportStatement.setStatus(String.valueOf(ReportDefinedStatus.NORMAL.value()));
+        reportStatement.setCreate_user(Integer.MIN_VALUE);
+        StringBuilder newName = new StringBuilder();
+        newName.append(reportStatement.getDefined_name());
+        newName.append("-复制");
+        newName.append(format.format(new Date()));
+        reportStatement.setDefined_name(newName.toString());
         reportStatementsDao.addReportStatements(reportStatement);
         Integer newDefindId = reportStatement.getDefined_id();
         return newDefindId;

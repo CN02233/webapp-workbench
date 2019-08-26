@@ -90,7 +90,9 @@ public class ReportUnitServiceImp implements ReportUnitService {
         }else if(UnitDefinedType.ONEDIMDYNAMIC.compareWith(unitTypeInt)){//一维动态
             columsDatas = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         }else if(UnitDefinedType.MANYDIMSTATIC.compareWith(unitTypeInt)){//多维静态
-            columsDatas = reportDefinedUnitMultDimService.getColumByUnit(unitId);
+            columsDatas =  reportDefinedUnitMultDimService.getColumByUnitOutUninon(unitId);
+
+//            columsDatas = reportDefinedUnitMultDimService.getColumByUnit(unitId);
         }else if(UnitDefinedType.MANYDIMTREE.compareWith(unitTypeInt)){//多维动态树
             columsDatas = reportDefinedUnitOneDimService.getColumByUnit(unitId);
         }else{

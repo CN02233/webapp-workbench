@@ -1,6 +1,5 @@
 package com.seaboxdata.cqny.record.service.imp;
 
-import com.google.common.base.Strings;
 import com.seaboxdata.cqny.record.config.ColumType;
 import com.seaboxdata.cqny.record.config.UnitDefinedType;
 import com.seaboxdata.cqny.record.dao.IReportDefinedUnitOneDimDao;

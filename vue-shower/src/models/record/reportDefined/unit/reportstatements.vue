@@ -75,10 +75,13 @@
                 >报送单元</el-button>
               <el-button
                 size="mini" v-if="scope.row.status==4" @click="viewDefinedUnit(scope.row.defined_id)"
-              >报送单元查看</el-button>
+               >报送单元查看</el-button>
               <el-button
                 size="mini" v-if="scope.row.status==4" @click="viewSubDefined(scope.row.defined_id)"
               >查看</el-button>
+              <el-button
+                size="mini" v-if="scope.row.status==4" @click="viewReSubDefined(scope.row)"
+              >补发</el-button>
               <el-button v-if="scope.row.status==0"
                 size="mini"
                 @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -90,6 +93,9 @@
                 size="mini"
                 type="success"
                 @click="openSubmitPrams(scope.row)">发布</el-button>
+              <el-button
+                size="mini" @click="copyReportDefined(scope.row.defined_id)"
+              >复制报表</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -102,46 +108,37 @@
     </WorkTablePager>
     <!-- 新增、编辑 弹窗-->
     <el-dialog class="table-options-modal" :title="dialogTitle" :visible.sync="showModalPage" >
-      <el-row :gutter="16">
-        <el-col :sm="20">
-          <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">报表名称</el-col>
-            <el-col :span="15">
-              <el-input size="small" placeholder="报送单元名称" v-model="formSubmitData.defined_name" class="input-with-select" ></el-input>
-            </el-col>
-          </el-row>
-          <el-row class="table-options-modal-item">
-            <el-col :span="8" :offset="1">所属报送机构</el-col>
-            <el-col :span="15">
-               <!-- <treeselect   multiple v-model="formSubmitData.origin_id"  :options="options" />-->
-                <el-tree
-                  accordion
-                  class="filter-tree"
-                  :data="treeData"
-                  show-checkbox
-                  :props="defaultProps"
-                  node-key = "id"
-                  ref="treeRef"
-                  :filter-node-method="filterNode"
-                  @node-click="handleNodeClick">
-                </el-tree>
-            </el-col>
-          </el-row>
-          <!--<el-row>
-            <el-col :span="8" :offset="1">报表状态</el-col>
-            <el-col :span="8" >
-              <el-select v-model="formSubmitData.status" placeholder="请选择报送单元状态">
-                <el-option
-                  v-for="item in statusOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </el-col>
-          </el-row>-->
-        </el-col>
-      </el-row>
+
+      <el-form style="width:80%" ref="form" :model="form" label-width="200px">
+        <el-form-item label="报表名称">
+          <el-input size="small" placeholder="报送单元名称" v-model="formSubmitData.defined_name" class="input-with-select" ></el-input>
+        </el-form-item>
+
+        <el-form-item label="报表类型">
+          <!--<el-select style="width:100%" @change="changeReportType" v-model="formSubmitData.report_type" placeholder="请选择报送类型">-->
+          <el-select style="width:100%" v-model="formSubmitData.report_type" placeholder="请选择报送类型">
+            <el-option
+              v-for="item in originType"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="所属报送机构">
+          <el-tree
+            accordion
+            class="filter-tree"
+            :data="treeData"
+            show-checkbox
+            :props="defaultProps"
+            node-key = "id"
+            ref="treeRef"
+            :filter-node-method="filterNode">
+          </el-tree>
+        </el-form-item>
+      </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="closeModal">取 消</el-button>
         <el-button type="primary" @click="handleInsert">确 定</el-button>
@@ -214,7 +211,8 @@
                 :data="submitParams.defined_origins"
                 :props="definedTreeProps"
                 ref="approveCheckOrigins"
-                show-checkbox >
+                show-checkbox
+              >
               </el-tree>
             </el-col>
           </el-row>
@@ -236,50 +234,141 @@
       </div>
     </el-dialog>
 
-    <!--reportDataStart: '',-->
-    <!--reportDataEnd: '',-->
-    <!--reportDataStart: '',-->
-    <!--reportDataEnd: '',-->
-    <!--passOriginNames: [],-->
+
+    <!--补发设置弹窗-->
+    <el-dialog class="table-options-modal" title="补发报表设置" :visible.sync="reSubmitModel" >
+      <el-row :gutter="16">
+        <el-col :sm="20">
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">报表定义名称</el-col>
+            <el-col :span="15">
+              <el-input placeholder="报表定义名称" :disabled="true" v-model="reSubmitParams.defined_name" class="input-with-select" ></el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">报送起始日期</el-col>
+            <el-col :span="15">
+              <el-input style="width: 100%;"  :disabled="true"
+                              v-model="reSubmitParams.report_start_date_str">
+              </el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">报送截止日期</el-col>
+            <el-col :span="15">
+              <el-input style="width: 100%;"  :disabled="true"
+                              v-model="reSubmitParams.report_end_date_str">
+              </el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">填报区间开始日期</el-col>
+            <el-col :span="15">
+              <el-input style="width: 100%;"  :disabled="true"
+                              v-model="reSubmitParams.report_data_start_str">
+              </el-input>
+            </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">填报区间截止日期</el-col>
+            <el-col :span="15">
+              <el-input style="width: 100%;" :disabled="true"
+                              v-model="reSubmitParams.report_data_end_str">
+              </el-input>
+            </el-col>
+          </el-row>
+
+          <el-row class="table-options-modal-item">
+
+              <el-col :span="8" :offset="1">不需审核机构</el-col>
+              <el-col align="left" :span="15">
+                <!--defined_origins-->
+                <el-select style="width: 100%;" v-model="reSubmitParams.approve_check_origins" multiple placeholder="请选择">
+                  <el-option
+                    v-for="item in reSubmitParams.resubmit_checked_origins"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-col>
+          </el-row>
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">不需复核机构</el-col>
+            <el-col align="left" :span="15">
+              <el-select style="width: 100%;" v-model="reSubmitParams.review_check_origins" multiple placeholder="请选择">
+                <el-option
+                  v-for="item in reSubmitParams.resubmit_checked_origins"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-col>
+          </el-row>
+
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">补发机构</el-col>
+            <el-col :span="15">
+
+              <el-tree
+                accordion
+                class="filter-tree"
+                :data="reSubmitParams.resubmit_origin_tree"
+                show-checkbox
+                :props="defaultProps"
+                node-key = "id"
+                ref="reSubmitTreeRef"
+                @check-change="handleNodeClick"
+              >
+              </el-tree>
+
+            </el-col>
+          </el-row>
+
+        </el-col>
+      </el-row>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="reSubmitModel=false">取 消</el-button>
+        <el-button type="primary" @click="submitForOrigins()">发 布</el-button>
+      </div>
+    </el-dialog>
+
+
     <el-dialog class="table-options-modal" title="已发布报表设置查看" :visible.sync="submitedModel" >
       <el-row :gutter="16">
         <el-col :sm="20">
-          <!--<el-row class="table-options-modal-item">-->
-            <!--<el-col :span="8" :offset="1">报送起始日期</el-col>-->
-            <!--<el-col :span="15">-->
-              <!--<el-input :disabled="true" v-model="submitedParams.reportStartDate"></el-input>-->
-            <!--</el-col>-->
-          <!--</el-row>-->
-          <!--<el-row class="table-options-modal-item">-->
-            <!--<el-col :span="8" :offset="1">报送截止日期</el-col>-->
-            <!--<el-col :span="15">-->
-              <!--<el-input :disabled="true" v-model="submitedParams.reportEndDate"></el-input>-->
-            <!--</el-col>-->
-          <!--</el-row>-->
-          <!--<el-row class="table-options-modal-item">-->
-            <!--<el-col :span="8" :offset="1">填报区间开始日期</el-col>-->
-            <!--<el-col :span="15">-->
-              <!--<el-input :disabled="true" v-model="submitedParams.reportDataStart"></el-input>-->
-            <!--</el-col>-->
-          <!--</el-row>-->
-          <!--<el-row class="table-options-modal-item">-->
-            <!--<el-col :span="8" :offset="1">填报区间截止日期</el-col>-->
-            <!--<el-col :span="15">-->
-              <!--<el-input :disabled="true" v-model="submitedParams.reportDataEnd"></el-input>-->
-            <!--</el-col>-->
-          <!--</el-row>-->
           <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需审核机构</el-col>
             <el-col align="left" :span="15">
-              <el-tag v-for="originName in submitedParams.passApproveOriginNames">{{originName}}</el-tag>
+              <el-tag :key="originName" v-for="originName in submitedParams.passApproveOriginNames">{{originName}}</el-tag>
 
             </el-col>
           </el-row>
           <el-row class="table-options-modal-item">
             <el-col :span="8" :offset="1">不需复核机构</el-col>
             <el-col align="left" :span="15">
-              <el-tag v-for="originName in submitedParams.passReviewOriginNames">{{originName}}</el-tag>
+              <el-tag :key="originName" v-for="originName in submitedParams.passReviewOriginNames">{{originName}}</el-tag>
 
+            </el-col>
+          </el-row>
+
+          <el-row class="table-options-modal-item">
+            <el-col :span="8" :offset="1">发布到的机构</el-col>
+
+
+
+            <el-col align="left" :span="15">
+
+              <el-tree
+                accordion
+                class="filter-tree"
+                :data="submitedParams.allSubOriginTree"
+                :props="defaultProps"
+                node-key = "id">
+              </el-tree>
+
+              <!--<el-tag v-for="originInfo in submitedParams.allSubOrigins">{{originInfo.originName}}</el-tag>-->
             </el-col>
           </el-row>
         </el-col>
@@ -310,6 +399,7 @@ export default {
       totalPage: 1,
       showModalPage: false,
       submitModel: false,
+      reSubmitModel: false,
       submitedModel: false,
       isEditModal: false,
       dialogTitle: '',
@@ -318,9 +408,11 @@ export default {
         defined_id: null,
         defined_name: null,
         origin_name: null,
+        report_type: null,
         status: 0
       },
-      options: [],
+
+      treeDataCache: [],
       statusOptions: [{
         value: '100',
         label: '编辑中'
@@ -350,18 +442,43 @@ export default {
         review_check_origins: [],
         defined_origins: []
       },
+      reSubmitParams: {
+        defined_id: '',
+        defined_name: '',
+        report_start_date_str: '',
+        report_end_date_str: '',
+        report_data_start_str: '',
+        report_data_end_str: '',
+        resubmit_origin_tree:[],
+        resubmit_checked_origins:[],
+        approve_check_origins: [],
+        review_check_origins: []
+      },
       submitedParams:{
         reportStartDate: '',
         reportEndDate: '',
         reportDataStart: '',
         reportDataEnd: '',
-        passOriginNames: [],
+        allSubOrigins: [],
+        passApproveOriginNames: [],
+        passReviewOriginNames: [],
+        allSubOriginTree:[]
       },
       definedTreeProps:{
         children: 'children',
         label: 'origin_name',
         id: 'origin_id'
-      }
+      },
+      originType: [{
+        value: '0',
+        label: '全部'
+      }, {
+        value: '1',
+        label: '燃气企业'
+      }, {
+        value: '2',
+        label: '管输企业'
+      }]
     }
   },
   watch: {// 监听节点搜索的内容
@@ -372,6 +489,9 @@ export default {
   validations: {// 提交前的验证
     formSubmitData: {
       defined_name: {
+        required
+      },
+      report_type: {
         required
       },
       status: {
@@ -409,8 +529,57 @@ export default {
       }
       return '未知'
     },
-    handleNodeClick (data) { // 点击树的节点进行赋值
-      // console.log(data)
+    handleNodeClick (data, checked, indeterminate) { // 点击树的节点进行赋值
+      const $this = this
+
+
+      function checkOrUncheckNode(checkData){
+        if(checked){
+          // this.resubmit_checked_origins
+          const originId = checkData.id
+          const orginName = checkData.label
+          $this.reSubmitParams.resubmit_checked_origins.push({value:originId,label:orginName})
+        }else{
+          if($this.reSubmitParams.resubmit_checked_origins){
+            const originId = checkData.id
+
+
+            $this.reSubmitParams.resubmit_checked_origins.forEach((checkedOrigin,index)=>{
+              if(checkedOrigin.value == originId){
+                $this.reSubmitParams.resubmit_checked_origins.splice(index,1);
+              }
+            })
+
+            $this.reSubmitParams.approve_check_origins.forEach((approveCheckedOrigin,index)=>{
+              if(approveCheckedOrigin == originId){
+                $this.reSubmitParams.approve_check_origins.splice(index,1)
+              }
+            })
+
+            $this.reSubmitParams.review_check_origins.forEach((reviewCheckedOrigin,index)=>{
+              if(reviewCheckedOrigin == originId){
+                $this.reSubmitParams.review_check_origins.splice(index,1)
+              }
+            })
+          }
+        }
+      }
+
+      if(data.children){
+        function checkSons(parentOrigin){
+          if(parentOrigin.children){
+            parentOrigin.children.forEach(childData=>{
+              checkSons(childData)
+            })
+          }else{
+            checkOrUncheckNode(parentOrigin)
+          }
+        }
+        checkSons(data)
+      }else{
+        checkOrUncheckNode(data)
+      }
+
       // console.log(this.$refs.treeRef.getCheckedNodes())
     },
     filterNode (value, data) { // 树节点的过滤
@@ -465,13 +634,9 @@ export default {
       }).then(response => {
         if (response != null && response.length > 0) {
           this.treeData = []
-          this.options = response
           this.treeData = response
         }
       })
-    },
-    getAuthOriginTree(reportDefinedId){
-
     },
     getDefinedAndOriginAssign (definedId, thisRef) { // 获取选择的机构id
       this.BaseRequest({
@@ -539,6 +704,7 @@ export default {
       this.isEditModal = true
       this.formSubmitData.defined_id = row.defined_id
       this.formSubmitData.defined_name = row.defined_name
+      this.formSubmitData.report_type = row.report_type
       this.formSubmitData.status = row.status
       this.$nextTick(function () {
         this.$refs.treeRef.setCheckedKeys([])
@@ -580,7 +746,7 @@ export default {
       if (checkResult) {
         this.$notify({
           dangerouslyUseHTMLString: true,
-          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、状态'
+          message: '<span style="font-size:15px;color:red;font-weight: bold">以下参数不允许为空</span><br>报送单元名称、所属报送机构、报送类型、状态'
         })
       }
       return checkResult
@@ -613,7 +779,96 @@ export default {
         }
       }).then(response => {
         this.submitedParams = response
+        // allSubOriginTree
+        const allSubOriginsObj = {}
+        if(this.submitedParams.allSubOrigins){
+          this.submitedParams.allSubOrigins.forEach(subOrigin=>{
+            const originId = subOrigin.originId
+            const originName = subOrigin.originName
+            allSubOriginsObj[originId] = originName
+          })
+        }
+
+        const reSubOrigins = JSON.parse(JSON.stringify(this.treeData))
+
+        const reSubOriginTree = []
+
+        function checkLiftOrigin(parentOrigins){
+          const newChildren = new Array()
+          if(parentOrigins&&parentOrigins.length>0){
+            parentOrigins.forEach(parentOrigin=>{
+              const parentOriginChildren = parentOrigin.children
+              if(parentOriginChildren!=null&&parentOriginChildren.length>0){//非叶子节点
+                parentOrigin.children = checkLiftOrigin(parentOriginChildren)
+                newChildren.push(parentOrigin)
+              }else{//叶子节点
+                if(allSubOriginsObj[parentOrigin.id]){
+                  newChildren.push(parentOrigin)
+                }
+              }
+            })
+          }
+          return newChildren
+        }
+
+        if(reSubOrigins&&reSubOrigins.length>0){
+          this.submitedParams.allSubOriginTree = checkLiftOrigin(reSubOrigins)
+
+        }
+
+
+        // allSubOriginTree
       })
+    },
+    viewReSubDefined(repoortDefinedInfos){
+      this.BaseRequest({
+        url: '/reportCust/getReportBaseInfo',
+        params: {
+          reportDefinedId: repoortDefinedInfos.defined_id
+        }
+      }).then(response => {
+        this.reSubmitModel = true
+
+        this.reSubmitParams.defined_id = repoortDefinedInfos.defined_id
+        this.reSubmitParams.defined_name = repoortDefinedInfos.defined_name
+
+        const allSubOrigins= response.allSubOrigins
+
+        this.reSubmitParams.report_data_start_str = repoortDefinedInfos.reportDataStart
+        this.reSubmitParams.report_data_end_str = repoortDefinedInfos.reportDataEnd
+        this.reSubmitParams.report_start_date_str = repoortDefinedInfos.reportStartDate
+        this.reSubmitParams.report_end_date_str = repoortDefinedInfos.reportEndDate
+
+        const allSubOriginObj = {}
+        if(allSubOrigins){
+          allSubOrigins.forEach(allSubOrigin=>{
+            const originId = allSubOrigin.originId
+            const originName = allSubOrigin.originName
+            allSubOriginObj[originId] = originName
+          })
+        }
+        function forEachTree(treeDataArray){
+          treeDataArray.forEach(treeOption=>{
+            const treeOriginId = treeOption.id
+            if(treeOption.children&&treeOption.children.length>0){
+              treeOption.disabled = true
+              if(treeOption.children){
+                forEachTree(treeOption.children)
+              }
+            }else{
+              if(allSubOriginObj[treeOriginId]){
+                treeOption.disabled = true
+              }
+            }
+          })
+        }
+
+        const reSubOrigins = JSON.parse(JSON.stringify(this.treeData))
+        forEachTree(reSubOrigins)
+        this.reSubmitParams.resubmit_origin_tree = reSubOrigins
+      })
+
+
     },
     openSubmitPrams (definedData) {
       this.submitModel = true
@@ -630,6 +885,34 @@ export default {
         this.submitParams.defined_origins.push(response)
         console.log(this.submitParams.defined_origins)
       })
+    },
+    copyReportDefined(reportDefinedId){
+
+      this.$confirm('确定复制报表？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        dangerouslyUseHTMLString: true,
+        type: 'warning'
+      }).then(() => {
+        const loading = this.$loading({
+          lock: true,
+          text: '复制中',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        })
+        this.BaseRequest({
+          url: '/reportStatements/copyReportDefind',
+          params: {
+            reportDefinedId: reportDefinedId
+          }
+        }).then(response => {
+          this.getTableData(1)
+          loading.close()
+        })
+      }).catch(() => {
+      })
+
+
     },
     submitReport () {
       if (this.submitParams.report_start_date_str == null || this.submitParams.report_start_date_str == '' ||
@@ -659,7 +942,7 @@ export default {
       }
 
       this.submitParams.review_check_origins = []
-      let review_check_origins = this.$refs.approveCheckOrigins.getCheckedNodes()
+      let review_check_origins = this.$refs.reviewCheckOrigins.getCheckedNodes()
       for (let i = 0; i < review_check_origins.length; i++) {
         this.submitParams.review_check_origins.push(review_check_origins[i].origin_id)
       }
@@ -682,7 +965,50 @@ export default {
         this.getTableData(1)
         this.closeSubmitModal()
       })
+    },
+    submitForOrigins(){
+      const loading = this.$loading({
+        lock: true,
+        text: '补发中....',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+      const reSubmitCheckedOrigins = this.reSubmitParams.resubmit_checked_origins
+
+      const submit_origins = new Array()
+
+      if(reSubmitCheckedOrigins&&reSubmitCheckedOrigins.length>0){
+        reSubmitCheckedOrigins.forEach(reSubmitCheckedOrigin=>{
+          submit_origins.push(reSubmitCheckedOrigin.value)
+        })
+      }else{
+        this.Message.error("请选择需要补发的机构")
+        return
+      }
+
+
+      this.BaseRequest({
+        url: '/reportStatements/submitForOrigins',
+        method: 'post',
+        data: {
+          'defined_id': this.reSubmitParams.defined_id,
+          'report_start_date': this.reSubmitParams.report_start_date_str.replace(/-/g, ""),
+          'report_end_date': this.reSubmitParams.report_end_date_str.replace(/-/g, ""),
+          'report_data_start': this.reSubmitParams.report_data_start_str.replace(/-/g, ""),
+          'report_data_end': this.reSubmitParams.report_data_end_str.replace(/-/g, ""),
+          'submit_origins': submit_origins,
+          'approve_check_origins': this.reSubmitParams.approve_check_origins,
+          'review_check_origins': this.reSubmitParams.review_check_origins
+        }
+      }).then(response => {
+        loading.close()
+        this.reSubmitModel = false
+        this.Message.success('报表已补发')
+        this.getTableData(1)
+      })
     }
+
+
   },
   mounted: function () { // 初始化
     this.$nextTick(function () {

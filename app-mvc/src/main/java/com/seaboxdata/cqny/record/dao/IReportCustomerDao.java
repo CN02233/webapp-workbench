@@ -4,7 +4,9 @@ import com.github.pagehelper.Page;
 import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.entity.ReportCustomerData;
 import com.seaboxdata.cqny.record.entity.UnitDefined;
+import com.seaboxdata.cqny.record.entity.onedim.GridColumDefined;
 import org.apache.ibatis.annotations.*;
+import org.omg.PortableInterceptor.INACTIVE;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,15 +14,20 @@ import java.util.Map;
 
 public interface IReportCustomerDao {
 
-    @Select("select rc.* from report_customer rc inner join " +
-            "(select origin_id from user_origin_assign where user_id = #{userId}) org on " +
-            "rc.report_origin=org.origin_id")
-    Page<ReportCustomer> pageReport(@Param("currPage") Integer currPage,
-                                    @Param("pageSize") Integer pageSize,
-                                    @Param("userId") Integer userId);
+//    @Select("select rc.* from report_customer rc inner join " +
+//            "(select origin_id from user_origin_assign where user_id = #{userId}) org on " +
+//            "rc.report_origin=org.origin_id")
+//    Page<ReportCustomer> pageReport(@Param("currPage") Integer currPage,
+//                                    @Param("pageSize") Integer pageSize,
+//                                    @Param("userId") Integer userId);
 
     @Select("<script>" +
-            "select rc.* from report_customer rc where rc.report_origin in " +
+            "select rc.*," +
+            "u.user_name_cn user_name_cn,u.mobile_phone user_mobile_phone,u.office_phone user_office_phone " +
+            " from report_customer rc" +
+            " left join user u on " +
+            " rc.last_modify_user=u.user_id " +
+            "where rc.report_status!='4' and rc.report_origin in " +
             "<foreach item='item' index='index' collection='originParams' open='(' separator=',' close=')'> " +
             "#{item}" +
             "</foreach>" +
@@ -40,11 +47,11 @@ public interface IReportCustomerDao {
     @Insert("insert into report_customer " +
             "(report_defined_id,report_name,report_origin,create_date,report_start_date,report_end_date,active_unit,pass_approve,pass_review," +
             "report_data_start," +
-            "report_data_end) " +
+            "report_data_end,report_type,report_status) " +
             "values " +
             "(#{report_defined_id},#{report_name},#{report_origin},#{create_date},#{report_start_date},#{report_end_date},#{active_unit}" +
             ",#{pass_approve},#{pass_review}" +
-            ",#{report_data_start},#{report_data_end})")
+            ",#{report_data_start},#{report_data_end},#{report_type},#{report_status})")
     @Options(useGeneratedKeys = true, keyProperty = "report_id", keyColumn = "report_id")
     void createReportCustomer(ReportCustomer reportCustomer);
 
@@ -84,6 +91,7 @@ public interface IReportCustomerDao {
             "rui.report_defined_id," +
             "rui.unit_type," +
             "rui.unit_order," +
+            "rui.unit_show_type," +
             "rui.origin_id " +
             " from report_unit_info rui where rui.report_defined_id = #{report_id} order by rui.unit_order")
     List<UnitDefined> getAllUnitEntityByReportId(String report_id);
@@ -115,8 +123,8 @@ public interface IReportCustomerDao {
     @Update("update report_customer set active_unit= #{nextStepUnit} where report_id = #{reportId}")
     void updateStep(@Param("reportId") String reportId,@Param("nextStepUnit") Integer nextStepUnit);
 
-    @Delete("delete from report_customer_data where unit_id=#{unit_id}")
-    void removeUnitContextData(String unit_id);
+    @Delete("delete from report_customer_data where report_id = #{reportId} and unit_id=#{unit_id}")
+    void removeUnitContextData(@Param("reportId") Integer reportId , @Param("unit_id") String unit_id);
 
     @Insert("insert into report_customer_data (report_id,unit_id,report_group_id,colum_id,dimensions_id,report_data,colum_order) " +
             "values (#{report_id},#{unit_id},#{report_group_id},#{colum_id},#{dimensions_id},#{report_data},#{colum_order})")
@@ -151,7 +159,7 @@ public interface IReportCustomerDao {
     @Update("update report_customer_data set report_data = #{report_data} where report_id=#{report_id} and unit_id=#{unit_id} and colum_id=#{colum_id} and dimensions_id=#{dimensions_id}")
     void updateGridUnitContext(ReportCustomerData columDatas);
 
-    @Select("select sum(report_data) as sum_value from report_customer_data where " +
+    @Select("select sum(CONVERT(report_data,DECIMAL(11,2))) as sum_value from report_customer_data where " +
             "report_id=#{reportId} and unit_id=#{unitId} and dimensions_id = #{dimVal} ")
     BigDecimal sumColumForDimensions(@Param("reportId") String reportId, @Param("unitId") String unitId,@Param("dimVal") String dimVal);
 
@@ -178,7 +186,44 @@ public interface IReportCustomerDao {
     List<ReportCustomer> getReportBaseInfo(String reportId);
 
     @Select("select distinct rc.*,so.origin_name as report_origin_name from " +
+            "report_customer rc left join " +
+            " (select report_defined_id from " +
+            " report_customer where report_id = #{reportId}) rct  on rc.report_defined_id =rct.report_defined_id " +
+            " inner join sys_origin so on rc.report_origin=so.origin_id")
+    List<ReportCustomer> getReportBaseInfoByOrigin(String reportId);
+
+    @Select("select distinct rc.*,so.origin_name as report_origin_name from " +
             "report_customer rc " +
             " inner join sys_origin so on  rc.report_defined_id =#{reportDefinedId} and rc.report_origin=so.origin_id")
     List<ReportCustomer> getReportBaseInfoByDefinedId(String reportDefinedId);
+
+    @Select("select * from report_customer where report_id = #{reportID}")
+    ReportCustomer getReportCustomerByReportID(String reportID);
+
+    @Select("select * from report_defined_unit_multdim_col where unit_id = #{unitId} order by colum_order ")
+    List<GridColumDefined> getGridColumDefiend(String unitId);
+
+    @Select("select * from report_defined_unit_multdim_dim  where unit_id = #{unitId}")
+    List<GridColumDefined> getGridDimDefiend(String unitId);
+
+    @Select("select * from report_defined_unit_multdim  where unit_id = #{unitId}")
+    List<GridColumDefined> getGridMultDefiend(String unitId);
+
+    @Update("update report_customer set last_modify_user=#{user_id} where report_id = #{reportId}")
+    void updateReportCustomerSubmitUser(@Param("reportId") String reportId,@Param("user_id") int user_id);
+
+    @Delete("delete from report_customer_signature where report_id = #{report_id}")
+    void removeOldSign(String report_id);
+
+    @Insert("insert into report_customer_signature (report_id,report_cust_name,report_account_name,report_leader_name) " +
+            "values (#{report_id},#{report_cust_name},#{report_account_name},#{report_leader_name})")
+    void saveSignInfo(
+            @Param("report_id") String report_id,
+            @Param("report_cust_name") String report_cust_name,
+            @Param("report_account_name") String report_account_name,
+            @Param("report_leader_name") String report_leader_name
+                      );
+
+    @Select("select * from report_customer_signature where report_id = #{report_id} limit 1")
+    Map<String, Object> reportSignInfos(String reportId);
 }

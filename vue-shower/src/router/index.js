@@ -182,6 +182,16 @@ const routes = [
                 children: []
               }
             ]
+          },{
+            name: 'changeOriginType',
+            path: '/record/changeOriginType',
+            component: () => import('@/models/record/submitAuthority/changeOriginType'),
+            children: []
+          },{
+            name: 'smsConfig',
+            path: '/sms/smsMain',
+            component: () => import('@/models/record/sms/smsMain'),
+            children: []
           }
         ]
       }

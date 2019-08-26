@@ -5,7 +5,7 @@
   "author": "CN02233 <black41802935@163.com>",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "webpack-dev-server --inline --progress --colors --hot --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "unit": "jest --config test/unit/jest.conf.js --coverage",
     "test": "npm run unit",
@@ -17,7 +17,7 @@
     "@riophae/vue-treeselect": "0.0.38",
     "axios": "^0.18.0",
     "echarts": "^4.2.1",
-    "element-ui": "^2.7.2",
+    "element-ui": "^2.9.2",
     "handsontable": "^6.2.2",
     "js-cookie": "^2.2.0",
     "vue": "^2.5.16",
@@ -25,6 +25,7 @@
     "vue-echarts": "^4.0.1",
     "vue-particle-line": "^0.1.4",
     "vue-router": "^3.0.1",
+    "vue2-verify": "^1.1.5",
     "vuelidate": "^0.7.4"
   },
   "devDependencies": {

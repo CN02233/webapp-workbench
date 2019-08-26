@@ -8,6 +8,8 @@ import org.junit.Test;
 
 import javax.annotation.Resource;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SubmitReportServiceImpTest extends AbstractTestService {
 
@@ -17,14 +19,33 @@ public class SubmitReportServiceImpTest extends AbstractTestService {
     @Test
     public void testDoSubmit() throws ParseException {
         SubmitReportRequestEntity submitReportRequestEntity = new SubmitReportRequestEntity();
+//        submitReportRequestEntity.setDefined_id("1397196");
+        submitReportRequestEntity.setDefined_id("4778228");
+//        submitReportRequestEntity.setDefined_id("1");
+        submitReportRequestEntity.setReport_data_start("20180101");
+        submitReportRequestEntity.setReport_data_end("20181231");
+        submitReportRequestEntity.setReport_start_date("20190801");
+        submitReportRequestEntity.setReport_end_date("20190931");
+
+
+
+        submitReportService.doSubmit(submitReportRequestEntity);
+    }
+
+
+
+    @Test
+    public void testDoSubmitForOrigins() throws ParseException {
+        SubmitReportRequestEntity submitReportRequestEntity = new SubmitReportRequestEntity();
         submitReportRequestEntity.setDefined_id("1");
         submitReportRequestEntity.setReport_data_start("20190504");
         submitReportRequestEntity.setReport_data_end("20190518");
         submitReportRequestEntity.setReport_start_date("20190501");
         submitReportRequestEntity.setReport_end_date("20190531");
+        List<String> origins = new ArrayList<>();
+        submitReportRequestEntity.setSubmit_origins(origins);
 
 
-
-        submitReportService.doSubmit(submitReportRequestEntity);
+        submitReportService.doSubmitForOrigins(submitReportRequestEntity);
     }
 }

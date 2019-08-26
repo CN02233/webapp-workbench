@@ -32,7 +32,7 @@ public interface ReportStatementsService {
 
     List<HashMap<String,String>> getOriginsByUserId(int user_id);
 
-    void copyReportDefined(String definedId);
+    Integer copyReportDefined(String definedId);
 
     void updateReportDefined(ReportDefinedEntity reportDefined);
 

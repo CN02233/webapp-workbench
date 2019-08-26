@@ -18,10 +18,10 @@ public interface IReportDefinedUnitOneDimDao {
     @Insert("insert into report_defined_unit_onedim " +
             "(colum_name,colum_name_cn,group_id," +
             "group_name,unit_id,min_value,max_value ,colum_formula,colum_formula_desc," +
-            "parent_id,parent_name,colum_type,colum_desc,colum_point,need_remember,default_value) values " +
+            "parent_id,parent_name,colum_type,colum_desc,colum_point,need_remember,default_value,colum_order,colum_show) values " +
             "(#{colum_name},#{colum_name_cn},#{group_id},#{group_name},#{unit_id}," +
             "#{min_value},#{max_value},#{colum_formula},#{colum_formula_desc}," +
-            "#{parent_id},#{parent_name},#{colum_type},#{colum_desc},#{colum_point},#{need_remember},#{default_value})")
+            "#{parent_id},#{parent_name},#{colum_type},#{colum_desc},#{colum_point},#{need_remember},#{default_value},#{colum_order},#{colum_show})")
     @Options(useGeneratedKeys = true, keyProperty = "colum_id", keyColumn = "colum_id")
     void addSaveOnedim(SimpleColumDefined simpleColumDefined);
 

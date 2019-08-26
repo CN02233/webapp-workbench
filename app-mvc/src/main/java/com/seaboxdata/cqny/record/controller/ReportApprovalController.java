@@ -9,18 +9,31 @@ import com.seaboxdata.cqny.record.entity.ReportCustomer;
 import com.seaboxdata.cqny.record.service.OriginService;
 import com.seaboxdata.cqny.record.service.ReportApprovalService;
 import com.seaboxdata.cqny.record.service.ReportCustomerService;
+import com.seaboxdata.cqny.record.service.ReportExportService;
 import com.webapp.support.json.JsonSupport;
 import com.webapp.support.jsonp.JsonResult;
 import com.webapp.support.page.PageResult;
 import com.webapp.support.session.SessionSupport;
 import com.workbench.auth.user.entity.User;
 import com.workbench.spring.aop.annotation.JsonpCallback;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -42,10 +55,14 @@ public class ReportApprovalController {
     @Autowired
     private ReportCustomerService reportCustomerService;
 
+    @Autowired
+    private ReportExportService reportExportService;
+
     /**
      * 审核报表列表查询展示
      * update 20190508
      * 报送审批工作由地市用户审批
+     *
      * @param currPage
      * @param pageSize
      * @return
@@ -53,21 +70,18 @@ public class ReportApprovalController {
     @RequestMapping("listReportApproval")
     @ResponseBody
     @JsonpCallback
-    @CrossOrigin(allowCredentials="true")
-    public String listReportApproval(int currPage, int pageSize,String searchOriginId,String searchOriginName){
+    @CrossOrigin(allowCredentials = "true")
+    public String listReportApproval(int currPage, int pageSize, String searchOriginId, String searchOriginName) {
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
         String userType = currUser.getUser_type();
 
 
-        if(!"0".equals(userType)){//0:审核用户
+        if (!"0".equals(userType)) {//0:审核用户
             String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
             return jsonpResponse;
-        }else{
+        } else {
             Origin originUser = originService.getOriginByUser(currUserId);
-
-            Integer parentOriginId = originUser.getParent_origin_id();
-
             PageResult emptyResult = new PageResult();
             emptyResult.setCurrPage(currPage);
             emptyResult.setPageSize(pageSize);
@@ -75,10 +89,18 @@ public class ReportApprovalController {
             emptyResult.setTotalPage(1);
             emptyResult.setDataList(null);
 
-            if(parentOriginId == 1){//省级机构 无权限
+            if (originUser == null) {
                 String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
                 return jsonpResponse;
-            }else{//市级机构 无权限
+            }
+
+            Integer parentOriginId = originUser.getParent_origin_id();
+
+
+            if (parentOriginId == 1) {//省级机构 无权限
+                String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
+                return jsonpResponse;
+            } else {//市级机构 无权限
 
             }
 
@@ -98,16 +120,16 @@ public class ReportApprovalController {
             List<Origin> childrenOrigin = null;
 
             List<Integer> originParams = new ArrayList<>();
-            if(Strings.isNullOrEmpty(searchOriginId)&&Strings.isNullOrEmpty(searchOriginName)){
-                childrenOrigin = originService.checkoutSons(userOriginId,allOrigins);
+            if (Strings.isNullOrEmpty(searchOriginId) && Strings.isNullOrEmpty(searchOriginName)) {
+                childrenOrigin = originService.checkoutSons(userOriginId, allOrigins);
                 originParams.add(userOriginId);
-            }else if(!Strings.isNullOrEmpty(searchOriginId)){
-                childrenOrigin = originService.checkoutSons(new Integer(searchOriginId),allOrigins);
+            } else if (!Strings.isNullOrEmpty(searchOriginId)) {
+                childrenOrigin = originService.checkoutSons(new Integer(searchOriginId), allOrigins);
             }
 
-            if(Strings.isNullOrEmpty(searchOriginId)&&!Strings.isNullOrEmpty(searchOriginName)){
+            if (Strings.isNullOrEmpty(searchOriginId) && !Strings.isNullOrEmpty(searchOriginName)) {
 
-                childrenOrigin = originService.checkoutSons(userOriginId,allOrigins);
+                childrenOrigin = originService.checkoutSons(userOriginId, allOrigins);
                 childrenOrigin.add(userOrigin);
                 List<Integer> childrenOriginIds = new ArrayList<>();
                 for (Origin origin : childrenOrigin) {
@@ -116,14 +138,14 @@ public class ReportApprovalController {
 
                 List<Origin> origins = originService.getOriginByName(searchOriginName);
                 for (Origin origin : origins) {
-                    if(childrenOriginIds.contains(origin.getOrigin_id())&&!originParams.contains(origin.getOrigin_id())){
+                    if (childrenOriginIds.contains(origin.getOrigin_id()) && !originParams.contains(origin.getOrigin_id())) {
                         originParams.add(origin.getOrigin_id());
-                    }else if(userOriginId.equals(origin.getOrigin_id())){
+                    } else if (userOriginId.equals(origin.getOrigin_id())) {
                         originParams.add(userOriginId);
                     }
                 }
-            }else{
-                if(childrenOrigin!=null){
+            } else {
+                if (childrenOrigin != null) {
                     for (Origin origin : childrenOrigin) {
                         originParams.add(origin.getOrigin_id());
                     }
@@ -133,15 +155,15 @@ public class ReportApprovalController {
                     ReportStatus.SUBMIT.getValue(),
                     currUser.getUser_id(),
                     currPage,
-                    pageSize,originParams);
+                    pageSize, originParams);
 
             List<ReportCustomer> resultData = pageResult.getDataList();
             for (ReportCustomer resultDatum : resultData) {
                 Integer reportOriginId = resultDatum.getReport_origin();
                 Map<String, Origin> result = originService.getFist2Origin(reportOriginId, allOrigins);
-                if(result.get("cityOrigin")!=null)
+                if (result.get("cityOrigin") != null)
                     resultDatum.setOrigin_city(result.get("cityOrigin").getOrigin_name());
-                if(result.get("provinceOrigin")!=null)
+                if (result.get("provinceOrigin") != null)
                     resultDatum.setOrigin_province(result.get("provinceOrigin").getOrigin_name());
             }
 
@@ -149,14 +171,14 @@ public class ReportApprovalController {
             Collection<Map<String, Object>> first2Origin = originService.checkProvAndCity(allOrigins);
 
 
-            Map<String,Object> responseMap = new HashMap<>();
-            responseMap.put("currPage",pageResult.getCurrPage());
-            responseMap.put("dataList",pageResult.getDataList());
-            responseMap.put("pageSize",pageResult.getPageSize());
-            responseMap.put("totalNum",pageResult.getTotalNum());
-            responseMap.put("totalPage",pageResult.getTotalPage());
-            responseMap.put("origins",childrenOrigin);
-            responseMap.put("first2Origin",first2Origin);
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("currPage", pageResult.getCurrPage());
+            responseMap.put("dataList", pageResult.getDataList());
+            responseMap.put("pageSize", pageResult.getPageSize());
+            responseMap.put("totalNum", pageResult.getTotalNum());
+            responseMap.put("totalPage", pageResult.getTotalPage());
+            responseMap.put("origins", childrenOrigin);
+            responseMap.put("first2Origin", first2Origin);
 
             String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, responseMap);
             return jsonpResponse;
@@ -164,8 +186,10 @@ public class ReportApprovalController {
 
 
     }
+
     /**
      * 复核报表列表查询展示
+     *
      * @param currPage
      * @param pageSize
      * @return
@@ -173,22 +197,19 @@ public class ReportApprovalController {
     @RequestMapping("listReportReview")
     @ResponseBody
     @JsonpCallback
-    @CrossOrigin(allowCredentials="true")
-    public String listReportReview(int currPage, int pageSize,String searchOriginId,String searchOriginName){
+    @CrossOrigin(allowCredentials = "true")
+    public String listReportReview(int currPage, int pageSize, String searchOriginId, String searchOriginName) {
 
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
         String userType = currUser.getUser_type();
 
 
-        if(!"0".equals(userType)){//0:审核用户
+        if (!"0".equals(userType)) {//0:审核用户
             String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
             return jsonpResponse;
-        }else{
+        } else {
             Origin originUser = originService.getOriginByUser(currUserId);
-
-            Integer parentOriginId = originUser.getParent_origin_id();
-
             PageResult emptyResult = new PageResult();
             emptyResult.setCurrPage(currPage);
             emptyResult.setPageSize(pageSize);
@@ -196,8 +217,16 @@ public class ReportApprovalController {
             emptyResult.setTotalPage(1);
             emptyResult.setDataList(null);
 
-            if(parentOriginId == 1){//省级机构 有权限
-            }else{//市级机构 无权限
+            if (originUser == null) {
+                String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
+                return jsonpResponse;
+            }
+
+            Integer parentOriginId = originUser.getParent_origin_id();
+
+
+            if (parentOriginId == 1) {//省级机构 有权限
+            } else {//市级机构 无权限
                 String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, emptyResult);
                 return jsonpResponse;
             }
@@ -208,16 +237,16 @@ public class ReportApprovalController {
             List<Origin> childrenOrigin = null;
 
             List<Integer> originParams = new ArrayList<>();
-            if(Strings.isNullOrEmpty(searchOriginId)&&Strings.isNullOrEmpty(searchOriginName)){
-                childrenOrigin = originService.checkoutSons(userOriginId,allOrigins);
+            if (Strings.isNullOrEmpty(searchOriginId) && Strings.isNullOrEmpty(searchOriginName)) {
+                childrenOrigin = originService.checkoutSons(userOriginId, allOrigins);
                 originParams.add(userOriginId);
-            }else if(!Strings.isNullOrEmpty(searchOriginId)){
-                childrenOrigin = originService.checkoutSons(new Integer(searchOriginId),allOrigins);
+            } else if (!Strings.isNullOrEmpty(searchOriginId)) {
+                childrenOrigin = originService.checkoutSons(new Integer(searchOriginId), allOrigins);
             }
 
-            if(Strings.isNullOrEmpty(searchOriginId)&&!Strings.isNullOrEmpty(searchOriginName)){
+            if (Strings.isNullOrEmpty(searchOriginId) && !Strings.isNullOrEmpty(searchOriginName)) {
 
-                childrenOrigin = originService.checkoutSons(userOriginId,allOrigins);
+                childrenOrigin = originService.checkoutSons(userOriginId, allOrigins);
                 childrenOrigin.add(userOrigin);
                 List<Integer> childrenOriginIds = new ArrayList<>();
                 for (Origin origin : childrenOrigin) {
@@ -226,14 +255,14 @@ public class ReportApprovalController {
 
                 List<Origin> origins = originService.getOriginByName(searchOriginName);
                 for (Origin origin : origins) {
-                    if(childrenOriginIds.contains(origin.getOrigin_id())&&!originParams.contains(origin.getOrigin_id())){
+                    if (childrenOriginIds.contains(origin.getOrigin_id()) && !originParams.contains(origin.getOrigin_id())) {
                         originParams.add(origin.getOrigin_id());
-                    }else if(userOriginId.equals(origin.getOrigin_id())){
+                    } else if (userOriginId.equals(origin.getOrigin_id())) {
                         originParams.add(userOriginId);
                     }
                 }
-            }else{
-                if(childrenOrigin!=null){
+            } else {
+                if (childrenOrigin != null) {
                     for (Origin origin : childrenOrigin) {
                         originParams.add(origin.getOrigin_id());
                     }
@@ -242,23 +271,23 @@ public class ReportApprovalController {
 
             PageResult pageResult = null;
 
-            if(originParams!=null&&originParams.size()>0){
+            if (originParams != null && originParams.size() > 0) {
                 pageResult = reportApprovalService.listReportApproval(
                         ReportStatus.REVIEW.getValue(),
                         currUser.getUser_id(),
                         currPage,
-                        pageSize,originParams);
+                        pageSize, originParams);
 
                 List<ReportCustomer> resultData = pageResult.getDataList();
                 for (ReportCustomer resultDatum : resultData) {
                     Integer reportOriginId = resultDatum.getReport_origin();
                     Map<String, Origin> result = originService.getFist2Origin(reportOriginId, allOrigins);
-                    if(result.get("cityOrigin")!=null)
+                    if (result.get("cityOrigin") != null)
                         resultDatum.setOrigin_city(result.get("cityOrigin").getOrigin_name());
-                    if(result.get("provinceOrigin")!=null)
+                    if (result.get("provinceOrigin") != null)
                         resultDatum.setOrigin_province(result.get("provinceOrigin").getOrigin_name());
                 }
-            }else{
+            } else {
                 pageResult = new PageResult();
                 pageResult.setCurrPage(currPage);
                 pageResult.setPageSize(pageSize);
@@ -270,19 +299,17 @@ public class ReportApprovalController {
             }
 
 
-
-
             Collection<Map<String, Object>> first2Origin = originService.checkProvAndCity(allOrigins);
 
 
-            Map<String,Object> responseMap = new HashMap<>();
-            responseMap.put("currPage",pageResult.getCurrPage());
-            responseMap.put("dataList",pageResult.getDataList());
-            responseMap.put("pageSize",pageResult.getPageSize());
-            responseMap.put("totalNum",pageResult.getTotalNum());
-            responseMap.put("totalPage",pageResult.getTotalPage());
-            responseMap.put("origins",childrenOrigin);
-            responseMap.put("first2Origin",first2Origin);
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("currPage", pageResult.getCurrPage());
+            responseMap.put("dataList", pageResult.getDataList());
+            responseMap.put("pageSize", pageResult.getPageSize());
+            responseMap.put("totalNum", pageResult.getTotalNum());
+            responseMap.put("totalPage", pageResult.getTotalPage());
+            responseMap.put("origins", childrenOrigin);
+            responseMap.put("first2Origin", first2Origin);
 
             String jsonpResponse = JsonSupport.makeJsonResultStr(JsonResult.RESULT.SUCCESS, "获取成功", null, responseMap);
             return jsonpResponse;
@@ -292,29 +319,37 @@ public class ReportApprovalController {
 
     @RequestMapping("listAllSupervision")
     @ResponseBody
-    @CrossOrigin(allowCredentials="true")
-    public JsonResult listAllSupervision(int currPage, int pageSize, String searchOriginId, String searchOriginName){
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult listAllSupervision(int currPage, int pageSize, String searchOriginId, String searchOriginName) {
         //获取当前用户所属行政机构
         User currUser = SessionSupport.checkoutUserFromSession();
         int currUserId = currUser.getUser_id();
         String userType = currUser.getUser_type();
-        if(!"2".equals(userType)){
+        if (!"2".equals(userType)) {
             JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
             return response;
         }
 
         List<String> allReportOriginIds = submitauthorityService.getReportOriginForOrganizationUser(currUserId);
+
+        if (allReportOriginIds != null && allReportOriginIds.size() > 0) {
+
+        } else {
+            JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, null);
+            return response;
+        }
+
         //根据行政机构获取报送机构
 
         List<Origin> allReportOrigins = originService.listAllOrigin();
-        List<Integer>  reportOrigins = new ArrayList<Integer>();
-        if(allReportOriginIds!=null&&allReportOriginIds.size()>0){
+        List<Integer> reportOrigins = new ArrayList<Integer>();
+        if (allReportOriginIds != null && allReportOriginIds.size() > 0) {
             for (String allReportOriginId : allReportOriginIds) {
                 Integer allReportOriginIdInt = new Integer(allReportOriginId);
                 List<Origin> allChildrens = originService.checkoutSons(allReportOriginIdInt, allReportOrigins);
-                if(allChildrens!=null&&allChildrens.size()>0){
+                if (allChildrens != null && allChildrens.size() > 0) {
                     for (Origin childOrin : allChildrens) {
-                        if(!reportOrigins.contains(childOrin.getOrigin_id())){
+                        if (!reportOrigins.contains(childOrin.getOrigin_id())) {
                             reportOrigins.add(childOrin.getOrigin_id());
                         }
                     }
@@ -324,13 +359,13 @@ public class ReportApprovalController {
 
         List<Integer> searchOriginList = new ArrayList<>();
 
-        if(!Strings.isNullOrEmpty(searchOriginId)){
+        if (!Strings.isNullOrEmpty(searchOriginId)) {
             List<Origin> searchOrigins = originService.checkoutSons(new Integer(searchOriginId), allReportOrigins);
             for (Origin searchOrigin : searchOrigins) {
                 searchOriginList.add(searchOrigin.getOrigin_id());
             }
-        }else{
-            if(!Strings.isNullOrEmpty(searchOriginName)){
+        } else {
+            if (!Strings.isNullOrEmpty(searchOriginName)) {
                 List<Origin> searchOrigins = originService.getOriginByName(searchOriginName);
                 for (Origin searchOrigin : searchOrigins) {
                     searchOriginList.add(searchOrigin.getOrigin_id());
@@ -338,9 +373,9 @@ public class ReportApprovalController {
             }
         }
 
-        if(searchOriginList!=null&&searchOriginList.size()>0){
+        if (searchOriginList != null && searchOriginList.size() > 0) {
             for (Integer searchReportOriginId : searchOriginList) {
-                if(!reportOrigins.contains(searchReportOriginId)){
+                if (!reportOrigins.contains(searchReportOriginId)) {
                     searchOriginList.remove(searchReportOriginId);
                 }
             }
@@ -355,9 +390,9 @@ public class ReportApprovalController {
         for (ReportCustomer resultDatum : resultData) {
             Integer reportOriginId = resultDatum.getReport_origin();
             Map<String, Origin> result = originService.getFist2Origin(reportOriginId, allReportOrigins);
-            if(result.get("cityOrigin")!=null)
+            if (result.get("cityOrigin") != null)
                 resultDatum.setOrigin_city(result.get("cityOrigin").getOrigin_name());
-            if(result.get("provinceOrigin")!=null)
+            if (result.get("provinceOrigin") != null)
                 resultDatum.setOrigin_province(result.get("provinceOrigin").getOrigin_name());
         }
 
@@ -365,13 +400,13 @@ public class ReportApprovalController {
         Collection<Map<String, Object>> first2Origin = originService.checkProvAndCity(allReportOrigins);
 
 
-        Map<String,Object> responseMap = new HashMap<>();
-        responseMap.put("currPage",pageResult.getCurrPage());
-        responseMap.put("dataList",pageResult.getDataList());
-        responseMap.put("pageSize",pageResult.getPageSize());
-        responseMap.put("totalNum",pageResult.getTotalNum());
-        responseMap.put("totalPage",pageResult.getTotalPage());
-        responseMap.put("first2Origin",first2Origin);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("currPage", pageResult.getCurrPage());
+        responseMap.put("dataList", pageResult.getDataList());
+        responseMap.put("pageSize", pageResult.getPageSize());
+        responseMap.put("totalNum", pageResult.getTotalNum());
+        responseMap.put("totalPage", pageResult.getTotalPage());
+        responseMap.put("first2Origin", first2Origin);
 
         JsonResult response = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "获取成功", null, responseMap);
         return response;
@@ -379,36 +414,148 @@ public class ReportApprovalController {
 
     /**
      * 审核报送报表
+     *
      * @param reportId
-     * @param reportStatus
-     * 审核通过 reportStatus="pass"
-     * 驳回 reportStatus="reject"
+     * @param reportStatus 审核通过 reportStatus="pass"
+     *                     驳回 reportStatus="reject"
      * @return
      */
     @RequestMapping("ReportApprovalOperator")
     @ResponseBody
-    @CrossOrigin(allowCredentials="true")
-    public JsonResult ReportApprovalOperator( String reportId,String reportStatus){
-        reportApprovalService.reportApprovalOperator(reportId,reportStatus);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult ReportApprovalOperator(String reportId, String reportStatus) {
+        ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
+
+        String passReview = reportCust.getPass_review();
+
+        if ("Y".equals(passReview)) {
+            if ("pass".equals(reportStatus)) {
+                reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.REPORT_DONE);
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "审核成功", null, null);
+                return jsonResult;
+            }
+        }
+
+        reportApprovalService.reportApprovalOperator(reportId, reportStatus);
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "审核成功", null, null);
         return jsonResult;
     }
 
     /**
      * 复核报送报表
+     *
      * @param reportId
-     * @param reportStatus
-     * 复核通过 reportStatus="pass"
-     * 驳回 reportStatus="reject"
-     * 重填 reportStatus="refill"
+     * @param reportStatus 复核通过 reportStatus="pass"
+     *                     驳回 reportStatus="reject"
+     *                     重填 reportStatus="refill"
      * @return
      */
     @RequestMapping("ReportReviewOperator")
     @ResponseBody
-    @CrossOrigin(allowCredentials="true")
-    public JsonResult reportReviewOperator( String reportId,String reportStatus){
-        reportApprovalService.reportReviewOperator(reportId,reportStatus);
-        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "删除成功", null,null);
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult reportReviewOperator(String reportId, String reportStatus) {
+        ReportCustomer reportCust = reportCustomerService.checkReportCustomer(reportId);
+        String passApprove = reportCust.getPass_approve();
+        if ("Y".equals(passApprove)) {//免审核，驳回需要直接回退到填报中
+            if ("reject".equals(reportStatus)) {
+                reportCustomerService.updateReportCustomerStatus(reportId, ReportStatus.NORMAL);
+                JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "复核成功", null, null);
+                return jsonResult;
+            }
+        }
+        reportApprovalService.reportReviewOperator(reportId, reportStatus);
+
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "复核成功", null, null);
         return jsonResult;
+    }
+
+
+    @RequestMapping("batchReportApprovalOperator")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult batchReportApprovalOperator(@RequestBody Map<String, Object> approveParams) {
+        List<Double> reportIdList = null;
+        String operator = null;
+        if (approveParams.containsKey("report_id_list")) {
+            reportIdList = (List<Double>) approveParams.get("report_id_list");
+        }
+
+        if (approveParams.containsKey("operator")) {
+            operator = (String) approveParams.get("operator");
+        }
+
+        List<String> reportIdStrLIst = new ArrayList<>();
+        for (Double reportIdDouble : reportIdList) {
+            reportIdStrLIst.add(reportIdDouble.toString());
+        }
+
+        reportApprovalService.batchReportApprovalOperator(reportIdStrLIst, operator);
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "批量审核完成", null, JsonResult.RESULT.SUCCESS);
+        return jsonResult;
+    }
+
+    @RequestMapping("batchReportReviewOperator")
+    @ResponseBody
+    @CrossOrigin(allowCredentials = "true")
+    public JsonResult batchReportReviewOperator(@RequestBody Map<String, Object> reviewParams) {
+        List<Double> reportIdList = null;
+        String operator = null;
+        if (reviewParams.containsKey("report_id_list")) {
+            reportIdList = (List<Double>) reviewParams.get("report_id_list");
+        }
+
+        if (reviewParams.containsKey("operator")) {
+            operator = (String) reviewParams.get("operator");
+        }
+
+        List<String> reportIdStrLIst = new ArrayList<>();
+        for (Double reportIdDouble : reportIdList) {
+            reportIdStrLIst.add(reportIdDouble.toString());
+        }
+
+        reportApprovalService.batchReportReviewOperator(reportIdStrLIst, operator);
+
+        JsonResult jsonResult = JsonSupport.makeJsonpResult(JsonResult.RESULT.SUCCESS, "批量复核完成", null, JsonResult.RESULT.SUCCESS);
+        return jsonResult;
+    }
+
+    @RequestMapping("exportReportExcel")
+    @CrossOrigin(allowCredentials = "true")
+    public ResponseEntity exportReportExcel(String reportId, HttpServletRequest request) throws IOException {
+        // 4.设置格式
+        String filePath = reportExportService.doExport(reportId);
+
+        String[] filePathArray = filePath.split("/");
+        String fileName = filePathArray[filePathArray.length - 1];
+        
+        File exportFIle = new File(filePath);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", encodeChineseDownloadFileName(request, fileName));
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        // 5.返回下载
+        return new ResponseEntity<byte[]>(FileUtils.readFileToByteArray(exportFIle),
+                headers, HttpStatus.OK);
+
+    }
+
+    private String encodeChineseDownloadFileName(HttpServletRequest request, String fileName)
+            throws UnsupportedEncodingException {
+        String resultFileName = "";
+        String agent = request.getHeader("User-Agent").toUpperCase();
+        if (null == agent) {
+            resultFileName = fileName;
+        } else {
+            if (agent.indexOf("FIREFOX") != -1 || agent.indexOf("CHROME") != -1) {  //firefox, chrome
+                resultFileName = new String(fileName.getBytes("UTF-8"), "iso-8859-1");
+            } else {  //ie7+
+                resultFileName = URLEncoder.encode(fileName, "UTF-8");
+                resultFileName = StringUtils.replace(resultFileName, "+", "%20");  //替换空格
+            }
+        }
+        return resultFileName;
     }
 }
