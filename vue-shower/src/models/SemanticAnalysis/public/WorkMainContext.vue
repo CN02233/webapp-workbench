@@ -1,0 +1,19 @@
+<template>
+  <div class="work-main-context">
+    <slot></slot>
+  </div>
+</template>
+
+<script>
+    export default {
+        name: 'WorkMainContext',
+        data() {
+            return {}
+        },
+        methods: {}
+    }
+</script>
+
+<style rel="stylesheet/scss" lang="scss" scoped>
+
+</style>

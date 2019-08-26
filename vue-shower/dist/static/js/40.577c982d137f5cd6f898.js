@@ -1,0 +1,2 @@
+webpackJsonp([40],{c6HE:function(e,t){},nJ9j:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var r={render:function(){var e=this.$createElement;return(this._self._c||e)("router-view")},staticRenderFns:[]};var a=n("VU/8")({name:"ModelManage",data:function(){return{}},methods:{}},r,!1,function(e){n("c6HE")},"data-v-4243ffdc",null);t.default=a.exports}});
+//# sourceMappingURL=40.577c982d137f5cd6f898.js.map
