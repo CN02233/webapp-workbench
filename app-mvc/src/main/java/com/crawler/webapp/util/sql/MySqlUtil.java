@@ -21,14 +21,22 @@ public class MySqlUtil implements ISqlUitl {
         }
 
         if(tableMeta.isIs_drop()){
-            sb.append("DROP TABLE IF EXISTS `").append(full_table).append("`;\n");
+            sb.append("DROP TABLE IF EXISTS ").append(full_table).append(";\n");
         }
-        sb.append("CREATE TABLE ").append(full_table).append(" (\n");
+        if (tableMeta.isIs_original() == true){
+            sb.append("ALTER TABLE ").append(full_table).append(" \n");
+        }else{
+            sb.append("CREATE TABLE ").append(full_table).append(" (\n");
+        }
         int i = 0;
         int ln = tableMeta.getDataField().size() - 1;
         String primary_keys = "";
         for(DataFieldMeta fieldMeta : tableMeta.getDataField()){
-            sb.append("  `").append(fieldMeta.getField_name()).append("`");
+            if (tableMeta.isIs_original() == true){
+                sb.append("  ADD COLUMN `").append(fieldMeta.getField_name()).append("`");
+            }else{
+                sb.append("  `").append(fieldMeta.getField_name()).append("`");
+            }
             sb.append(" ").append(fieldMeta.getData_type());
             String size = fieldMeta.getData_size();
             String scale = fieldMeta.getData_scale();
@@ -50,23 +58,26 @@ public class MySqlUtil implements ISqlUitl {
             }else{
                 sb.append(" NOT NULL");
             }
-
-            if(fieldMeta.isPrimary_key()){
-                primary_keys += "`"+fieldMeta.getField_name()+"`,";
+            if (tableMeta.isIs_original() == false){
+                if(fieldMeta.isPrimary_key()){
+                    primary_keys += "`"+fieldMeta.getField_name()+"`,";
+                }
             }
             if(i < ln){
                 sb.append(",\n");
             }
             i++;
         }
-        if(primary_keys.length()>0){
-            sb.append(",\n").append("  PRIMARY KEY ("+primary_keys.substring(0, primary_keys.length()-1)+")");
-        }else{
-            sb.append("\n");
-        }
-        sb.append("\n) ENGINE=InnoDB DEFAULT CHARSET=utf8");
-        if(tableMeta.isIs_dynamic()){
-            sb.append(" ROW_FORMAT=DYNAMIC");
+        if (tableMeta.isIs_original() == false){
+            if(primary_keys.length()>0){
+                sb.append(",\n").append("  PRIMARY KEY ("+primary_keys.substring(0, primary_keys.length()-1)+")");
+            }else{
+                sb.append("\n");
+            }
+            sb.append("\n) ENGINE=InnoDB DEFAULT CHARSET=utf8");
+            if(tableMeta.isIs_dynamic()){
+                sb.append(" ROW_FORMAT=DYNAMIC");
+            }
         }
         sb.append(";");
         return sb.toString();

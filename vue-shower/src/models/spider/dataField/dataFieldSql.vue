@@ -10,19 +10,24 @@
           <el-button type="primary" @click="goBack" size="small">放弃</el-button>
         </el-form-item>
       </el-col>
-      <el-col :span="17">
+      <el-col :span="16">
         <el-form-item label-width="60px" label="表名" prop="formData.table_name">
           <el-select STYLE="width: 100%" v-model="formData.table_name" placeholder="请选择采集表" @change="linkTableName" size="small">
             <el-option :key="r.data_file" v-for="r in tableList" :label="r.data_file" :value="r.data_file"></el-option>
           </el-select>
         </el-form-item>
       </el-col>
-      <el-col :span="7">
+      <el-col :span="5">
         <el-form-item label-width="0">
           <el-checkbox label="强制建表" v-model="formData.is_drop"></el-checkbox>
         </el-form-item>
         <el-form-item label-width="0">
           <el-checkbox label="动态表" v-model="formData.is_dynamic"></el-checkbox>
+        </el-form-item>
+      </el-col>
+      <el-col :span="3">
+        <el-form-item label-width="0">
+          <el-checkbox label="原表新增" v-model="formData.is_original"></el-checkbox>
         </el-form-item>
       </el-col>
       <el-col :span="24">
@@ -112,8 +117,10 @@
         pageTitle:'',
         tableList:[],
         fieldList:[],
+        newFildList:[],
         dataTypes:['varchar','datetime','decimal','int','bigint','blob','bool','char','date','mediumtext','text','timestamp'],
         formData:{
+          is_original:false,
           is_drop:false,
           is_dynamic:true,
           table_name:''
@@ -124,7 +131,11 @@
       save(){
         this.$refs['formData'].validate((valid) => {
           if (valid) {
-            this.saveSub("crawler/pageMg/createTable","执行成功")
+            if (this.formData.is_original === true) {
+              this.saveSubs("crawler/pageMg/createTable","执行成功")
+            }else{
+              this.saveSub("crawler/pageMg/createTable","执行成功")
+            }
           } else {
             return false;
           }
@@ -134,6 +145,21 @@
         const $this = this
         let dataList = Object.assign({},this.formData)
         dataList.dataField = this.fieldList
+        this.BaseRequest({
+          url: url,
+          method: 'post',
+          data: dataList
+        }).then(response => {
+          if(response)
+            this.$message({showClose: true,message:response,type:'error'})
+          else
+            this.Message.success(msg)
+        })
+      },
+      saveSubs(url, msg){
+        const $this = this
+        let dataList = Object.assign({},this.formData)
+        dataList.dataField = this.newFildList
         this.BaseRequest({
           url: url,
           method: 'post',
@@ -157,7 +183,11 @@
       showSqlSub(url){
         const $this = this
         let dataList = Object.assign({},this.formData)
-        dataList.dataField = this.fieldList
+        if (this.formData.is_original === true){
+          dataList.dataField = this.newFildList
+        } else {
+          dataList.dataField = this.fieldList
+        }
         this.BaseRequest({
           url: url,
           method: 'post',
@@ -242,6 +272,7 @@
         };
         let addObj = Object.assign({},newObj)
         this.fieldList.push(addObj)
+        this.newFildList.push(addObj)
       },
       sortData(index, n){
         if(index+n>= this.fieldList.length || index+n<0)

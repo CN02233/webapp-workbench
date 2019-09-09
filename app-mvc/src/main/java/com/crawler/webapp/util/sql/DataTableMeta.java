@@ -9,6 +9,7 @@ public class DataTableMeta {
     private String table_name;
     private boolean is_drop;
     private boolean is_dynamic;
+    private boolean is_original;
     private List<DataFieldMeta> dataField;
 
     public String getTable_name() {
@@ -33,6 +34,14 @@ public class DataTableMeta {
 
     public void setIs_dynamic(boolean is_dynamic) {
         this.is_dynamic = is_dynamic;
+    }
+
+    public boolean isIs_original() {
+        return is_original;
+    }
+
+    public void setIs_original(boolean is_original) {
+        this.is_original = is_original;
     }
 
     public List<DataFieldMeta> getDataField() {
